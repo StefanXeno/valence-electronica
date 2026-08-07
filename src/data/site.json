@@ -1,0 +1,18 @@
+{
+  "artist": {
+    "name": "Valence",
+    "tagline": "Something's coming for you.",
+    "description": "Electronic music from Augsburg, Germany. This page is under construction — new material is on the way.",
+    "location": "Augsburg, Germany"
+  },
+  "seo": {
+    "title": "Valence — Electronic Music",
+    "indexable": false
+  },
+  "channels": [
+    { "label": "Bandcamp", "url": "https://valenceelectronica.bandcamp.com/", "status": "active" },
+    { "label": "Spotify", "status": "placeholder" },
+    { "label": "SoundCloud", "status": "placeholder" },
+    { "label": "Instagram", "status": "placeholder" }
+  ]
+}

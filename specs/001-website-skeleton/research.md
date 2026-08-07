@@ -21,8 +21,9 @@ All NEEDS CLARIFICATION items from the Technical Context were resolved as follow
 
 ## R2: Hosting & deployment
 
-- **Decision**: GitHub Pages, deployed from GitHub Actions using `withastro/action@v5`
-  (build) + `actions/deploy-pages` (deploy), triggered on push to `main`.
+- **Decision**: GitHub Pages, deployed from GitHub Actions using `withastro/action@v6`
+  (build) + `actions/deploy-pages@v5` (deploy), triggered on push to `main`, as per the
+  official Astro deployment guide.
 - **Rationale**: Free (constitution II), no infrastructure to operate, atomic deployments —
   a failed build never replaces the live site (FR-008). The repo the user is about to
   create on GitHub is the single source of truth.

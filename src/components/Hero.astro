@@ -1,0 +1,56 @@
+---
+import site from '../data/site.json';
+
+const { name, tagline, description, location } = site.artist;
+---
+
+<section class="hero">
+  <p class="location">{location}</p>
+  <h1>{name}</h1>
+  <p class="tagline">{tagline}</p>
+  <p class="description">{description}</p>
+</section>
+
+<style>
+  .hero {
+    min-height: 70svh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: var(--space-xl) 0 var(--space-l);
+    background:
+      radial-gradient(60rem 30rem at 80% -10%, color-mix(in srgb, var(--color-accent) 22%, transparent), transparent 70%),
+      radial-gradient(40rem 24rem at 0% 110%, color-mix(in srgb, var(--color-accent-alt) 12%, transparent), transparent 70%);
+  }
+
+  .location {
+    margin: 0 0 var(--space-s);
+    color: var(--color-text-muted);
+    font-size: 0.85rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: clamp(2.75rem, 12vw, 5.5rem);
+    font-weight: 700;
+    background: linear-gradient(100deg, var(--color-text) 40%, var(--color-accent) 80%, var(--color-accent-alt));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .tagline {
+    margin: var(--space-m) 0 0;
+    font-family: var(--font-display);
+    font-size: clamp(1.1rem, 4vw, 1.5rem);
+    color: var(--color-accent-alt);
+  }
+
+  .description {
+    margin: var(--space-m) 0 0;
+    max-width: 36rem;
+    color: var(--color-text-muted);
+  }
+</style>

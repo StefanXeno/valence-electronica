@@ -1,0 +1,37 @@
+---
+import { getCollection, render } from 'astro:content';
+import type { CollectionEntry } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import site from '../../data/site.json';
+import { withBase } from '../../lib/url';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('legal');
+  return entries.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}
+
+interface Props {
+  entry: CollectionEntry<'legal'>;
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+---
+
+<Base title={`${entry.data.title} — ${site.artist.name}`}>
+  <article class="legal">
+    <h1>{entry.data.title}</h1>
+    <Content />
+    <p><a href={withBase('/')}>&larr; Back</a></p>
+  </article>
+</Base>
+
+<style>
+  .legal {
+    padding: var(--space-xl) 0;
+  }
+
+  h1 {
+    font-size: clamp(1.75rem, 6vw, 2.5rem);
+  }
+</style>

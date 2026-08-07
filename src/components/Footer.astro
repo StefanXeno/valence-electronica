@@ -1,0 +1,48 @@
+---
+import { getCollection } from 'astro:content';
+import site from '../data/site.json';
+import { withBase } from '../lib/url';
+
+const legalPages = await getCollection('legal');
+const year = new Date().getFullYear();
+---
+
+<footer>
+  <nav aria-label="Legal">
+    {legalPages.map((page) => <a href={withBase(`/legal/${page.id}`)}>{page.data.title}</a>)}
+  </nav>
+  <p>© {year} {site.artist.name}</p>
+</footer>
+
+<style>
+  footer {
+    width: 100%;
+    max-width: var(--content-width);
+    margin: 0 auto;
+    padding: var(--space-l) var(--space-m);
+    border-top: 1px solid var(--color-border);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: var(--space-s);
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+  }
+
+  nav {
+    display: flex;
+    gap: var(--space-m);
+  }
+
+  nav a {
+    color: var(--color-text-muted);
+  }
+
+  nav a:hover {
+    color: var(--color-text);
+  }
+
+  p {
+    margin: 0;
+  }
+</style>

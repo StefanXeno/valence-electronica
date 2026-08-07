@@ -17,8 +17,8 @@
 
 **Purpose**: Initialize the Astro project so it builds locally
 
-- [ ] T001 Initialize Astro 7 project at repository root: `package.json` (scripts: `dev`, `build`, `preview`, `check`), `astro.config.mjs` with `site`/`base` for GitHub Pages (see research.md R3), `tsconfig.json` (strict), `.gitignore`
-- [ ] T002 [P] Add placeholder assets in `public/`: `favicon.svg` and `og-image.png` (deliberate placeholder design, swappable later)
+- [x] T001 Initialize Astro 7 project at repository root: `package.json` (scripts: `dev`, `build`, `preview`, `check`), `astro.config.mjs` with `site`/`base` for GitHub Pages (see research.md R3), `tsconfig.json` (strict), `.gitignore`
+- [x] T002 [P] Add placeholder assets in `public/`: `favicon.svg` and `og-image.png` (deliberate placeholder design, swappable later)
 
 ---
 
@@ -28,9 +28,9 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T003 [P] Create `src/data/site.json` exactly per contracts/content-schema.md (artist profile "Valence", `seo.indexable: false`, channels: Bandcamp active + Spotify/SoundCloud/Instagram placeholders)
-- [ ] T004 [P] Create design tokens and base styles in `src/styles/global.css` (dark theme custom properties, typography scale, responsive defaults from 320px)
-- [ ] T005 Create `src/layouts/Base.astro`: HTML shell reading `site.json` for `<title>`, meta description, Open Graph tags, conditional `noindex` robots meta; imports `global.css`; header/main/footer landmarks (depends on T003, T004)
+- [x] T003 [P] Create `src/data/site.json` exactly per contracts/content-schema.md (artist profile "Valence", `seo.indexable: false`, channels: Bandcamp active + Spotify/SoundCloud/Instagram placeholders)
+- [x] T004 [P] Create design tokens and base styles in `src/styles/global.css` (dark theme custom properties, typography scale, responsive defaults from 320px)
+- [x] T005 Create `src/layouts/Base.astro`: HTML shell reading `site.json` for `<title>`, meta description, Open Graph tags, conditional `noindex` robots meta; imports `global.css`; header/main/footer landmarks (depends on T003, T004)
 
 **Checkpoint**: `npm run build` succeeds with an empty page rendered through the layout
 
@@ -44,8 +44,8 @@
 
 ### Implementation for User Story 1
 
-- [ ] T006 [P] [US1] Create `src/components/Hero.astro` rendering `artist.name`, `artist.tagline`, `artist.description` from `src/data/site.json` with placeholder visual treatment
-- [ ] T007 [US1] Create `src/pages/index.astro` rendering Hero inside `Base.astro` (depends on T006)
+- [x] T006 [P] [US1] Create `src/components/Hero.astro` rendering `artist.name`, `artist.tagline`, `artist.description` from `src/data/site.json` with placeholder visual treatment
+- [x] T007 [US1] Create `src/pages/index.astro` rendering Hero inside `Base.astro` (depends on T006)
 
 **Checkpoint**: MVP — the page is live-able and shareable
 
@@ -59,8 +59,8 @@
 
 ### Implementation for User Story 2
 
-- [ ] T008 [P] [US2] Create `src/components/Channels.astro`: renders `channels` from `site.json`; `status: "active"` → `<a target="_blank" rel="noopener noreferrer">`; `status: "placeholder"` → non-linked "coming soon" entry; section hides itself when list is empty
-- [ ] T009 [US2] Integrate Channels section into `src/pages/index.astro` (depends on T008)
+- [x] T008 [P] [US2] Create `src/components/Channels.astro`: renders `channels` from `site.json`; `status: "active"` → `<a target="_blank" rel="noopener noreferrer">`; `status: "placeholder"` → non-linked "coming soon" entry; section hides itself when list is empty
+- [x] T009 [US2] Integrate Channels section into `src/pages/index.astro` (depends on T008)
 
 **Checkpoint**: Landing page leads visitors to the music
 
@@ -74,8 +74,8 @@
 
 ### Implementation for User Story 3
 
-- [ ] T010 [US3] Create `.github/workflows/deploy.yml`: trigger on push to `main`; job 1 runs `astro check` + build via `withastro/action@v5`; job 2 deploys via `actions/deploy-pages`; correct `permissions` and `concurrency` blocks
-- [ ] T011 [P] [US3] Document one-time GitHub Pages setup (Settings → Pages → Source: GitHub Actions) and the `<owner>` placeholder in `astro.config.mjs` in `README.md`
+- [x] T010 [US3] Create `.github/workflows/deploy.yml`: trigger on push to `main`; job 1 runs `astro check` + build via `withastro/action@v5`; job 2 deploys via `actions/deploy-pages`; correct `permissions` and `concurrency` blocks
+- [x] T011 [P] [US3] Document one-time GitHub Pages setup (Settings → Pages → Source: GitHub Actions) and the `<owner>` placeholder in `astro.config.mjs` in `README.md`
 
 **Checkpoint**: Zero-ops publishing pipeline complete (verifiable once the GitHub repo exists)
 
@@ -89,10 +89,10 @@
 
 ### Implementation for User Story 4
 
-- [ ] T012 [P] [US4] Define `legal` content collection schema in `src/content/config.ts` (frontmatter: required `title`)
-- [ ] T013 [P] [US4] Create placeholder legal pages `src/content/legal/imprint.md` and `src/content/legal/privacy.md` (German titles, clearly marked placeholder bodies)
-- [ ] T014 [US4] Create `src/pages/legal/[slug].astro` rendering legal collection entries through `Base.astro` (depends on T012, T013)
-- [ ] T015 [US4] Create `src/components/Footer.astro` with links to all legal pages and integrate it into `src/layouts/Base.astro` so it appears on every page (depends on T014)
+- [x] T012 [P] [US4] Define `legal` content collection schema in `src/content/config.ts` (frontmatter: required `title`)
+- [x] T013 [P] [US4] Create placeholder legal pages `src/content/legal/imprint.md` and `src/content/legal/privacy.md` (German titles, clearly marked placeholder bodies)
+- [x] T014 [US4] Create `src/pages/legal/[slug].astro` rendering legal collection entries through `Base.astro` (depends on T012, T013)
+- [x] T015 [US4] Create `src/components/Footer.astro` with links to all legal pages and integrate it into `src/layouts/Base.astro` so it appears on every page (depends on T014)
 
 **Checkpoint**: All user stories independently functional
 
@@ -102,8 +102,8 @@
 
 **Purpose**: Documentation and final validation
 
-- [ ] T016 [P] Extend `README.md` with content editing guide: how to change `site.json`, legal pages, and preview locally (FR-011)
-- [ ] T017 Run quickstart.md validation scenarios 1–3, 6, 7 locally (`npm run check`, `npm run build`, `npm run preview`, weight budget, no third-party requests); scenarios 4–5 require the GitHub repo and are handed to the owner
+- [x] T016 [P] Extend `README.md` with content editing guide: how to change `site.json`, legal pages, and preview locally (FR-011)
+- [x] T017 Run quickstart.md validation scenarios 1–3, 6, 7 locally (`npm run check`, `npm run build`, `npm run preview`, weight budget, no third-party requests); scenarios 4–5 require the GitHub repo and are handed to the owner
 
 ---
 
@@ -127,3 +127,18 @@
 MVP first: Phases 1–3 produce a shareable landing page. Then US2 (channels), US3
 (pipeline), US4 (legal) as independent increments, polish last. Commit after each phase
 checkpoint at minimum.
+
+## Implementation Notes (2026-08-07)
+
+- All tasks completed. Deviations from the original task descriptions:
+  - T002: `og-image.png` deferred until real artwork exists; the `og:image` tag is omitted
+    (FR-010 only requires title + description). `favicon.svg` created.
+  - T012: collection schema lives at `src/content.config.ts` (current Astro convention)
+    instead of `src/content/config.ts`.
+  - Astro telemetry disabled in CI (`ASTRO_TELEMETRY_DISABLED=1`), in line with
+    constitution principle V.
+- T017 validation results: `astro check` 0 errors/warnings/hints; build outputs 3 pages;
+  total `dist/` 264 KB (fonts split per unicode-range subset, a browser loads only the
+  latin subset ≈ 52 KB); zero JavaScript shipped; no third-party requests; browser
+  screenshots at 1280px and 375px confirmed no horizontal scrolling and no visual defects.
+  Scenarios 4–5 (deploy pipeline) require the GitHub repository and remain with the owner.
