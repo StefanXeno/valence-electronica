@@ -9,21 +9,23 @@
 .volume-control {
   --glitch-red: var(--color-accent);
   --glitch-white: var(--color-text);
-  --g-xa: 14;
-  --g-xb: -16;
-  --g-xc: 10;
-  --g-ya: 8;
-  --g-yb: -10;
-  --g-yc: 6;
-  --g-sa: 18;
-  --g-sb: -14;
-  --g-sc: 12;
-  --g-line1: 28;
-  --g-line2: 64;
-  --g-vline1: 30;
-  --g-vline2: 68;
-  --g-scale: 1.1;
-  --g-dur: 600ms;
+  --g-xa: 8;
+  --g-xb: -9;
+  --g-xc: 5;
+  --g-ya: 4;
+  --g-yb: -5;
+  --g-yc: 3;
+  --g-sa: 10;
+  --g-sb: -8;
+  --g-sc: 6;
+  --g-line1: 22;
+  --g-line2: 48;
+  --g-line3: 74;
+  --g-vline1: 24;
+  --g-vline2: 52;
+  --g-vline3: 78;
+  --g-scale: 1.04;
+  --g-dur: 560ms;
   isolation: isolate;
   overflow: visible;
 }
@@ -44,7 +46,14 @@
   mix-blend-mode: screen;
 }
 
-/* Horizontal scanlines (fewer) */
+/* Keep interactive controls receiving clicks even while glitching */
+.volume-control,
+.volume-control__toggle,
+[data-mute-control].glitch-hit {
+  pointer-events: auto;
+}
+
+/* Horizontal scanlines */
 .glitch-hit::before,
 .volume-control::before {
   left: -12%;
@@ -52,7 +61,9 @@
   height: 2px;
   top: calc(var(--g-line1) * 1%);
   background: var(--glitch-red);
-  box-shadow: 0 calc((var(--g-line2) - var(--g-line1)) * 1%) 0 0 var(--glitch-white);
+  box-shadow:
+    0 calc((var(--g-line2) - var(--g-line1)) * 1%) 0 0 var(--glitch-white),
+    0 calc((var(--g-line3) - var(--g-line1)) * 1%) 0 0 var(--glitch-red);
 }
 
 /* Vertical scanlines */
@@ -63,13 +74,24 @@
   width: 2px;
   left: calc(var(--g-vline1) * 1%);
   background: var(--glitch-white);
-  box-shadow: calc((var(--g-vline2) - var(--g-vline1)) * 1%) 0 0 0 var(--glitch-red);
+  box-shadow:
+    calc((var(--g-vline2) - var(--g-vline1)) * 1%) 0 0 0 var(--glitch-red),
+    calc((var(--g-vline3) - var(--g-vline1)) * 1%) 0 0 0 var(--glitch-white);
 }
 
 .glitch-hit.is-glitching,
 .glitch-hit.is-glitch-hover {
   animation: ui-glitch-hit var(--g-dur) both;
   z-index: 1;
+}
+
+/*
+  Interactive mute control: same jitter/RGB, but NO clip-path.
+  clip-path removes hit-testing area and made the button unclickable mid-glitch.
+*/
+[data-mute-control].glitch-hit.is-glitching,
+[data-mute-control].glitch-hit.is-glitch-hover {
+  animation-name: ui-glitch-hit-live;
 }
 
 .glitch-hit.is-glitching::before,
@@ -92,102 +114,127 @@
     clip-path: inset(0);
     animation-timing-function: steps(1, end);
   }
-  /* H → — fewer horizontal bands */
+  /* H → */
   14% {
-    transform: translateX(calc(var(--g-xa) * 1px)) skewX(calc(var(--g-sa) * 1deg))
+    transform: translateX(calc(var(--g-xa) * 1px)) skewX(calc(var(--g-sa) * 0.75deg))
       scaleX(var(--g-scale));
-    filter: drop-shadow(calc(var(--g-xa) * -0.4px) 0 var(--glitch-red)) contrast(1.4);
+    filter: drop-shadow(calc(var(--g-xa) * -0.35px) 0 var(--glitch-red)) contrast(1.15);
     clip-path: polygon(
       0 0,
       100% 0,
-      100% 22%,
-      0 24%,
-      0 48%,
-      100% 46%,
-      100% 70%,
-      0 72%,
+      100% 30%,
+      0 32%,
+      0 58%,
+      100% 56%,
+      100% 100%,
+      0 100%
+    );
+    animation-timing-function: steps(1, end);
+  }
+  /* V ↓ */
+  28% {
+    transform: translateY(calc(var(--g-ya) * 1px)) skewY(calc(var(--g-sb) * 0.4deg));
+    filter: drop-shadow(0 calc(var(--g-ya) * -0.35px) var(--glitch-white));
+    clip-path: polygon(
+      0 0,
+      28% 0,
+      26% 100%,
+      55% 100%,
+      57% 0,
+      100% 0,
+      100% 100%,
+      0 100%
+    );
+    animation-timing-function: steps(1, end);
+  }
+  /* H ← */
+  42% {
+    transform: translateX(calc(var(--g-xb) * 1px)) skewX(calc(var(--g-sa) * -0.65deg));
+    filter: drop-shadow(calc(var(--g-xb) * -0.35px) 0 var(--glitch-red));
+    clip-path: polygon(
+      0 0,
+      100% 0,
+      100% 38%,
+      0 40%,
       0 100%,
       100% 100%
     );
     animation-timing-function: steps(1, end);
   }
-  /* V ↓ — vertical tears */
-  28% {
-    transform: translateY(calc(var(--g-ya) * 1px)) skewY(calc(var(--g-sb) * 0.55deg));
-    filter: drop-shadow(0 calc(var(--g-ya) * -0.4px) var(--glitch-white)) brightness(1.12);
-    clip-path: polygon(
-      0 0,
-      22% 0,
-      20% 100%,
-      38% 100%,
-      40% 0,
-      58% 0,
-      56% 100%,
-      74% 100%,
-      76% 0,
-      100% 0,
-      100% 100%,
-      0 100%
-    );
-    animation-timing-function: steps(1, end);
-  }
-  /* H ← — fewer horizontal bands */
-  42% {
-    transform: translateX(calc(var(--g-xb) * 1px)) skewX(calc(var(--g-sa) * -0.85deg));
-    filter: drop-shadow(calc(var(--g-xb) * -0.4px) 0 var(--glitch-red));
-    clip-path: polygon(
-      0 0,
-      100% 0,
-      100% 28%,
-      0 30%,
-      0 52%,
-      100% 50%,
-      100% 100%,
-      0 100%
-    );
-    animation-timing-function: steps(1, end);
-  }
-  /* V ↑ — vertical tears */
+  /* V ↑ */
   56% {
-    transform: translateY(calc(var(--g-yb) * 1px)) skewY(calc(var(--g-sb) * -0.5deg));
-    filter: drop-shadow(0 calc(var(--g-yb) * -0.4px) var(--glitch-white));
+    transform: translateY(calc(var(--g-yb) * 1px)) skewY(calc(var(--g-sb) * -0.35deg));
+    filter: drop-shadow(0 calc(var(--g-yb) * -0.35px) var(--glitch-white));
     clip-path: polygon(
       0 0,
-      30% 0,
-      28% 100%,
-      48% 100%,
-      50% 0,
-      70% 0,
-      68% 100%,
+      40% 0,
+      38% 100%,
       100% 100%,
       100% 0
     );
     animation-timing-function: steps(1, end);
   }
-  /* H soft — fewer horizontal bands */
+  /* H soft */
   70% {
-    transform: translateX(calc(var(--g-xc) * 1px)) skewX(calc(var(--g-sc) * 1deg)) scaleX(1.04);
-    filter: drop-shadow(calc(var(--g-xc) * -0.35px) 0 var(--glitch-red));
-    clip-path: polygon(
-      0 0,
-      100% 0,
-      100% 36%,
-      0 38%,
-      0 100%,
-      100% 100%
-    );
+    transform: translateX(calc(var(--g-xc) * 1px)) skewX(calc(var(--g-sc) * 0.7deg));
+    filter: drop-shadow(calc(var(--g-xc) * -0.3px) 0 var(--glitch-red));
+    clip-path: inset(0 6% 0 0);
     animation-timing-function: steps(1, end);
   }
-  /* V soft — vertical cut */
+  /* V soft */
   84% {
     transform: translateY(calc(var(--g-yc) * 1px));
-    filter: drop-shadow(0 calc(var(--g-yc) * -0.3px) var(--glitch-white));
-    clip-path: polygon(0 0, 42% 0, 40% 100%, 100% 100%, 100% 0);
+    filter: drop-shadow(0 calc(var(--g-yc) * -0.25px) var(--glitch-white));
+    clip-path: inset(0);
     animation-timing-function: steps(1, end);
   }
   100% {
     transform: none;
     clip-path: inset(0);
+    filter: none;
+  }
+}
+
+/* Click-safe variant for controls (transform + filter only) */
+@keyframes ui-glitch-hit-live {
+  0% {
+    transform: none;
+    filter: none;
+    animation-timing-function: steps(1, end);
+  }
+  14% {
+    transform: translateX(calc(var(--g-xa) * 1px)) skewX(calc(var(--g-sa) * 0.85deg))
+      scaleX(var(--g-scale));
+    filter: drop-shadow(calc(var(--g-xa) * -0.4px) 0 var(--glitch-red)) contrast(1.2);
+    animation-timing-function: steps(1, end);
+  }
+  28% {
+    transform: translateY(calc(var(--g-ya) * 1px)) skewY(calc(var(--g-sb) * 0.45deg));
+    filter: drop-shadow(0 calc(var(--g-ya) * -0.4px) var(--glitch-white));
+    animation-timing-function: steps(1, end);
+  }
+  42% {
+    transform: translateX(calc(var(--g-xb) * 1px)) skewX(calc(var(--g-sa) * -0.75deg));
+    filter: drop-shadow(calc(var(--g-xb) * -0.4px) 0 var(--glitch-red));
+    animation-timing-function: steps(1, end);
+  }
+  56% {
+    transform: translateY(calc(var(--g-yb) * 1px)) skewY(calc(var(--g-sb) * -0.4deg));
+    filter: drop-shadow(0 calc(var(--g-yb) * -0.4px) var(--glitch-white));
+    animation-timing-function: steps(1, end);
+  }
+  70% {
+    transform: translateX(calc(var(--g-xc) * 1px)) skewX(calc(var(--g-sc) * 0.75deg));
+    filter: drop-shadow(calc(var(--g-xc) * -0.35px) 0 var(--glitch-red));
+    animation-timing-function: steps(1, end);
+  }
+  84% {
+    transform: translateY(calc(var(--g-yc) * 1px));
+    filter: drop-shadow(0 calc(var(--g-yc) * -0.3px) var(--glitch-white));
+    animation-timing-function: steps(1, end);
+  }
+  100% {
+    transform: none;
     filter: none;
   }
 }

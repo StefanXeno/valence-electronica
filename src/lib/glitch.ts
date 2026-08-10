@@ -14,9 +14,11 @@ export type GlitchPreset = {
   /** Horizontal scanline positions in % of element height. */
   line1: number;
   line2: number;
+  line3: number;
   /** Vertical scanline positions in % of element width. */
   vline1: number;
   vline2: number;
+  vline3: number;
   scale: number;
   dur: number;
 };
@@ -27,31 +29,45 @@ function rand(min: number, max: number): number {
   return min + Math.random() * (max - min);
 }
 
-function makePreset(): GlitchPreset {
-  const hDir = Math.random() > 0.5 ? 1 : -1;
-  const vDir = Math.random() > 0.5 ? 1 : -1;
+/**
+ * Build one calm-but-distinct variant.
+ * Index spreads character (direction bias, line layout, tempo) so picks read differently.
+ */
+function makePreset(index: number): GlitchPreset {
+  const hDir = index % 2 === 0 ? 1 : -1;
+  const vDir = index % 3 === 0 ? -1 : 1;
+  // Keep overall calm; spread intensity across the pool so variants differ
+  const t = index / (PRESET_COUNT - 1); // 0..1
+  const move = 6.5 + t * 8.5; // ~6.5–15px peak horizontal
+  const moveY = 3.5 + t * 5.5; // ~3.5–9px vertical
+  const skew = 8 + t * 10; // ~8–18deg
+  const lineShift = (index * 7) % 18;
 
   return {
-    xa: rand(8, 20) * hDir,
-    xb: rand(10, 22) * -hDir,
-    xc: rand(6, 14) * hDir,
-    ya: rand(4, 12) * vDir,
-    yb: rand(5, 14) * -vDir,
-    yc: rand(3, 9) * vDir,
-    sa: rand(12, 28) * hDir,
-    sb: rand(10, 24) * -vDir,
-    sc: rand(8, 18) * hDir,
-    line1: rand(18, 40),
-    line2: rand(55, 78),
-    vline1: rand(20, 42),
-    vline2: rand(58, 80),
-    scale: rand(1.05, 1.16),
-    dur: Math.floor(rand(520, 720)),
+    xa: (move + rand(-1.4, 1.4)) * hDir,
+    xb: (move * 1.2 + rand(-1.6, 1.6)) * -hDir,
+    xc: (move * 0.7 + rand(-1, 1)) * hDir,
+    ya: (moveY + rand(-1, 1)) * vDir,
+    yb: (moveY * 1.15 + rand(-1, 1)) * -vDir,
+    yc: (moveY * 0.75 + rand(-0.6, 0.6)) * vDir,
+    sa: (skew + rand(-1.8, 1.8)) * hDir,
+    sb: (skew * 0.9 + rand(-1.4, 1.4)) * -vDir,
+    sc: (skew * 0.65 + rand(-1.2, 1.2)) * hDir,
+    line1: 12 + lineShift + rand(0, 4),
+    line2: 38 + ((lineShift * 1.4) % 16) + rand(0, 4),
+    line3: 66 + ((lineShift * 0.8) % 14) + rand(0, 4),
+    vline1: 14 + ((index * 9) % 20) + rand(0, 3),
+    vline2: 42 + ((index * 5) % 16) + rand(0, 3),
+    vline3: 70 + ((index * 11) % 14) + rand(0, 3),
+    scale: 1.03 + t * 0.07 + rand(0, 0.02),
+    dur: Math.floor(470 + t * 170 + rand(0, 40)),
   };
 }
 
-/** Fixed pool of 10 glitch variants — hover/press only picks from these. */
-export const GLITCH_PRESETS: readonly GlitchPreset[] = Array.from({ length: PRESET_COUNT }, makePreset);
+/** Fixed pool of 10 distinct glitch variants — hover/press picks from these. */
+export const GLITCH_PRESETS: readonly GlitchPreset[] = Array.from({ length: PRESET_COUNT }, (_, i) =>
+  makePreset(i),
+);
 
 function pickPreset(previousIndex?: number): { preset: GlitchPreset; index: number } {
   if (GLITCH_PRESETS.length === 1) {
@@ -85,8 +101,10 @@ export function applyGlitchPreset(el: HTMLElement): GlitchPreset {
   el.style.setProperty('--g-sc', preset.sc.toFixed(2));
   el.style.setProperty('--g-line1', preset.line1.toFixed(2));
   el.style.setProperty('--g-line2', preset.line2.toFixed(2));
+  el.style.setProperty('--g-line3', preset.line3.toFixed(2));
   el.style.setProperty('--g-vline1', preset.vline1.toFixed(2));
   el.style.setProperty('--g-vline2', preset.vline2.toFixed(2));
+  el.style.setProperty('--g-vline3', preset.vline3.toFixed(2));
   el.style.setProperty('--g-scale', preset.scale.toFixed(3));
   el.style.setProperty('--g-dur', `${preset.dur}ms`);
 
@@ -98,8 +116,11 @@ export const rollGlitchVars = applyGlitchPreset;
 
 export function playElementGlitch(el: HTMLElement, className = 'is-glitching'): number {
   const preset = applyGlitchPreset(el);
-  el.classList.remove(className);
+  // Force a clean restart so new CSS vars take effect on the next animation
+  el.classList.remove('is-glitching', 'is-glitch-hover');
+  el.style.animation = 'none';
   void el.offsetWidth;
+  el.style.animation = '';
   el.classList.add(className);
   return preset.dur;
 }

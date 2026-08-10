@@ -10,11 +10,18 @@
       if (el.classList.contains('is-glitching') || el.classList.contains('is-glitch-hover')) return;
     }
 
-    el.classList.remove('is-glitch-hover', 'is-glitching');
     const dur = playElementGlitch(el, className);
-    const clear = () => el.classList.remove(className);
-    el.addEventListener('animationend', clear, { once: true });
-    window.setTimeout(clear, dur + 80);
+    // Only clear on the host animation end (ignore bubbled ::before/::after)
+    const onEnd = (event: AnimationEvent) => {
+      if (event.target !== el) return;
+      el.removeEventListener('animationend', onEnd);
+      el.classList.remove(className);
+    };
+    el.addEventListener('animationend', onEnd);
+    window.setTimeout(() => {
+      el.removeEventListener('animationend', onEnd);
+      el.classList.remove(className);
+    }, dur + 80);
   }
 
   function bindGlitchPress() {
@@ -54,6 +61,13 @@
         if (!(target instanceof Element)) return;
         const hit = target.closest('.glitch-hit');
         if (!(hit instanceof HTMLElement)) return;
+        // MuteControl owns shell glitch after click — don't clip the button mid-press
+        if (
+          hit.matches('[data-mute-control], [data-volume-control]') ||
+          hit.closest('[data-volume-control]')
+        ) {
+          return;
+        }
         runGlitch(hit, 'is-glitching');
       },
       true,

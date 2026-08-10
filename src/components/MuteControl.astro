@@ -270,86 +270,49 @@
     animation: volume-slider-track-glitch 520ms both;
   }
 
+  /* No clip-path on shell/icon — keeps the mute button clickable mid-glitch */
   @keyframes volume-shell-glitch {
     0% {
       transform: none;
       filter: none;
       border-color: var(--color-border);
-      clip-path: inset(0);
       animation-timing-function: steps(1, end);
     }
-    /* H */
     14% {
-      transform: translateX(calc(var(--g-xa) * 1px)) skewX(calc(var(--g-sa) * 1deg))
+      transform: translateX(calc(var(--g-xa) * 1px)) skewX(calc(var(--g-sa) * 0.9deg))
         scaleX(var(--g-scale));
-      filter: drop-shadow(calc(var(--g-xa) * -0.4px) 0 var(--glitch-red)) contrast(1.35);
+      filter: drop-shadow(calc(var(--g-xa) * -0.4px) 0 var(--glitch-red)) contrast(1.25);
       border-color: var(--glitch-white);
-      clip-path: polygon(
-        0 0,
-        100% 0,
-        100% 24%,
-        0 26%,
-        0 54%,
-        100% 52%,
-        100% 100%,
-        0 100%
-      );
       animation-timing-function: steps(1, end);
     }
-    /* V — vertical tears */
     28% {
-      transform: translateY(calc(var(--g-ya) * 1px)) skewY(calc(var(--g-sb) * 0.5deg));
-      filter: drop-shadow(0 calc(var(--g-ya) * -0.4px) var(--glitch-white)) brightness(1.12);
+      transform: translateY(calc(var(--g-ya) * 1px)) skewY(calc(var(--g-sb) * 0.45deg));
+      filter: drop-shadow(0 calc(var(--g-ya) * -0.4px) var(--glitch-white)) brightness(1.1);
       border-color: var(--glitch-red);
-      clip-path: polygon(
-        0 0,
-        24% 0,
-        22% 100%,
-        46% 100%,
-        48% 0,
-        72% 0,
-        70% 100%,
-        100% 100%,
-        100% 0
-      );
       animation-timing-function: steps(1, end);
     }
-    /* H */
     42% {
-      transform: translateX(calc(var(--g-xb) * 1px)) skewX(calc(var(--g-sa) * -0.85deg));
-      clip-path: polygon(
-        0 0,
-        100% 0,
-        100% 34%,
-        0 36%,
-        0 100%,
-        100% 100%
-      );
+      transform: translateX(calc(var(--g-xb) * 1px)) skewX(calc(var(--g-sa) * -0.8deg));
       filter: drop-shadow(calc(var(--g-xb) * -0.4px) 0 var(--glitch-red));
       animation-timing-function: steps(1, end);
     }
-    /* V — vertical tears */
     56% {
       transform: translateY(calc(var(--g-yb) * 1px));
-      clip-path: polygon(0 0, 38% 0, 36% 100%, 100% 100%, 100% 0);
       filter: drop-shadow(0 calc(var(--g-yb) * -0.35px) var(--glitch-white));
       animation-timing-function: steps(1, end);
     }
-    /* H soft */
     72% {
-      transform: translateX(calc(var(--g-xc) * 0.55px)) skewX(calc(var(--g-sc) * 0.5deg));
+      transform: translateX(calc(var(--g-xc) * 0.6px)) skewX(calc(var(--g-sc) * 0.55deg));
       filter: drop-shadow(calc(var(--g-xc) * -0.3px) 0 var(--glitch-red));
       animation-timing-function: steps(1, end);
     }
-    /* V soft */
     86% {
-      transform: translateY(calc(var(--g-yc) * 0.45px));
+      transform: translateY(calc(var(--g-yc) * 0.5px));
       filter: drop-shadow(0 calc(var(--g-yc) * -0.25px) var(--glitch-white));
       animation-timing-function: steps(1, end);
     }
     100% {
       transform: none;
-      clip-path: inset(0);
       filter: none;
       border-color: var(--color-border);
     }
@@ -359,46 +322,42 @@
     0% {
       transform: none;
       filter: none;
-      clip-path: inset(0);
       animation-timing-function: steps(1, end);
     }
     14% {
-      transform: translateX(calc(var(--g-xa) * 0.75px)) skewX(calc(var(--g-sa) * 1deg))
+      transform: translateX(calc(var(--g-xa) * 0.8px)) skewX(calc(var(--g-sa) * 0.9deg))
         scaleX(var(--g-scale));
       filter: drop-shadow(calc(var(--g-xa) * -0.35px) 0 var(--glitch-red));
       animation-timing-function: steps(1, end);
     }
     28% {
-      transform: translateY(calc(var(--g-ya) * 0.75px));
+      transform: translateY(calc(var(--g-ya) * 0.8px));
       filter: drop-shadow(0 calc(var(--g-ya) * -0.35px) var(--glitch-white));
       animation-timing-function: steps(1, end);
     }
     42% {
-      transform: translateX(calc(var(--g-xb) * 0.7px)) skewX(calc(var(--g-sa) * -0.8deg));
-      clip-path: polygon(0 0, 100% 8%, 100% 40%, 0 44%, 0 68%, 100% 64%, 100% 100%, 0 100%);
+      transform: translateX(calc(var(--g-xb) * 0.75px)) skewX(calc(var(--g-sa) * -0.75deg));
       filter: drop-shadow(calc(var(--g-xb) * -0.35px) 0 var(--glitch-red));
       animation-timing-function: steps(1, end);
     }
     56% {
-      transform: translateY(calc(var(--g-yb) * 0.65px));
-      clip-path: inset(0);
+      transform: translateY(calc(var(--g-yb) * 0.7px));
       filter: drop-shadow(0 calc(var(--g-yb) * -0.3px) var(--glitch-white));
       animation-timing-function: steps(1, end);
     }
     72% {
-      transform: translateX(calc(var(--g-xc) * 0.4px));
+      transform: translateX(calc(var(--g-xc) * 0.45px));
       filter: drop-shadow(calc(var(--g-xc) * -0.25px) 0 var(--glitch-red));
       animation-timing-function: steps(1, end);
     }
     86% {
-      transform: translateY(calc(var(--g-yc) * 0.3px));
+      transform: translateY(calc(var(--g-yc) * 0.35px));
       filter: drop-shadow(0 calc(var(--g-yc) * -0.2px) var(--glitch-white));
       animation-timing-function: steps(1, end);
     }
     100% {
       transform: none;
       filter: none;
-      clip-path: inset(0);
     }
   }
 
