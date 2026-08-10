@@ -14,7 +14,7 @@ basic themes without editing layout components (constitution III).
     {
       "id": "placeholder-loop",
       "title": "NIGHTMARE (temp — first 30s from YouTube, for testing)",
-      "themeId": "violet-night",
+      "themeId": "nightmare-crimson",
       "hasAudio": true,
       "poster": "/images/posters/placeholder-loop.jpg",
       "sources": [
@@ -48,7 +48,7 @@ Rules:
 Each basic pack overrides color/surface tokens only, for example:
 
 ```css
-[data-theme="violet-night"] {
+[data-theme="nightmare-crimson"] {
   --color-bg: …;
   --color-surface: …;
   --color-text: …;

@@ -30,9 +30,9 @@
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
 - [x] T003 Create `src/data/background.json` per `contracts/background-content.md` (`defaultVideoId`, one `videos[]` entry with `sources`, `poster`, `themeId`, `hasAudio`)
-- [ ] T004 [P] Create `src/lib/background.ts` that loads `background.json`, resolves the default `BackgroundVideo`, and fails fast if `defaultVideoId` is missing/invalid
-- [ ] T005 [P] Create `src/styles/themes.css` with a `default` pack and at least one named pack (e.g. `violet-night`) overriding color/surface tokens (`--color-*`, `--bg-scrim`) for `[data-theme="…"]`
-- [ ] T006 Update `src/layouts/Base.astro` to import `themes.css`, set `data-theme` on `<html>` from the default video’s `themeId` via `src/lib/background.ts`, and reserve a full-viewport slot/region for the shared atmosphere layer (depends on T003–T005)
+- [x] T004 [P] Create `src/lib/background.ts` that loads `background.json`, resolves the default `BackgroundVideo`, and fails fast if `defaultVideoId` is missing/invalid
+- [x] T005 [P] Create `src/styles/themes.css` with a `default` pack and at least one named pack (e.g. `violet-night`) overriding color/surface tokens (`--color-*`, `--bg-scrim`) for `[data-theme="…"]`
+- [x] T006 Update `src/layouts/Base.astro` to import `themes.css`, set `data-theme` on `<html>` from the default video’s `themeId` via `src/lib/background.ts`, and reserve a full-viewport slot/region for the shared atmosphere layer (depends on T003–T005)
 
 **Checkpoint**: `npm run check` passes; HTML root carries `data-theme` from `background.json` even before video UI lands
 
@@ -46,10 +46,10 @@
 
 ### Implementation for User Story 1
 
-- [ ] T007 [US1] Create `src/components/BackgroundAtmosphere.astro` rendering full-bleed `<video autoplay muted loop playsinline>` from the default entry’s `sources` (honor `base` via `src/lib/url.ts`), with poster `<img>` sibling and a content scrim using `--bg-scrim` (depends on T004, T002)
-- [ ] T008 [US1] Integrate `BackgroundAtmosphere.astro` into `src/layouts/Base.astro` (or landing shell) so the landing page shows the atmosphere behind `<main>` content without covering footer/legal link reachability (depends on T006, T007)
-- [ ] T009 [P] [US1] Adjust `src/components/Hero.astro` and `src/styles/global.css` so hero/text contrast remains readable over video (reduce opaque hero gradients that fight the atmosphere; keep 320px layout)
-- [ ] T010 [US1] Ensure `src/pages/index.astro` composition (Hero + Channels) sits cleanly above the atmosphere with no horizontal scroll (depends on T008, T009)
+- [x] T007 [US1] Create `src/components/BackgroundAtmosphere.astro` rendering full-bleed `<video autoplay muted loop playsinline>` from the default entry’s `sources` (honor `base` via `src/lib/url.ts`), with poster `<img>` sibling and a content scrim using `--bg-scrim` (depends on T004, T002)
+- [x] T008 [US1] Integrate `BackgroundAtmosphere.astro` into `src/layouts/Base.astro` (or landing shell) so the landing page shows the atmosphere behind `<main>` content without covering footer/legal link reachability (depends on T006, T007)
+- [x] T009 [P] [US1] Adjust `src/components/Hero.astro` and `src/styles/global.css` so hero/text contrast remains readable over video (reduce opaque hero gradients that fight the atmosphere; keep 320px layout)
+- [x] T010 [US1] Ensure `src/pages/index.astro` composition (Hero + Channels) sits cleanly above the atmosphere with no horizontal scroll (depends on T008, T009)
 
 **Checkpoint**: MVP — muted atmospheric landing is demoable
 
@@ -63,9 +63,9 @@
 
 ### Implementation for User Story 2
 
-- [ ] T011 [US2] Create `src/components/MuteControl.astro` that renders only when default video `hasAudio` is true; button toggles the atmosphere `<video>` `muted` state; updates accessible name / pressed state; includes the justified minimal client `<script>` (depends on T007)
-- [ ] T012 [US2] Mount `MuteControl.astro` on the landing atmosphere in `src/layouts/Base.astro` or `src/components/BackgroundAtmosphere.astro` so it does not block primary content, channels, or legal links (FR-009) (depends on T011, T008)
-- [ ] T013 [US2] Wire playback-failure handling in the MuteControl/atmosphere script: on `error` or rejected `play()`, set fallback state, hide/disable mute control, keep poster visible (FR-003/FR-008) (depends on T011)
+- [x] T011 [US2] Create `src/components/MuteControl.astro` that renders only when default video `hasAudio` is true; button toggles the atmosphere `<video>` `muted` state; updates accessible name / pressed state; includes the justified minimal client `<script>` (depends on T007)
+- [x] T012 [US2] Mount `MuteControl.astro` on the landing atmosphere in `src/layouts/Base.astro` or `src/components/BackgroundAtmosphere.astro` so it does not block primary content, channels, or legal links (FR-009) (depends on T011, T008)
+- [x] T013 [US2] Wire playback-failure handling in the MuteControl/atmosphere script: on `error` or rejected `play()`, set fallback state, hide/disable mute control, keep poster visible (FR-003/FR-008) (depends on T011)
 
 **Checkpoint**: Audio control matches clarify rules; silent clips stay control-free
 
@@ -79,9 +79,9 @@
 
 ### Implementation for User Story 3
 
-- [ ] T014 [P] [US3] Expand `src/styles/themes.css` with a second distinct basic pack and document token expectations in a short comment block at the top of the file
-- [ ] T015 [US3] Verify/adjust `src/lib/background.ts` + `src/layouts/Base.astro` so unknown `themeId` falls back to the `default` pack and the active theme remains applied when atmosphere is in poster/fallback mode (depends on T004, T006, T007)
-- [ ] T016 [US3] Manually confirm content-only theme switch: edit only `src/data/background.json` `themeId`, refresh — no component changes required (SC-006) (depends on T014, T015)
+- [x] T014 [P] [US3] Expand `src/styles/themes.css` with a second distinct basic pack and document token expectations in a short comment block at the top of the file
+- [x] T015 [US3] Verify/adjust `src/lib/background.ts` + `src/layouts/Base.astro` so unknown `themeId` falls back to the `default` pack and the active theme remains applied when atmosphere is in poster/fallback mode (depends on T004, T006, T007)
+- [x] T016 [US3] Manually confirm content-only theme switch: edit only `src/data/background.json` `themeId`, refresh — no component changes required (SC-006) (depends on T014, T015)
 
 **Checkpoint**: Basic theme binding is operator-maintainable
 
@@ -95,9 +95,9 @@
 
 ### Implementation for User Story 4
 
-- [ ] T017 [US4] Add `@media (prefers-reduced-motion: reduce)` rules in `src/components/BackgroundAtmosphere.astro` (and/or `src/styles/global.css`) to hide/stop the looping video presentation and show the poster/still only
-- [ ] T018 [US4] Ensure reduced-motion path keeps `data-theme` and readable content, and that `MuteControl` stays hidden/disabled when video is not playing (depends on T011, T017)
-- [ ] T019 [US4] Confirm load/autoplay failure path from T013 still yields themed static fallback with no blank hero (depends on T013, T017)
+- [x] T017 [US4] Add `@media (prefers-reduced-motion: reduce)` rules in `src/components/BackgroundAtmosphere.astro` (and/or `src/styles/global.css`) to hide/stop the looping video presentation and show the poster/still only
+- [x] T018 [US4] Ensure reduced-motion path keeps `data-theme` and readable content, and that `MuteControl` stays hidden/disabled when video is not playing (depends on T011, T017)
+- [x] T019 [US4] Confirm load/autoplay failure path from T013 still yields themed static fallback with no blank hero (depends on T013, T017)
 
 **Checkpoint**: Motion preferences and failures never force video
 
@@ -111,10 +111,10 @@
 
 ### Implementation for User Story 5
 
-- [ ] T020 [US5] Create `src/components/LegalPanel.astro`: near-fullscreen panel with margin on all sides, scrollable body slot, top Exit control linking to `/` via `withBase`, CSS open animation skipped under `prefers-reduced-motion`
-- [ ] T021 [US5] Refactor `src/pages/legal/[slug].astro` to render collection content inside `LegalPanel.astro` over the shared atmosphere from `Base.astro` (remove plain full-page-only legal layout that hides the atmosphere) (depends on T008, T020)
-- [ ] T022 [P] [US5] Adjust `src/components/Footer.astro` styles if needed so legal links remain obvious on the atmospheric landing page
-- [ ] T023 [US5] Verify focus is not trapped without Exit: keyboard can activate Exit; panel does not require video playback to read legal text (depends on T021)
+- [x] T020 [US5] Create `src/components/LegalPanel.astro`: near-fullscreen panel with margin on all sides, scrollable body slot, top Exit control linking to `/` via `withBase`, CSS open animation skipped under `prefers-reduced-motion`
+- [x] T021 [US5] Refactor `src/pages/legal/[slug].astro` to render collection content inside `LegalPanel.astro` over the shared atmosphere from `Base.astro` (remove plain full-page-only legal layout that hides the atmosphere) (depends on T008, T020)
+- [x] T022 [P] [US5] Adjust `src/components/Footer.astro` styles if needed so legal links remain obvious on the atmospheric landing page
+- [x] T023 [US5] Verify focus is not trapped without Exit: keyboard can activate Exit; panel does not require video playback to read legal text (depends on T021)
 
 **Checkpoint**: Legal UX matches clarify panel decision; direct URLs work
 
@@ -124,10 +124,10 @@
 
 **Purpose**: Docs, readability pass, and full quickstart validation
 
-- [ ] T024 [P] Document editing `src/data/background.json` and swapping video/poster/theme assets in `README.md` (content-editing section)
-- [ ] T025 [P] Tune `src/components/Channels.astro` / footer contrast over video if quickstart readability checks fail
-- [ ] T026 Run full `quickstart.md` validation scenarios 1–8 locally (`npm run check`, `npm run build`, `npm run preview`) and fix any gaps
-- [ ] T027 Confirm no third-party media hosts and no new npm UI dependencies were introduced (constitution IV/V/VI)
+- [x] T024 [P] Document editing `src/data/background.json` and swapping video/poster/theme assets in `README.md` (content-editing section)
+- [x] T025 [P] Tune `src/components/Channels.astro` / footer contrast over video if quickstart readability checks fail
+- [x] T026 Run full `quickstart.md` validation scenarios 1–8 locally (`npm run check`, `npm run build`, `npm run preview`) and fix any gaps
+- [x] T027 Confirm no third-party media hosts and no new npm UI dependencies were introduced (constitution IV/V/VI)
 
 ---
 

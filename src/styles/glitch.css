@@ -1,0 +1,286 @@
+/*
+  Shared press/hover glitch.
+  - Axis-locked snaps: each frame is ONLY horizontal OR ONLY vertical (never diagonal).
+  - Scanline overlays via ::before / ::after.
+  - Values come from one of 10 presets applied in JS (applyGlitchPreset).
+*/
+
+.glitch-hit,
+.volume-control {
+  --glitch-red: var(--color-accent);
+  --glitch-white: var(--color-text);
+  --g-xa: 14;
+  --g-xb: -16;
+  --g-xc: 10;
+  --g-ya: 8;
+  --g-yb: -10;
+  --g-yc: 6;
+  --g-sa: 18;
+  --g-sb: -14;
+  --g-sc: 12;
+  --g-line1: 28;
+  --g-line2: 64;
+  --g-vline1: 30;
+  --g-vline2: 68;
+  --g-scale: 1.1;
+  --g-dur: 600ms;
+  isolation: isolate;
+  overflow: visible;
+}
+
+.glitch-hit {
+  position: relative;
+}
+
+.glitch-hit::before,
+.glitch-hit::after,
+.volume-control::before,
+.volume-control::after {
+  content: '';
+  position: absolute;
+  pointer-events: none;
+  opacity: 0;
+  z-index: 3;
+  mix-blend-mode: screen;
+}
+
+/* Horizontal scanlines (fewer) */
+.glitch-hit::before,
+.volume-control::before {
+  left: -12%;
+  width: 124%;
+  height: 2px;
+  top: calc(var(--g-line1) * 1%);
+  background: var(--glitch-red);
+  box-shadow: 0 calc((var(--g-line2) - var(--g-line1)) * 1%) 0 0 var(--glitch-white);
+}
+
+/* Vertical scanlines */
+.glitch-hit::after,
+.volume-control::after {
+  top: -12%;
+  height: 124%;
+  width: 2px;
+  left: calc(var(--g-vline1) * 1%);
+  background: var(--glitch-white);
+  box-shadow: calc((var(--g-vline2) - var(--g-vline1)) * 1%) 0 0 0 var(--glitch-red);
+}
+
+.glitch-hit.is-glitching,
+.glitch-hit.is-glitch-hover {
+  animation: ui-glitch-hit var(--g-dur) both;
+  z-index: 1;
+}
+
+.glitch-hit.is-glitching::before,
+.glitch-hit.is-glitch-hover::before,
+.volume-control.is-glitching::before {
+  animation: glitch-scan-a var(--g-dur) both;
+}
+
+.glitch-hit.is-glitching::after,
+.glitch-hit.is-glitch-hover::after,
+.volume-control.is-glitching::after {
+  animation: glitch-scan-b var(--g-dur) both;
+}
+
+/* Multi-tear slices — several horizontal fracture lines per frame */
+@keyframes ui-glitch-hit {
+  0% {
+    transform: none;
+    filter: none;
+    clip-path: inset(0);
+    animation-timing-function: steps(1, end);
+  }
+  /* H → — fewer horizontal bands */
+  14% {
+    transform: translateX(calc(var(--g-xa) * 1px)) skewX(calc(var(--g-sa) * 1deg))
+      scaleX(var(--g-scale));
+    filter: drop-shadow(calc(var(--g-xa) * -0.4px) 0 var(--glitch-red)) contrast(1.4);
+    clip-path: polygon(
+      0 0,
+      100% 0,
+      100% 22%,
+      0 24%,
+      0 48%,
+      100% 46%,
+      100% 70%,
+      0 72%,
+      0 100%,
+      100% 100%
+    );
+    animation-timing-function: steps(1, end);
+  }
+  /* V ↓ — vertical tears */
+  28% {
+    transform: translateY(calc(var(--g-ya) * 1px)) skewY(calc(var(--g-sb) * 0.55deg));
+    filter: drop-shadow(0 calc(var(--g-ya) * -0.4px) var(--glitch-white)) brightness(1.12);
+    clip-path: polygon(
+      0 0,
+      22% 0,
+      20% 100%,
+      38% 100%,
+      40% 0,
+      58% 0,
+      56% 100%,
+      74% 100%,
+      76% 0,
+      100% 0,
+      100% 100%,
+      0 100%
+    );
+    animation-timing-function: steps(1, end);
+  }
+  /* H ← — fewer horizontal bands */
+  42% {
+    transform: translateX(calc(var(--g-xb) * 1px)) skewX(calc(var(--g-sa) * -0.85deg));
+    filter: drop-shadow(calc(var(--g-xb) * -0.4px) 0 var(--glitch-red));
+    clip-path: polygon(
+      0 0,
+      100% 0,
+      100% 28%,
+      0 30%,
+      0 52%,
+      100% 50%,
+      100% 100%,
+      0 100%
+    );
+    animation-timing-function: steps(1, end);
+  }
+  /* V ↑ — vertical tears */
+  56% {
+    transform: translateY(calc(var(--g-yb) * 1px)) skewY(calc(var(--g-sb) * -0.5deg));
+    filter: drop-shadow(0 calc(var(--g-yb) * -0.4px) var(--glitch-white));
+    clip-path: polygon(
+      0 0,
+      30% 0,
+      28% 100%,
+      48% 100%,
+      50% 0,
+      70% 0,
+      68% 100%,
+      100% 100%,
+      100% 0
+    );
+    animation-timing-function: steps(1, end);
+  }
+  /* H soft — fewer horizontal bands */
+  70% {
+    transform: translateX(calc(var(--g-xc) * 1px)) skewX(calc(var(--g-sc) * 1deg)) scaleX(1.04);
+    filter: drop-shadow(calc(var(--g-xc) * -0.35px) 0 var(--glitch-red));
+    clip-path: polygon(
+      0 0,
+      100% 0,
+      100% 36%,
+      0 38%,
+      0 100%,
+      100% 100%
+    );
+    animation-timing-function: steps(1, end);
+  }
+  /* V soft — vertical cut */
+  84% {
+    transform: translateY(calc(var(--g-yc) * 1px));
+    filter: drop-shadow(0 calc(var(--g-yc) * -0.3px) var(--glitch-white));
+    clip-path: polygon(0 0, 42% 0, 40% 100%, 100% 100%, 100% 0);
+    animation-timing-function: steps(1, end);
+  }
+  100% {
+    transform: none;
+    clip-path: inset(0);
+    filter: none;
+  }
+}
+
+/* Horizontal line layer */
+@keyframes glitch-scan-a {
+  0%,
+  100% {
+    opacity: 0;
+    transform: none;
+    animation-timing-function: steps(1, end);
+  }
+  14% {
+    opacity: 0.95;
+    transform: translateX(calc(var(--g-xa) * 0.6px));
+    animation-timing-function: steps(1, end);
+  }
+  28% {
+    opacity: 0.35;
+    transform: translateY(calc(var(--g-ya) * 0.35px));
+    animation-timing-function: steps(1, end);
+  }
+  42% {
+    opacity: 1;
+    transform: translateX(calc(var(--g-xb) * 0.7px));
+    animation-timing-function: steps(1, end);
+  }
+  56% {
+    opacity: 0.25;
+    transform: none;
+    animation-timing-function: steps(1, end);
+  }
+  70% {
+    opacity: 0.8;
+    transform: translateX(calc(var(--g-xc) * 0.5px));
+    animation-timing-function: steps(1, end);
+  }
+  84% {
+    opacity: 0.2;
+    transform: none;
+    animation-timing-function: steps(1, end);
+  }
+}
+
+/* Vertical line layer */
+@keyframes glitch-scan-b {
+  0%,
+  100% {
+    opacity: 0;
+    transform: none;
+    animation-timing-function: steps(1, end);
+  }
+  14% {
+    opacity: 0.35;
+    transform: translateX(calc(var(--g-xa) * 0.3px));
+    animation-timing-function: steps(1, end);
+  }
+  28% {
+    opacity: 1;
+    transform: translateY(calc(var(--g-ya) * 0.55px));
+    animation-timing-function: steps(1, end);
+  }
+  42% {
+    opacity: 0.4;
+    transform: translateX(calc(var(--g-xb) * 0.35px));
+    animation-timing-function: steps(1, end);
+  }
+  56% {
+    opacity: 0.95;
+    transform: translateY(calc(var(--g-yb) * 0.5px));
+    animation-timing-function: steps(1, end);
+  }
+  70% {
+    opacity: 0.3;
+    transform: translateX(calc(var(--g-xc) * 0.25px));
+    animation-timing-function: steps(1, end);
+  }
+  84% {
+    opacity: 0.75;
+    transform: translateY(calc(var(--g-yc) * -0.35px));
+    animation-timing-function: steps(1, end);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glitch-hit.is-glitching,
+  .glitch-hit.is-glitch-hover,
+  .glitch-hit.is-glitching::before,
+  .glitch-hit.is-glitching::after,
+  .glitch-hit.is-glitch-hover::before,
+  .glitch-hit.is-glitch-hover::after,
+  .volume-control.is-glitching::before,
+  .volume-control.is-glitching::after {
+    animation: none !important;
+  }
+}

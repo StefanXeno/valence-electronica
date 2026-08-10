@@ -1,8 +1,14 @@
 ---
 import '@fontsource-variable/unbounded';
 import '../styles/global.css';
+import '../styles/themes.css';
+import '../styles/glitch.css';
 import site from '../data/site.json';
 import Footer from '../components/Footer.astro';
+import BackgroundAtmosphere from '../components/BackgroundAtmosphere.astro';
+import MuteControl from '../components/MuteControl.astro';
+import GlitchPress from '../components/GlitchPress.astro';
+import { getDefaultVideo, resolveThemeId } from '../lib/background';
 import { withBase } from '../lib/url';
 
 interface Props {
@@ -12,10 +18,12 @@ interface Props {
 
 const { title = site.seo.title, description = site.artist.description } = Astro.props;
 const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : undefined;
+const defaultVideo = getDefaultVideo();
+const themeId = resolveThemeId(defaultVideo.themeId);
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme={themeId}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -31,9 +39,24 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : un
     <meta name="generator" content={Astro.generator} />
   </head>
   <body>
-    <main>
-      <slot />
-    </main>
-    <Footer />
+    <BackgroundAtmosphere />
+    <div class="page-shell">
+      <main>
+        <slot />
+      </main>
+      <Footer />
+    </div>
+    {defaultVideo.hasAudio && <MuteControl />}
+    <GlitchPress />
   </body>
 </html>
+
+<style>
+  .page-shell {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 100svh;
+  }
+</style>

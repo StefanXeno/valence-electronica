@@ -1,0 +1,64 @@
+---
+---
+
+<script>
+  import { playElementGlitch } from '../lib/glitch';
+
+  function runGlitch(el: HTMLElement, className: 'is-glitching' | 'is-glitch-hover') {
+    // Hover should not interrupt an active press, or re-fire while hovering children
+    if (className === 'is-glitch-hover') {
+      if (el.classList.contains('is-glitching') || el.classList.contains('is-glitch-hover')) return;
+    }
+
+    el.classList.remove('is-glitch-hover', 'is-glitching');
+    const dur = playElementGlitch(el, className);
+    const clear = () => el.classList.remove(className);
+    el.addEventListener('animationend', clear, { once: true });
+    window.setTimeout(clear, dur + 80);
+  }
+
+  function bindGlitchPress() {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    document.addEventListener(
+      'pointerover',
+      (event) => {
+        const target = event.target;
+        if (!(target instanceof Element)) return;
+        const hit = target.closest('.glitch-hit');
+        if (!(hit instanceof HTMLElement)) return;
+
+        const related = event.relatedTarget;
+        if (related instanceof Node && hit.contains(related)) return;
+
+        runGlitch(hit, 'is-glitch-hover');
+      },
+      true,
+    );
+
+    document.addEventListener(
+      'focusin',
+      (event) => {
+        const target = event.target;
+        if (!(target instanceof HTMLElement)) return;
+        if (!target.classList.contains('glitch-hit')) return;
+        runGlitch(target, 'is-glitch-hover');
+      },
+      true,
+    );
+
+    document.addEventListener(
+      'pointerdown',
+      (event) => {
+        const target = event.target;
+        if (!(target instanceof Element)) return;
+        const hit = target.closest('.glitch-hit');
+        if (!(hit instanceof HTMLElement)) return;
+        runGlitch(hit, 'is-glitching');
+      },
+      true,
+    );
+  }
+
+  bindGlitchPress();
+</script>

@@ -1,0 +1,127 @@
+---
+import { getDefaultVideo } from '../lib/background';
+import { withBase } from '../lib/url';
+
+const video = getDefaultVideo();
+const posterSrc = withBase(video.poster);
+const sources = video.sources.map((source) => ({
+  ...source,
+  src: withBase(source.src),
+}));
+---
+
+<div
+  class="atmosphere"
+  data-atmosphere
+  data-bg-state="playing"
+  data-has-audio={video.hasAudio ? 'true' : 'false'}
+>
+  <video
+    class="atmosphere__video"
+    data-bg-video
+    autoplay
+    muted
+    loop
+    playsinline
+    preload="metadata"
+    poster={posterSrc}
+  >
+    {sources.map((source) => <source src={source.src} type={source.type} />)}
+  </video>
+  <img class="atmosphere__poster" src={posterSrc} alt="" decoding="async" />
+  <div class="atmosphere__scrim" aria-hidden="true"></div>
+</div>
+
+<script>
+  function initAtmosphere() {
+    const root = document.querySelector<HTMLElement>('[data-atmosphere]');
+    const video = root?.querySelector<HTMLVideoElement>('[data-bg-video]');
+    if (!root || !video) return;
+
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+    const setFallback = () => {
+      root.setAttribute('data-bg-state', 'fallback');
+      video.pause();
+      root.dispatchEvent(new CustomEvent('bg-state-change', { bubbles: true }));
+    };
+
+    const setPlaying = () => {
+      if (reduceMotion.matches) {
+        setFallback();
+        return;
+      }
+      root.setAttribute('data-bg-state', 'playing');
+      root.dispatchEvent(new CustomEvent('bg-state-change', { bubbles: true }));
+    };
+
+    if (reduceMotion.matches) {
+      setFallback();
+    } else {
+      const playAttempt = video.play();
+      if (playAttempt) {
+        playAttempt.catch(() => setFallback());
+      }
+    }
+
+    video.addEventListener('error', () => setFallback());
+    reduceMotion.addEventListener('change', () => {
+      if (reduceMotion.matches) setFallback();
+      else {
+        setPlaying();
+        video.muted = true;
+        video.play()?.catch(() => setFallback());
+      }
+    });
+  }
+
+  initAtmosphere();
+</script>
+
+<style>
+  .atmosphere {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+    background: var(--color-bg);
+  }
+
+  .atmosphere__video,
+  .atmosphere__poster {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .atmosphere__poster {
+    display: none;
+  }
+
+  .atmosphere__scrim {
+    position: absolute;
+    inset: 0;
+    background: var(--bg-scrim);
+  }
+
+  .atmosphere[data-bg-state='fallback'] .atmosphere__video {
+    display: none;
+  }
+
+  .atmosphere[data-bg-state='fallback'] .atmosphere__poster {
+    display: block;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .atmosphere__video {
+      display: none;
+    }
+
+    .atmosphere__poster {
+      display: block;
+    }
+  }
+</style>

@@ -1,0 +1,43 @@
+/*
+  Basic theme packs (color / surface only).
+  Operators switch packs via background.json `themeId` (existing ids only).
+  Adding a new mood requires a new [data-theme="…"] block here (dev task).
+
+  `nightmare-crimson` is sampled from the NIGHTMARE loop (dominant #a00000 reds,
+  near-black ink, pale text highlights).
+*/
+
+:root,
+[data-theme='default'] {
+  --color-bg: #0a0000;
+  --color-surface: #1a0808;
+  --color-border: #4a1515;
+  --color-text: #f5ecec;
+  --color-text-muted: #b89898;
+  --color-accent: #c01010;
+  --color-accent-alt: #f0c8c8;
+  --bg-scrim: rgb(8 0 0 / 68%);
+}
+
+/* Active pack for the temp NIGHTMARE background clip */
+[data-theme='nightmare-crimson'] {
+  --color-bg: #080000;
+  --color-surface: rgb(28 6 6 / 82%);
+  --color-border: #5c1212;
+  --color-text: #f7efef;
+  --color-text-muted: #c4a0a0;
+  --color-accent: #a00000;
+  --color-accent-alt: #e85a5a;
+  --bg-scrim: rgb(6 0 0 / 72%);
+}
+
+[data-theme='cyan-pulse'] {
+  --color-bg: #040b10;
+  --color-surface: rgb(10 28 36 / 80%);
+  --color-border: #1e4a55;
+  --color-text: #e8f7fa;
+  --color-text-muted: #8ab0c4;
+  --color-accent: #22d3ee;
+  --color-accent-alt: #7dd3fc;
+  --bg-scrim: rgb(2 10 14 / 70%);
+}
