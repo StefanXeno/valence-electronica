@@ -30,9 +30,9 @@ npm run preview   # serve the built site locally
    without scrolling, no horizontal scrollbar.
 2. **US1 — link preview**: View page source. Expect: `<title>`, `meta description`, and
    `og:title` / `og:description` / `og:image` present, values from `site.json`.
-3. **US2 — channels**: Expect: Bandcamp rendered as a link opening
-   `https://valenceelectronica.bandcamp.com/` in a new tab; Spotify/SoundCloud/Instagram
-   rendered as non-linked "coming soon" entries.
+3. **US2 — channels**: Expect: Bandcamp, SoundCloud, YouTube, Instagram, TikTok, and
+   Spotify each render as an active link (with brand icon + label) opening the configured
+   `https://` URL in a new tab. Placeholder entries (if any) stay non-linked "coming soon".
 4. **US3 — auto publish**: Edit `artist.tagline` in `src/data/site.json`, commit to
    `main`, push. Expect: GitHub Actions run succeeds and the change is live on the public
    URL within 10 minutes.

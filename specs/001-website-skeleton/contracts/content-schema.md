@@ -20,18 +20,57 @@ must stay stable so that content edits never require code changes (constitution 
     "indexable": false
   },
   "channels": [
-    { "label": "Bandcamp", "url": "https://valenceelectronica.bandcamp.com/", "status": "active" },
-    { "label": "Spotify", "status": "placeholder" },
-    { "label": "SoundCloud", "status": "placeholder" },
-    { "label": "Instagram", "status": "placeholder" }
+    {
+      "id": "bandcamp",
+      "label": "Bandcamp",
+      "url": "https://valenceelectronica.bandcamp.com/",
+      "status": "active"
+    },
+    {
+      "id": "soundcloud",
+      "label": "SoundCloud",
+      "url": "https://soundcloud.com/valence-music",
+      "status": "active"
+    },
+    {
+      "id": "youtube",
+      "label": "YouTube",
+      "url": "https://www.youtube.com/channel/UCHqAx9AtBYOl1Fw1sJa1IHA",
+      "status": "active"
+    },
+    {
+      "id": "instagram",
+      "label": "Instagram",
+      "url": "https://www.instagram.com/valence_electronica/",
+      "status": "active"
+    },
+    {
+      "id": "tiktok",
+      "label": "TikTok",
+      "url": "https://www.tiktok.com/@valence_electronica",
+      "status": "active"
+    },
+    {
+      "id": "spotify",
+      "label": "Spotify",
+      "url": "https://open.spotify.com/artist/6QmxwTumED1VMmiZ04jEW0",
+      "status": "active"
+    }
   ]
 }
 ```
 
 Rules:
 
+- `channels[].id` is a stable platform key (lowercase, no spaces). It selects the brand
+  mark in `src/components/ChannelIcon.astro`. Known keys: `bandcamp`, `soundcloud`,
+  `youtube`, `instagram`, `tiktok`, `spotify`.
 - `channels[].url` is mandatory for `status: "active"`, ignored for `"placeholder"`.
 - Removing an entry hides it; changing `status` to `"placeholder"` shows "coming soon".
+- Activating or editing a known platform is a `site.json`-only change (SC-006). A brand-
+  new platform needs a new `id` plus a matching SVG path in `ChannelIcon.astro` if the
+  mark is not already mapped.
+- Icons are first-party inline SVG (no third-party icon CDN or icon font).
 - `seo.indexable: true` is the launch switch (removes the `noindex` robots meta tag).
 
 ## `src/content/legal/<slug>.md`

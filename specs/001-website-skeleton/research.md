@@ -96,3 +96,14 @@ All NEEDS CLARIFICATION items from the Technical Context were resolved as follow
   constitution VI) and can be added when content grows.
 - **Alternatives considered**: Playwright smoke tests (deferred); HTML validators / link
   checkers (deferred until real links exist).
+
+## R9: Channel brand marks
+
+- **Decision**: Each `channels[]` entry has a stable `id`. `Channels.astro` renders a
+  first-party inline SVG from `ChannelIcon.astro` keyed by that `id` (paths baked from
+  Simple Icons). No icon font and no third-party icon CDN.
+- **Rationale**: Recognizable platform marks without GDPR/privacy cost (constitution V) or
+  extra font weight (constitution IV). URL/label/status stay in `site.json` (constitution
+  III); only a brand-new platform without a mapped mark needs a tiny chrome edit.
+- **Alternatives considered**: Text-only chips (weaker recognition); icon font package
+  (heavier); remote SVG/CDN icons (third-party request / privacy risk).

@@ -33,5 +33,6 @@
 
 - Items marked incomplete require spec updates before `/speckit-clarify` or `/speckit-plan`
 - Open points are deliberately documented as assumptions instead of blockers: final tagline
-  and copy, remaining platform links (Spotify, SoundCloud, socials), photos/logo. Confirm
+  and copy, photos/logo. Platform channel URLs/icons for Bandcamp/SoundCloud/YouTube/
+  Instagram/TikTok/Spotify are configured; confirm
   with the artist before replacing the placeholders.

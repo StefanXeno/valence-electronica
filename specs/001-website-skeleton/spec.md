@@ -50,7 +50,8 @@ opens the target (or the defined placeholder behavior) in a new tab.
 **Acceptance Scenarios**:
 
 1. **Given** the page is open, **When** the visitor navigates to the channels section,
-   **Then** they see a list of music platforms and social channels with recognizable labels.
+   **Then** they see a list of music platforms and social channels with recognizable labels
+   and matching brand marks (icons) where a mark is mapped for that channel.
 2. **Given** a real platform link is configured (e.g. Bandcamp), **When** the visitor clicks
    it, **Then** the artist's profile opens in a new tab.
 
@@ -120,7 +121,10 @@ Datenschutzerklärung and verify both pages are reachable.
 - **FR-002**: The landing page MUST show the artist name "Valence", a short
   tagline/description, and a visual design that fits electronic music.
 - **FR-003**: The landing page MUST contain a section for music platform links and social
-  channels; entries MUST be individually maintainable (add, change, hide).
+  channels; entries MUST be individually maintainable (add, change, hide). Each entry MUST
+  have a stable `id`, visitor-facing `label`, and `status`; active entries MUST have a URL.
+  Known platforms SHOULD show a first-party brand mark keyed by `id` (inline SVG; no
+  third-party icon host).
 - **FR-004**: External links MUST open in a new tab.
 - **FR-005**: The page MUST be usable on common screen sizes (smartphone, tablet, desktop)
   without horizontal scrolling.
@@ -140,9 +144,9 @@ Datenschutzerklärung and verify both pages are reachable.
 
 - **Artist profile**: name, tagline, short description; the site's central identity,
   maintainable in exactly one place.
-- **Channel link**: platform label, target URL, visibility state (active/placeholder); the
-  list is extensible. Known so far: Bandcamp
-  (https://valenceelectronica.bandcamp.com/).
+- **Channel link**: stable platform `id`, label, target URL, visibility state
+  (active/placeholder), and optional brand mark keyed by `id`; the list is extensible.
+  Known active platforms: Bandcamp, SoundCloud, YouTube, Instagram, TikTok, Spotify.
 
 ## Success Criteria *(mandatory)*
 
@@ -168,8 +172,9 @@ Datenschutzerklärung and verify both pages are reachable.
   legally required.
 - The site starts as a single landing page plus legal subpages; further sections (release
   detail pages, gigs, bio, presskit) follow as separate features.
-- No real assets are available yet (photos, logo, final copy, complete platform links); all
-  content starts as placeholders. The Bandcamp URL is the only confirmed real link.
+- Photos/logo/final copy may still be placeholders; platform channel URLs and brand marks
+  for Bandcamp, SoundCloud, YouTube, Instagram, TikTok, and Spotify are configured as
+  active content in `site.json` (icons via first-party `ChannelIcon.astro`).
 - Publishing uses a free static hosting service driven by the existing git repository; a
   custom domain is optional and not part of this feature.
 - No visitor data is collected (no tracking, no forms); the privacy policy stays minimal
