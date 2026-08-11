@@ -59,6 +59,10 @@ Content integrates on **`pre-release`**; the **live** site updates when **`main`
 updated. GitHub Actions (`.github/workflows/deploy.yml`) builds and deploys from `main`.
 If the build fails, the previous version stays live.
 
+To deploy another integration branch (currently `pre-release`) without merging to `main`:
+Actions → **Deploy to GitHub Pages** → **Run workflow** → use workflow from `main` →
+choose the target branch. That overwrites the same GitHub Pages URL.
+
 ## One-time GitHub setup
 
 1. Create the GitHub repository (name `valence-electronica` matches the configured base

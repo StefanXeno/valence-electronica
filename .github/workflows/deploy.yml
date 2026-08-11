@@ -4,6 +4,15 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      branch:
+        description: Branch to build and deploy to GitHub Pages
+        required: true
+        default: main
+        type: choice
+        options:
+          - main
+          - pre-release
 
 permissions:
   contents: read
@@ -20,6 +29,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # Push to main → deploy that commit. Manual run → selected branch (e.g. pre-release).
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.branch || github.sha }}
       # Runs the package "build" script (astro check && astro build) and uploads dist/
       - name: Install, check, build, and upload site
         uses: withastro/action@e84f40bd8d2caa9e768ec82ad30dd81f0b280853 # v6.1.2
