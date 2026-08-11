@@ -31,6 +31,10 @@ All content lives in two places — no code changes needed:
 Every merge to `main` is automatically checked, built, and deployed by GitHub Actions
 (`.github/workflows/deploy.yml`). If the build fails, the previous version stays live.
 
+To deploy another integration branch (currently `pre-release`) without merging to `main`:
+Actions → **Deploy to GitHub Pages** → **Run workflow** → use workflow from `main` →
+choose the target branch. That overwrites the same GitHub Pages URL.
+
 ## One-time GitHub setup
 
 1. Create the GitHub repository (name `valence-electronica` matches the configured base
