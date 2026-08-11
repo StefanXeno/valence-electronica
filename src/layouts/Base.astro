@@ -8,6 +8,7 @@ import Footer from '../components/Footer.astro';
 import BackgroundAtmosphere from '../components/BackgroundAtmosphere.astro';
 import MuteControl from '../components/MuteControl.astro';
 import GlitchPress from '../components/GlitchPress.astro';
+import LegalOverlay from '../components/LegalOverlay.astro';
 import { getDefaultVideo, resolveThemeId } from '../lib/background';
 import { withBase } from '../lib/url';
 
@@ -47,6 +48,7 @@ const themeId = resolveThemeId(defaultVideo.themeId);
       <Footer />
     </div>
     {defaultVideo.hasAudio && <MuteControl />}
+    <LegalOverlay />
     <GlitchPress />
   </body>
 </html>

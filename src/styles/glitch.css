@@ -1,8 +1,7 @@
 /*
-  Shared press/hover glitch.
-  - Axis-locked snaps: each frame is ONLY horizontal OR ONLY vertical (never diagonal).
-  - Scanline overlays via ::before / ::after.
-  - Values come from one of 10 presets applied in JS (applyGlitchPreset).
+  Shared press/hover glitch — 10 style families.
+  JS picks a family via data-glitch-style + numeric CSS vars (applyGlitchPreset).
+  Mute/live controls use clip-path-free "live-*" keyframes so hit-testing survives.
 */
 
 .glitch-hit,
@@ -26,6 +25,7 @@
   --g-vline3: 78;
   --g-scale: 1.04;
   --g-dur: 560ms;
+  --g-scan: 0.85;
   isolation: isolate;
   overflow: visible;
 }
@@ -81,107 +81,249 @@
 
 .glitch-hit.is-glitching,
 .glitch-hit.is-glitch-hover {
-  animation: ui-glitch-hit var(--g-dur) both;
+  animation: ui-glitch-tear var(--g-dur) both;
   z-index: 1;
 }
 
+.glitch-hit.is-glitching[data-glitch-style='tear'],
+.glitch-hit.is-glitch-hover[data-glitch-style='tear'] {
+  animation-name: ui-glitch-tear;
+}
+.glitch-hit.is-glitching[data-glitch-style='chroma'],
+.glitch-hit.is-glitch-hover[data-glitch-style='chroma'] {
+  animation-name: ui-glitch-chroma;
+}
+.glitch-hit.is-glitching[data-glitch-style='stutter'],
+.glitch-hit.is-glitch-hover[data-glitch-style='stutter'] {
+  animation-name: ui-glitch-stutter;
+}
+.glitch-hit.is-glitching[data-glitch-style='slice'],
+.glitch-hit.is-glitch-hover[data-glitch-style='slice'] {
+  animation-name: ui-glitch-slice;
+}
+.glitch-hit.is-glitching[data-glitch-style='ripple'],
+.glitch-hit.is-glitch-hover[data-glitch-style='ripple'] {
+  animation-name: ui-glitch-ripple;
+}
+.glitch-hit.is-glitching[data-glitch-style='static'],
+.glitch-hit.is-glitch-hover[data-glitch-style='static'] {
+  animation-name: ui-glitch-static;
+}
+.glitch-hit.is-glitching[data-glitch-style='shear'],
+.glitch-hit.is-glitch-hover[data-glitch-style='shear'] {
+  animation-name: ui-glitch-shear;
+}
+.glitch-hit.is-glitching[data-glitch-style='blink'],
+.glitch-hit.is-glitch-hover[data-glitch-style='blink'] {
+  animation-name: ui-glitch-blink;
+}
+.glitch-hit.is-glitching[data-glitch-style='wave'],
+.glitch-hit.is-glitch-hover[data-glitch-style='wave'] {
+  animation-name: ui-glitch-wave;
+}
+.glitch-hit.is-glitching[data-glitch-style='punch'],
+.glitch-hit.is-glitch-hover[data-glitch-style='punch'] {
+  animation-name: ui-glitch-punch;
+}
+
 /*
-  Interactive mute control: same jitter/RGB, but NO clip-path.
-  clip-path removes hit-testing area and made the button unclickable mid-glitch.
+  Mute / live controls: NO clip-path (keeps hit-testing).
 */
 [data-mute-control].glitch-hit.is-glitching,
-[data-mute-control].glitch-hit.is-glitch-hover {
-  animation-name: ui-glitch-hit-live;
+[data-mute-control].glitch-hit.is-glitch-hover,
+.volume-control.is-glitching {
+  animation-name: ui-glitch-live-tear;
+}
+[data-mute-control].glitch-hit.is-glitching[data-glitch-style='chroma'],
+[data-mute-control].glitch-hit.is-glitch-hover[data-glitch-style='chroma'],
+.volume-control.is-glitching[data-glitch-style='chroma'] {
+  animation-name: ui-glitch-live-chroma;
+}
+[data-mute-control].glitch-hit.is-glitching[data-glitch-style='stutter'],
+[data-mute-control].glitch-hit.is-glitch-hover[data-glitch-style='stutter'],
+.volume-control.is-glitching[data-glitch-style='stutter'] {
+  animation-name: ui-glitch-live-stutter;
+}
+[data-mute-control].glitch-hit.is-glitching[data-glitch-style='slice'],
+[data-mute-control].glitch-hit.is-glitch-hover[data-glitch-style='slice'],
+.volume-control.is-glitching[data-glitch-style='slice'] {
+  animation-name: ui-glitch-live-slice;
+}
+[data-mute-control].glitch-hit.is-glitching[data-glitch-style='ripple'],
+[data-mute-control].glitch-hit.is-glitch-hover[data-glitch-style='ripple'],
+.volume-control.is-glitching[data-glitch-style='ripple'] {
+  animation-name: ui-glitch-live-ripple;
+}
+[data-mute-control].glitch-hit.is-glitching[data-glitch-style='static'],
+[data-mute-control].glitch-hit.is-glitch-hover[data-glitch-style='static'],
+.volume-control.is-glitching[data-glitch-style='static'] {
+  animation-name: ui-glitch-live-static;
+}
+[data-mute-control].glitch-hit.is-glitching[data-glitch-style='shear'],
+[data-mute-control].glitch-hit.is-glitch-hover[data-glitch-style='shear'],
+.volume-control.is-glitching[data-glitch-style='shear'] {
+  animation-name: ui-glitch-live-shear;
+}
+[data-mute-control].glitch-hit.is-glitching[data-glitch-style='blink'],
+[data-mute-control].glitch-hit.is-glitch-hover[data-glitch-style='blink'],
+.volume-control.is-glitching[data-glitch-style='blink'] {
+  animation-name: ui-glitch-live-blink;
+}
+[data-mute-control].glitch-hit.is-glitching[data-glitch-style='wave'],
+[data-mute-control].glitch-hit.is-glitch-hover[data-glitch-style='wave'],
+.volume-control.is-glitching[data-glitch-style='wave'] {
+  animation-name: ui-glitch-live-wave;
+}
+[data-mute-control].glitch-hit.is-glitching[data-glitch-style='punch'],
+[data-mute-control].glitch-hit.is-glitch-hover[data-glitch-style='punch'],
+.volume-control.is-glitching[data-glitch-style='punch'] {
+  animation-name: ui-glitch-live-punch;
+}
+[data-mute-control].glitch-hit.is-glitching[data-glitch-style='tear'],
+[data-mute-control].glitch-hit.is-glitch-hover[data-glitch-style='tear'],
+.volume-control.is-glitching[data-glitch-style='tear'] {
+  animation-name: ui-glitch-live-tear;
+}
+
+/* Mute-only continuous hover — one cycle at a time; JS re-rolls style after each end. */
+[data-mute-control].glitch-hit.is-glitch-continuous {
+  animation: ui-glitch-live-tear var(--g-dur, 560ms) both;
+}
+[data-mute-control].glitch-hit.is-glitch-continuous[data-glitch-style='chroma'] {
+  animation-name: ui-glitch-live-chroma;
+}
+[data-mute-control].glitch-hit.is-glitch-continuous[data-glitch-style='stutter'] {
+  animation-name: ui-glitch-live-stutter;
+}
+[data-mute-control].glitch-hit.is-glitch-continuous[data-glitch-style='slice'] {
+  animation-name: ui-glitch-live-slice;
+}
+[data-mute-control].glitch-hit.is-glitch-continuous[data-glitch-style='ripple'] {
+  animation-name: ui-glitch-live-ripple;
+}
+[data-mute-control].glitch-hit.is-glitch-continuous[data-glitch-style='static'] {
+  animation-name: ui-glitch-live-static;
+}
+[data-mute-control].glitch-hit.is-glitch-continuous[data-glitch-style='shear'] {
+  animation-name: ui-glitch-live-shear;
+}
+[data-mute-control].glitch-hit.is-glitch-continuous[data-glitch-style='blink'] {
+  animation-name: ui-glitch-live-blink;
+}
+[data-mute-control].glitch-hit.is-glitch-continuous[data-glitch-style='wave'] {
+  animation-name: ui-glitch-live-wave;
+}
+[data-mute-control].glitch-hit.is-glitch-continuous[data-glitch-style='punch'] {
+  animation-name: ui-glitch-live-punch;
+}
+[data-mute-control].glitch-hit.is-glitch-continuous[data-glitch-style='tear'] {
+  animation-name: ui-glitch-live-tear;
 }
 
 .glitch-hit.is-glitching::before,
 .glitch-hit.is-glitch-hover::before,
+.glitch-hit.is-glitch-continuous::before,
 .volume-control.is-glitching::before {
   animation: glitch-scan-a var(--g-dur) both;
 }
 
 .glitch-hit.is-glitching::after,
 .glitch-hit.is-glitch-hover::after,
+.glitch-hit.is-glitch-continuous::after,
 .volume-control.is-glitching::after {
   animation: glitch-scan-b var(--g-dur) both;
 }
 
-/* Multi-tear slices — several horizontal fracture lines per frame */
-@keyframes ui-glitch-hit {
+/* Chroma: quieter scanlines; stutter: punchier; slice: mostly horizontal */
+.glitch-hit[data-glitch-style='chroma'].is-glitching::before,
+.glitch-hit[data-glitch-style='chroma'].is-glitch-hover::before,
+.glitch-hit[data-glitch-style='chroma'].is-glitch-continuous::before {
+  animation-name: glitch-scan-soft;
+}
+
+.glitch-hit[data-glitch-style='chroma'].is-glitching::after,
+.glitch-hit[data-glitch-style='chroma'].is-glitch-hover::after,
+.glitch-hit[data-glitch-style='chroma'].is-glitch-continuous::after {
+  animation-name: glitch-scan-soft-v;
+}
+
+.glitch-hit[data-glitch-style='stutter'].is-glitching::before,
+.glitch-hit[data-glitch-style='stutter'].is-glitch-hover::before,
+.glitch-hit[data-glitch-style='stutter'].is-glitch-continuous::before {
+  animation-name: glitch-scan-stutter;
+}
+
+.glitch-hit[data-glitch-style='slice'].is-glitching::after,
+.glitch-hit[data-glitch-style='slice'].is-glitch-hover::after,
+.glitch-hit[data-glitch-style='slice'].is-glitch-continuous::after {
+  animation: none;
+  opacity: 0;
+}
+
+[data-mute-control].glitch-hit.is-glitch-continuous::before {
+  animation: glitch-scan-a var(--g-dur, 560ms) both;
+}
+
+[data-mute-control].glitch-hit.is-glitch-continuous::after {
+  animation: glitch-scan-b var(--g-dur, 560ms) both;
+}
+
+[data-mute-control].glitch-hit.is-glitch-continuous[data-glitch-style='chroma']::before {
+  animation-name: glitch-scan-soft;
+}
+
+[data-mute-control].glitch-hit.is-glitch-continuous[data-glitch-style='chroma']::after {
+  animation-name: glitch-scan-soft-v;
+}
+
+[data-mute-control].glitch-hit.is-glitch-continuous[data-glitch-style='stutter']::before {
+  animation-name: glitch-scan-stutter;
+}
+
+[data-mute-control].glitch-hit.is-glitch-continuous[data-glitch-style='slice']::after {
+  animation: none;
+  opacity: 0;
+}
+
+/* --- Style: tear (classic fracture) --- */
+@keyframes ui-glitch-tear {
   0% {
     transform: none;
     filter: none;
     clip-path: inset(0);
     animation-timing-function: steps(1, end);
   }
-  /* H → */
   14% {
     transform: translateX(calc(var(--g-xa) * 1px)) skewX(calc(var(--g-sa) * 0.75deg))
       scaleX(var(--g-scale));
     filter: drop-shadow(calc(var(--g-xa) * -0.35px) 0 var(--glitch-red)) contrast(1.15);
-    clip-path: polygon(
-      0 0,
-      100% 0,
-      100% 30%,
-      0 32%,
-      0 58%,
-      100% 56%,
-      100% 100%,
-      0 100%
-    );
+    clip-path: polygon(0 0, 100% 0, 100% 30%, 0 32%, 0 58%, 100% 56%, 100% 100%, 0 100%);
     animation-timing-function: steps(1, end);
   }
-  /* V ↓ */
   28% {
     transform: translateY(calc(var(--g-ya) * 1px)) skewY(calc(var(--g-sb) * 0.4deg));
     filter: drop-shadow(0 calc(var(--g-ya) * -0.35px) var(--glitch-white));
-    clip-path: polygon(
-      0 0,
-      28% 0,
-      26% 100%,
-      55% 100%,
-      57% 0,
-      100% 0,
-      100% 100%,
-      0 100%
-    );
+    clip-path: polygon(0 0, 28% 0, 26% 100%, 55% 100%, 57% 0, 100% 0, 100% 100%, 0 100%);
     animation-timing-function: steps(1, end);
   }
-  /* H ← */
   42% {
     transform: translateX(calc(var(--g-xb) * 1px)) skewX(calc(var(--g-sa) * -0.65deg));
     filter: drop-shadow(calc(var(--g-xb) * -0.35px) 0 var(--glitch-red));
-    clip-path: polygon(
-      0 0,
-      100% 0,
-      100% 38%,
-      0 40%,
-      0 100%,
-      100% 100%
-    );
+    clip-path: polygon(0 0, 100% 0, 100% 38%, 0 40%, 0 100%, 100% 100%);
     animation-timing-function: steps(1, end);
   }
-  /* V ↑ */
   56% {
     transform: translateY(calc(var(--g-yb) * 1px)) skewY(calc(var(--g-sb) * -0.35deg));
     filter: drop-shadow(0 calc(var(--g-yb) * -0.35px) var(--glitch-white));
-    clip-path: polygon(
-      0 0,
-      40% 0,
-      38% 100%,
-      100% 100%,
-      100% 0
-    );
+    clip-path: polygon(0 0, 40% 0, 38% 100%, 100% 100%, 100% 0);
     animation-timing-function: steps(1, end);
   }
-  /* H soft */
   70% {
     transform: translateX(calc(var(--g-xc) * 1px)) skewX(calc(var(--g-sc) * 0.7deg));
     filter: drop-shadow(calc(var(--g-xc) * -0.3px) 0 var(--glitch-red));
     clip-path: inset(0 6% 0 0);
     animation-timing-function: steps(1, end);
   }
-  /* V soft */
   84% {
     transform: translateY(calc(var(--g-yc) * 1px));
     filter: drop-shadow(0 calc(var(--g-yc) * -0.25px) var(--glitch-white));
@@ -195,8 +337,135 @@
   }
 }
 
-/* Click-safe variant for controls (transform + filter only) */
-@keyframes ui-glitch-hit-live {
+/* --- Style: chroma (RGB split / soft drift, minimal geometry) --- */
+@keyframes ui-glitch-chroma {
+  0% {
+    transform: none;
+    filter: none;
+    clip-path: inset(0);
+    animation-timing-function: steps(1, end);
+  }
+  18% {
+    transform: translateX(calc(var(--g-xa) * 0.7px));
+    filter: drop-shadow(calc(var(--g-xa) * -0.9px) 0 var(--glitch-red))
+      drop-shadow(calc(var(--g-xa) * 0.9px) 0 var(--glitch-white));
+    animation-timing-function: steps(1, end);
+  }
+  36% {
+    transform: translateY(calc(var(--g-ya) * 0.6px)) scale(var(--g-scale));
+    filter: drop-shadow(calc(var(--g-xb) * -0.7px) calc(var(--g-ya) * 0.2px) var(--glitch-red))
+      drop-shadow(calc(var(--g-xb) * 0.7px) 0 var(--glitch-white)) brightness(1.08);
+    animation-timing-function: steps(1, end);
+  }
+  54% {
+    transform: translateX(calc(var(--g-xb) * 0.55px));
+    filter: drop-shadow(calc(var(--g-xb) * 0.85px) 0 var(--glitch-red))
+      drop-shadow(calc(var(--g-xb) * -0.85px) 0 var(--glitch-white));
+    animation-timing-function: steps(1, end);
+  }
+  72% {
+    transform: translateY(calc(var(--g-yc) * -0.45px));
+    filter: drop-shadow(0 calc(var(--g-yc) * -0.5px) var(--glitch-white)) contrast(1.08);
+    animation-timing-function: steps(1, end);
+  }
+  100% {
+    transform: none;
+    filter: none;
+    clip-path: inset(0);
+  }
+}
+
+/* --- Style: stutter (short, snappy micro-jitters) --- */
+@keyframes ui-glitch-stutter {
+  0% {
+    transform: none;
+    filter: none;
+    clip-path: inset(0);
+    animation-timing-function: steps(1, end);
+  }
+  10% {
+    transform: translateX(calc(var(--g-xa) * 1.1px));
+    filter: drop-shadow(calc(var(--g-xa) * -0.4px) 0 var(--glitch-red));
+    clip-path: inset(0 0 55% 0);
+    animation-timing-function: steps(1, end);
+  }
+  20% {
+    transform: translateX(calc(var(--g-xb) * 0.9px));
+    filter: drop-shadow(calc(var(--g-xb) * -0.35px) 0 var(--glitch-white));
+    clip-path: inset(40% 0 0 0);
+    animation-timing-function: steps(1, end);
+  }
+  32% {
+    transform: translateY(calc(var(--g-ya) * 1px)) skewX(calc(var(--g-sa) * 0.4deg));
+    filter: contrast(1.2);
+    clip-path: inset(0 12% 0 0);
+    animation-timing-function: steps(1, end);
+  }
+  45% {
+    transform: translateX(calc(var(--g-xc) * -0.8px));
+    filter: drop-shadow(calc(var(--g-xc) * 0.4px) 0 var(--glitch-red));
+    clip-path: inset(0);
+    animation-timing-function: steps(1, end);
+  }
+  58% {
+    transform: translateY(calc(var(--g-yb) * -0.7px));
+    filter: drop-shadow(0 calc(var(--g-yb) * -0.3px) var(--glitch-white));
+    clip-path: inset(0 0 0 10%);
+    animation-timing-function: steps(1, end);
+  }
+  72% {
+    transform: translateX(calc(var(--g-xa) * 0.45px)) scaleX(var(--g-scale));
+    filter: drop-shadow(calc(var(--g-xa) * -0.25px) 0 var(--glitch-red));
+    animation-timing-function: steps(1, end);
+  }
+  100% {
+    transform: none;
+    filter: none;
+    clip-path: inset(0);
+  }
+}
+
+/* --- Style: slice (wide horizontal bands, less vertical noise) --- */
+@keyframes ui-glitch-slice {
+  0% {
+    transform: none;
+    filter: none;
+    clip-path: inset(0);
+    animation-timing-function: steps(1, end);
+  }
+  16% {
+    transform: translateX(calc(var(--g-xa) * 1.2px));
+    filter: drop-shadow(calc(var(--g-xa) * -0.45px) 0 var(--glitch-red));
+    clip-path: polygon(0 0, 100% 0, 100% 22%, 0 26%, 0 100%, 100% 100%);
+    animation-timing-function: steps(1, end);
+  }
+  34% {
+    transform: translateX(calc(var(--g-xb) * 1.1px));
+    filter: drop-shadow(calc(var(--g-xb) * -0.4px) 0 var(--glitch-white)) brightness(1.06);
+    clip-path: polygon(0 0, 100% 0, 100% 48%, 0 52%, 0 100%, 100% 100%);
+    animation-timing-function: steps(1, end);
+  }
+  52% {
+    transform: translateX(calc(var(--g-xc) * -1px)) scaleY(var(--g-scale));
+    filter: drop-shadow(calc(var(--g-xc) * 0.35px) 0 var(--glitch-red));
+    clip-path: polygon(0 0, 100% 0, 100% 70%, 0 74%, 0 100%, 100% 100%);
+    animation-timing-function: steps(1, end);
+  }
+  70% {
+    transform: translateX(calc(var(--g-xa) * 0.5px));
+    filter: drop-shadow(calc(var(--g-xa) * -0.25px) 0 var(--glitch-white));
+    clip-path: inset(18% 0 18% 0);
+    animation-timing-function: steps(1, end);
+  }
+  100% {
+    transform: none;
+    filter: none;
+    clip-path: inset(0);
+  }
+}
+
+/* --- Live-safe families (mute / volume shell — no clip-path) --- */
+@keyframes ui-glitch-live-tear {
   0% {
     transform: none;
     filter: none;
@@ -228,9 +497,478 @@
     filter: drop-shadow(calc(var(--g-xc) * -0.35px) 0 var(--glitch-red));
     animation-timing-function: steps(1, end);
   }
-  84% {
-    transform: translateY(calc(var(--g-yc) * 1px));
-    filter: drop-shadow(0 calc(var(--g-yc) * -0.3px) var(--glitch-white));
+  100% {
+    transform: none;
+    filter: none;
+  }
+}
+
+@keyframes ui-glitch-live-chroma {
+  0% {
+    transform: none;
+    filter: none;
+    animation-timing-function: steps(1, end);
+  }
+  20% {
+    transform: translateX(calc(var(--g-xa) * 0.6px));
+    filter: drop-shadow(calc(var(--g-xa) * -1px) 0 var(--glitch-red))
+      drop-shadow(calc(var(--g-xa) * 1px) 0 var(--glitch-white));
+    animation-timing-function: steps(1, end);
+  }
+  40% {
+    transform: scale(var(--g-scale));
+    filter: drop-shadow(calc(var(--g-xb) * -0.8px) 0 var(--glitch-red))
+      drop-shadow(calc(var(--g-xb) * 0.8px) 0 var(--glitch-white)) brightness(1.1);
+    animation-timing-function: steps(1, end);
+  }
+  65% {
+    transform: translateY(calc(var(--g-ya) * 0.5px));
+    filter: drop-shadow(calc(var(--g-xc) * 0.7px) 0 var(--glitch-red))
+      drop-shadow(calc(var(--g-xc) * -0.7px) 0 var(--glitch-white));
+    animation-timing-function: steps(1, end);
+  }
+  100% {
+    transform: none;
+    filter: none;
+  }
+}
+
+@keyframes ui-glitch-live-stutter {
+  0% {
+    transform: none;
+    filter: none;
+    animation-timing-function: steps(1, end);
+  }
+  12% {
+    transform: translateX(calc(var(--g-xa) * 1.15px));
+    filter: drop-shadow(calc(var(--g-xa) * -0.35px) 0 var(--glitch-red));
+    animation-timing-function: steps(1, end);
+  }
+  24% {
+    transform: translateX(calc(var(--g-xb) * 1px));
+    filter: drop-shadow(calc(var(--g-xb) * -0.3px) 0 var(--glitch-white));
+    animation-timing-function: steps(1, end);
+  }
+  38% {
+    transform: translateY(calc(var(--g-ya) * 0.9px));
+    filter: contrast(1.18);
+    animation-timing-function: steps(1, end);
+  }
+  52% {
+    transform: translateX(calc(var(--g-xc) * -0.85px));
+    filter: drop-shadow(calc(var(--g-xc) * 0.35px) 0 var(--glitch-red));
+    animation-timing-function: steps(1, end);
+  }
+  68% {
+    transform: translateY(calc(var(--g-yb) * -0.65px)) scaleX(var(--g-scale));
+    filter: drop-shadow(0 calc(var(--g-yb) * -0.25px) var(--glitch-white));
+    animation-timing-function: steps(1, end);
+  }
+  100% {
+    transform: none;
+    filter: none;
+  }
+}
+
+@keyframes ui-glitch-live-slice {
+  0% {
+    transform: none;
+    filter: none;
+    animation-timing-function: steps(1, end);
+  }
+  18% {
+    transform: translateX(calc(var(--g-xa) * 1.15px));
+    filter: drop-shadow(calc(var(--g-xa) * -0.45px) 0 var(--glitch-red));
+    animation-timing-function: steps(1, end);
+  }
+  40% {
+    transform: translateX(calc(var(--g-xb) * 1.05px)) scaleY(var(--g-scale));
+    filter: drop-shadow(calc(var(--g-xb) * -0.4px) 0 var(--glitch-white)) brightness(1.06);
+    animation-timing-function: steps(1, end);
+  }
+  62% {
+    transform: translateX(calc(var(--g-xc) * -0.95px));
+    filter: drop-shadow(calc(var(--g-xc) * 0.35px) 0 var(--glitch-red));
+    animation-timing-function: steps(1, end);
+  }
+  100% {
+    transform: none;
+    filter: none;
+  }
+}
+
+/* --- Style: ripple (soft scale bloom) --- */
+@keyframes ui-glitch-ripple {
+  0% {
+    transform: none;
+    filter: none;
+    clip-path: inset(0);
+    animation-timing-function: steps(1, end);
+  }
+  25% {
+    transform: scale(var(--g-scale)) translateX(calc(var(--g-xa) * 0.4px));
+    filter: drop-shadow(calc(var(--g-xa) * -0.3px) 0 var(--glitch-red)) brightness(1.06);
+    animation-timing-function: steps(1, end);
+  }
+  50% {
+    transform: scale(calc(var(--g-scale) * 1.02)) translateY(calc(var(--g-ya) * 0.35px));
+    filter: drop-shadow(0 calc(var(--g-ya) * -0.25px) var(--glitch-white));
+    clip-path: inset(4% 2% 4% 2%);
+    animation-timing-function: steps(1, end);
+  }
+  75% {
+    transform: scale(var(--g-scale)) translateX(calc(var(--g-xb) * 0.3px));
+    filter: drop-shadow(calc(var(--g-xb) * -0.25px) 0 var(--glitch-red));
+    animation-timing-function: steps(1, end);
+  }
+  100% {
+    transform: none;
+    filter: none;
+    clip-path: inset(0);
+  }
+}
+
+/* --- Style: static (TV snow micro-shakes) --- */
+@keyframes ui-glitch-static {
+  0% {
+    transform: none;
+    filter: none;
+    clip-path: inset(0);
+    animation-timing-function: steps(1, end);
+  }
+  8% {
+    transform: translate(calc(var(--g-xa) * 0.5px), calc(var(--g-ya) * 0.4px));
+    filter: contrast(1.25) brightness(1.05);
+    animation-timing-function: steps(1, end);
+  }
+  16% {
+    transform: translate(calc(var(--g-xb) * 0.45px), calc(var(--g-yb) * -0.35px));
+    filter: drop-shadow(calc(var(--g-xa) * -0.2px) 0 var(--glitch-red));
+    clip-path: inset(8% 0 12% 0);
+    animation-timing-function: steps(1, end);
+  }
+  28% {
+    transform: translate(calc(var(--g-xc) * -0.4px), calc(var(--g-yc) * 0.3px));
+    filter: contrast(1.15);
+    clip-path: inset(0 6% 0 4%);
+    animation-timing-function: steps(1, end);
+  }
+  40% {
+    transform: translate(calc(var(--g-xa) * 0.35px), calc(var(--g-yb) * 0.25px));
+    filter: drop-shadow(0 calc(var(--g-ya) * -0.2px) var(--glitch-white));
+    animation-timing-function: steps(1, end);
+  }
+  55% {
+    transform: translate(calc(var(--g-xb) * -0.3px), calc(var(--g-ya) * -0.25px));
+    clip-path: inset(15% 0 5% 0);
+    animation-timing-function: steps(1, end);
+  }
+  70% {
+    transform: translate(calc(var(--g-xc) * 0.25px), 0);
+    filter: contrast(1.1);
+    animation-timing-function: steps(1, end);
+  }
+  100% {
+    transform: none;
+    filter: none;
+    clip-path: inset(0);
+  }
+}
+
+/* --- Style: shear (skew-forward) --- */
+@keyframes ui-glitch-shear {
+  0% {
+    transform: none;
+    filter: none;
+    clip-path: inset(0);
+    animation-timing-function: steps(1, end);
+  }
+  22% {
+    transform: skewX(calc(var(--g-sa) * 1deg)) translateX(calc(var(--g-xa) * 0.5px));
+    filter: drop-shadow(calc(var(--g-xa) * -0.35px) 0 var(--glitch-red));
+    animation-timing-function: steps(1, end);
+  }
+  44% {
+    transform: skewY(calc(var(--g-sb) * 0.55deg)) translateY(calc(var(--g-ya) * 0.4px));
+    filter: drop-shadow(0 calc(var(--g-ya) * -0.3px) var(--glitch-white));
+    clip-path: polygon(0 0, 100% 4%, 100% 100%, 0 96%);
+    animation-timing-function: steps(1, end);
+  }
+  66% {
+    transform: skewX(calc(var(--g-sc) * -0.85deg)) translateX(calc(var(--g-xb) * 0.4px));
+    filter: drop-shadow(calc(var(--g-xb) * -0.3px) 0 var(--glitch-red));
+    animation-timing-function: steps(1, end);
+  }
+  100% {
+    transform: none;
+    filter: none;
+    clip-path: inset(0);
+  }
+}
+
+/* --- Style: blink (opacity flicker + light chroma) --- */
+@keyframes ui-glitch-blink {
+  0% {
+    transform: none;
+    filter: none;
+    opacity: 1;
+    clip-path: inset(0);
+    animation-timing-function: steps(1, end);
+  }
+  12% {
+    opacity: 0.35;
+    filter: drop-shadow(calc(var(--g-xa) * -0.6px) 0 var(--glitch-red));
+    animation-timing-function: steps(1, end);
+  }
+  24% {
+    opacity: 1;
+    transform: translateX(calc(var(--g-xa) * 0.5px));
+    filter: drop-shadow(calc(var(--g-xa) * 0.6px) 0 var(--glitch-white));
+    animation-timing-function: steps(1, end);
+  }
+  40% {
+    opacity: 0.45;
+    transform: translateY(calc(var(--g-ya) * 0.3px));
+    animation-timing-function: steps(1, end);
+  }
+  55% {
+    opacity: 1;
+    filter: drop-shadow(calc(var(--g-xb) * -0.5px) 0 var(--glitch-red))
+      drop-shadow(calc(var(--g-xb) * 0.5px) 0 var(--glitch-white));
+    animation-timing-function: steps(1, end);
+  }
+  70% {
+    opacity: 0.55;
+    animation-timing-function: steps(1, end);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+    filter: none;
+    clip-path: inset(0);
+  }
+}
+
+/* --- Style: wave (horizontal undulation) --- */
+@keyframes ui-glitch-wave {
+  0% {
+    transform: none;
+    filter: none;
+    clip-path: inset(0);
+    animation-timing-function: steps(1, end);
+  }
+  16% {
+    transform: translateX(calc(var(--g-xa) * 1px)) skewX(calc(var(--g-sa) * 0.35deg));
+    filter: drop-shadow(calc(var(--g-xa) * -0.35px) 0 var(--glitch-red));
+    clip-path: polygon(0 0, 100% 0, 100% 35%, 0 40%, 0 100%, 100% 100%);
+    animation-timing-function: steps(1, end);
+  }
+  33% {
+    transform: translateX(calc(var(--g-xb) * 0.9px)) skewX(calc(var(--g-sa) * -0.3deg));
+    filter: drop-shadow(calc(var(--g-xb) * -0.3px) 0 var(--glitch-white));
+    clip-path: polygon(0 0, 100% 0, 100% 55%, 0 50%, 0 100%, 100% 100%);
+    animation-timing-function: steps(1, end);
+  }
+  50% {
+    transform: translateX(calc(var(--g-xc) * -0.85px)) skewX(calc(var(--g-sc) * 0.25deg));
+    filter: drop-shadow(calc(var(--g-xc) * 0.3px) 0 var(--glitch-red));
+    clip-path: polygon(0 0, 100% 0, 100% 70%, 0 75%, 0 100%, 100% 100%);
+    animation-timing-function: steps(1, end);
+  }
+  70% {
+    transform: translateX(calc(var(--g-xa) * 0.45px));
+    filter: drop-shadow(calc(var(--g-xa) * -0.2px) 0 var(--glitch-white));
+    animation-timing-function: steps(1, end);
+  }
+  100% {
+    transform: none;
+    filter: none;
+    clip-path: inset(0);
+  }
+}
+
+/* --- Style: punch (one hard hit, then settle) --- */
+@keyframes ui-glitch-punch {
+  0% {
+    transform: none;
+    filter: none;
+    clip-path: inset(0);
+    animation-timing-function: steps(1, end);
+  }
+  18% {
+    transform: translate(calc(var(--g-xa) * 1.3px), calc(var(--g-ya) * 0.8px))
+      scale(var(--g-scale)) skewX(calc(var(--g-sa) * 0.6deg));
+    filter: drop-shadow(calc(var(--g-xa) * -0.5px) 0 var(--glitch-red)) contrast(1.2);
+    clip-path: inset(0 8% 0 0);
+    animation-timing-function: steps(1, end);
+  }
+  40% {
+    transform: translate(calc(var(--g-xb) * 0.4px), calc(var(--g-yb) * -0.3px));
+    filter: drop-shadow(0 calc(var(--g-yb) * -0.25px) var(--glitch-white));
+    clip-path: inset(0);
+    animation-timing-function: steps(1, end);
+  }
+  100% {
+    transform: none;
+    filter: none;
+    clip-path: inset(0);
+  }
+}
+
+@keyframes ui-glitch-live-ripple {
+  0% {
+    transform: none;
+    filter: none;
+    animation-timing-function: steps(1, end);
+  }
+  30% {
+    transform: scale(var(--g-scale));
+    filter: drop-shadow(calc(var(--g-xa) * -0.3px) 0 var(--glitch-red)) brightness(1.06);
+    animation-timing-function: steps(1, end);
+  }
+  60% {
+    transform: scale(calc(var(--g-scale) * 1.02)) translateY(calc(var(--g-ya) * 0.3px));
+    filter: drop-shadow(0 calc(var(--g-ya) * -0.25px) var(--glitch-white));
+    animation-timing-function: steps(1, end);
+  }
+  100% {
+    transform: none;
+    filter: none;
+  }
+}
+
+@keyframes ui-glitch-live-static {
+  0% {
+    transform: none;
+    filter: none;
+    animation-timing-function: steps(1, end);
+  }
+  12% {
+    transform: translate(calc(var(--g-xa) * 0.55px), calc(var(--g-ya) * 0.4px));
+    filter: contrast(1.22);
+    animation-timing-function: steps(1, end);
+  }
+  24% {
+    transform: translate(calc(var(--g-xb) * 0.5px), calc(var(--g-yb) * -0.35px));
+    filter: drop-shadow(calc(var(--g-xa) * -0.2px) 0 var(--glitch-red));
+    animation-timing-function: steps(1, end);
+  }
+  40% {
+    transform: translate(calc(var(--g-xc) * -0.4px), calc(var(--g-yc) * 0.3px));
+    animation-timing-function: steps(1, end);
+  }
+  55% {
+    transform: translate(calc(var(--g-xa) * 0.3px), calc(var(--g-yb) * 0.25px));
+    filter: contrast(1.12);
+    animation-timing-function: steps(1, end);
+  }
+  72% {
+    transform: translate(calc(var(--g-xb) * -0.25px), 0);
+    animation-timing-function: steps(1, end);
+  }
+  100% {
+    transform: none;
+    filter: none;
+  }
+}
+
+@keyframes ui-glitch-live-shear {
+  0% {
+    transform: none;
+    filter: none;
+    animation-timing-function: steps(1, end);
+  }
+  28% {
+    transform: skewX(calc(var(--g-sa) * 1deg)) translateX(calc(var(--g-xa) * 0.45px));
+    filter: drop-shadow(calc(var(--g-xa) * -0.35px) 0 var(--glitch-red));
+    animation-timing-function: steps(1, end);
+  }
+  55% {
+    transform: skewY(calc(var(--g-sb) * 0.5deg));
+    filter: drop-shadow(0 calc(var(--g-ya) * -0.25px) var(--glitch-white));
+    animation-timing-function: steps(1, end);
+  }
+  100% {
+    transform: none;
+    filter: none;
+  }
+}
+
+@keyframes ui-glitch-live-blink {
+  0% {
+    transform: none;
+    filter: none;
+    opacity: 1;
+    animation-timing-function: steps(1, end);
+  }
+  15% {
+    opacity: 0.4;
+    filter: drop-shadow(calc(var(--g-xa) * -0.55px) 0 var(--glitch-red));
+    animation-timing-function: steps(1, end);
+  }
+  30% {
+    opacity: 1;
+    transform: translateX(calc(var(--g-xa) * 0.4px));
+    animation-timing-function: steps(1, end);
+  }
+  50% {
+    opacity: 0.5;
+    animation-timing-function: steps(1, end);
+  }
+  70% {
+    opacity: 1;
+    filter: drop-shadow(calc(var(--g-xb) * 0.45px) 0 var(--glitch-white));
+    animation-timing-function: steps(1, end);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+
+@keyframes ui-glitch-live-wave {
+  0% {
+    transform: none;
+    filter: none;
+    animation-timing-function: steps(1, end);
+  }
+  20% {
+    transform: translateX(calc(var(--g-xa) * 1px)) skewX(calc(var(--g-sa) * 0.3deg));
+    filter: drop-shadow(calc(var(--g-xa) * -0.35px) 0 var(--glitch-red));
+    animation-timing-function: steps(1, end);
+  }
+  40% {
+    transform: translateX(calc(var(--g-xb) * 0.85px)) skewX(calc(var(--g-sa) * -0.25deg));
+    filter: drop-shadow(calc(var(--g-xb) * -0.3px) 0 var(--glitch-white));
+    animation-timing-function: steps(1, end);
+  }
+  65% {
+    transform: translateX(calc(var(--g-xc) * -0.7px));
+    filter: drop-shadow(calc(var(--g-xc) * 0.25px) 0 var(--glitch-red));
+    animation-timing-function: steps(1, end);
+  }
+  100% {
+    transform: none;
+    filter: none;
+  }
+}
+
+@keyframes ui-glitch-live-punch {
+  0% {
+    transform: none;
+    filter: none;
+    animation-timing-function: steps(1, end);
+  }
+  22% {
+    transform: translate(calc(var(--g-xa) * 1.25px), calc(var(--g-ya) * 0.7px))
+      scale(var(--g-scale));
+    filter: drop-shadow(calc(var(--g-xa) * -0.45px) 0 var(--glitch-red)) contrast(1.18);
+    animation-timing-function: steps(1, end);
+  }
+  45% {
+    transform: translate(calc(var(--g-xb) * 0.35px), 0);
+    filter: drop-shadow(0 calc(var(--g-yb) * -0.2px) var(--glitch-white));
     animation-timing-function: steps(1, end);
   }
   100% {
@@ -248,32 +986,32 @@
     animation-timing-function: steps(1, end);
   }
   14% {
-    opacity: 0.95;
+    opacity: calc(var(--g-scan, 0.9) * 0.95);
     transform: translateX(calc(var(--g-xa) * 0.6px));
     animation-timing-function: steps(1, end);
   }
   28% {
-    opacity: 0.35;
+    opacity: calc(var(--g-scan, 0.9) * 0.35);
     transform: translateY(calc(var(--g-ya) * 0.35px));
     animation-timing-function: steps(1, end);
   }
   42% {
-    opacity: 1;
+    opacity: var(--g-scan, 0.9);
     transform: translateX(calc(var(--g-xb) * 0.7px));
     animation-timing-function: steps(1, end);
   }
   56% {
-    opacity: 0.25;
+    opacity: calc(var(--g-scan, 0.9) * 0.25);
     transform: none;
     animation-timing-function: steps(1, end);
   }
   70% {
-    opacity: 0.8;
+    opacity: calc(var(--g-scan, 0.9) * 0.8);
     transform: translateX(calc(var(--g-xc) * 0.5px));
     animation-timing-function: steps(1, end);
   }
   84% {
-    opacity: 0.2;
+    opacity: calc(var(--g-scan, 0.9) * 0.2);
     transform: none;
     animation-timing-function: steps(1, end);
   }
@@ -288,33 +1026,112 @@
     animation-timing-function: steps(1, end);
   }
   14% {
-    opacity: 0.35;
+    opacity: calc(var(--g-scan, 0.9) * 0.35);
     transform: translateX(calc(var(--g-xa) * 0.3px));
     animation-timing-function: steps(1, end);
   }
   28% {
-    opacity: 1;
+    opacity: var(--g-scan, 0.9);
     transform: translateY(calc(var(--g-ya) * 0.55px));
     animation-timing-function: steps(1, end);
   }
   42% {
-    opacity: 0.4;
+    opacity: calc(var(--g-scan, 0.9) * 0.4);
     transform: translateX(calc(var(--g-xb) * 0.35px));
     animation-timing-function: steps(1, end);
   }
   56% {
-    opacity: 0.95;
+    opacity: calc(var(--g-scan, 0.9) * 0.95);
     transform: translateY(calc(var(--g-yb) * 0.5px));
     animation-timing-function: steps(1, end);
   }
   70% {
-    opacity: 0.3;
+    opacity: calc(var(--g-scan, 0.9) * 0.3);
     transform: translateX(calc(var(--g-xc) * 0.25px));
     animation-timing-function: steps(1, end);
   }
   84% {
-    opacity: 0.75;
+    opacity: calc(var(--g-scan, 0.9) * 0.75);
     transform: translateY(calc(var(--g-yc) * -0.35px));
+    animation-timing-function: steps(1, end);
+  }
+}
+
+@keyframes glitch-scan-soft {
+  0%,
+  100% {
+    opacity: 0;
+    transform: none;
+    animation-timing-function: steps(1, end);
+  }
+  25% {
+    opacity: calc(var(--g-scan, 0.4) * 0.7);
+    transform: translateX(calc(var(--g-xa) * 0.4px));
+    animation-timing-function: steps(1, end);
+  }
+  55% {
+    opacity: calc(var(--g-scan, 0.4) * 0.45);
+    transform: translateX(calc(var(--g-xb) * 0.35px));
+    animation-timing-function: steps(1, end);
+  }
+  80% {
+    opacity: calc(var(--g-scan, 0.4) * 0.25);
+    transform: none;
+    animation-timing-function: steps(1, end);
+  }
+}
+
+@keyframes glitch-scan-soft-v {
+  0%,
+  100% {
+    opacity: 0;
+    transform: none;
+    animation-timing-function: steps(1, end);
+  }
+  30% {
+    opacity: calc(var(--g-scan, 0.4) * 0.55);
+    transform: translateY(calc(var(--g-ya) * 0.3px));
+    animation-timing-function: steps(1, end);
+  }
+  60% {
+    opacity: calc(var(--g-scan, 0.4) * 0.35);
+    transform: translateY(calc(var(--g-yb) * 0.25px));
+    animation-timing-function: steps(1, end);
+  }
+}
+
+@keyframes glitch-scan-stutter {
+  0%,
+  100% {
+    opacity: 0;
+    transform: none;
+    animation-timing-function: steps(1, end);
+  }
+  10% {
+    opacity: var(--g-scan, 0.7);
+    transform: translateX(calc(var(--g-xa) * 0.5px));
+    animation-timing-function: steps(1, end);
+  }
+  22% {
+    opacity: 0;
+    animation-timing-function: steps(1, end);
+  }
+  34% {
+    opacity: calc(var(--g-scan, 0.7) * 0.9);
+    transform: translateX(calc(var(--g-xb) * 0.45px));
+    animation-timing-function: steps(1, end);
+  }
+  48% {
+    opacity: 0;
+    animation-timing-function: steps(1, end);
+  }
+  62% {
+    opacity: calc(var(--g-scan, 0.7) * 0.7);
+    transform: translateX(calc(var(--g-xc) * 0.35px));
+    animation-timing-function: steps(1, end);
+  }
+  78% {
+    opacity: 0;
     animation-timing-function: steps(1, end);
   }
 }
@@ -322,12 +1139,17 @@
 @media (prefers-reduced-motion: reduce) {
   .glitch-hit.is-glitching,
   .glitch-hit.is-glitch-hover,
+  .glitch-hit.is-glitch-continuous,
   .glitch-hit.is-glitching::before,
   .glitch-hit.is-glitching::after,
   .glitch-hit.is-glitch-hover::before,
   .glitch-hit.is-glitch-hover::after,
+  .glitch-hit.is-glitch-continuous::before,
+  .glitch-hit.is-glitch-continuous::after,
+  .volume-control.is-glitching,
   .volume-control.is-glitching::before,
   .volume-control.is-glitching::after {
     animation: none !important;
   }
 }
+

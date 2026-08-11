@@ -1,11 +1,19 @@
 ---
 import site from '../data/site.json';
+import ChannelIcon from './ChannelIcon.astro';
 
-const channels = site.channels.map((channel) => ({
-  label: channel.label,
-  url: 'url' in channel ? channel.url : undefined,
-  active: channel.status === 'active' && 'url' in channel,
-}));
+const channels = site.channels.map((channel) => {
+  const id =
+    'id' in channel && typeof channel.id === 'string'
+      ? channel.id
+      : channel.label.toLowerCase().replace(/\s+/g, '');
+  return {
+    id,
+    label: channel.label,
+    url: 'url' in channel ? channel.url : undefined,
+    active: channel.status === 'active' && 'url' in channel,
+  };
+});
 ---
 
 {
@@ -16,12 +24,19 @@ const channels = site.channels.map((channel) => ({
         {channels.map((channel) =>
           channel.active ? (
             <li>
-              <a class="glitch-hit" href={channel.url} target="_blank" rel="noopener noreferrer">
-                {channel.label}
+              <a
+                class="glitch-hit"
+                href={channel.url}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <ChannelIcon id={channel.id} label={channel.label} />
+                <span>{channel.label}</span>
               </a>
             </li>
           ) : (
             <li class="placeholder">
+              <ChannelIcon id={channel.id} label={channel.label} />
               <span>{channel.label}</span>
               <span class="soon">coming soon</span>
             </li>
@@ -57,7 +72,7 @@ const channels = site.channels.map((channel) => ({
   li.placeholder {
     display: inline-flex;
     align-items: center;
-    gap: 0.5em;
+    gap: 0.55em;
     padding: 0.6em 1.1em;
     border: 1px solid var(--color-border);
     border-radius: 999px;
@@ -74,6 +89,12 @@ const channels = site.channels.map((channel) => ({
 
   li a:hover {
     border-color: var(--color-accent);
+  }
+
+  li a :global(.channel-icon),
+  li.placeholder :global(.channel-icon) {
+    flex-shrink: 0;
+    display: block;
   }
 
   li.placeholder {
