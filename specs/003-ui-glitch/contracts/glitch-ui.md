@@ -26,7 +26,7 @@ MUST NOT glitch:
 | Target | Pointer hover | Keyboard-visible focus | Press / click | Notes |
 |--------|---------------|------------------------|---------------|-------|
 | Channel / legal / exit | One-shot | One-shot | One-shot | Idle hover does not loop |
-| Mute button | Continuous while pointer over button | One-shot | Morph only (no stacked press) | Continuous ends on pointer-out |
+| Mute button | Continuous while pointer over button **and muted** | One-shot | Morph only (no stacked press) | Continuous ends on pointer-out or when audio plays |
 | Volume slider | None | None | None | Out of set |
 | Placeholder chip | None | None | None | Out of set |
 
@@ -36,7 +36,8 @@ MUST NOT glitch:
 - Press supersedes in-flight hover/focus one-shots.
 - Mouse-click focus MUST NOT fire a focus glitch.
 - Mute/unmute click: **morph wins** over continuous mute hover for that click. Continuous
-  hover may resume only if the pointer is still over the mute button after morph ends.
+  hover may resume only if the pointer is still over the mute button, audio is muted, and
+  morph has ended.
 - During any glitch (including continuous mute hover and morph), the control MUST remain
   activatable; the effect MUST NOT remove or meaningfully shrink the hit target.
 - At ~320px width, glitch displacement MUST NOT push critical controls permanently

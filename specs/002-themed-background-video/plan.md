@@ -57,7 +57,7 @@ allows additional video entries later without UI switcher; landing + legal overl
 | I. Static-First Delivery | Astro static output; prerendered HTML/CSS/JS/assets; no SSR adapter or serverless | PASS |
 | II. Zero-Cost, Zero-Ops Publishing | Unchanged GitHub Pages + Actions free-tier deploy | PASS |
 | III. Content-Code Separation | Default video, media paths, `hasAudio`, theme id, and theme tokens driven from data/CSS packs — not hard-coded in page copy components | PASS |
-| IV. Lightweight by Default | Semantic HTML video + CSS themes/reduced-motion; **justified** minimal client JS for mute state and playback-failure fallback (see Complexity Tracking). Responsive from 320px; content-first loading | PASS (with justified exception) |
+| IV. Lightweight by Default | Semantic HTML video + CSS themes/reduced-motion; **justified** minimal client JS for mute state, playback-failure fallback, and in-page legal open/close + History API (see Complexity Tracking). Responsive from 320px; content-first loading | PASS (with justified exception) |
 | V. Privacy & Legal Compliance | First-party static media only; no analytics/cookies; Impressum/privacy remain reachable with clearer exit UX; no third-party players | PASS |
 | VI. Simplicity & Spec-Driven Change | No new npm UI libs; no video switcher/scheduler; sample/placeholder clip acceptable until real assets arrive | PASS |
 
@@ -97,23 +97,25 @@ src/
 ├── components/
 │   ├── BackgroundAtmosphere.astro  # Full-bleed video + poster + theme attribute host
 │   ├── MuteControl.astro           # Mute/unmute when hasAudio + playing; small script
-│   ├── LegalPanel.astro            # Near-fullscreen panel chrome (margins, top exit)
+│   ├── LegalPanel.astro            # Near-fullscreen panel chrome (margins, X exit)
+│   ├── LegalOverlay.astro          # Prerendered legal panels + in-page open/close script
 │   ├── Hero.astro / Channels.astro / Footer.astro  # Adjusted for overlay readability
 ├── layouts/
-│   └── Base.astro             # Apply data-theme from background default; slot atmosphere
+│   └── Base.astro             # Apply data-theme; mount atmosphere + LegalOverlay
 ├── pages/
 │   ├── index.astro            # Landing over atmosphere
-│   └── legal/[slug].astro     # Same atmosphere + LegalPanel wrapping content
+│   └── legal/[slug].astro     # Same landing shell; overlay opens from URL
 └── lib/
     └── background.ts          # Typed helpers to resolve default video + theme from JSON
 ```
 
-**Structure Decision**: Stay on the single Astro root project. Atmosphere is a shared
-component used by landing and legal routes so direct legal URLs keep the themed backdrop
-and exit-to-home panel pattern without a client-side router.
+**Structure Decision**: Stay on the single Astro root project. Atmosphere and legal panels
+are shared in `Base` so landing and `/legal/{slug}` deep links keep the themed backdrop.
+In-page open/close uses History API (not a client-side router framework).
 
 ## Complexity Tracking
 
 | Violation | Why Needed | Simpler Alternative Rejected Because |
 |-----------|------------|-------------------------------------|
 | Client JS for mute toggle + playback failure class | Spec requires interactive unmute only after a user gesture and a non-broken fallback when autoplay/load fails (FR-003, FR-008) | Pure CSS checkbox hacks are brittle for accessible name/state and cannot reliably detect video `error` / blocked autoplay; server cannot know client playback outcome |
+| Client JS for legal overlay open/close + History API | Spec requires dismissible panel without full reload when scripting is available, while keeping shareable `/legal/{slug}` URLs (FR-012) | Full navigation reloads tear down atmosphere/audio; View Transitions / dialog libraries add weight; index-only `<dialog>` without prerendered deep-link HTML breaks refresh/direct URLs |

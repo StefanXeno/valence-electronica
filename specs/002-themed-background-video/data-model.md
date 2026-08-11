@@ -57,10 +57,12 @@ entries (`src/content/legal/*.md` from feature 001).
 
 | Aspect | Rule |
 |--------|------|
-| Routes | `/legal/{slug}` unchanged |
-| Chrome | Near-fullscreen panel, margins on all sides, top exit to `/` |
+| Routes | `/legal/{slug}` remain shareable (SSR open + History API sync) |
+| Chrome | Near-fullscreen panel, margins on all sides, X exit (accessible name “Exit”) |
+| Shell | Prerendered in `LegalOverlay` on every page via `Base`; landing content under panel |
 | Atmosphere | Same default video theme + media layer as landing |
 | Motion | CSS enter animation when motion allowed; skipped/minimized for reduced motion |
+| No-JS | Footer/Exit hard-navigate; panels still render on `/legal/{slug}` |
 
 ## Relationships
 

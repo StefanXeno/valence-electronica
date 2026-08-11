@@ -73,7 +73,8 @@ Rules:
 | Background video | Full-bleed behind primary content when motion allowed and playback works; `muted` + loop at start |
 | Poster / fallback | Shown for `prefers-reduced-motion`, load failure, or blocked autoplay |
 | Mute control | Present only if `hasAudio` and video playing; keyboard reachable; accessible name reflects mute/unmute |
-| Legal panel | `/legal/{slug}` content in near-fullscreen panel with margins; top Exit returns to `/` |
+| Legal panel | `/legal/{slug}` content in near-fullscreen panel with margins; X Exit returns to landing |
+| Legal navigation | With JS: in-page open/close + History API (no full reload from landing); without JS: hard navigation still works |
 | Legal motion | Smooth open animation when motion allowed; skipped/minimized when reduced motion preferred |
 
 ## Unchanged contracts from 001

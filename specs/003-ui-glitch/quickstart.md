@@ -37,9 +37,10 @@ npm run preview
 4. **US2 — mute morph**: With mute visible, unmute then mute. Expect: expand/collapse uses
    glitch-styled morph; **no** extra press glitch stacked on the click; control stays
    operable mid-morph.
-5. **US2 — continuous mute hover only**: Hover the mute button and keep the pointer there.
-   Expect: continuous glitch while hovering; stops when pointer leaves. Hover channel/legal
-   links. Expect: one-shot only — never continuous.
+5. **US2 — continuous mute hover only**: With audio muted, hover the mute button and keep
+   the pointer there. Expect: continuous glitch while hovering; stops when pointer leaves.
+   Unmute (audio playing), hover mute again. Expect: **no** continuous glitch. Hover
+   channel/legal links. Expect: one-shot only — never continuous.
 6. **Out of set**: Hover/drag the volume slider (after unmute) and hover a “coming soon”
    placeholder. Expect: **no** glitch treatment.
 7. **US3 — reduced motion**: Enable OS/browser reduce motion, reload. Expect: 0 glitch
@@ -48,8 +49,9 @@ npm run preview
    clarity; actions still work.
 7b. **Viewport**: At ~320px width with motion allowed, trigger glitches on channel/legal/
     mute. Expect: controls stay on-screen and usable; no permanent cover of primary content.
-8. **Legal exit**: Open a legal page, hover/press Exit. Expect: one-shot glitch; Exit still
-   returns home; reduced motion skips glitch.
+8. **Legal exit**: Open a legal panel (in-page overlay; see feature `002`), hover/press the
+   X Exit. Expect: one-shot glitch; Exit still returns to landing without needing a full
+   reload when JS is available; reduced motion skips glitch.
 9. **Intensity / owner taste**: Owner reviews one-shots and continuous mute hover. Expect:
    calm, on-brand, roughly ≤3 distinct flashes/sec, no full-viewport flashes (SC-005 /
    SC-006).

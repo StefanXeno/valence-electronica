@@ -31,15 +31,16 @@ All Technical Context unknowns for this feature were resolved as follows.
 
 ## R3: Continuous mute-button hover
 
-- **Decision**: While the pointer is over the **mute button** only, allow a continuous
-  glitch (looping or repeatedly refreshed treatment) that **stops immediately** on
-  pointer-out. No other element may use continuous hover glitch. Touch without hover
-  simply skips continuous mode; tap still gets morph on mute/unmute.
-- **Rationale**: Explicit clarify decision; distinctive chrome without turning the whole
-  page into ambient noise.
-- **Alternatives considered**: One-shot hover on mute only (rejected by owner); continuous
-  hover on all controls (rejected); continuous on entire volume shell including slider
-  (slider is out of scope).
+- **Decision**: While the pointer is over the **mute button** only **and audio is muted**,
+  allow a continuous glitch (looping or repeatedly refreshed treatment) that **stops
+  immediately** on pointer-out or when audio starts playing. No other element may use
+  continuous hover glitch. Touch without hover simply skips continuous mode; tap still
+  gets morph on mute/unmute.
+- **Rationale**: Clarify + post-implement owner polish — distinctive chrome in the muted
+  idle state without competing with playing audio.
+- **Alternatives considered**: Continuous while unmuted/playing (rejected by owner);
+  one-shot hover on mute only (rejected earlier); continuous on all controls (rejected);
+  continuous on entire volume shell including slider (slider is out of scope).
 
 ## R4: Mute morph vs press
 

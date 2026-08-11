@@ -14,7 +14,7 @@ Not stored in JSON — markup identity on the live page.
 |------|-------|----------------|------------------|
 | Active channel link | `Channels.astro` | Only `status: active` links; never placeholders | One-shot hover, keyboard-visible focus, press |
 | Legal footer link | `Footer.astro` | Impressum / privacy links | One-shot hover, keyboard-visible focus, press |
-| Legal exit | `LegalPanel.astro` | Exit control back to landing | One-shot hover, keyboard-visible focus, press |
+| Legal exit | `LegalPanel.astro` | X Exit control back to landing (overlay from `002`) | One-shot hover, keyboard-visible focus, press |
 | Mute button | `MuteControl.astro` | Toggle only — **not** the volume slider | Continuous pointer hover; keyboard-visible focus one-shot; **no** separate press glitch (morph owns click) |
 
 ### Explicitly out of set
@@ -52,7 +52,8 @@ Ephemeral visual disturbance applied to one hit target (or mute shell for morph)
 - Each `GlitchHitTarget` → 0..1 active `GlitchTreatment` at a time
 - Mute button → continuous hover treatment **or** morph treatment per stacking/special rules;
   never a stacked press + morph on the same click; morph supersedes continuous hover on
-  unmute/mute click; continuous may resume only if pointer still over mute after morph
+  unmute/mute click; continuous only while muted and may resume only if pointer still over
+  mute, audio muted, after morph
 - `GlitchTreatment` tint → existing `VisualTheme` tokens from feature `002` (`--color-accent`,
   `--color-text`, etc.)
 

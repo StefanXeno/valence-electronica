@@ -100,15 +100,16 @@ src/
 │   ├── MuteControl.astro       # Morph glitch + continuous mute hover (refine)
 │   ├── Channels.astro          # Active links: glitch-hit; placeholders: never
 │   ├── Footer.astro            # Legal links: glitch-hit
-│   ├── LegalPanel.astro        # Exit: glitch-hit
+│   ├── LegalPanel.astro        # X Exit: glitch-hit (panel chrome from 002)
+│   ├── LegalOverlay.astro      # Owned by 002; hosts panels used by glitch exit targets
 │   └── BackgroundAtmosphere.astro  # Unchanged role; mute visibility still from 002
 └── layouts/
-    └── Base.astro              # Imports glitch.css + mounts GlitchPress
+    └── Base.astro              # Imports glitch.css + mounts GlitchPress (+ LegalOverlay from 002)
 ```
 
 **Structure Decision**: Stay on the single Astro root project. Glitch is presentation chrome
 layered on existing `001`/`002` components; refine in place rather than introduce a new
-package or app split.
+package or app split. In-page legal navigation remains a `002` concern.
 
 ## Complexity Tracking
 

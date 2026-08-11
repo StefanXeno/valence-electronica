@@ -40,9 +40,11 @@ npm run preview
    looping video; poster/static fallback visible; mute control hidden/disabled.
 5. **US5 — legal panel**: From the footer, open Impressum and Datenschutzerklärung.
    Expect: near-fullscreen panel with visible margin on all sides; atmosphere visible in
-   the margins; top Exit returns to landing; long text scrolls inside the panel. With
-   motion allowed, panel entrance is animated; with reduced motion, animation is
-   skipped/minimized. Open `/legal/imprint` directly in a new tab — same panel + Exit.
+   the margins; **no full document reload** (audio/atmosphere continue); URL becomes
+   `/legal/{slug}`; X Exit (or Escape) returns to landing without reload; long text scrolls
+   inside the panel. With motion allowed, panel entrance is animated; with reduced motion,
+   animation is skipped/minimized. Open `/legal/imprint` directly in a new tab — same
+   panel + X Exit over the landing shell.
 6. **Failure fallback**: Temporarily break the video `src` path in `background.json` (or
    block media in devtools), reload. Expect: readable content + themed static/solid
    fallback; no blank hero; mute control hidden.

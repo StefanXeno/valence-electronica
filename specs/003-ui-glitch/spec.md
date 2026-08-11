@@ -19,9 +19,18 @@ a separate idea)."
 
 - Q: When a visitor clicks mute/unmute, separate press glitch plus morph, or morph only?
   → A: Morph only for mute/unmute clicks; hover/focus glitch on the mute button still
-  allowed. Exception: while the pointer hovers the mute button, that button may glitch
-  continuously for the duration of the hover — mute button only; no other element may
-  use continuous hover glitch.
+  allowed. Exception: while the pointer hovers the mute button **and audio is muted**,
+  that button may glitch continuously for the duration of the hover — mute button only;
+  no other element may use continuous hover glitch. Continuous mute hover MUST NOT run
+  while background audio is playing.
+
+### Session 2026-08-12 (post-implement owner polish)
+
+- Q: Should continuous mute-button hover also run while audio is unmuted/playing?
+  → A: No — continuous hover glitch only while muted; quiet chrome while audio plays.
+- Q: How should legal Exit present visually?
+  → A: X icon with accessible name “Exit” (legal overlay presentation owned by feature
+  `002`; glitch hit-target rules unchanged).
 - Q: Which interactive elements are in scope as glitch hit targets?
   → A: Closed set only: active channel links, legal links, legal exit, and the mute
   button (plus mute shell morph on unmute/mute). Volume slider and “coming soon”
@@ -79,8 +88,9 @@ When the visitor unmutes or mutes background audio, the mute/volume control’s 
 (circle ↔ pill with volume) is accompanied by the same glitch language so the expand and
 collapse feel intentional rather than a plain layout jump. A mute/unmute click does not
 also fire a separate press glitch on the button — the morph is the click treatment. While
-the pointer rests on the mute button, that button alone may keep glitching for the whole
-hover (continuous); no other control may do that.
+the pointer rests on the mute button **and audio is muted**, that button alone may keep
+glitching for the whole hover (continuous); no other control may do that, and continuous
+hover MUST NOT run while audio is playing.
 
 **Why this priority**: The mute control is the most distinctive interactive chrome on the
 atmospheric landing page; tying its morph to the glitch language completes the motion
@@ -101,10 +111,12 @@ operable throughout.
    (again without a stacked press glitch).
 3. **Given** a morph glitch is in progress, **When** the visitor clicks the mute toggle
    again, **Then** the click still registers (no dead zones from the animation).
-4. **Given** motion is allowed and the mute button is visible, **When** the visitor
-   keeps the pointer hovering over the mute button, **Then** that button may glitch
-   continuously for the duration of the hover and stops when the pointer leaves.
-5. **Given** motion is allowed, **When** the visitor hovers any in-scope control that is
+4. **Given** motion is allowed, the mute button is visible, and audio is muted, **When**
+   the visitor keeps the pointer hovering over the mute button, **Then** that button may
+   glitch continuously for the duration of the hover and stops when the pointer leaves.
+5. **Given** motion is allowed and audio is playing, **When** the visitor hovers the mute
+   button, **Then** continuous hover glitch MUST NOT run.
+6. **Given** motion is allowed, **When** the visitor hovers any in-scope control that is
    not the mute button, **Then** that control MUST NOT use continuous hover glitch
    (one-shot only per User Story 1).
 
@@ -138,13 +150,14 @@ confirm no glitch animations run and actions still work.
 
 - Rapid hover in/out or repeated presses on non-mute controls → treatments stay short and
   do not stack into a long or chaotic sequence; the control remains usable.
-- Mute button continuous hover → allowed only while the pointer is over the mute button;
-  leaving the button MUST end the continuous glitch and return to a stable resting state
-  (must not stay glitching after pointer-out).
+- Mute button continuous hover → allowed only while the pointer is over the mute button
+  **and** background audio is muted; leaving the button or unmuting MUST end the continuous
+  glitch and return to a stable resting state (must not stay glitching after pointer-out
+  or while audio is playing).
 - Mute/unmute click → morph glitch only; do not stack a separate press glitch on the same
   click. If continuous mute hover was active, morph **wins** for the click; continuous
-  hover may resume only if the pointer is still over the mute button after the morph
-  completes.
+  hover may resume only if the pointer is still over the mute button, audio is muted, and
+  the morph has completed.
 - Touch devices without true hover → press/tap still gets a brief treatment where
   applicable; lack of hover must not break the control; continuous mute hover simply does
   not apply without a hover pointer.
@@ -177,8 +190,8 @@ confirm no glitch animations run and actions still work.
 - **FR-003**: Glitch treatments MUST be calm enough that text/icons remain recognizable
   during and after the effect. Non-mute hover/press/keyboard-focus treatments MUST be
   brief and non-looping for a single idle hover. The mute button MAY glitch continuously
-  for the entire time the pointer hovers it; continuous hover glitch is forbidden on every
-  other element.
+  while the pointer hovers it **and** audio is muted; continuous hover glitch is forbidden
+  on every other element and MUST NOT run while background audio is playing.
 - **FR-004**: While a glitch is playing, the affected control MUST remain activatable
   (click/tap/keyboard); the effect MUST NOT remove or meaningfully shrink the hit target.
 - **FR-005**: When motion is allowed, mute/unmute transitions that expand or collapse the
@@ -196,8 +209,9 @@ confirm no glitch animations run and actions still work.
 - **FR-009**: After any glitch completes (or is skipped), or when continuous mute hover
   ends (pointer leaves), the control MUST return to a stable, non-glitched visual resting
   state.
-- **FR-010**: Continuous hover glitch MUST apply only to the mute button; other in-scope
-  hit targets MUST remain one-shot on hover.
+- **FR-010**: Continuous hover glitch MUST apply only to the mute button, and only while
+  background audio is muted; it MUST stop when audio is playing. Other in-scope hit
+  targets MUST remain one-shot on hover.
 - **FR-011**: The closed set of glitch hit targets for this feature is exactly: active
   channel links, legal footer links, legal-panel exit, and the mute button (with mute
   shell morph on unmute/mute). No other elements are in scope unless this spec is amended.
@@ -209,7 +223,8 @@ confirm no glitch animations run and actions still work.
   triggers overlap, press supersedes hover/keyboard-focus; a new one-shot MUST NOT stack
   on an in-flight one-shot. Mute continuous hover (FR-010) and mute morph (FR-005) keep
   their special rules: on mute/unmute click, morph supersedes continuous hover; continuous
-  hover may resume only if the pointer remains over the mute button after morph ends.
+  hover may resume only if the pointer remains over the mute button, audio is muted, and
+  morph has ended.
   Treatments MUST NOT leave the control unusable or stuck glitching after the interaction
   ends.
 - **FR-014**: Focus glitch MUST fire only for keyboard-visible focus. Pointer users rely on
@@ -224,7 +239,7 @@ confirm no glitch animations run and actions still work.
 - **Glitch treatment**: A short, one-shot visual disturbance (displacement / tear / color
   fringing character) triggered by pointer hover, keyboard-visible focus, press, or mute
   morph — except continuous hover glitch, which is allowed only on the mute button while
-  the pointer remains over it.
+  the pointer remains over it and audio is muted.
 - **Motion preference**: Visitor/OS preference for reduced motion; when set, all glitch
   treatments (including continuous mute hover) are omitted.
 
