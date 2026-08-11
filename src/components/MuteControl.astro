@@ -4,7 +4,7 @@
 <div class="volume-control" data-volume-control data-sound="off" hidden>
   <button
     type="button"
-    class="volume-control__toggle"
+    class="volume-control__toggle glitch-hit"
     data-mute-control
     aria-pressed="true"
     aria-label="Unmute background audio"
@@ -53,6 +53,8 @@
 </div>
 
 <script>
+  import { applyGlitchPreset, playElementGlitch } from '../lib/glitch';
+
   function initMuteControl() {
     const root = document.querySelector<HTMLElement>('[data-atmosphere]');
     const video = root?.querySelector<HTMLVideoElement>('[data-bg-video]');
@@ -63,7 +65,94 @@
 
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
     let lastVolume = Number(slider.value) || 0.7;
+    let wasMuted = true;
+    let glitchTimer: number | undefined;
+    let continuousTimer: number | undefined;
+    let continuousOnEnd: ((event: AnimationEvent) => void) | undefined;
+    let pointerOverMute = false;
     video.volume = lastVolume;
+
+    const isAudioPlaying = () => !(video.muted || video.volume === 0);
+
+    const stopContinuousHover = () => {
+      window.clearTimeout(continuousTimer);
+      continuousTimer = undefined;
+      if (continuousOnEnd) {
+        button.removeEventListener('animationend', continuousOnEnd);
+        continuousOnEnd = undefined;
+      }
+      button.classList.remove('is-glitch-continuous', 'is-glitch-hover', 'is-glitching');
+      button.style.animation = '';
+    };
+
+    const cycleContinuousHover = () => {
+      // Continuous mute hover only while muted — quiet when audio is playing
+      if (reduceMotion.matches || !pointerOverMute || control.hidden || isAudioPlaying()) {
+        stopContinuousHover();
+        return;
+      }
+      // Morph owns the click — don't stack continuous on top of shell morph
+      if (control.classList.contains('is-glitching')) return;
+
+      window.clearTimeout(continuousTimer);
+      if (continuousOnEnd) {
+        button.removeEventListener('animationend', continuousOnEnd);
+        continuousOnEnd = undefined;
+      }
+
+      const preset = applyGlitchPreset(button);
+      button.classList.remove('is-glitching', 'is-glitch-hover', 'is-glitch-continuous');
+      button.style.animation = 'none';
+      void button.offsetWidth;
+      button.style.animation = '';
+      button.classList.add('is-glitch-continuous');
+
+      continuousOnEnd = (event: AnimationEvent) => {
+        if (event.target !== button) return;
+        if (continuousOnEnd) button.removeEventListener('animationend', continuousOnEnd);
+        continuousOnEnd = undefined;
+        window.clearTimeout(continuousTimer);
+        if (
+          pointerOverMute &&
+          !isAudioPlaying() &&
+          !control.classList.contains('is-glitching') &&
+          !reduceMotion.matches
+        ) {
+          cycleContinuousHover();
+        } else {
+          stopContinuousHover();
+        }
+      };
+      button.addEventListener('animationend', continuousOnEnd);
+      // Fallback if animationend is missed (pseudo-element noise / browser quirks)
+      continuousTimer = window.setTimeout(() => {
+        if (!pointerOverMute || !button.classList.contains('is-glitch-continuous')) return;
+        if (control.classList.contains('is-glitching') || reduceMotion.matches || isAudioPlaying()) {
+          stopContinuousHover();
+          return;
+        }
+        cycleContinuousHover();
+      }, preset.dur + 50);
+    };
+
+    const startContinuousHover = () => {
+      cycleContinuousHover();
+    };
+
+    const playGlitch = (direction: 'in' | 'out') => {
+      if (reduceMotion.matches) return;
+      // Morph supersedes continuous mute hover for this click
+      stopContinuousHover();
+      control.dataset.glitch = direction;
+      window.clearTimeout(glitchTimer);
+      const dur = playElementGlitch(control, 'is-glitching');
+      glitchTimer = window.setTimeout(() => {
+        control.classList.remove('is-glitching');
+        delete control.dataset.glitch;
+        // Resume continuous only while muted and pointer still over mute
+        if (pointerOverMute && !isAudioPlaying()) startContinuousHover();
+      }, dur + 80);
+    };
 
     const applySoundUi = (muted: boolean) => {
       control.dataset.sound = muted ? 'off' : 'on';
@@ -76,13 +165,47 @@
       const fallback = root.getAttribute('data-bg-state') === 'fallback' || reduceMotion.matches;
       control.hidden = fallback;
       if (fallback) {
+        stopContinuousHover();
         applySoundUi(true);
+        wasMuted = true;
         return;
       }
 
       const muted = video.muted || video.volume === 0;
-      applySoundUi(muted);
+      const turningOn = wasMuted && !muted;
+      const turningOff = !wasMuted && muted;
+
+      // Audio playing → no continuous mute hover
+      if (!muted) stopContinuousHover();
+
+      if (turningOff && !reduceMotion.matches) {
+        // Keep pill visible briefly so the slider can glitch-collapse, then go circular
+        applySoundUi(false);
+        playGlitch('out');
+        window.clearTimeout(glitchTimer);
+        glitchTimer = window.setTimeout(() => {
+          applySoundUi(true);
+          control.classList.remove('is-glitching');
+          delete control.dataset.glitch;
+          if (pointerOverMute && !isAudioPlaying()) startContinuousHover();
+        }, 480);
+      } else {
+        applySoundUi(muted);
+        if (turningOn) playGlitch('in');
+      }
+
+      wasMuted = muted;
     };
+
+    button.addEventListener('pointerenter', () => {
+      pointerOverMute = true;
+      startContinuousHover();
+    });
+
+    button.addEventListener('pointerleave', () => {
+      pointerOverMute = false;
+      stopContinuousHover();
+    });
 
     button.addEventListener('click', () => {
       if (video.muted || video.volume === 0) {
@@ -105,7 +228,10 @@
     });
 
     root.addEventListener('bg-state-change', sync);
-    reduceMotion.addEventListener('change', sync);
+    reduceMotion.addEventListener('change', () => {
+      if (reduceMotion.matches) stopContinuousHover();
+      sync();
+    });
     sync();
   }
 
@@ -128,11 +254,12 @@
     color: var(--color-text);
     box-sizing: border-box;
     transition:
-      padding 160ms ease,
-      gap 160ms ease,
-      width 160ms ease;
+      padding 160ms steps(2, end),
+      gap 160ms steps(2, end),
+      width 160ms steps(2, end);
   }
 
+  /* Muted: perfect circle around the icon */
   .volume-control[data-sound='off'] {
     width: var(--control-size);
     height: var(--control-size);
@@ -140,6 +267,7 @@
     gap: 0;
   }
 
+  /* Unmuted: pill with slider */
   .volume-control[data-sound='on'] {
     width: auto;
     height: var(--control-size);
@@ -194,6 +322,7 @@
     max-width: 0;
     opacity: 0;
     overflow: hidden;
+    transform-origin: left center;
   }
 
   .volume-control[data-sound='on'] .volume-control__slider-wrap {
@@ -209,9 +338,259 @@
     cursor: pointer;
   }
 
+  .volume-control.is-glitching {
+    animation: volume-shell-glitch var(--g-dur) both;
+  }
+
+  .volume-control.is-glitching .volume-control__toggle {
+    animation: volume-icon-glitch var(--g-dur) both;
+  }
+
+  .volume-control.is-glitching[data-glitch='in'] .volume-control__slider-wrap {
+    animation: volume-slider-glitch-in var(--g-dur) both;
+  }
+
+  .volume-control.is-glitching[data-glitch='in'] .volume-control__slider {
+    animation: volume-slider-track-glitch var(--g-dur) both;
+  }
+
+  .volume-control.is-glitching[data-glitch='out'] .volume-control__slider-wrap {
+    animation: volume-slider-glitch-out 520ms both;
+  }
+
+  .volume-control.is-glitching[data-glitch='out'] .volume-control__slider {
+    animation: volume-slider-track-glitch 520ms both;
+  }
+
+  /* No clip-path on shell/icon — keeps the mute button clickable mid-glitch */
+  @keyframes volume-shell-glitch {
+    0% {
+      transform: none;
+      filter: none;
+      border-color: var(--color-border);
+      animation-timing-function: steps(1, end);
+    }
+    14% {
+      transform: translateX(calc(var(--g-xa) * 1px)) skewX(calc(var(--g-sa) * 0.9deg))
+        scaleX(var(--g-scale));
+      filter: drop-shadow(calc(var(--g-xa) * -0.4px) 0 var(--glitch-red)) contrast(1.25);
+      border-color: var(--glitch-white);
+      animation-timing-function: steps(1, end);
+    }
+    28% {
+      transform: translateY(calc(var(--g-ya) * 1px)) skewY(calc(var(--g-sb) * 0.45deg));
+      filter: drop-shadow(0 calc(var(--g-ya) * -0.4px) var(--glitch-white)) brightness(1.1);
+      border-color: var(--glitch-red);
+      animation-timing-function: steps(1, end);
+    }
+    42% {
+      transform: translateX(calc(var(--g-xb) * 1px)) skewX(calc(var(--g-sa) * -0.8deg));
+      filter: drop-shadow(calc(var(--g-xb) * -0.4px) 0 var(--glitch-red));
+      animation-timing-function: steps(1, end);
+    }
+    56% {
+      transform: translateY(calc(var(--g-yb) * 1px));
+      filter: drop-shadow(0 calc(var(--g-yb) * -0.35px) var(--glitch-white));
+      animation-timing-function: steps(1, end);
+    }
+    72% {
+      transform: translateX(calc(var(--g-xc) * 0.6px)) skewX(calc(var(--g-sc) * 0.55deg));
+      filter: drop-shadow(calc(var(--g-xc) * -0.3px) 0 var(--glitch-red));
+      animation-timing-function: steps(1, end);
+    }
+    86% {
+      transform: translateY(calc(var(--g-yc) * 0.5px));
+      filter: drop-shadow(0 calc(var(--g-yc) * -0.25px) var(--glitch-white));
+      animation-timing-function: steps(1, end);
+    }
+    100% {
+      transform: none;
+      filter: none;
+      border-color: var(--color-border);
+    }
+  }
+
+  @keyframes volume-icon-glitch {
+    0% {
+      transform: none;
+      filter: none;
+      animation-timing-function: steps(1, end);
+    }
+    14% {
+      transform: translateX(calc(var(--g-xa) * 0.8px)) skewX(calc(var(--g-sa) * 0.9deg))
+        scaleX(var(--g-scale));
+      filter: drop-shadow(calc(var(--g-xa) * -0.35px) 0 var(--glitch-red));
+      animation-timing-function: steps(1, end);
+    }
+    28% {
+      transform: translateY(calc(var(--g-ya) * 0.8px));
+      filter: drop-shadow(0 calc(var(--g-ya) * -0.35px) var(--glitch-white));
+      animation-timing-function: steps(1, end);
+    }
+    42% {
+      transform: translateX(calc(var(--g-xb) * 0.75px)) skewX(calc(var(--g-sa) * -0.75deg));
+      filter: drop-shadow(calc(var(--g-xb) * -0.35px) 0 var(--glitch-red));
+      animation-timing-function: steps(1, end);
+    }
+    56% {
+      transform: translateY(calc(var(--g-yb) * 0.7px));
+      filter: drop-shadow(0 calc(var(--g-yb) * -0.3px) var(--glitch-white));
+      animation-timing-function: steps(1, end);
+    }
+    72% {
+      transform: translateX(calc(var(--g-xc) * 0.45px));
+      filter: drop-shadow(calc(var(--g-xc) * -0.25px) 0 var(--glitch-red));
+      animation-timing-function: steps(1, end);
+    }
+    86% {
+      transform: translateY(calc(var(--g-yc) * 0.35px));
+      filter: drop-shadow(0 calc(var(--g-yc) * -0.2px) var(--glitch-white));
+      animation-timing-function: steps(1, end);
+    }
+    100% {
+      transform: none;
+      filter: none;
+    }
+  }
+
+  @keyframes volume-slider-glitch-in {
+    0% {
+      width: 0;
+      max-width: 0;
+      opacity: 0;
+      transform: translateX(calc(var(--g-xb) * 1px));
+      clip-path: inset(0 100% 0 0);
+      filter: none;
+      animation-timing-function: steps(1, end);
+    }
+    18% {
+      width: min(8.5rem, 28vw);
+      max-width: min(8.5rem, 28vw);
+      opacity: 1;
+      transform: translateX(calc(var(--g-xa) * 1px)) skewX(calc(var(--g-sa) * 1deg));
+      clip-path: polygon(
+        0 0,
+        100% 0,
+        100% 20%,
+        0 22%,
+        0 42%,
+        100% 40%,
+        100% 62%,
+        0 64%,
+        0 100%,
+        100% 100%
+      );
+      filter: drop-shadow(calc(var(--g-xa) * -0.35px) 0 var(--glitch-red));
+      animation-timing-function: steps(1, end);
+    }
+    36% {
+      transform: translateY(calc(var(--g-ya) * 0.8px));
+      filter: drop-shadow(0 calc(var(--g-ya) * -0.35px) var(--glitch-white));
+      animation-timing-function: steps(1, end);
+    }
+    54% {
+      transform: translateX(calc(var(--g-xb) * 0.8px));
+      clip-path: inset(0 10% 0 0);
+      filter: drop-shadow(calc(var(--g-xb) * -0.3px) 0 var(--glitch-red));
+      animation-timing-function: steps(1, end);
+    }
+    72% {
+      transform: translateY(calc(var(--g-yb) * 0.45px));
+      clip-path: inset(0);
+      filter: drop-shadow(0 calc(var(--g-yb) * -0.25px) var(--glitch-white));
+      animation-timing-function: steps(1, end);
+    }
+    100% {
+      width: min(8.5rem, 28vw);
+      max-width: min(8.5rem, 28vw);
+      opacity: 1;
+      transform: none;
+      clip-path: inset(0);
+      filter: none;
+    }
+  }
+
+  @keyframes volume-slider-glitch-out {
+    0% {
+      width: min(8.5rem, 28vw);
+      max-width: min(8.5rem, 28vw);
+      opacity: 1;
+      transform: none;
+      clip-path: inset(0);
+      filter: none;
+      animation-timing-function: steps(1, end);
+    }
+    20% {
+      transform: translateX(calc(var(--g-xa) * 0.85px));
+      clip-path: polygon(0 0, 100% 0, 100% 30%, 0 32%, 0 58%, 100% 56%, 100% 100%, 0 100%);
+      filter: drop-shadow(calc(var(--g-xa) * -0.35px) 0 var(--glitch-red));
+      animation-timing-function: steps(1, end);
+    }
+    40% {
+      transform: translateY(calc(var(--g-ya) * 0.7px));
+      clip-path: inset(0 0 0 38%);
+      filter: drop-shadow(0 calc(var(--g-ya) * -0.3px) var(--glitch-white));
+      animation-timing-function: steps(1, end);
+    }
+    65% {
+      width: 1.25rem;
+      max-width: 1.25rem;
+      opacity: 0.5;
+      transform: translateX(calc(var(--g-xb) * 0.9px));
+      clip-path: inset(0 0 0 72%);
+      filter: drop-shadow(calc(var(--g-xb) * -0.3px) 0 var(--glitch-red));
+      animation-timing-function: steps(1, end);
+    }
+    100% {
+      width: 0;
+      max-width: 0;
+      opacity: 0;
+      transform: translateY(calc(var(--g-yb) * 0.6px));
+      clip-path: inset(0 0 0 100%);
+      filter: none;
+    }
+  }
+
+  @keyframes volume-slider-track-glitch {
+    0% {
+      transform: none;
+      filter: none;
+      animation-timing-function: steps(1, end);
+    }
+    25% {
+      transform: scaleX(1.12) translateX(calc(var(--g-xa) * 0.5px));
+      filter: drop-shadow(calc(var(--g-xa) * -0.3px) 0 var(--glitch-red));
+      animation-timing-function: steps(1, end);
+    }
+    50% {
+      transform: translateY(calc(var(--g-ya) * 0.45px));
+      filter: drop-shadow(0 calc(var(--g-ya) * -0.3px) var(--glitch-white)) contrast(1.2);
+      animation-timing-function: steps(1, end);
+    }
+    75% {
+      transform: scaleX(1.05) translateX(calc(var(--g-xb) * 0.35px));
+      filter: drop-shadow(calc(var(--g-xb) * -0.25px) 0 var(--glitch-red));
+      animation-timing-function: steps(1, end);
+    }
+    100% {
+      transform: none;
+      filter: none;
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .volume-control {
       transition: none;
+    }
+
+    .volume-control.is-glitching,
+    .volume-control.is-glitching .volume-control__toggle,
+    .volume-control.is-glitching .volume-control__slider-wrap,
+    .volume-control.is-glitching .volume-control__slider,
+    .volume-control__toggle.is-glitch-continuous,
+    .volume-control__toggle.is-glitch-continuous::before,
+    .volume-control__toggle.is-glitch-continuous::after {
+      animation: none !important;
     }
   }
 

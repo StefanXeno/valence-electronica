@@ -24,15 +24,18 @@ Embedded in `site.json` under `channels`.
 
 | Field | Type | Required | Description / Validation |
 |-------|------|----------|--------------------------|
+| `id` | string | yes | Stable platform key used to pick the brand mark in `ChannelIcon.astro` (e.g. `"bandcamp"`, `"spotify"`). Not visitor-facing copy. |
 | `label` | string | yes | Platform name shown to visitors, e.g. `"Bandcamp"` |
 | `url` | string (URL) | yes* | Absolute `https://` URL. *Required when `status` is `active` |
 | `status` | `"active"` \| `"placeholder"` | yes | `placeholder` entries render as "coming soon" without a link (spec edge case) |
 
-Initial entries: Bandcamp (`active`, `https://valenceelectronica.bandcamp.com/`);
-Spotify, SoundCloud, Instagram (`placeholder`).
+Current entries (all `active` with real URLs): Bandcamp, SoundCloud, YouTube, Instagram,
+TikTok, Spotify. Icons are first-party inline SVG keyed by `id` (no icon font / CDN).
 
 **State transition**: `placeholder → active` by filling `url` and switching `status` —
-one edit in one file (SC-006).
+one edit in one file (SC-006). Adding a new platform: append a `channels[]` row with a
+new `id`, then add a matching SVG path in `ChannelIcon.astro` if that mark is not already
+mapped (presentation chrome; content URL/label stay in `site.json`).
 
 ## Entity: LegalPage
 

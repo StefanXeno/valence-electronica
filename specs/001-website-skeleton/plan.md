@@ -95,6 +95,7 @@ src/
 ├── components/
 │   ├── Hero.astro       # Artist name, tagline, visual
 │   ├── Channels.astro   # Music platform + social links
+│   ├── ChannelIcon.astro# First-party brand marks keyed by channel `id`
 │   └── Footer.astro     # Legal links
 ├── pages/
 │   ├── index.astro      # Landing page

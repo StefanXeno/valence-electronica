@@ -1,0 +1,113 @@
+---
+---
+
+<script>
+  import { playElementGlitch } from '../lib/glitch';
+
+  function prefersReducedMotion(): boolean {
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  }
+
+  function isMuteHit(el: Element): boolean {
+    return (
+      el.matches('[data-mute-control], [data-volume-control]') ||
+      Boolean(el.closest('[data-volume-control]'))
+    );
+  }
+
+  function isMuteToggle(el: Element): boolean {
+    return el.matches('[data-mute-control]');
+  }
+
+  function runGlitch(el: HTMLElement, className: 'is-glitching' | 'is-glitch-hover') {
+    if (prefersReducedMotion()) return;
+
+    // At most one active treatment: hover must not interrupt press or re-fire mid-hover
+    if (className === 'is-glitch-hover') {
+      if (el.classList.contains('is-glitching') || el.classList.contains('is-glitch-hover')) return;
+      if (el.classList.contains('is-glitch-continuous')) return;
+    }
+
+    // Press supersedes in-flight hover
+    if (className === 'is-glitching') {
+      el.classList.remove('is-glitch-hover');
+    }
+
+    const dur = playElementGlitch(el, className);
+    const onEnd = (event: AnimationEvent) => {
+      if (event.target !== el) return;
+      el.removeEventListener('animationend', onEnd);
+      el.classList.remove(className);
+    };
+    el.addEventListener('animationend', onEnd);
+    window.setTimeout(() => {
+      el.removeEventListener('animationend', onEnd);
+      el.classList.remove(className);
+    }, dur + 80);
+  }
+
+  function bindGlitchPress() {
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+    const clearAllGlitchClasses = () => {
+      document.querySelectorAll('.is-glitching, .is-glitch-hover, .is-glitch-continuous').forEach((node) => {
+        node.classList.remove('is-glitching', 'is-glitch-hover', 'is-glitch-continuous');
+      });
+    };
+
+    reduceMotion.addEventListener('change', () => {
+      if (reduceMotion.matches) clearAllGlitchClasses();
+    });
+
+    document.addEventListener(
+      'pointerover',
+      (event) => {
+        if (prefersReducedMotion()) return;
+        const target = event.target;
+        if (!(target instanceof Element)) return;
+        const hit = target.closest('.glitch-hit');
+        if (!(hit instanceof HTMLElement)) return;
+
+        // Mute button continuous hover is owned by MuteControl
+        if (isMuteToggle(hit) || isMuteHit(hit)) return;
+
+        const related = event.relatedTarget;
+        if (related instanceof Node && hit.contains(related)) return;
+
+        runGlitch(hit, 'is-glitch-hover');
+      },
+      true,
+    );
+
+    document.addEventListener(
+      'focusin',
+      (event) => {
+        if (prefersReducedMotion()) return;
+        const target = event.target;
+        if (!(target instanceof HTMLElement)) return;
+        if (!target.classList.contains('glitch-hit')) return;
+        // Keyboard-visible focus only — mouse-click focus must not glitch
+        if (!target.matches(':focus-visible')) return;
+        runGlitch(target, 'is-glitch-hover');
+      },
+      true,
+    );
+
+    document.addEventListener(
+      'pointerdown',
+      (event) => {
+        if (prefersReducedMotion()) return;
+        const target = event.target;
+        if (!(target instanceof Element)) return;
+        const hit = target.closest('.glitch-hit');
+        if (!(hit instanceof HTMLElement)) return;
+        // Mute morph owns the click — no stacked press glitch
+        if (isMuteHit(hit)) return;
+        runGlitch(hit, 'is-glitching');
+      },
+      true,
+    );
+  }
+
+  bindGlitchPress();
+</script>

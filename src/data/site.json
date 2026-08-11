@@ -10,9 +10,41 @@
     "indexable": false
   },
   "channels": [
-    { "label": "Bandcamp", "url": "https://valenceelectronica.bandcamp.com/", "status": "active" },
-    { "label": "Spotify", "status": "placeholder" },
-    { "label": "SoundCloud", "status": "placeholder" },
-    { "label": "Instagram", "status": "placeholder" }
+    {
+      "id": "bandcamp",
+      "label": "Bandcamp",
+      "url": "https://valenceelectronica.bandcamp.com/",
+      "status": "active"
+    },
+    {
+      "id": "soundcloud",
+      "label": "SoundCloud",
+      "url": "https://soundcloud.com/valence-music",
+      "status": "active"
+    },
+    {
+      "id": "youtube",
+      "label": "YouTube",
+      "url": "https://www.youtube.com/channel/UCHqAx9AtBYOl1Fw1sJa1IHA",
+      "status": "active"
+    },
+    {
+      "id": "instagram",
+      "label": "Instagram",
+      "url": "https://www.instagram.com/valence_electronica/",
+      "status": "active"
+    },
+    {
+      "id": "tiktok",
+      "label": "TikTok",
+      "url": "https://www.tiktok.com/@valence_electronica",
+      "status": "active"
+    },
+    {
+      "id": "spotify",
+      "label": "Spotify",
+      "url": "https://open.spotify.com/artist/6QmxwTumED1VMmiZ04jEW0",
+      "status": "active"
+    }
   ]
 }

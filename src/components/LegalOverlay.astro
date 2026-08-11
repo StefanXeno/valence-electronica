@@ -1,0 +1,175 @@
+---
+import { getCollection, render } from 'astro:content';
+import site from '../data/site.json';
+import LegalPanel from './LegalPanel.astro';
+import { withBase } from '../lib/url';
+
+const entries = await getCollection('legal');
+const rendered = await Promise.all(
+  entries.map(async (entry) => {
+    const { Content } = await render(entry);
+    return { entry, Content };
+  }),
+);
+
+const basePath = import.meta.env.BASE_URL.replace(/\/$/, '');
+const pathWithoutBase = Astro.url.pathname.startsWith(basePath)
+  ? Astro.url.pathname.slice(basePath.length) || '/'
+  : Astro.url.pathname;
+const openSlug = pathWithoutBase.match(/^\/legal\/([^/]+)\/?$/)?.[1] ?? null;
+---
+
+{
+  rendered.map(({ entry, Content }) => (
+    <LegalPanel title={entry.data.title} slug={entry.id} open={entry.id === openSlug}>
+      <Content />
+    </LegalPanel>
+  ))
+}
+
+<script
+  is:inline
+  define:vars={{
+    homePath: withBase('/'),
+    basePath,
+    siteName: site.artist.name,
+    defaultTitle: site.seo.title,
+  }}
+>
+  function stripBase(pathname) {
+    if (basePath && pathname.startsWith(basePath)) {
+      return pathname.slice(basePath.length) || '/';
+    }
+    return pathname;
+  }
+
+  function slugFromPath(pathname) {
+    const match = stripBase(pathname).match(/^\/legal\/([^/]+)\/?$/);
+    return match ? decodeURIComponent(match[1]) : null;
+  }
+
+  function legalPath(slug) {
+    return `${basePath}/legal/${slug}`;
+  }
+
+  function panels() {
+    return Array.from(document.querySelectorAll('[data-legal-panel]'));
+  }
+
+  function panelFor(slug) {
+    return document.querySelector('[data-legal-panel="' + slug + '"]');
+  }
+
+  var lastFocus = null;
+
+  function setDocumentTitle(slug) {
+    if (!slug) {
+      document.title = defaultTitle;
+      return;
+    }
+    var panel = panelFor(slug);
+    var heading = panel && panel.querySelector('h1');
+    var title = heading && heading.textContent && heading.textContent.trim();
+    document.title = title ? title + ' — ' + siteName : defaultTitle;
+  }
+
+  function closeAll() {
+    panels().forEach(function (panel) {
+      panel.hidden = true;
+    });
+  }
+
+  function openPanel(slug, options) {
+    var historyMode = (options && options.historyMode) || 'push';
+    var panel = panelFor(slug);
+    if (!(panel instanceof HTMLElement)) return;
+
+    if (!lastFocus) {
+      lastFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    }
+
+    closeAll();
+    panel.hidden = false;
+
+    var frame = panel.querySelector('.legal-panel__frame');
+    if (frame instanceof HTMLElement) {
+      frame.style.animation = 'none';
+      void frame.offsetWidth;
+      frame.style.animation = '';
+    }
+
+    var exit = panel.querySelector('[data-legal-exit]');
+    if (exit instanceof HTMLElement) exit.focus();
+
+    setDocumentTitle(slug);
+
+    var nextUrl = legalPath(slug);
+    if (historyMode === 'push' && location.pathname !== nextUrl) {
+      history.pushState({ legal: slug }, '', nextUrl);
+    } else if (historyMode === 'replace') {
+      history.replaceState({ legal: slug }, '', nextUrl);
+    }
+  }
+
+  function closePanel(options) {
+    var historyMode = (options && options.historyMode) || 'push';
+    closeAll();
+    setDocumentTitle(null);
+
+    if (historyMode !== 'none') {
+      if (historyMode === 'replace') {
+        history.replaceState({ legal: null }, '', homePath);
+      } else {
+        history.pushState({ legal: null }, '', homePath);
+      }
+    }
+
+    if (lastFocus && lastFocus.isConnected) lastFocus.focus();
+    lastFocus = null;
+  }
+
+  function activeSlug() {
+    var open = panels().find(function (panel) {
+      return !panel.hidden;
+    });
+    return open ? open.getAttribute('data-legal-panel') : null;
+  }
+
+  document.addEventListener('click', function (event) {
+    var target = event.target;
+    if (!(target instanceof Element)) return;
+
+    var exit = target.closest('[data-legal-exit]');
+    if (exit) {
+      event.preventDefault();
+      closePanel({ historyMode: 'push' });
+      return;
+    }
+
+    var link = target.closest('[data-legal-slug]');
+    if (!(link instanceof HTMLElement)) return;
+
+    var slug = link.getAttribute('data-legal-slug');
+    if (!slug || !panelFor(slug)) return;
+
+    event.preventDefault();
+    lastFocus = link;
+    openPanel(slug, { historyMode: 'push' });
+  });
+
+  document.addEventListener('keydown', function (event) {
+    if (event.key !== 'Escape') return;
+    if (!activeSlug()) return;
+    event.preventDefault();
+    closePanel({ historyMode: 'push' });
+  });
+
+  window.addEventListener('popstate', function () {
+    var slug = slugFromPath(location.pathname);
+    if (slug && panelFor(slug)) {
+      openPanel(slug, { historyMode: 'none' });
+      return;
+    }
+    closePanel({ historyMode: 'none' });
+  });
+</script>

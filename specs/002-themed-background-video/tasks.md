@@ -219,6 +219,5 @@ US1 → US2 → US4 → US3 → US5 → Polish (theme can be lightly present fro
 - [P] = different files, no blocking dependency on incomplete sibling tasks
 - No automated browser test tasks (not requested)
 - Sample/placeholder media is explicitly allowed by the spec
-- Do not implement video switcher, schedule, deep theme packs, UI glitch/hover motion, or
-  track-info panel (FR-011); glitch lives on branch/spec `003-ui-glitch`
+- Do not implement video switcher, schedule, deep theme packs, or track-info panel (FR-011)
 - Commit after each task or logical group; keep `main` deployable via PR when ready

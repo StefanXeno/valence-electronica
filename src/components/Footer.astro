@@ -10,7 +10,13 @@ const year = new Date().getFullYear();
 <footer>
   <nav aria-label="Legal">
     {legalPages.map((page) => (
-      <a href={withBase(`/legal/${page.id}`)}>{page.data.title}</a>
+      <a
+        class="glitch-hit"
+        href={withBase(`/legal/${page.id}`)}
+        data-legal-slug={page.id}
+      >
+        {page.data.title}
+      </a>
     ))}
   </nav>
   <p>© {year} {site.artist.name}</p>

@@ -48,18 +48,22 @@ All Technical Context unknowns for this feature were resolved as follows.
 - **Alternatives considered**: Per-component theme props (harder to keep global mood);
   runtime theme JS (unnecessary for static default).
 
-## R5: Legal panel presentation without a SPA
+## R5: Legal panel as in-page overlay (static routes + History API)
 
-- **Decision**: Keep routes `/legal/imprint` and `/legal/privacy`. Each legal page reuses
-  the shared atmosphere (video/poster + theme) and renders content inside a
-  near-fullscreen **panel** with viewport margins and a top **Exit** control linking home
-  (`/`). Open animation via CSS (`@keyframes` / transition) skipped under reduced motion.
-- **Rationale**: Spec requires direct URL access, exit back to landing, margins revealing
-  atmosphere, and readable legal text — all achievable with static pages + CSS, without a
-  client router or dialog library (constitution IV/VI).
-- **Alternatives considered**: In-page `<dialog>` only on index (breaks refresh/direct
-  legal URLs unless duplicated); Astro View Transitions (optional later polish, not
-  required); full separate plain legal layout (rejected by clarify answer).
+- **Decision**: Keep shareable routes `/legal/imprint` and `/legal/privacy`. Prerender all
+  legal panels into the shared shell (`LegalOverlay` + `LegalPanel`). Footer clicks and
+  Exit use small first-party JS (`preventDefault` + `history.pushState` / `popstate`) so
+  opening/closing does **not** full-reload the document — atmosphere/audio keep running.
+  Direct visit/refresh on `/legal/{slug}` still SSRs the matching panel open over the
+  landing shell. Exit control is an **X** icon with accessible name “Exit”. Open animation
+  via CSS skipped under reduced motion.
+- **Rationale**: Owner wants legal reading without tearing down the landing session; German
+  law still needs reachable Impressum/privacy (constitution V); URLs stay bookmarkable.
+  Still static HTML/JS artifacts (constitution I); no SPA framework.
+- **Alternatives considered**: Full page navigation only (original MVP; rejected after
+  owner feedback — interrupts audio/atmosphere); in-page `<dialog>` only on index without
+  duplicated deep-link HTML (breaks refresh/direct URLs); Astro View Transitions (heavier
+  than needed); third-party dialog/router libs (rejected: IV/V/VI).
 
 ## R6: Where content lives
 
@@ -73,16 +77,15 @@ All Technical Context unknowns for this feature were resolved as follows.
 
 ## R7: Client JS budget
 
-- **Decision**: One small bundled script attached to `MuteControl` (and shared fallback
-  wiring in the atmosphere component): toggle `muted` / `volume`, update accessible
-  name/pressed state, set fallback state on error/play rejection. No analytics, no
-  frameworks, no hydration libraries. UI glitch/hover motion is out of scope here and
-  tracked as `003-ui-glitch`.
-- **Rationale**: Constitution IV exception documented in plan Complexity Tracking; legal
-  panel needs no JS for MVP.
+- **Decision**: Small first-party scripts only: (1) `MuteControl` for mute/volume +
+  playback-failure fallback; (2) `LegalOverlay` for in-page open/close + History API URL
+  sync. No analytics, no frameworks, no hydration libraries. Without JS, footer `href`s
+  still hard-navigate to `/legal/{slug}` and Exit still links home.
+- **Rationale**: Constitution IV exceptions documented in plan Complexity Tracking; progressive
+  enhancement keeps legal reachable if JS fails (constitution V).
 - **Alternatives considered**: React/Solid island (rejected: dependency weight); zero JS
-  with checkbox mute (weak a11y and no failure path); bundling glitch motion into this
-  feature (rejected — separate spec `003-ui-glitch`).
+  with checkbox mute (weak a11y and no failure path); full reload for every legal open
+  (rejected by owner — kills atmosphere/audio continuity).
 
 ## R8: Sample assets for shipping
 

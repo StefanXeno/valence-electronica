@@ -1,7 +1,7 @@
-# Specification Quality Checklist: Website Skeleton for Valence
+# Specification Quality Checklist: UI Glitch Interactions
 
 **Purpose**: Validate specification completeness and quality before proceeding to planning
-**Created**: 2026-08-07
+**Created**: 2026-08-10
 **Feature**: [spec.md](../spec.md)
 
 ## Content Quality
@@ -31,8 +31,14 @@
 
 ## Notes
 
-- Items marked incomplete require spec updates before `/speckit-clarify` or `/speckit-plan`
-- Open points are deliberately documented as assumptions instead of blockers: final tagline
-  and copy, photos/logo. Platform channel URLs/icons for Bandcamp/SoundCloud/YouTube/
-  Instagram/TikTok/Spotify are configured; confirm
-  with the artist before replacing the placeholders.
+- Validation passed on 2026-08-10 (iteration 1).
+- Re-validated after `/speckit-clarify` session 2026-08-12: still 16/16 passing; scope,
+  mute continuous hover, stacking, intensity owner bar, and keyboard-visible focus now
+  explicit in `spec.md`.
+- Spec captures glitch work extracted from `002-themed-background-video`.
+- Explicitly excludes Seravek typeface change and per-video deep motion packs.
+- Provisional implementation lives on branch `003-ui-glitch` as a refine-against-spec
+  starting point.
+- Plan + tasks generated 2026-08-12; analyze HIGH/MEDIUM remediations applied (C1 reduce-
+  motion recheck after continuous mute; morph>continuous precedence; 320px check;
+  “in-scope” wording). Ready for `/speckit-implement`.

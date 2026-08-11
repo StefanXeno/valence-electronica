@@ -1,8 +1,9 @@
 ---
-import { getCollection, render } from 'astro:content';
+import { getCollection } from 'astro:content';
 import type { CollectionEntry } from 'astro:content';
 import Base from '../../layouts/Base.astro';
-import LegalPanel from '../../components/LegalPanel.astro';
+import Hero from '../../components/Hero.astro';
+import Channels from '../../components/Channels.astro';
 import site from '../../data/site.json';
 
 export async function getStaticPaths() {
@@ -14,12 +15,14 @@ interface Props {
   entry: CollectionEntry<'legal'>;
 }
 
-const { entry } = Astro.props;
-const { Content } = await render(entry);
+const { entry } = Astro.props as Props;
 ---
 
+<!--
+  Same landing shell as `/`. LegalOverlay in Base opens the matching panel from the URL
+  so deep links work; footer clicks on the home page use history + overlay (no reload).
+-->
 <Base title={`${entry.data.title} — ${site.artist.name}`}>
-  <LegalPanel title={entry.data.title}>
-    <Content />
-  </LegalPanel>
+  <Hero />
+  <Channels />
 </Base>

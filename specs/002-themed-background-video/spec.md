@@ -148,16 +148,18 @@ instead.
 A visitor opens Impressum or the privacy policy and sees the legal content in a large panel
 that covers nearly the whole viewport, with visible margin on all sides so the landing
 atmosphere (themed background video or its static fallback) remains visible around the
-panel. The panel appears with a smooth animation. An exit control at the top closes the
-panel and returns the visitor to the landing content. Legal text inside the panel stays
-readable and scrollable if long.
+panel. The panel appears with a smooth animation. An exit control (X icon, accessible name
+“Exit”) at the top closes the panel and returns the visitor to the landing content. From
+the landing page, opening Impressum/privacy MUST NOT full-reload the document when scripting
+is available, so the atmosphere (and any playing audio) continues. Legal text inside the
+panel stays readable and scrollable if long.
 
 **Why this priority**: German sites must expose Impressum and privacy; presenting them as
 an overlay keeps the atmospheric landing experience while making exit obvious.
 
 **Independent Test**: From the landing page, open Impressum and privacy, confirm the
-near-fullscreen panel with margins, top exit control, readable content, and successful
-dismiss back to the landing page.
+near-fullscreen panel with margins, X exit control, readable content, no full document
+reload when JS is available, and successful dismiss back to the landing page.
 
 **Acceptance Scenarios**:
 
@@ -169,6 +171,10 @@ dismiss back to the landing page.
    **Then** the panel closes and the landing page content is available again.
 4. **Given** the legal panel is open, **When** the visitor reads the legal text, **Then**
    the text remains readable (and scrollable if it exceeds the panel height).
+5. **Given** the landing page is open and scripting is available, **When** the visitor
+   opens Impressum or privacy from the footer, **Then** the document does not full-reload
+   and the shareable `/legal/{slug}` URL is reflected (History API); Exit / Escape returns
+   to the landing URL without a full reload.
 
 ---
 
@@ -192,6 +198,8 @@ dismiss back to the landing page.
   animation; panel still opens and the exit control still works.
 - Direct visit or refresh on a legal URL → visitor still reaches the same legal content and
   can exit back to the landing experience (no dead-end without exit).
+- Scripting unavailable → footer links hard-navigate to `/legal/{slug}`; Exit hard-navigates
+  home; panel chrome and readable content still work.
 
 ## Requirements *(mandatory)*
 
@@ -225,12 +233,15 @@ dismiss back to the landing page.
   remains usable; clips SHOULD stay short (about 8–20 seconds) and lightweight rather than
   long-form files.
 - **FR-011**: This feature MUST NOT require a visitor-facing video picker, schedule rules,
-  deep per-theme typography/motion packs, UI glitch/hover motion language, or per-video
-  track-info panels (those are separate future features; UI glitch is `003-ui-glitch`).
+  deep per-theme typography/motion packs, or per-video track-info panels (those are
+  separate future features).
 - **FR-012**: Impressum and privacy MUST each open in a near-fullscreen content panel with
   visible margin on all sides over the landing atmosphere, MUST appear with a smooth
-  animation when motion is allowed, and MUST provide an exit control at the top that
-  dismisses the panel and returns the visitor to the landing experience.
+  animation when motion is allowed, and MUST provide a top exit control (X icon with
+  accessible name “Exit”) that dismisses the panel and returns the visitor to the landing
+  experience. When scripting is available, opening or dismissing from the landing session
+  MUST NOT require a full document reload; shareable `/legal/{slug}` URLs MUST remain valid
+  on direct visit/refresh.
 - **FR-013**: Legal panel content MUST remain readable and scrollable independently of
   background video playback; when reduced motion is preferred, open/close animation MUST
   be skipped or minimized without removing exit.
@@ -279,13 +290,13 @@ dismiss back to the landing page.
   sample/placeholder clip and poster is acceptable until real media is provided.
 - “Basic theme” in this feature means color and surface mood only. Richer per-video packs
   (typography, motion language, hover treatments) are a separate feature (IDEA-002).
-  Shared UI glitch/hover treatments on controls are a separate feature (`003-ui-glitch`).
 - A visitor-facing switcher for multiple clips, calendar-based defaults, and per-video
   track info panels are separate features (IDEA-003, IDEA-004, IDEA-006) even if the data
   model can already name more than one video.
-- Impressum and privacy remain reachable legal destinations; this feature changes their
-  presentation to a dismissible near-fullscreen panel over the landing atmosphere rather
-  than a separate plain full-page layout without that overlay pattern.
+- Impressum and privacy remain reachable legal destinations; this feature presents them as
+  a dismissible near-fullscreen panel over the landing atmosphere (in-page overlay with
+  shareable `/legal/{slug}` URLs) rather than a plain full-page layout without that
+  overlay pattern.
 - Any client-side behavior required for playback/mute or the legal panel will be justified
   in the feature plan against the constitution's lightweight-by-default principle; the
   specification only requires the visitor-facing outcomes above.
