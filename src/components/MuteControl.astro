@@ -1,0 +1,229 @@
+---
+---
+
+<div class="volume-control" data-volume-control data-sound="off" hidden>
+  <button
+    type="button"
+    class="volume-control__toggle"
+    data-mute-control
+    aria-pressed="true"
+    aria-label="Unmute background audio"
+  >
+    <svg
+      class="volume-control__icon volume-control__icon--muted"
+      viewBox="0 0 24 24"
+      width="22"
+      height="22"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path
+        fill="currentColor"
+        d="M16.5 12a4.5 4.5 0 0 0-2.25-3.9v1.96l2.17 2.17c.05-.24.08-.48.08-.73Zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51A8.8 8.8 0 0 0 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71ZM4.27 3 3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06a8.99 8.99 0 0 0 3.69-1.81L19.73 21 21 19.73 4.27 3ZM12 4 9.91 6.09 12 8.18V4Z"
+      ></path>
+    </svg>
+    <svg
+      class="volume-control__icon volume-control__icon--on"
+      viewBox="0 0 24 24"
+      width="22"
+      height="22"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path
+        fill="currentColor"
+        d="M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0 0 14 8.97v6.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"
+      ></path>
+    </svg>
+  </button>
+
+  <label class="volume-control__slider-wrap" data-volume-wrap>
+    <span class="visually-hidden">Volume</span>
+    <input
+      class="volume-control__slider"
+      data-volume-slider
+      type="range"
+      min="0"
+      max="1"
+      step="0.01"
+      value="0.7"
+      aria-label="Background audio volume"
+    />
+  </label>
+</div>
+
+<script>
+  function initMuteControl() {
+    const root = document.querySelector<HTMLElement>('[data-atmosphere]');
+    const video = root?.querySelector<HTMLVideoElement>('[data-bg-video]');
+    const control = document.querySelector<HTMLElement>('[data-volume-control]');
+    const button = control?.querySelector<HTMLButtonElement>('[data-mute-control]');
+    const slider = control?.querySelector<HTMLInputElement>('[data-volume-slider]');
+    if (!root || !video || !control || !button || !slider) return;
+
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let lastVolume = Number(slider.value) || 0.7;
+    video.volume = lastVolume;
+
+    const applySoundUi = (muted: boolean) => {
+      control.dataset.sound = muted ? 'off' : 'on';
+      button.setAttribute('aria-pressed', muted ? 'true' : 'false');
+      button.setAttribute('aria-label', muted ? 'Unmute background audio' : 'Mute background audio');
+      if (!muted) slider.value = String(video.volume);
+    };
+
+    const sync = () => {
+      const fallback = root.getAttribute('data-bg-state') === 'fallback' || reduceMotion.matches;
+      control.hidden = fallback;
+      if (fallback) {
+        applySoundUi(true);
+        return;
+      }
+
+      const muted = video.muted || video.volume === 0;
+      applySoundUi(muted);
+    };
+
+    button.addEventListener('click', () => {
+      if (video.muted || video.volume === 0) {
+        video.muted = false;
+        video.volume = lastVolume > 0 ? lastVolume : 0.7;
+        slider.value = String(video.volume);
+      } else {
+        lastVolume = video.volume > 0 ? video.volume : lastVolume;
+        video.muted = true;
+      }
+      sync();
+    });
+
+    slider.addEventListener('input', () => {
+      const next = Number(slider.value);
+      video.volume = next;
+      video.muted = next === 0;
+      if (next > 0) lastVolume = next;
+      sync();
+    });
+
+    root.addEventListener('bg-state-change', sync);
+    reduceMotion.addEventListener('change', sync);
+    sync();
+  }
+
+  initMuteControl();
+</script>
+
+<style>
+  .volume-control {
+    --control-size: 3.1rem;
+    position: fixed;
+    right: var(--space-m);
+    bottom: var(--space-m);
+    z-index: 4;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    background: var(--color-surface);
+    color: var(--color-text);
+    box-sizing: border-box;
+    transition:
+      padding 160ms ease,
+      gap 160ms ease,
+      width 160ms ease;
+  }
+
+  .volume-control[data-sound='off'] {
+    width: var(--control-size);
+    height: var(--control-size);
+    padding: 0;
+    gap: 0;
+  }
+
+  .volume-control[data-sound='on'] {
+    width: auto;
+    height: var(--control-size);
+    padding: 0 0.75rem 0 0.35rem;
+    gap: 0.55rem;
+  }
+
+  .volume-control[hidden] {
+    display: none;
+  }
+
+  .volume-control__toggle {
+    position: relative;
+    display: inline-grid;
+    place-items: center;
+    flex: 0 0 auto;
+    width: 2.4rem;
+    height: 2.4rem;
+    padding: 0;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+  }
+
+  .volume-control__toggle:hover {
+    color: var(--color-accent-alt);
+  }
+
+  .volume-control__icon {
+    grid-area: 1 / 1;
+    display: block;
+  }
+
+  .volume-control__icon--on {
+    display: none;
+  }
+
+  .volume-control[data-sound='on'] .volume-control__icon--muted {
+    display: none;
+  }
+
+  .volume-control[data-sound='on'] .volume-control__icon--on {
+    display: block;
+  }
+
+  .volume-control__slider-wrap {
+    display: none;
+    align-items: center;
+    width: 0;
+    max-width: 0;
+    opacity: 0;
+    overflow: hidden;
+  }
+
+  .volume-control[data-sound='on'] .volume-control__slider-wrap {
+    display: flex;
+    width: min(8.5rem, 28vw);
+    max-width: min(8.5rem, 28vw);
+    opacity: 1;
+  }
+
+  .volume-control__slider {
+    width: min(8.5rem, 28vw);
+    accent-color: var(--color-accent);
+    cursor: pointer;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .volume-control {
+      transition: none;
+    }
+  }
+
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+</style>

@@ -18,12 +18,18 @@ npm run preview   # serve the built site locally
 
 ## Editing content
 
-All content lives in two places — no code changes needed:
+All content lives in structured data/files — no layout changes needed for routine updates:
 
 - **`src/data/site.json`** — artist name, tagline, description, and the channel links.
   - Add or edit entries under `channels`. Set `"status": "active"` with a `"url"` to show
     a real link; `"status": "placeholder"` shows a "coming soon" chip without a link.
   - Set `"seo": { "indexable": true }` at launch to allow search engines to index the site.
+- **`src/data/background.json`** — default background video, poster path, `hasAudio`, and
+  `themeId` (must match a pack in `src/styles/themes.css`).
+  - Put media files under `public/videos/` and `public/images/posters/`, then point
+    `sources` / `poster` at those paths.
+  - v1 uses a single default clip (no visitor-facing switcher yet). The current file is a
+    temporary 30s cut for testing.
 - **`src/content/legal/`** — `imprint.md` (Impressum) and `privacy.md`
   (Datenschutzerklärung). Both are placeholders and MUST be filled with real information
   before the site is promoted publicly.

@@ -18,9 +18,6 @@ const { name, tagline, description, location } = site.artist;
     flex-direction: column;
     justify-content: center;
     padding: var(--space-xl) 0 var(--space-l);
-    background:
-      radial-gradient(60rem 30rem at 80% -10%, color-mix(in srgb, var(--color-accent) 22%, transparent), transparent 70%),
-      radial-gradient(40rem 24rem at 0% 110%, color-mix(in srgb, var(--color-accent-alt) 12%, transparent), transparent 70%);
   }
 
   .location {
@@ -29,16 +26,15 @@ const { name, tagline, description, location } = site.artist;
     font-size: 0.85rem;
     letter-spacing: 0.2em;
     text-transform: uppercase;
+    text-shadow: 0 1px 12px var(--bg-scrim);
   }
 
   h1 {
     margin: 0;
     font-size: clamp(2.75rem, 12vw, 5.5rem);
     font-weight: 700;
-    background: linear-gradient(100deg, var(--color-text) 40%, var(--color-accent) 80%, var(--color-accent-alt));
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+    color: var(--color-text);
+    text-shadow: 0 2px 24px var(--bg-scrim);
   }
 
   .tagline {
@@ -46,11 +42,13 @@ const { name, tagline, description, location } = site.artist;
     font-family: var(--font-display);
     font-size: clamp(1.1rem, 4vw, 1.5rem);
     color: var(--color-accent-alt);
+    text-shadow: 0 1px 16px var(--bg-scrim);
   }
 
   .description {
     margin: var(--space-m) 0 0;
     max-width: 36rem;
     color: var(--color-text-muted);
+    text-shadow: 0 1px 12px var(--bg-scrim);
   }
 </style>

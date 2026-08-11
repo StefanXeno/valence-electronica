@@ -1,0 +1,108 @@
+---
+import { withBase } from '../lib/url';
+
+interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<div
+  class="legal-panel"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="legal-panel-title"
+>
+  <div class="legal-panel__frame">
+    <header class="legal-panel__header">
+      <a class="legal-panel__exit" href={withBase('/')}>Exit</a>
+      <h1 id="legal-panel-title">{title}</h1>
+    </header>
+    <div class="legal-panel__body">
+      <slot />
+    </div>
+  </div>
+</div>
+
+<style>
+  .legal-panel {
+    position: fixed;
+    inset: 0;
+    z-index: 5;
+    display: grid;
+    place-items: stretch;
+    padding: clamp(0.75rem, 3vw, 1.5rem);
+    pointer-events: none;
+  }
+
+  .legal-panel__frame {
+    pointer-events: auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    max-height: 100%;
+    border: 1px solid var(--color-border);
+    border-radius: 0.75rem;
+    background: color-mix(in srgb, var(--color-surface) 92%, transparent);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 1rem 3rem rgb(0 0 0 / 35%);
+    animation: legal-panel-in 320ms ease-out both;
+  }
+
+  .legal-panel__header {
+    display: grid;
+    gap: var(--space-s);
+    padding: var(--space-m) var(--space-m) var(--space-s);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .legal-panel__exit {
+    justify-self: start;
+    color: var(--color-text);
+    text-decoration: none;
+    font-size: 0.9rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    padding: 0.35rem 0.85rem;
+    background: var(--color-bg);
+  }
+
+  .legal-panel__exit:hover {
+    border-color: var(--color-accent);
+  }
+
+  .legal-panel__header h1 {
+    margin: 0;
+    font-size: clamp(1.5rem, 5vw, 2.25rem);
+  }
+
+  .legal-panel__body {
+    overflow: auto;
+    padding: var(--space-m);
+    color: var(--color-text);
+  }
+
+  .legal-panel__body :global(p) {
+    max-width: 42rem;
+  }
+
+  @keyframes legal-panel-in {
+    from {
+      opacity: 0;
+      transform: translateY(0.75rem) scale(0.985);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .legal-panel__frame {
+      animation: none;
+    }
+  }
+</style>

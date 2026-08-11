@@ -61,7 +61,8 @@ const channels = site.channels.map((channel) => ({
     padding: 0.6em 1.1em;
     border: 1px solid var(--color-border);
     border-radius: 999px;
-    background: var(--color-surface);
+    background: color-mix(in srgb, var(--color-surface) 88%, transparent);
+    backdrop-filter: blur(6px);
     font-family: var(--font-display);
     font-size: 0.9rem;
   }
@@ -69,12 +70,10 @@ const channels = site.channels.map((channel) => ({
   li a {
     color: var(--color-text);
     text-decoration: none;
-    transition: border-color 150ms ease, transform 150ms ease;
   }
 
   li a:hover {
     border-color: var(--color-accent);
-    transform: translateY(-2px);
   }
 
   li.placeholder {

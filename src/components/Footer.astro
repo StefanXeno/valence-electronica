@@ -9,7 +9,9 @@ const year = new Date().getFullYear();
 
 <footer>
   <nav aria-label="Legal">
-    {legalPages.map((page) => <a href={withBase(`/legal/${page.id}`)}>{page.data.title}</a>)}
+    {legalPages.map((page) => (
+      <a href={withBase(`/legal/${page.id}`)}>{page.data.title}</a>
+    ))}
   </nav>
   <p>© {year} {site.artist.name}</p>
 </footer>
@@ -27,6 +29,7 @@ const year = new Date().getFullYear();
     gap: var(--space-s);
     font-size: 0.85rem;
     color: var(--color-text-muted);
+    text-shadow: 0 1px 10px var(--bg-scrim);
   }
 
   nav {
@@ -35,11 +38,13 @@ const year = new Date().getFullYear();
   }
 
   nav a {
-    color: var(--color-text-muted);
+    color: var(--color-text);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
   }
 
   nav a:hover {
-    color: var(--color-text);
+    color: var(--color-accent-alt);
   }
 
   p {
