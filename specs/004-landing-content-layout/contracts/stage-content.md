@@ -23,6 +23,10 @@ stageButtonLabel: Play on stage
 emptyLyrics: Lyrics not available
 emptyReleases: No releases yet
 emptyShows: No upcoming dates
+jukeboxLabel: Jukebox
+socialsLabel: Socials
+comingSoon: coming soon
+ticketLabel: Tickets
 ---
 ```
 
@@ -74,16 +78,20 @@ Rules:
 - Body = lyrics for that entry. Empty body → lyrics panel shows `emptyLyrics`.
 - `themeId` must match a pack in `src/styles/themes.css` (unknown → `default` pack).
 - Media paths are site-root paths under `public/` (honor Astro `base` when emitting).
-- Missing required logical fields → **omit this entry**, build the rest (FR-020).
-- Adding a new clip: drop files in `public/videos/` + `public/images/posters/`, then add
-  a Markdown file. New `themeId` values still need a CSS pack (developer).
+- `sources` optional. Looping video + unmute audio only when `themeId` is
+  `nightmare-crimson` and sources exist. Other entries MAY be poster-only stills
+  (`hasAudio: false`); mute stays hidden while they are active.
+- Missing required logical fields (`label`, `poster`) → **omit this entry**, build
+  the rest (FR-020).
+- Adding a new clip: drop poster (and optional video) in `public/`, then add a
+  Markdown file. New `themeId` values still need a CSS pack (developer).
 
 v1 example set:
 
-- `placeholder-loop.md` — existing NIGHTMARE temp media, `default: true`,
-  `nightmare-crimson`
-- `example-cyan.md` — **same** MP4/poster, `themeId: cyan-pulse`, example lyrics (proves
-  switch without a second video file)
+- `placeholder-loop.md` — NIGHTMARE temp media, `default: true`,
+  `nightmare-crimson`, MP4 + poster, `hasAudio: true`
+- `example-cyan.md` — **poster only** (`/images/posters/placeholder-cyan.svg`),
+  `themeId: cyan-pulse`, no `sources`, `hasAudio: false` (static still, no mute)
 
 ## `src/content/releases/<slug>.md`
 
@@ -117,18 +125,22 @@ Rules:
 
 ```markdown
 ---
-date: 2026-12-31
+date: 2026-12-05
 city: Augsburg
 venue: Example Venue
-ticketUrl: https://example.com/tickets
+ticketUrl: https://valenceelectronica.bandcamp.com/
 ---
+
+EXAMPLE PLACEHOLDER SHOW — replace with a real date.
 ```
 
 Rules:
 
 - `date`, `city`, `venue` required or the show is omitted.
 - Timezone for “upcoming”: Europe/Berlin, calendar date.
-- Past dates are not listed on the stage. v1 may ship **zero** show files.
+- Past dates are not listed on the stage.
+- v1 ships `example-augsburg.md` (clearly marked EXAMPLE). Zero shows is still a
+  valid empty state after that file is removed.
 
 ## `src/data/site.json`
 

@@ -2,12 +2,17 @@
   --font-display: 'Unbounded Variable', system-ui, sans-serif;
   --font-body: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
 
+  --hud-scale: 1.5;
+
   --space-s: 0.75rem;
   --space-m: 1.25rem;
   --space-l: 2.5rem;
   --space-xl: 5rem;
 
-  --content-width: 42rem;
+  --control-size: calc(3.1rem * var(--hud-scale));
+  --hud-inset: calc(0.75rem * var(--hud-scale));
+  --hud-footer: calc(2.4rem * var(--hud-scale));
+  --hud-mute: calc(5.5rem * var(--hud-scale));
 }
 
 *,
@@ -18,11 +23,13 @@
 
 html {
   color-scheme: dark;
+  overflow-x: clip;
 }
 
 body {
   margin: 0;
   min-height: 100svh;
+  overflow-x: clip;
   background: var(--color-bg);
   color: var(--color-text);
   font-family: var(--font-body);
@@ -33,9 +40,9 @@ body {
 main {
   flex: 1;
   width: 100%;
-  max-width: var(--content-width);
-  margin: 0 auto;
-  padding: 0 var(--space-m);
+  max-width: none;
+  margin: 0;
+  padding: 0;
 }
 
 h1,
@@ -60,4 +67,56 @@ a {
   outline: 2px solid var(--color-accent-alt);
   outline-offset: 3px;
   border-radius: 2px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Full-viewport stage: center stays empty (atmosphere only). */
+.stage {
+  position: relative;
+  min-height: 100svh;
+  pointer-events: none;
+}
+
+.stage__identity,
+.stage__socials,
+.stage__jukebox,
+.stage__panels {
+  pointer-events: auto;
+  position: fixed;
+  z-index: 2;
+}
+
+.stage__identity {
+  top: var(--hud-inset);
+  left: var(--hud-inset);
+  max-width: min(calc(18rem * var(--hud-scale)), calc(100vw - 10rem));
+}
+
+.stage__socials {
+  top: var(--hud-inset);
+  right: var(--hud-inset);
+  max-width: calc(100vw - 7.5rem);
+}
+
+.stage__jukebox {
+  left: var(--hud-inset);
+  bottom: var(--hud-footer);
+  max-width: min(16rem, calc(100vw - 2 * var(--hud-inset)));
+}
+
+.stage__panels {
+  right: var(--space-m);
+  bottom: var(--hud-mute);
+  width: min(calc(14rem * var(--hud-scale)), calc(100vw - 2 * var(--hud-inset)));
 }

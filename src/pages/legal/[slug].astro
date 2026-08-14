@@ -4,6 +4,8 @@ import type { CollectionEntry } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import Hero from '../../components/Hero.astro';
 import Channels from '../../components/Channels.astro';
+import Jukebox from '../../components/Jukebox.astro';
+import StagePanels from '../../components/StagePanels.astro';
 import site from '../../data/site.json';
 
 export async function getStaticPaths() {
@@ -23,6 +25,18 @@ const { entry } = Astro.props as Props;
   so deep links work; footer clicks on the home page use history + overlay (no reload).
 -->
 <Base title={`${entry.data.title} — ${site.artist.name}`}>
-  <Hero />
-  <Channels />
+  <div class="stage">
+    <div class="stage__identity">
+      <Hero />
+    </div>
+    <div class="stage__socials">
+      <Channels />
+    </div>
+    <div class="stage__jukebox">
+      <Jukebox />
+    </div>
+    <div class="stage__panels">
+      <StagePanels />
+    </div>
+  </div>
 </Base>

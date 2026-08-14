@@ -1,0 +1,114 @@
+---
+import AboutPanel from './AboutPanel.astro';
+import LyricsPanel from './LyricsPanel.astro';
+import Discography from './Discography.astro';
+import TourDates from './TourDates.astro';
+import { getBackgroundConfig } from '../lib/background';
+import { getAboutEntry, getChrome } from '../lib/stage';
+
+const [chrome, about, { defaultVideoId }] = await Promise.all([
+  getChrome(),
+  getAboutEntry(),
+  getBackgroundConfig(),
+]);
+---
+
+<div class="stage-panels" data-stage-panels>
+  {
+    about && (
+      <details class="glitch-hit">
+        <summary>{chrome.aboutTitle}</summary>
+        <div class="stage-panel__body">
+          <AboutPanel />
+        </div>
+      </details>
+    )
+  }
+  <details class="glitch-hit">
+    <summary>{chrome.lyricsTitle}</summary>
+    <div class="stage-panel__body">
+      <LyricsPanel chrome={chrome} />
+    </div>
+  </details>
+  <details class="glitch-hit">
+    <summary>{chrome.discographyTitle}</summary>
+    <div class="stage-panel__body">
+      <Discography chrome={chrome} defaultId={defaultVideoId} />
+    </div>
+  </details>
+  <details class="glitch-hit">
+    <summary>{chrome.tourTitle}</summary>
+    <div class="stage-panel__body">
+      <TourDates chrome={chrome} />
+    </div>
+  </details>
+</div>
+
+<script>
+  function initExclusivePanels() {
+    const cluster = document.querySelector('[data-stage-panels]');
+    if (!cluster) return;
+
+    cluster.addEventListener(
+      'toggle',
+      (event) => {
+        const target = event.target;
+        if (!(target instanceof HTMLDetailsElement) || !target.open) return;
+        cluster.querySelectorAll('details[open]').forEach((node) => {
+          if (node instanceof HTMLDetailsElement && node !== target) node.open = false;
+        });
+      },
+      true,
+    );
+  }
+
+  initExclusivePanels();
+</script>
+
+<style>
+  .stage-panels {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.35rem;
+  }
+
+  details {
+    overflow: visible;
+    border: 1px solid var(--color-border);
+    border-radius: 0.55rem;
+    background: color-mix(in srgb, var(--color-surface) 90%, transparent);
+    backdrop-filter: blur(8px);
+  }
+
+  summary {
+    cursor: pointer;
+    padding: 0.45em 0.75em;
+    font-family: var(--font-display);
+    font-size: calc(0.75rem * var(--hud-scale));
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-text);
+    list-style: none;
+  }
+
+  summary::marker {
+    content: '';
+  }
+
+  summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .stage-panel__body {
+    padding: 0 0.75em 0.75em;
+    max-height: min(30svh, calc(11rem * var(--hud-scale)));
+    overflow: auto;
+    font-size: calc(0.9rem * var(--hud-scale));
+    color: var(--color-text);
+  }
+
+  .stage-panel__body :global(p) {
+    margin: 0;
+  }
+</style>

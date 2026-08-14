@@ -2,9 +2,23 @@
 import Base from '../layouts/Base.astro';
 import Hero from '../components/Hero.astro';
 import Channels from '../components/Channels.astro';
+import Jukebox from '../components/Jukebox.astro';
+import StagePanels from '../components/StagePanels.astro';
 ---
 
 <Base>
-  <Hero />
-  <Channels />
+  <div class="stage">
+    <div class="stage__identity">
+      <Hero />
+    </div>
+    <div class="stage__socials">
+      <Channels />
+    </div>
+    <div class="stage__jukebox">
+      <Jukebox />
+    </div>
+    <div class="stage__panels">
+      <StagePanels />
+    </div>
+  </div>
 </Base>

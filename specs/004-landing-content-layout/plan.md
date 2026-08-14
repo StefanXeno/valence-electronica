@@ -14,6 +14,13 @@ visitor-facing theme/song switcher: picking an entry (or the discography stage b
 bound) updates atmosphere + `data-theme` + lyrics for this load only — reload returns to
 the content-configured default. No third-party players, no visit memory, no new routes.
 
+**As-built (2026-08-14):** Spec + UI contract are the source of truth. Laptop HUD
+slots are frozen; jukebox is a collapsed vinyl control; socials are icon-only;
+footer is a transparent left cluster; looping video and glitch are Nightmare-only;
+poster-only jukebox entries are valid; visual success is typical laptop (phone HUD
+= IDEA-013). Historical plan bullets below that say “no glitch expansion” or
+“320px HUD polish” are superseded.
+
 ## Technical Context
 
 **Language/Version**: TypeScript (strict), Node.js 22+ (LTS) for build tooling only

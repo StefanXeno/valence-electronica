@@ -250,7 +250,15 @@ export function applyGlitchPreset(el: HTMLElement): GlitchPreset {
 /** @deprecated Use applyGlitchPreset — kept as alias for call sites. */
 export const rollGlitchVars = applyGlitchPreset;
 
+export const GLITCH_THEME_ID = 'nightmare-crimson';
+
+/** Glitch motion only runs on the Nightmare theme pack. */
+export function isGlitchThemeActive(): boolean {
+  return document.documentElement.dataset.theme === GLITCH_THEME_ID;
+}
+
 export function playElementGlitch(el: HTMLElement, className = 'is-glitching'): number {
+  if (!isGlitchThemeActive()) return 0;
   const preset = applyGlitchPreset(el);
   el.classList.remove('is-glitching', 'is-glitch-hover', 'is-glitch-continuous');
   el.style.animation = 'none';

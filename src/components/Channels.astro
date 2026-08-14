@@ -1,7 +1,9 @@
 ---
 import site from '../data/site.json';
 import ChannelIcon from './ChannelIcon.astro';
+import { getChrome } from '../lib/stage';
 
+const chrome = await getChrome();
 const channels = site.channels.map((channel) => {
   const id =
     'id' in channel && typeof channel.id === 'string'
@@ -18,8 +20,7 @@ const channels = site.channels.map((channel) => {
 
 {
   channels.length > 0 && (
-    <section class="channels" aria-labelledby="channels-heading">
-      <h2 id="channels-heading">Listen &amp; Follow</h2>
+    <nav class="channels" aria-label={chrome.socialsLabel}>
       <ul>
         {channels.map((channel) =>
           channel.active ? (
@@ -29,57 +30,52 @@ const channels = site.channels.map((channel) => {
                 href={channel.url}
                 target="_blank"
                 rel="noopener noreferrer"
+                aria-label={channel.label}
               >
                 <ChannelIcon id={channel.id} label={channel.label} />
-                <span>{channel.label}</span>
               </a>
             </li>
           ) : (
             <li class="placeholder">
-              <ChannelIcon id={channel.id} label={channel.label} />
-              <span>{channel.label}</span>
-              <span class="soon">coming soon</span>
+              <span aria-label={`${channel.label} — ${chrome.comingSoon}`}>
+                <ChannelIcon id={channel.id} label={channel.label} />
+              </span>
             </li>
           ),
         )}
       </ul>
-    </section>
+    </nav>
   )
 }
 
 <style>
   .channels {
-    padding: var(--space-l) 0 var(--space-xl);
-  }
-
-  h2 {
-    font-size: 1.1rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--color-text-muted);
+    text-shadow: 0 1px 12px var(--bg-scrim);
   }
 
   ul {
     list-style: none;
-    margin: var(--space-m) 0 0;
+    margin: 0;
     padding: 0;
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-s);
+    justify-content: flex-end;
+    align-items: center;
+    gap: calc(0.3rem * var(--hud-scale));
   }
 
   li a,
-  li.placeholder {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.55em;
-    padding: 0.6em 1.1em;
+  li.placeholder span {
+    display: inline-grid;
+    place-items: center;
+    width: calc(2.5rem * var(--hud-scale));
+    height: calc(2.5rem * var(--hud-scale));
+    padding: 0;
     border: 1px solid var(--color-border);
     border-radius: 999px;
     background: color-mix(in srgb, var(--color-surface) 88%, transparent);
     backdrop-filter: blur(6px);
-    font-family: var(--font-display);
-    font-size: 0.9rem;
+    box-sizing: border-box;
   }
 
   li a {
@@ -89,22 +85,22 @@ const channels = site.channels.map((channel) => {
 
   li a:hover {
     border-color: var(--color-accent);
+    color: var(--color-accent-alt);
   }
 
   li a :global(.channel-icon),
   li.placeholder :global(.channel-icon) {
     flex-shrink: 0;
     display: block;
+    width: calc(22px * var(--hud-scale));
+    height: calc(22px * var(--hud-scale));
   }
 
   li.placeholder {
     color: var(--color-text-muted);
   }
 
-  .soon {
-    font-size: 0.7rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--color-accent);
+  li.placeholder span {
+    cursor: default;
   }
 </style>

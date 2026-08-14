@@ -26,16 +26,18 @@ npm run preview
 
 ## Validation scenarios (map to spec)
 
-1. **US1 — free center**: Laptop and ~320px phone. Expect: atmosphere in the middle; name
-   + hook, jukebox, and socials visible as compact chrome; About/lyrics/discography/tour
-   **closed**; no stacked document; no horizontal scroll.
-2. **US2 — jukebox switch**: With two example entries, pick the non-default. Expect: theme
-   + clip identity change, lyrics follow, **no full reload**, audio stays muted until
-   unmute; unmute then switch again keeps unmuted if the new entry has audio. Reload:
-   default entry again (SC-012). Reduced motion: static fallback + theme still follow the
-   pick.
-3. **US3 — About + socials**: Open About; read placeholder bio; center stays open. Socials
-   visible without opening a panel; active link → new tab. Temporarily empty
+1. **US1 — free center**: Typical **laptop**. Expect: atmosphere in the middle; name +
+   hook top-left; icon socials top-right; collapsed vinyl jukebox bottom-left; About /
+   lyrics / discography / tour **closed** bottom-right; transparent copyright + legal
+   bottom-left; mute bottom-right below panels. Phone layout is **not** a pass/fail for
+   this feature (IDEA-013); the page must still load.
+2. **US2 — jukebox switch**: Open the vinyl, pick Example Cyan. Expect: static cyan
+   poster (no looping video), mute hidden, lyrics follow, **no full reload**. Switch back
+   to Nightmare → loop + mute return. Audio stays muted until unmute on Nightmare.
+   Unmute then switch to another audio entry keeps unmuted. Reload: default Nightmare
+   again (SC-012). Reduced motion: static fallback + theme still follow the pick.
+3. **US3 — About + socials**: Open About; read placeholder bio; center stays open.
+   Socials are **icons only** (accessible names); active link → new tab. Temporarily empty
    `about/me.md` body → About control hidden; restore after.
 4. **US4 — lyrics**: Open lyrics on default (has placeholder lines). Switch jukebox →
    lyrics change (or empty-state string). Long text scrolls **inside** the panel.
@@ -43,16 +45,18 @@ npm run preview
    EP does not. Stage button switches jukebox like (2). Bandcamp (or example) URL → new
    tab, jukebox unchanged. Move both release files aside → control remains with
    “No releases yet” (or chrome copy).
-6. **US6 — tour**: No show files (v1). Open tour → “No upcoming dates” (or chrome copy),
-   control still there. Add a dated-in-the-past show → not listed. Add a future show →
-   listed soonest-first; ticket link → new tab.
+6. **US6 — tour**: Open tour → shipped EXAMPLE Augsburg date (soonest-first); ticket
+   link → new tab. Move the show file aside → “No upcoming dates” (or chrome copy),
+   control still there. Add a dated-in-the-past show → not listed.
 7. **US7 — non-programmer edit**: Change `chrome.md` `aboutTitle`, one lyric line, Example
    EP title, and tagline in `site.json` only. Refresh. Expect those strings to update; no
    component edits. Follow README “Editing content”.
 8. **FR-020 omit**: Add a show Markdown missing `city`. Expect: build succeeds, that show
    absent, rest of stage present (SC-013).
-9. **Legal + mute**: Open Impressum overlay (`002`); Exit works; mute not covered by an
-   open panel; new controls are **not** glitched (`003` closed set).
+9. **Legal + mute + glitch**: Open Impressum overlay (`002`); Exit works; mute not covered
+   by an open panel. On **Nightmare**: closed panels glitch on hover; click glitches the
+   whole box; open panels do not hover-glitch; vinyl hover/morph like mute. Switch to
+   Cyan → glitch off.
 10. **Privacy / weight**: No third-party players or cookies; chrome readable before video
     finishes buffering.
 

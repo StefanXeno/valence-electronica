@@ -18,21 +18,38 @@ npm run preview   # serve the built site locally
 
 ## Editing content
 
-All content lives in structured data/files — no layout changes needed for routine updates:
+All visitor-facing copy lives in structured data/files — no layout or component edits for
+routine updates. Preview locally with `npm run dev`. **Do not rename ids** (jukebox
+filename slugs, `jukeboxId` values, legal slugs, or `themeId`s) unless a developer is
+updating the matching references.
 
 - **`src/data/site.json`** — artist name, tagline, description, and the channel links.
   - Add or edit entries under `channels`. Set `"status": "active"` with a `"url"` to show
     a real link; `"status": "placeholder"` shows a "coming soon" chip without a link.
   - Set `"seo": { "indexable": true }` at launch to allow search engines to index the site.
-- **`src/data/background.json`** — default background video, poster path, `hasAudio`, and
-  `themeId` (must match a pack in `src/styles/themes.css`).
+- **`src/content/jukebox/`** — one Markdown file per stage record. Filename slug = stable
+  id (e.g. `placeholder-loop.md` → `placeholder-loop`). Frontmatter: `label`, `themeId`
+  (must match a pack in `src/styles/themes.css`), `hasAudio`, `poster`, `sources`, and
+  `default: true` on exactly one usable entry. The Markdown **body** is the lyrics for
+  that record (leave empty for instrumentals).
   - Put media files under `public/videos/` and `public/images/posters/`, then point
-    `sources` / `poster` at those paths.
-  - v1 uses a single default clip (no visitor-facing switcher yet). The current file is a
-    temporary 30s cut for testing.
+    `sources` / `poster` at those paths. An entry with only a `poster` (no `sources`)
+    is a static still — looping video is used for the Nightmare theme (`nightmare-crimson`).
+- **`src/content/about/me.md`** — short bio. Empty or missing body hides the About control.
+- **`src/content/releases/`** — discography rows (`title`, `year`, optional `kind`, `url`,
+  `jukeboxId`). `jukeboxId` must match a jukebox filename slug to show “Play on stage”.
+  Rows are not the jukebox — following a link does not change the stage.
+- **`src/content/shows/`** — upcoming dates (`date`, `city`, `venue`, optional `ticketUrl`).
+  Past dates (Europe/Berlin) are hidden. v1 can ship with no show files (empty-state copy).
+- **`src/content/ui/chrome.md`** — region titles, empty-state strings, jukebox/social labels,
+  and the stage-button label.
 - **`src/content/legal/`** — `imprint.md` (Impressum) and `privacy.md`
   (Datenschutzerklärung). Both are placeholders and MUST be filled with real information
   before the site is promoted publicly.
+
+**Omit-invalid-item:** a release missing `title`/`year`, or a show missing `date`/`city`/
+`venue`, is dropped with a build warning. The rest of the page still builds. Unparseable
+Markdown can still fail the whole build — the last good live deploy stays up.
 
 Every merge to `main` is automatically checked, built, and deployed by GitHub Actions
 (`.github/workflows/deploy.yml`). If the build fails, the previous version stays live.

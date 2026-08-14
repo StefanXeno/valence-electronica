@@ -1,0 +1,24 @@
+---
+import { render } from 'astro:content';
+import { getAboutEntry } from '../lib/stage';
+
+const entry = await getAboutEntry();
+const Content = entry ? (await render(entry)).Content : undefined;
+---
+
+{Content && <div class="about-body"><Content /></div>}
+
+<style>
+  .about-body {
+    font-size: 0.9rem;
+    color: var(--color-text);
+  }
+
+  .about-body :global(p) {
+    margin: 0 0 0.7em;
+  }
+
+  .about-body :global(p:last-child) {
+    margin-bottom: 0;
+  }
+</style>

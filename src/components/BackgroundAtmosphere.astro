@@ -2,19 +2,23 @@
 import { getDefaultVideo } from '../lib/background';
 import { withBase } from '../lib/url';
 
-const video = getDefaultVideo();
+const video = await getDefaultVideo();
 const posterSrc = withBase(video.poster);
-const sources = video.sources.map((source) => ({
-  ...source,
-  src: withBase(source.src),
-}));
+const useVideo = video.themeId === 'nightmare-crimson' && video.sources.length > 0;
+const sources = useVideo
+  ? video.sources.map((source) => ({
+      ...source,
+      src: withBase(source.src),
+    }))
+  : [];
 ---
 
 <div
   class="atmosphere"
   data-atmosphere
-  data-bg-state="playing"
-  data-has-audio={video.hasAudio ? 'true' : 'false'}
+  data-bg-state={useVideo ? 'playing' : 'fallback'}
+  data-active-id={video.id}
+  data-has-audio={useVideo && video.hasAudio ? 'true' : 'false'}
 >
   <video
     class="atmosphere__video"
@@ -28,7 +32,7 @@ const sources = video.sources.map((source) => ({
   >
     {sources.map((source) => <source src={source.src} type={source.type} />)}
   </video>
-  <img class="atmosphere__poster" src={posterSrc} alt="" decoding="async" />
+  <img class="atmosphere__poster" data-bg-poster src={posterSrc} alt="" decoding="async" />
   <div class="atmosphere__scrim" aria-hidden="true"></div>
 </div>
 
@@ -55,7 +59,7 @@ const sources = video.sources.map((source) => ({
       root.dispatchEvent(new CustomEvent('bg-state-change', { bubbles: true }));
     };
 
-    if (reduceMotion.matches) {
+    if (reduceMotion.matches || root.getAttribute('data-bg-state') === 'fallback') {
       setFallback();
     } else {
       const playAttempt = video.play();
@@ -66,7 +70,7 @@ const sources = video.sources.map((source) => ({
 
     video.addEventListener('error', () => setFallback());
     reduceMotion.addEventListener('change', () => {
-      if (reduceMotion.matches) setFallback();
+      if (reduceMotion.matches || !video.querySelector('source')) setFallback();
       else {
         setPlaying();
         video.muted = true;

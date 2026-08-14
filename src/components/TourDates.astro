@@ -1,0 +1,72 @@
+---
+import { getUpcomingShows, type UiChrome } from '../lib/stage';
+
+interface Props {
+  chrome: UiChrome;
+}
+
+const { chrome } = Astro.props;
+const shows = await getUpcomingShows();
+const dateFmt = new Intl.DateTimeFormat('en-GB', {
+  timeZone: 'Europe/Berlin',
+  day: 'numeric',
+  month: 'short',
+  year: 'numeric',
+});
+---
+
+{
+  shows.length === 0 ? (
+    <p>{chrome.emptyShows}</p>
+  ) : (
+    <ul class="tour">
+      {shows.map((show) => (
+        <li>
+          <time datetime={show.date.toISOString().slice(0, 10)}>{dateFmt.format(show.date)}</time>
+          <span>
+            {show.city} · {show.venue}
+          </span>
+          {show.ticketUrl && (
+            <a href={show.ticketUrl} target="_blank" rel="noopener noreferrer">
+              {chrome.ticketLabel}
+            </a>
+          )}
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+<style>
+  .tour {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+  }
+
+  li {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+
+  time {
+    font-family: var(--font-display);
+    font-size: calc(0.8rem * var(--hud-scale));
+    color: var(--color-accent-alt);
+  }
+
+  a {
+    color: var(--color-text);
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+    font-size: 0.85rem;
+  }
+
+  a:hover {
+    color: var(--color-accent-alt);
+  }
+</style>

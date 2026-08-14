@@ -18,9 +18,9 @@
 
 **Purpose**: Content directories and collection schemas before any UI
 
-- [ ] T001 Create Markdown collection directories `src/content/jukebox/`, `src/content/about/`, `src/content/releases/`, `src/content/shows/`, and `src/content/ui/`
-- [ ] T002 Register collections `jukebox`, `about`, `releases`, `shows`, and `ui` in `src/content.config.ts` with optional-enough Zod schemas per `specs/004-landing-content-layout/data-model.md` so a missing logical field does not fail the whole build
-- [ ] T003 [P] Add `src/content/ui/chrome.md` with frontmatter labels and empty states from `specs/004-landing-content-layout/contracts/stage-content.md`
+- [x] T001 Create Markdown collection directories `src/content/jukebox/`, `src/content/about/`, `src/content/releases/`, `src/content/shows/`, and `src/content/ui/`
+- [x] T002 Register collections `jukebox`, `about`, `releases`, `shows`, and `ui` in `src/content.config.ts` with optional-enough Zod schemas per `specs/004-landing-content-layout/data-model.md` so a missing logical field does not fail the whole build
+- [x] T003 [P] Add `src/content/ui/chrome.md` with frontmatter labels and empty states from `specs/004-landing-content-layout/contracts/stage-content.md`
 
 ---
 
@@ -30,14 +30,14 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T004 Add `src/content/jukebox/placeholder-loop.md` from the current `src/data/background.json` default (`nightmare-crimson`, existing MP4/poster, `default: true`) plus EXAMPLE placeholder lyrics in the body
-- [ ] T005 [P] Add `src/content/jukebox/example-cyan.md` reusing the same MP4/poster with `themeId: cyan-pulse`, `default` unset, and EXAMPLE lyrics
-- [ ] T006 [P] Add `src/content/about/me.md` with a clearly marked EXAMPLE short bio
-- [ ] T007 [P] Add `src/content/releases/example-single.md` (`jukeboxId: placeholder-loop`) and `src/content/releases/example-ep.md` (unbound) per the content contract
-- [ ] T008 Rewrite `src/lib/background.ts` to resolve jukebox entries from the `jukebox` collection (default flag, theme fallback, omit unusable entries); delete `src/data/background.json` and update any remaining imports
-- [ ] T009 [P] Add `src/lib/stage.ts` to load chrome strings (fallbacks if missing), filter valid releases/shows (omit broken items, upcoming-only shows in Europe/Berlin), and expose helpers for About emptiness
-- [ ] T010 Convert landing layout to a full-viewport stage HUD in `src/styles/global.css` (drop `main` `42rem` column; center empty; corner slots; no horizontal scroll from 320px)
-- [ ] T011 Compose the stage shell in `src/pages/index.astro` and keep `src/layouts/Base.astro` `data-theme` on the default jukebox entry at load; footer/mute/legal overlay stay peripheral and uncovered
+- [x] T004 Add `src/content/jukebox/placeholder-loop.md` from the current `src/data/background.json` default (`nightmare-crimson`, existing MP4/poster, `default: true`) plus EXAMPLE placeholder lyrics in the body
+- [x] T005 [P] Add `src/content/jukebox/example-cyan.md` reusing the same MP4/poster with `themeId: cyan-pulse`, `default` unset, and EXAMPLE lyrics
+- [x] T006 [P] Add `src/content/about/me.md` with a clearly marked EXAMPLE short bio
+- [x] T007 [P] Add `src/content/releases/example-single.md` (`jukeboxId: placeholder-loop`) and `src/content/releases/example-ep.md` (unbound) per the content contract
+- [x] T008 Rewrite `src/lib/background.ts` to resolve jukebox entries from the `jukebox` collection (default flag, theme fallback, omit unusable entries); delete `src/data/background.json` and update any remaining imports
+- [x] T009 [P] Add `src/lib/stage.ts` to load chrome strings (fallbacks if missing), filter valid releases/shows (omit broken items, upcoming-only shows in Europe/Berlin), and expose helpers for About emptiness
+- [x] T010 Convert landing layout to a full-viewport stage HUD in `src/styles/global.css` (drop `main` `42rem` column; center empty; corner slots; no horizontal scroll from 320px)
+- [x] T011 Compose the stage shell in `src/pages/index.astro` and keep `src/layouts/Base.astro` `data-theme` on the default jukebox entry at load; footer/mute/legal overlay stay peripheral and uncovered
 
 **Checkpoint**: `npm run check` / `npm run build` succeed; default atmosphere still plays from Markdown; HUD slots exist even if some chrome is still the old stacked components
 
@@ -51,11 +51,11 @@
 
 ### Implementation for User Story 1
 
-- [ ] T012 [US1] Refactor `src/components/Hero.astro` into persistent identity chrome (name + tagline from `src/data/site.json` only; no large centered hero block)
-- [ ] T013 [P] [US1] Restyle `src/components/Channels.astro` as compact persistent socials chrome (top-right slot); keep `glitch-hit` only on existing active channel links; labels still from `site.json`
-- [ ] T014 [US1] Add a compact default-only jukebox readout in `src/components/Jukebox.astro` (current record label from the default entry; no switcher yet) and mount it in the bottom-left slot from `src/pages/index.astro`
-- [ ] T015 [US1] Add closed on-demand cluster `src/components/StagePanels.astro` (`<details>` for About, Lyrics, Discography, Tour) using titles from `src/content/ui/chrome.md`; bodies may be empty stubs; nothing expanded on load; mount bottom-right from `src/pages/index.astro`
-- [ ] T016 [US1] Manually walk quickstart.md scenario 1 (free center, persistent chrome, 320px) and fix HUD spacing in `src/styles/global.css` / the new components so mute and legal footer stay reachable
+- [x] T012 [US1] Refactor `src/components/Hero.astro` into persistent identity chrome (name + tagline from `src/data/site.json` only; no large centered hero block)
+- [x] T013 [P] [US1] Restyle `src/components/Channels.astro` as compact persistent socials chrome (top-right slot); keep `glitch-hit` only on existing active channel links; labels still from `site.json`
+- [x] T014 [US1] Add a compact default-only jukebox readout in `src/components/Jukebox.astro` (current record label from the default entry; no switcher yet) and mount it in the bottom-left slot from `src/pages/index.astro`
+- [x] T015 [US1] Add closed on-demand cluster `src/components/StagePanels.astro` (`<details>` for About, Lyrics, Discography, Tour) using titles from `src/content/ui/chrome.md`; bodies may be empty stubs; nothing expanded on load; mount bottom-right from `src/pages/index.astro`
+- [x] T016 [US1] Manually walk quickstart.md scenario 1 (free center, persistent chrome, 320px) and fix HUD spacing in `src/styles/global.css` / the new components so mute and legal footer stay reachable
 
 **Checkpoint**: MVP — the page reads as a stage, not a stacked document
 
@@ -69,10 +69,10 @@
 
 ### Implementation for User Story 2
 
-- [ ] T017 [US2] Expand `src/components/Jukebox.astro` into an accessible selector of all valid jukebox entries (labels from Markdown; current entry announced); do not add `glitch-hit`
-- [ ] T018 [US2] Prerender all valid jukebox payloads (sources, poster, themeId, hasAudio, id) for the client and implement first-party switch logic (extend `src/components/BackgroundAtmosphere.astro` and/or a small script next to `src/components/Jukebox.astro`): swap video/poster, set `document.documentElement.dataset.theme`, dispatch existing `bg-state-change`; no `sessionStorage`/cookies
-- [ ] T019 [US2] Update `src/components/MuteControl.astro` so mute visibility and unmute survival follow the **active** entry’s `hasAudio` and playing state after a switch (002 rules)
-- [ ] T020 [US2] Manually walk quickstart.md scenario 2 (switch, mute, reload default, reduced motion) and fix regressions in `src/components/Jukebox.astro` / `src/components/BackgroundAtmosphere.astro` / `src/components/MuteControl.astro`
+- [x] T017 [US2] Expand `src/components/Jukebox.astro` into an accessible selector of all valid jukebox entries (labels from Markdown; current entry announced); do not add `glitch-hit`
+- [x] T018 [US2] Prerender all valid jukebox payloads (sources, poster, themeId, hasAudio, id) for the client and implement first-party switch logic (extend `src/components/BackgroundAtmosphere.astro` and/or a small script next to `src/components/Jukebox.astro`): swap video/poster, set `document.documentElement.dataset.theme`, dispatch existing `bg-state-change`; no `sessionStorage`/cookies
+- [x] T019 [US2] Update `src/components/MuteControl.astro` so mute visibility and unmute survival follow the **active** entry’s `hasAudio` and playing state after a switch (002 rules)
+- [x] T020 [US2] Manually walk quickstart.md scenario 2 (switch, mute, reload default, reduced motion) and fix regressions in `src/components/Jukebox.astro` / `src/components/BackgroundAtmosphere.astro` / `src/components/MuteControl.astro`
 
 **Checkpoint**: Jukebox is the theme/song switcher for this visit only
 
@@ -86,10 +86,10 @@
 
 ### Implementation for User Story 3
 
-- [ ] T021 [US3] Implement About body in `src/components/AboutPanel.astro` from `src/content/about/me.md` and render it inside the About `<details>` in `src/components/StagePanels.astro`
-- [ ] T022 [US3] Hide the About control in `src/components/StagePanels.astro` when About body is empty/missing (`src/lib/stage.ts`); restore example bio after verifying hide
-- [ ] T023 [US3] Add exclusive-open behavior in `src/components/StagePanels.astro` (opening one `<details>` closes the others; toggle summary to close); first-party listener only, no npm accordion; justified under plan Complexity Tracking (FR-004 when scripting is available). Without JS, disclosures must still work (exclusive-open not required)
-- [ ] T024 [US3] Manually walk quickstart.md scenario 3 and confirm socials still open in a new tab from `src/components/Channels.astro`
+- [x] T021 [US3] Implement About body in `src/components/AboutPanel.astro` from `src/content/about/me.md` and render it inside the About `<details>` in `src/components/StagePanels.astro`
+- [x] T022 [US3] Hide the About control in `src/components/StagePanels.astro` when About body is empty/missing (`src/lib/stage.ts`); restore example bio after verifying hide
+- [x] T023 [US3] Add exclusive-open behavior in `src/components/StagePanels.astro` (opening one `<details>` closes the others; toggle summary to close); first-party listener only, no npm accordion; justified under plan Complexity Tracking (FR-004 when scripting is available). Without JS, disclosures must still work (exclusive-open not required)
+- [x] T024 [US3] Manually walk quickstart.md scenario 3 and confirm socials still open in a new tab from `src/components/Channels.astro`
 
 **Checkpoint**: About + socials match persistent vs on-demand split
 
@@ -103,10 +103,10 @@
 
 ### Implementation for User Story 4
 
-- [ ] T025 [US4] Implement `src/components/LyricsPanel.astro` with prerendered lyrics HTML per jukebox id and the `emptyLyrics` string from `src/content/ui/chrome.md`
-- [ ] T026 [US4] Wire lyrics into the Lyrics `<details>` in `src/components/StagePanels.astro` and update the visible lyrics node on jukebox switch (same script path as T018)
-- [ ] T027 [US4] Constrain lyrics overflow to the edge panel in `src/components/LyricsPanel.astro` / `src/styles/global.css` (internal scroll, center stays free)
-- [ ] T028 [US4] Manually walk quickstart.md scenario 4
+- [x] T025 [US4] Implement `src/components/LyricsPanel.astro` with prerendered lyrics HTML per jukebox id and the `emptyLyrics` string from `src/content/ui/chrome.md`
+- [x] T026 [US4] Wire lyrics into the Lyrics `<details>` in `src/components/StagePanels.astro` and update the visible lyrics node on jukebox switch (same script path as T018)
+- [x] T027 [US4] Constrain lyrics overflow to the edge panel in `src/components/LyricsPanel.astro` / `src/styles/global.css` (internal scroll, center stays free)
+- [x] T028 [US4] Manually walk quickstart.md scenario 4
 
 **Checkpoint**: Lyrics are always “this record”, never a mixed dump
 
@@ -120,10 +120,10 @@
 
 ### Implementation for User Story 5
 
-- [ ] T029 [US5] Implement `src/components/Discography.astro` listing valid releases from `src/lib/stage.ts` (title, year, optional kind, optional `url` in a new tab)
-- [ ] T030 [US5] Add the stage button (label from `src/content/ui/chrome.md`) only when `jukeboxId` matches a valid entry; click runs the same switch as the jukebox; if already active: visible, pressed/current, no-op; no `glitch-hit`
-- [ ] T031 [US5] Render discography inside its `<details>` in `src/components/StagePanels.astro` and show `emptyReleases` when the list is empty (control still present)
-- [ ] T032 [US5] Manually walk quickstart.md scenario 5 (including temporarily moving release files aside)
+- [x] T029 [US5] Implement `src/components/Discography.astro` listing valid releases from `src/lib/stage.ts` (title, year, optional kind, optional `url` in a new tab)
+- [x] T030 [US5] Add the stage button (label from `src/content/ui/chrome.md`) only when `jukeboxId` matches a valid entry; click runs the same switch as the jukebox; if already active: visible, pressed/current, no-op; no `glitch-hit`
+- [x] T031 [US5] Render discography inside its `<details>` in `src/components/StagePanels.astro` and show `emptyReleases` when the list is empty (control still present)
+- [x] T032 [US5] Manually walk quickstart.md scenario 5 (including temporarily moving release files aside)
 
 **Checkpoint**: Catalog ≠ jukebox; explicit button is the only catalog→stage path
 
@@ -137,9 +137,9 @@
 
 ### Implementation for User Story 6
 
-- [ ] T033 [US6] Implement `src/components/TourDates.astro` using upcoming-only shows from `src/lib/stage.ts` (date, city, venue, optional ticket new tab) and `emptyShows` from chrome
-- [ ] T034 [US6] Wire tour into its `<details>` in `src/components/StagePanels.astro`; keep the control visible when the list is empty
-- [ ] T035 [US6] Manually walk quickstart.md scenarios 6 and 8 (empty default, past vs future, omit missing `city` without failing the build)
+- [x] T033 [US6] Implement `src/components/TourDates.astro` using upcoming-only shows from `src/lib/stage.ts` (date, city, venue, optional ticket new tab) and `emptyShows` from chrome
+- [x] T034 [US6] Wire tour into its `<details>` in `src/components/StagePanels.astro`; keep the control visible when the list is empty
+- [x] T035 [US6] Manually walk quickstart.md scenarios 6 and 8 (empty default, past vs future, omit missing `city` without failing the build)
 
 **Checkpoint**: Tour never looks “missing”; v1 ships the empty state honestly
 
@@ -153,9 +153,9 @@
 
 ### Implementation for User Story 7
 
-- [ ] T036 [US7] Audit `src/components/` stage chrome (`Hero.astro`, `Jukebox.astro`, `StagePanels.astro`, `Discography.astro`, `TourDates.astro`, `LyricsPanel.astro`, `AboutPanel.astro`, `Channels.astro`) so region titles, empty states, and the stage-button label come only from `src/content/ui/chrome.md` or item Markdown/`site.json` — no leftover hard-coded visitor strings
-- [ ] T037 [US7] Extend the “Editing content” section in `README.md` for jukebox/about/releases/shows/chrome, the omit-invalid-item rule, “do not rename ids”, and how to preview (`npm run dev`)
-- [ ] T038 [US7] Manually walk quickstart.md scenario 7 as a content-only edit pass
+- [x] T036 [US7] Audit `src/components/` stage chrome (`Hero.astro`, `Jukebox.astro`, `StagePanels.astro`, `Discography.astro`, `TourDates.astro`, `LyricsPanel.astro`, `AboutPanel.astro`, `Channels.astro`) so region titles, empty states, and the stage-button label come only from `src/content/ui/chrome.md` or item Markdown/`site.json` — no leftover hard-coded visitor strings
+- [x] T037 [US7] Extend the “Editing content” section in `README.md` for jukebox/about/releases/shows/chrome, the omit-invalid-item rule, “do not rename ids”, and how to preview (`npm run dev`)
+- [x] T038 [US7] Manually walk quickstart.md scenario 7 as a content-only edit pass
 
 **Checkpoint**: Friend-with-no-code path matches legal-page editing
 
@@ -165,10 +165,10 @@
 
 **Purpose**: Contract compliance, a11y, CI, full quickstart
 
-- [ ] T039 [P] Confirm new controls are **not** `glitch-hit` in `src/components/Jukebox.astro`, `src/components/StagePanels.astro`, and `src/components/Discography.astro` (`003` closed set)
-- [ ] T040 [P] Keyboard pass: jukebox, panel summaries, stage button, socials, mute, legal — reachable and named; ~320px spot-check that panels do not cover mute/footer (`src/components/StagePanels.astro`, `src/styles/global.css`)
-- [ ] T041 Run `npm run check` and `npm run build` from repo root; fix type/build issues from the stage work
-- [ ] T042 Execute the full `specs/004-landing-content-layout/quickstart.md` list (scenarios 1–10), including legal overlay + privacy/weight; note follow-ups
+- [x] T039 [P] Confirm new controls are **not** `glitch-hit` in `src/components/Jukebox.astro`, `src/components/StagePanels.astro`, and `src/components/Discography.astro` (`003` closed set)
+- [x] T040 [P] Keyboard pass: jukebox, panel summaries, stage button, socials, mute, legal — reachable and named; ~320px spot-check that panels do not cover mute/footer (`src/components/StagePanels.astro`, `src/styles/global.css`)
+- [x] T041 Run `npm run check` and `npm run build` from repo root; fix type/build issues from the stage work
+- [x] T042 Execute the full `specs/004-landing-content-layout/quickstart.md` list (scenarios 1–10), including legal overlay + privacy/weight; note follow-ups
 
 ---
 

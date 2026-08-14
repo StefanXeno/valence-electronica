@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#031018"/>
+      <stop offset="55%" stop-color="#0a2a38"/>
+      <stop offset="100%" stop-color="#041820"/>
+    </linearGradient>
+    <radialGradient id="pulse" cx="50%" cy="48%" r="42%">
+      <stop offset="0%" stop-color="#22d3ee" stop-opacity="0.35"/>
+      <stop offset="70%" stop-color="#0e7490" stop-opacity="0.08"/>
+      <stop offset="100%" stop-color="#041820" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1920" height="1080" fill="url(#bg)"/>
+  <rect width="1920" height="1080" fill="url(#pulse)"/>
+  <circle cx="960" cy="520" r="220" fill="none" stroke="#22d3ee" stroke-opacity="0.22" stroke-width="2"/>
+  <circle cx="960" cy="520" r="360" fill="none" stroke="#7dd3fc" stroke-opacity="0.12" stroke-width="1.5"/>
+  <text
+    x="960"
+    y="980"
+    text-anchor="middle"
+    fill="#8ab0c4"
+    font-family="system-ui, sans-serif"
+    font-size="28"
+    letter-spacing="0.28em"
+  >TEMPORARY PLACEHOLDER</text>
+</svg>

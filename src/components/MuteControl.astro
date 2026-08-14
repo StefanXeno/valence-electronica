@@ -6,14 +6,15 @@
     type="button"
     class="volume-control__toggle glitch-hit"
     data-mute-control
+    data-glitch-live
     aria-pressed="true"
     aria-label="Unmute background audio"
   >
     <svg
       class="volume-control__icon volume-control__icon--muted"
       viewBox="0 0 24 24"
-      width="22"
-      height="22"
+      width="33"
+      height="33"
       aria-hidden="true"
       focusable="false"
     >
@@ -25,8 +26,8 @@
     <svg
       class="volume-control__icon volume-control__icon--on"
       viewBox="0 0 24 24"
-      width="22"
-      height="22"
+      width="33"
+      height="33"
       aria-hidden="true"
       focusable="false"
     >
@@ -53,7 +54,7 @@
 </div>
 
 <script>
-  import { applyGlitchPreset, playElementGlitch } from '../lib/glitch';
+  import { applyGlitchPreset, isGlitchThemeActive, playElementGlitch } from '../lib/glitch';
 
   function initMuteControl() {
     const root = document.querySelector<HTMLElement>('[data-atmosphere]');
@@ -87,7 +88,13 @@
 
     const cycleContinuousHover = () => {
       // Continuous mute hover only while muted — quiet when audio is playing
-      if (reduceMotion.matches || !pointerOverMute || control.hidden || isAudioPlaying()) {
+      if (
+        reduceMotion.matches ||
+        !isGlitchThemeActive() ||
+        !pointerOverMute ||
+        control.hidden ||
+        isAudioPlaying()
+      ) {
         stopContinuousHover();
         return;
       }
@@ -116,7 +123,8 @@
           pointerOverMute &&
           !isAudioPlaying() &&
           !control.classList.contains('is-glitching') &&
-          !reduceMotion.matches
+          !reduceMotion.matches &&
+          isGlitchThemeActive()
         ) {
           cycleContinuousHover();
         } else {
@@ -127,7 +135,7 @@
       // Fallback if animationend is missed (pseudo-element noise / browser quirks)
       continuousTimer = window.setTimeout(() => {
         if (!pointerOverMute || !button.classList.contains('is-glitch-continuous')) return;
-        if (control.classList.contains('is-glitching') || reduceMotion.matches || isAudioPlaying()) {
+        if (control.classList.contains('is-glitching') || reduceMotion.matches || !isGlitchThemeActive() || isAudioPlaying()) {
           stopContinuousHover();
           return;
         }
@@ -140,7 +148,7 @@
     };
 
     const playGlitch = (direction: 'in' | 'out') => {
-      if (reduceMotion.matches) return;
+      if (reduceMotion.matches || !isGlitchThemeActive()) return;
       // Morph supersedes continuous mute hover for this click
       stopContinuousHover();
       control.dataset.glitch = direction;
@@ -163,13 +171,20 @@
 
     const sync = () => {
       const fallback = root.getAttribute('data-bg-state') === 'fallback' || reduceMotion.matches;
-      control.hidden = fallback;
+      const hasAudio = root.getAttribute('data-has-audio') === 'true';
       if (fallback) {
+        control.hidden = true;
         stopContinuousHover();
         applySoundUi(true);
         wasMuted = true;
         return;
       }
+      if (!hasAudio) {
+        control.hidden = true;
+        stopContinuousHover();
+        return;
+      }
+      control.hidden = false;
 
       const muted = video.muted || video.volume === 0;
       const turningOn = wasMuted && !muted;
@@ -240,7 +255,6 @@
 
 <style>
   .volume-control {
-    --control-size: 3.1rem;
     position: fixed;
     right: var(--space-m);
     bottom: var(--space-m);
@@ -284,8 +298,8 @@
     display: inline-grid;
     place-items: center;
     flex: 0 0 auto;
-    width: 2.4rem;
-    height: 2.4rem;
+    width: calc(2.4rem * var(--hud-scale));
+    height: calc(2.4rem * var(--hud-scale));
     padding: 0;
     border: 0;
     border-radius: 999px;
@@ -327,13 +341,13 @@
 
   .volume-control[data-sound='on'] .volume-control__slider-wrap {
     display: flex;
-    width: min(8.5rem, 28vw);
-    max-width: min(8.5rem, 28vw);
+    width: min(calc(8.5rem * var(--hud-scale)), 28vw);
+    max-width: min(calc(8.5rem * var(--hud-scale)), 28vw);
     opacity: 1;
   }
 
   .volume-control__slider {
-    width: min(8.5rem, 28vw);
+    width: min(calc(8.5rem * var(--hud-scale)), 28vw);
     accent-color: var(--color-accent);
     cursor: pointer;
   }
@@ -464,8 +478,8 @@
       animation-timing-function: steps(1, end);
     }
     18% {
-      width: min(8.5rem, 28vw);
-      max-width: min(8.5rem, 28vw);
+      width: min(calc(8.5rem * var(--hud-scale)), 28vw);
+      max-width: min(calc(8.5rem * var(--hud-scale)), 28vw);
       opacity: 1;
       transform: translateX(calc(var(--g-xa) * 1px)) skewX(calc(var(--g-sa) * 1deg));
       clip-path: polygon(
@@ -501,8 +515,8 @@
       animation-timing-function: steps(1, end);
     }
     100% {
-      width: min(8.5rem, 28vw);
-      max-width: min(8.5rem, 28vw);
+      width: min(calc(8.5rem * var(--hud-scale)), 28vw);
+      max-width: min(calc(8.5rem * var(--hud-scale)), 28vw);
       opacity: 1;
       transform: none;
       clip-path: inset(0);
@@ -512,8 +526,8 @@
 
   @keyframes volume-slider-glitch-out {
     0% {
-      width: min(8.5rem, 28vw);
-      max-width: min(8.5rem, 28vw);
+      width: min(calc(8.5rem * var(--hud-scale)), 28vw);
+      max-width: min(calc(8.5rem * var(--hud-scale)), 28vw);
       opacity: 1;
       transform: none;
       clip-path: inset(0);

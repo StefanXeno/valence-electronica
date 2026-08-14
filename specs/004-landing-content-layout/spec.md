@@ -4,7 +4,7 @@
 
 **Created**: 2026-08-14
 
-**Status**: Draft
+**Status**: As-built (matches the landing HUD as of 2026-08-14)
 
 **Input**: User description: "Add landing content (lyrics, discography, tour dates,
 About me, existing socials, and a theme switcher presented as a jukebox that plays
@@ -12,6 +12,10 @@ different songs) and keep the center of the page visually free. Every visible te
 must be editable by a non-programmer the same way the legal pages already are."
 
 ## Clarifications
+
+HUD slots, jukebox chrome, glitch, atmosphere video, and phone visual success in
+the **as-built HUD** session below are authoritative. Earlier answers in this
+file still hold unless they conflict with that session.
 
 ### Session 2026-08-14
 
@@ -52,6 +56,36 @@ must be editable by a non-programmer the same way the legal pages already are."
   idea as in-page legal overlay). A tiny first-party listener implements
   exclusive-open — no accordion library.
 
+### Session 2026-08-14 (as-built HUD)
+
+- Q: Which edge holds which chrome on a typical laptop? → A: Identity top-left
+  (name + hook only). Socials top-right as equal-sized platform icons only.
+  Jukebox bottom-left. On-demand About / lyrics / discography / tour bottom-right.
+  Mute stays bottom-right below that cluster. Copyright + Impressum /
+  Datenschutzerklärung sit together bottom-left as transparent footer chrome
+  (no bar).
+- Q: How does the jukebox present when idle? → A: Collapsed to a vinyl-record
+  control (same family as the mute circle). Opening it expands a compact list
+  along that edge; it does not dump the song list in the center.
+- Q: Do new HUD controls glitch? → A: Yes, but only while the Nightmare visual
+  theme (`nightmare-crimson`) is active. Closed on-demand boxes glitch on hover;
+  clicking the control glitches the whole box; hovering an already-open panel
+  does not. Jukebox expand/collapse and collapsed-vinyl hover follow the mute
+  morph language. Existing `003` targets (active socials, legal links, legal
+  exit, mute) keep their treatments, still Nightmare-only. Other themes stay
+  still. Deep per-theme type/motion packs (IDEA-002) remain out of scope.
+- Q: Does every jukebox entry play the looping atmosphere video? → A: No. The
+  looping video (and its unmute audio) belongs to the Nightmare theme. Other
+  entries MAY be a static poster only (temporary stills allowed) with no looping
+  video and no mute control while they are active.
+- Q: Is the phone HUD in scope for this feature’s visual success? → A: No. v1
+  is a typical-laptop stage. A dedicated mobile/small-screen composition is
+  deferred (IDEA-013). The landing MUST remain reachable on small screens (no
+  blank page) but MUST NOT be judged as a finished phone layout in this feature.
+- Q: Do example tour dates ship? → A: Yes — at least one clearly marked EXAMPLE
+  upcoming show in content, replaceable without a layout rewrite (same spirit as
+  example releases and jukebox entries).
+
 ### Session 2026-08-14 (content editing)
 
 - Q: Who must be able to change the texts, and how? → A: A friend with no coding
@@ -73,19 +107,20 @@ them. Nothing important is parked in the center.
 content occupies the middle, the page becomes a brochure over a video and the rest
 of this feature fights itself.
 
-**Independent Test**: Open the landing page on a typical laptop and a typical
-phone. Confirm the central area is atmosphere-only, identity is still obvious from
-an edge, and no primary content block sits in the middle.
+**Independent Test**: Open the landing page on a typical laptop. Confirm the
+central area is atmosphere-only, identity is obvious from the top-left edge, and
+no primary content block sits in the middle. Phone/small-screen visual layout is
+out of this feature’s success bar (IDEA-013).
 
 **Acceptance Scenarios**:
 
 1. **Given** a typical laptop view, **When** the visitor opens the landing page,
    **Then** the central area of the screen shows atmosphere only (no About text,
    lyrics, lists, or jukebox body occupying the middle).
-2. **Given** a typical phone view (down to 320px wide), **When** the visitor opens
-   the landing page, **Then** the center remains visually open; persistent chrome
-   (identity, jukebox, socials) is compact at the edges, and on-demand regions are
-   reached via compact controls rather than a full-page stacked document.
+2. **Given** a typical laptop view, **When** the visitor looks at the corners,
+   **Then** identity is top-left, socials are top-right as icons, the jukebox is a
+   collapsed vinyl control bottom-left, and About / lyrics / discography / tour
+   are closed controls bottom-right.
 3. **Given** the landing page is open, **When** the visitor looks for whose site
    this is, **Then** they can name "Valence" within a few seconds from peripheral
    identity (name and a short hook), without a huge title sitting in the center.
@@ -93,16 +128,22 @@ an edge, and no primary content block sits in the middle.
    content regions are visible at the edges, **Then** those regions stay readable
    and do not cover the center with an opaque sheet.
 
+Phone and other small viewports: the same regions MUST remain reachable. How they
+are composed on a phone is **not** specified here (IDEA-013).
+
 ---
 
 ### User Story 2 - Visitor uses the jukebox to change song and world (Priority: P1)
 
 A visitor sees a jukebox as persistent edge chrome (not hidden behind a menu).
-Each selectable entry is a song
-(and its bound atmosphere/theme). Choosing a different entry changes what is
-playing and how the page feels. Sound still never starts by itself; the existing
-mute/unmute control remains the way to hear audio. Mute/unmute state survives a
-switch (the site does not force mute again unless the environment requires it).
+At rest it is a compact vinyl-record control. Opening it lists selectable entries
+along that edge. Each selectable entry is a song (and its bound atmosphere/theme).
+Choosing a different entry changes what is on the stage and how the page feels.
+Only the Nightmare theme uses the looping atmosphere video; other entries may be
+a static still. Sound still never starts by itself; the existing mute/unmute
+control remains the way to hear audio when the active entry has audio.
+Mute/unmute state survives a switch (the site does not force mute again unless
+the environment requires it).
 
 **Why this priority**: The jukebox is the interaction that ties songs, lyrics, and
 theme together. Without it, lyrics have no “current track” and the theme switcher
@@ -133,15 +174,20 @@ switch when audio exists.
 6. **Given** the visitor has selected a non-default jukebox entry, **When** they
    reload the landing page, **Then** the stage is the content-configured default
    again (not the last pick).
+7. **Given** the active entry is Nightmare with looping video, **When** the visitor
+   selects an entry that is a static still (no video sources), **Then** the loop
+   stops, the still and that entry’s theme show, and the mute control is hidden
+   while that entry is active.
 
 ---
 
 ### User Story 3 - Visitor reads About and reaches socials at the edge (Priority: P1)
 
 A visitor can open About me on demand from the periphery without covering the
-center. Existing listen/follow socials stay visible as persistent chrome. Socials
-already exist; this story is about placing them in the new stage layout, not
-inventing new platforms.
+center. Existing listen/follow socials stay visible as persistent **icon** chrome
+(equal-sized platform marks; names via accessible labels, not visible text).
+Socials already exist; this story is about placing them in the new stage layout,
+not inventing new platforms.
 
 **Why this priority**: Identity and “where do I listen/follow?” remain core jobs of
 the site. They must survive the layout change.
@@ -158,8 +204,9 @@ opens in a new tab.
 2. **Given** About copy is missing, **When** the landing page loads, **Then** the
    About control is hidden and the rest of the stage still works.
 3. **Given** the landing page is open, **When** the visitor looks for listen/follow
-   links, **Then** the existing socials/channels are visible as persistent chrome
-   (not hidden behind an extra open action) and still open in a new tab.
+   links, **Then** the existing socials/channels are visible as persistent icon
+   chrome (equal-sized platform marks, accessible names, not hidden behind an extra
+   open action) and still open in a new tab.
 
 ---
 
@@ -238,16 +285,17 @@ empty message. Center stays open.
 ### User Story 6 - Visitor checks tour dates (Priority: P2)
 
 A visitor wants to know if they can see Valence live. From the periphery they open
-upcoming dates (date, city, venue, optional ticket link). If nothing is booked, the
-region still exists and says that no dates are announced — so it does not look like
-a missing page.
+upcoming dates (date, city, venue, optional ticket link). The shipped content
+includes at least one clearly marked EXAMPLE show so the list is demonstrable.
+If nothing is booked, the region still exists and says that no dates are
+announced — so it does not look like a missing page.
 
 **Why this priority**: Tour info is requested, but it can be empty for long
 stretches. The empty state is part of the product.
 
-**Independent Test**: With sample upcoming dates, open the region and verify
-fields and optional ticket links. With zero dates, confirm the “no dates
-announced” state. Center stays free.
+**Independent Test**: With the shipped EXAMPLE upcoming date (or later real
+dates), open the region and verify fields and optional ticket links. With zero
+dates, confirm the “no dates announced” state. Center stays free.
 
 **Acceptance Scenarios**:
 
@@ -305,15 +353,15 @@ and that they did not edit layout or program files.
 
 - Only one jukebox entry → jukebox still shows the current record; there is
   nothing else to pick (no harmful extra switch).
-- Jukebox entry missing its atmosphere asset → that entry is omitted; another
-  valid entry or the existing static atmosphere fallback is used so the page
-  never goes blank.
+- Jukebox entry missing a usable label or poster → that entry is omitted;
+  another valid entry or the existing static atmosphere fallback is used so the
+  page never goes blank. Poster-only entries (no video sources) are valid.
 - Non-programmer breaks a content file’s structure (missing required field) →
   that item is omitted; the rest of the landing still publishes; the page must
   not go blank. If the whole publish fails for another reason, the last good
   public version stays online.
-- Jukebox entry has no audio → mute control follows existing rules (hidden or
-  disabled while that entry is active).
+- Jukebox entry has no audio, or is not the Nightmare looping-video theme → mute
+  control is hidden while that entry is active.
 - Instrumental or missing lyrics → lyrics region shows an explicit empty state.
 - Empty discography → control stays findable with a clear “no releases yet”
   message; stage remains usable.
@@ -323,8 +371,9 @@ and that they did not edit layout or program files.
   (this feature: all widths); persistent chrome stays available.
 - Scripting unavailable → on-demand `<details>` still open and close; exclusive
   “one at a time” is not guaranteed; the center should still stay usable.
-- Small phone / short landscape view → compact edge chrome; expanding a region
-  uses that edge, not a centered overlay that eats the stage.
+- Small phone / short landscape view → content MUST stay reachable (no blank
+  page). Visual composition for those sizes is **out of scope** (IDEA-013); do
+  not treat a cramped laptop HUD on a phone as a finished layout.
 - Reduced motion → no looping video; jukebox still changes static atmosphere and
   theme; lyrics/discography/tour/about still work.
 - Legal overlay → the existing near-fullscreen legal panel is the exception for
@@ -349,9 +398,10 @@ and that they did not edit layout or program files.
 ### Functional Requirements
 
 - **FR-001**: The landing page MUST keep the central area of the viewport visually
-  free (atmosphere only) on typical phone and laptop sizes, including while a
-  peripheral content region is open. Content MUST live on the edges/corners, not
-  in the middle.
+  free (atmosphere only) on a typical laptop, including while a peripheral content
+  region is open. Content MUST live on the edges/corners, not in the middle.
+  Visual success for this feature is laptop HUD. Small-screen composition is
+  deferred (IDEA-013); the page MUST still load and remain reachable there.
 - **FR-002**: Artist identity (name "Valence" and a short hook) MUST be recognizable
   from the periphery within a few seconds and MUST NOT be placed as a large block
   in the center.
@@ -361,31 +411,37 @@ and that they did not edit layout or program files.
   pages). Identity, jukebox, and socials MUST remain visible as compact persistent
   chrome. About me, lyrics, discography, and tour dates MUST be on-demand (closed
   until the visitor opens them).
-- **FR-004**: On small screens, on-demand content MUST be reached via compact
-  edge/corner controls. Expanding a region MUST happen along the periphery.
-  When scripting is available, small screens MUST show at most one expanded
-  on-demand region at a time. Persistent chrome (identity, jukebox, socials)
-  MUST remain visible in compact form on all screen sizes. On larger screens
-  more than one on-demand region MAY be open if the center stays free (this
-  feature MAY still keep exclusive-open on all widths). The page MUST remain
-  usable from 320px width without horizontal scrolling. Without scripting,
-  on-demand disclosures MUST still work; exclusive-open MUST NOT be required.
+- **FR-004**: On-demand content MUST be reached via compact edge/corner controls.
+  Expanding a region MUST happen along the periphery, not as a centered opaque
+  sheet. When scripting is available, at most one expanded on-demand region at a
+  time (all widths in this feature). Persistent chrome is: identity (name + hook,
+  top-left), socials (icon-only, top-right), jukebox (collapsed vinyl control,
+  bottom-left). Jukebox song list is visible only while that control is open.
+  Without scripting, on-demand disclosures MUST still work; exclusive-open MUST
+  NOT be required. Small viewports MUST remain reachable; they are not the visual
+  target (IDEA-013).
 - **FR-005**: About me MUST present a short artist bio from structured content.
   If About copy is empty, the About control MUST be hidden and the rest of the
   stage MUST still work.
 - **FR-006**: Existing social/channel links MUST remain reachable from the
-  periphery and MUST still open in a new tab. This feature MUST NOT require new
-  platforms; it only re-places the list that already exists.
-- **FR-007**: The jukebox MUST list selectable song entries from structured
-  content. Selecting an entry MUST set the active song identity and MUST update
-  the bound atmosphere and bound visual theme together. The jukebox is the
+  periphery as equal-sized platform icons (no visible text labels; accessible
+  names via `aria-label`) and MUST still open in a new tab. Inactive channels MAY
+  show as non-link icons with a coming-soon accessible name. This feature MUST
+  NOT require new platforms; it only re-places the list that already exists.
+- **FR-007**: The jukebox MUST start collapsed as a vinyl-record control (same
+  family as the mute circle). Opening it MUST list selectable song entries from
+  structured content along that edge. Selecting an entry MUST set the active song
+  identity and MUST update the bound atmosphere and bound visual theme together.
+  Looping atmosphere video (and unmute audio) MUST play only for the Nightmare
+  theme (`nightmare-crimson`) when that entry has video sources. Other entries
+  MUST show a static poster and MUST NOT start the loop. The jukebox is the
   visitor-facing theme switcher for this site. Each fresh load of the landing
   page MUST start from the content-configured default entry; a visitor’s pick
   MUST NOT be remembered across reload.
 - **FR-008**: Jukebox audio MUST follow existing mute rules: no sound without a
   visitor unmute; mute/unmute state MUST survive a jukebox switch when the new
-  entry has audio; mute control MUST stay hidden or disabled when the active
-  entry has no audio or atmosphere is not playing.
+  entry has looping video with audio; mute control MUST stay hidden when the
+  active entry has no audio, is a static still, or atmosphere is not playing.
 - **FR-009**: Lyrics MUST be those of the active jukebox entry only. Long lyrics
   MUST scroll inside the lyrics region. Missing or instrumental lyrics MUST show
   a clear empty state. Changing the jukebox MUST update the lyrics shown.
@@ -415,22 +471,27 @@ and that they did not edit layout or program files.
   and MUST NOT cover the center with an opaque sheet. The existing legal overlay
   is the only allowed near-fullscreen reading surface, and only for Impressum and
   privacy.
-- **FR-014**: New controls MUST NOT block mute (when shown) or legal links. Legal
-  overlay open/dismiss behavior MUST keep working.
+- **FR-014**: New controls MUST NOT block mute (when shown) or legal links.
+  Copyright and legal links MUST sit together as transparent footer chrome on the
+  bottom-left (no opaque bar). Legal overlay open/dismiss behavior MUST keep
+  working.
 - **FR-015**: This feature MUST ship with a few clearly marked example
   discography entries (at least two) in content files so the catalog is
   demonstrable: at least one bound to a jukebox entry (stage button visible) and
-  at least one unbound (no stage button). Placeholder About copy, sample tour
-  dates, and sample jukebox entries are allowed until real material exists.
-  Replacing placeholders MUST NOT require a layout rewrite. Example entries MUST
-  be obviously temporary (wording or marking) so they are not mistaken for the
-  official catalog.
+  at least one unbound (no stage button). It MUST also ship at least one clearly
+  marked EXAMPLE upcoming show. Placeholder About copy and sample jukebox
+  entries (including a poster-only non-Nightmare still) are allowed until real
+  material exists. Replacing placeholders MUST NOT require a layout rewrite.
+  Example entries MUST be obviously temporary (wording or marking) so they are
+  not mistaken for the official catalog.
 - **FR-016**: Public landing copy (About, lyrics, release titles, tour labels,
   jukebox labels) MUST be English. German remains only on legally required pages.
 - **FR-017**: This feature MUST NOT add third-party streaming embeds, tracking,
   cookies, forms, completed legal texts, required portraits, a new primary
   typeface, or deep per-theme type/motion packs beyond the existing bound visual
-  theme.
+  theme. Glitch on HUD chrome (jukebox, on-demand panels, plus existing `003`
+  targets) MUST run only while `data-theme` is `nightmare-crimson`. Other themes
+  MUST stay still.
 - **FR-018**: This feature MUST NOT invent extra site pages (no standalone lyrics
   page, no standalone tour page, no standalone discography page).
 - **FR-019**: The project MUST include a short editing guide, aimed at someone who
@@ -448,13 +509,18 @@ and that they did not edit layout or program files.
 
 - **Landing stage**: The landing viewport treated as a stage: free center
   (atmosphere) plus peripheral regions. Not a scrolling document.
-- **Peripheral region**: One edge/corner area or compact control. **Persistent
-  chrome** is always visible in compact form: identity, jukebox, socials.
-  **On-demand regions** start closed: About, lyrics, discography, tour dates.
-  Expansion stays off-center.
+- **Peripheral region**: One edge/corner area or compact control. Frozen laptop
+  slots: identity top-left; socials top-right (icons); jukebox bottom-left
+  (collapsed vinyl); on-demand cluster bottom-right; mute bottom-right below
+  that cluster; copyright + legal links bottom-left as transparent footer (no
+  bar). **Persistent chrome** always visible in compact form: identity, collapsed
+  jukebox control, socials. **On-demand regions** start closed: About, lyrics,
+  discography, tour dates. Expansion stays off-center. Chrome size uses
+  `--hud-scale: 1.5` on the laptop HUD.
 - **Jukebox entry**: A selectable song/atmosphere item with stable identity,
-  visitor-facing label, bound atmosphere, bound visual theme, optional audio, and
-  optional lyrics. The active entry is “what the stage is playing.”
+  visitor-facing label, bound visual theme, poster, optional video sources,
+  optional audio (only with Nightmare looping video), and optional lyrics. The
+  active entry is “what the stage is playing.”
 - **Lyrics**: The words for one jukebox entry (or an explicit instrumental/empty
   state). Always tied to the active entry.
 - **Release**: One discography item (title, year, optional kind, optional outbound
@@ -474,9 +540,10 @@ and that they did not edit layout or program files.
 
 ### Measurable Outcomes
 
-- **SC-001**: On a typical laptop and a typical phone, informal review agrees the
-  central area stays atmosphere-only while using About, lyrics, discography, tour
-  dates, socials, and the jukebox (legal overlay excepted).
+- **SC-001**: On a typical laptop, informal review agrees the central area stays
+  atmosphere-only while using About, lyrics, discography, tour dates, socials,
+  and the jukebox (legal overlay excepted). Phone visual layout is not a success
+  bar for this feature (IDEA-013).
 - **SC-002**: A first-time visitor can name the artist within 5 seconds from
   peripheral identity, without a centered title block.
 - **SC-003**: With two or more jukebox entries, a visitor can switch song and
@@ -494,9 +561,9 @@ and that they did not edit layout or program files.
 - **SC-007**: Replacing one About paragraph, one lyrics line, one release title,
   one show city, one jukebox label, or one region title requires editing exactly
   one content place for that item and no layout or program files.
-- **SC-008**: On a 320px-wide view there is no horizontal scrolling; expanding a
-  region leaves a visible open center; mute (when shown) and legal links remain
-  reachable.
+- **SC-008**: On a typical laptop, expanding a region leaves a visible open
+  center; mute (when shown) and legal links remain reachable. Small-screen
+  visual polish is deferred (IDEA-013); the page MUST still load there.
 - **SC-009**: 100% of previously working channel destinations and both legal
   destinations remain reachable after the layout change.
 - **SC-010**: At least 80% of informal testers agree the page feels like a stage
@@ -527,10 +594,9 @@ and that they did not edit layout or program files.
 - Tour dates use a single obvious timezone for display (Europe/Berlin, the
   artist’s home). Exact clock times are optional; calendar date + city + venue is
   enough.
-- Exact which edge holds which region is a composition choice at plan/design
-  time, as long as FR-001 (free center), persistent chrome (identity, jukebox,
-  socials), and on-demand About/lyrics/discography/tour hold. This spec does not
-  freeze a wireframe.
+- Laptop HUD slots are frozen as of 2026-08-14 (see as-built clarifications and
+  Key Entities). A dedicated phone/small-screen composition is a later idea
+  (IDEA-013), not a shrink-the-desktop pass.
 - Socials are the already-configured channels; completing additional platforms
   (IDEA-005) is not required here.
 - Per-track credits, honorable mentions, and extra listen-link panels (IDEA-006)
@@ -542,9 +608,16 @@ and that they did not edit layout or program files.
   with at least two clearly marked example releases (one jukebox-bound, one not)
   until the artist replaces them. Suggested placeholder titles for that set:
   “Example Single” (2024, single, bound) and “Example EP” (2025, EP, unbound).
-- New interactive controls in this feature are not automatically glitch targets;
-  the closed glitch set from the glitch feature stays unchanged unless that spec
-  is amended.
+  Tour ships at least one EXAMPLE upcoming show (e.g. Augsburg) until replaced.
+  Jukebox v1 examples: Nightmare (`placeholder-loop`, looping video + audio) and
+  Example Cyan (`example-cyan`, static poster, no video, no mute).
+- Glitch is Nightmare-only. As-built HUD targets: closed on-demand panels glitch
+  on hover; click on the control glitches the whole box; open panels do not
+  glitch on hover. Jukebox collapsed-vinyl hover and expand/collapse follow the
+  mute morph language; option buttons are hit targets when the list is open.
+  Existing `003` targets (active socials, legal links, legal exit, mute) keep
+  their treatments. Other `data-theme` values stay still. Deep packs (IDEA-002)
+  remain out of scope.
 - No new tracking, cookies, or visitor accounts. Jukebox picks are not stored;
   each load uses the configured default.
 - The site stays a single public landing plus the existing legal overlay.

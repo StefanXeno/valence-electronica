@@ -1,6 +1,6 @@
 /*
   Basic theme packs (color / surface only).
-  Operators switch packs via background.json `themeId` (existing ids only).
+  Operators switch packs via jukebox Markdown `themeId` (existing ids only).
   Adding a new mood requires a new [data-theme="…"] block here (dev task).
 
   `nightmare-crimson` is sampled from the NIGHTMARE loop (dominant #a00000 reds,

@@ -20,6 +20,10 @@ File: `src/content/ui/chrome.md` — exactly one instance (frontmatter; body unu
 | `emptyLyrics` | string | yes | Instrumental / missing lyrics |
 | `emptyReleases` | string | yes | Shown when no valid releases |
 | `emptyShows` | string | yes | Shown when no upcoming shows |
+| `jukeboxLabel` | string | yes | Accessible name for the vinyl control |
+| `socialsLabel` | string | yes | Nav accessible name (icons have per-channel labels) |
+| `comingSoon` | string | yes | Appended to inactive channel accessible names |
+| `ticketLabel` | string | yes | Tour row ticket link text |
 
 If this file is missing or a field is empty, use the English literals from the contract
 as last-resort fallbacks (so the stage still renders). Operators should still edit this
@@ -47,19 +51,22 @@ Files: `src/content/jukebox/<id>.md` — `<id>` is the stable slug (do not renam
 |-------|------|----------|--------------------------|
 | `label` | string | yes | Visitor-facing jukebox label |
 | `themeId` | string | yes | CSS pack id; unknown → `default` pack |
-| `hasAudio` | boolean | yes | Mute control may show while this entry is playing |
-| `poster` | string | yes | Site path under `public/` |
-| `sources` | MediaSource[] | yes | At least one `video/mp4` |
+| `hasAudio` | boolean | no | Hint; mute only shows if this is true **and** the entry actually plays looping video |
+| `poster` | string | yes | Site path under `public/` (required for a usable entry) |
+| `sources` | MediaSource[] | no | Optional. Looping video plays only when `themeId` is `nightmare-crimson` **and** at least one usable source exists |
 | `default` | boolean | no | Exactly one should be `true`; resolver picks one valid default |
 | body | Markdown | no | Lyrics. Empty → lyrics empty-state copy |
 
-Logical omit (FR-020): drop the entry if `label` empty, `sources` unusable, or `poster`
-empty. If the omitted entry was default, use another valid entry; if none remain, keep
-static/themed fallback so the page is not blank.
+Logical omit (FR-020): drop the entry if `label` or `poster` is empty. Poster-only
+entries (no `sources`) are valid stills. If the omitted entry was default, use another
+valid entry; if none remain, keep static/themed fallback so the page is not blank.
+
+Shipped examples: `placeholder-loop` (Nightmare, MP4 + audio, default), `example-cyan`
+(cyan-pulse, static SVG poster, no sources, no mute).
 
 ### MediaSource
 
-Same as `002`: `{ src: string, type: string }` with `video/mp4` required for v1.
+Same as `002`: `{ src: string, type: string }`. When present, v1 uses `video/mp4`.
 
 ## Entity: Release
 
@@ -91,6 +98,9 @@ Files: `src/content/shows/<slug>.md`
 Omit if `date`, `city`, or `venue` missing. Stage list: `date` ≥ today (Berlin) only,
 soonest first. Past dates in files are allowed but not shown as upcoming.
 
+Shipped example: `example-augsburg.md` (2026-12-05, Augsburg, Example Venue, Bandcamp
+ticket URL), clearly marked EXAMPLE.
+
 ## Relationships
 
 - `JukeboxEntry` 1 → 0..1 lyrics body (same file)
@@ -104,7 +114,7 @@ soonest first. Past dates in files are allowed but not shown as upcoming.
 | State | Meaning |
 |-------|---------|
 | Active jukebox id | Starts as content default; changes on jukebox pick or stage button; **not** stored; reload restores default |
-| Mute | Inherited from `002`; survives jukebox switch when the new entry `hasAudio` and atmosphere is playing |
+| Mute | Inherited from `002`; survives jukebox switch when the new entry plays looping video with audio; hidden for static stills |
 | On-demand panel | At most one `<details>` open; default all closed |
 | About visibility | Hidden when About body empty |
 

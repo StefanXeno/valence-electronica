@@ -8,6 +8,7 @@ const year = new Date().getFullYear();
 ---
 
 <footer>
+  <p>© {year} {site.artist.name}</p>
   <nav aria-label="Legal">
     {legalPages.map((page) => (
       <a
@@ -19,28 +20,35 @@ const year = new Date().getFullYear();
       </a>
     ))}
   </nav>
-  <p>© {year} {site.artist.name}</p>
 </footer>
 
 <style>
   footer {
-    width: 100%;
-    max-width: var(--content-width);
-    margin: 0 auto;
-    padding: var(--space-l) var(--space-m);
-    border-top: 1px solid var(--color-border);
+    position: fixed;
+    left: var(--hud-inset);
+    bottom: 0;
+    z-index: 3;
+    width: max-content;
+    max-width: calc(100vw - var(--control-size) - 2 * var(--hud-inset));
+    margin: 0;
+    padding: 0.45rem 0 0.55rem;
+    border: 0;
+    background: transparent;
     display: flex;
     flex-wrap: wrap;
-    justify-content: space-between;
-    gap: var(--space-s);
-    font-size: 0.85rem;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.45rem 1rem;
+    font-size: calc(0.75rem * var(--hud-scale));
     color: var(--color-text-muted);
     text-shadow: 0 1px 10px var(--bg-scrim);
+    pointer-events: auto;
   }
 
   nav {
     display: flex;
-    gap: var(--space-m);
+    flex-wrap: wrap;
+    gap: 0.85rem;
   }
 
   nav a {

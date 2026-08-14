@@ -9,13 +9,17 @@ node_modules/
 
 # logs
 npm-debug.log*
+*.log
 
 # environment
 .env
 .env.production
 
-# OS
+# OS / editor junk
 .DS_Store
+Thumbs.db
+*.tmp
+*.swp
 
 # local-only idea backlog (not for the remote)
 docs/ideas.md

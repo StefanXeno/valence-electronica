@@ -5,7 +5,8 @@
 */
 
 .glitch-hit,
-.volume-control {
+.volume-control,
+[data-jukebox] {
   --glitch-red: var(--color-accent);
   --glitch-white: var(--color-text);
   --g-xa: 8;
@@ -37,7 +38,9 @@
 .glitch-hit::before,
 .glitch-hit::after,
 .volume-control::before,
-.volume-control::after {
+.volume-control::after,
+[data-jukebox]::before,
+[data-jukebox]::after {
   content: '';
   position: absolute;
   pointer-events: none;
@@ -49,13 +52,16 @@
 /* Keep interactive controls receiving clicks even while glitching */
 .volume-control,
 .volume-control__toggle,
-[data-mute-control].glitch-hit {
+[data-glitch-live].glitch-hit,
+[data-jukebox],
+[data-jukebox-toggle] {
   pointer-events: auto;
 }
 
 /* Horizontal scanlines */
 .glitch-hit::before,
-.volume-control::before {
+.volume-control::before,
+[data-jukebox]::before {
   left: -12%;
   width: 124%;
   height: 2px;
@@ -68,7 +74,8 @@
 
 /* Vertical scanlines */
 .glitch-hit::after,
-.volume-control::after {
+.volume-control::after,
+[data-jukebox]::after {
   top: -12%;
   height: 124%;
   width: 2px;
@@ -129,108 +136,121 @@
 /*
   Mute / live controls: NO clip-path (keeps hit-testing).
 */
-[data-mute-control].glitch-hit.is-glitching,
-[data-mute-control].glitch-hit.is-glitch-hover,
-.volume-control.is-glitching {
+[data-glitch-live].glitch-hit.is-glitching,
+[data-glitch-live].glitch-hit.is-glitch-hover,
+.volume-control.is-glitching,
+[data-jukebox].is-glitching {
   animation-name: ui-glitch-live-tear;
 }
-[data-mute-control].glitch-hit.is-glitching[data-glitch-style='chroma'],
-[data-mute-control].glitch-hit.is-glitch-hover[data-glitch-style='chroma'],
-.volume-control.is-glitching[data-glitch-style='chroma'] {
+[data-glitch-live].glitch-hit.is-glitching[data-glitch-style='chroma'],
+[data-glitch-live].glitch-hit.is-glitch-hover[data-glitch-style='chroma'],
+.volume-control.is-glitching[data-glitch-style='chroma'],
+[data-jukebox].is-glitching[data-glitch-style='chroma'] {
   animation-name: ui-glitch-live-chroma;
 }
-[data-mute-control].glitch-hit.is-glitching[data-glitch-style='stutter'],
-[data-mute-control].glitch-hit.is-glitch-hover[data-glitch-style='stutter'],
-.volume-control.is-glitching[data-glitch-style='stutter'] {
+[data-glitch-live].glitch-hit.is-glitching[data-glitch-style='stutter'],
+[data-glitch-live].glitch-hit.is-glitch-hover[data-glitch-style='stutter'],
+.volume-control.is-glitching[data-glitch-style='stutter'],
+[data-jukebox].is-glitching[data-glitch-style='stutter'] {
   animation-name: ui-glitch-live-stutter;
 }
-[data-mute-control].glitch-hit.is-glitching[data-glitch-style='slice'],
-[data-mute-control].glitch-hit.is-glitch-hover[data-glitch-style='slice'],
-.volume-control.is-glitching[data-glitch-style='slice'] {
+[data-glitch-live].glitch-hit.is-glitching[data-glitch-style='slice'],
+[data-glitch-live].glitch-hit.is-glitch-hover[data-glitch-style='slice'],
+.volume-control.is-glitching[data-glitch-style='slice'],
+[data-jukebox].is-glitching[data-glitch-style='slice'] {
   animation-name: ui-glitch-live-slice;
 }
-[data-mute-control].glitch-hit.is-glitching[data-glitch-style='ripple'],
-[data-mute-control].glitch-hit.is-glitch-hover[data-glitch-style='ripple'],
-.volume-control.is-glitching[data-glitch-style='ripple'] {
+[data-glitch-live].glitch-hit.is-glitching[data-glitch-style='ripple'],
+[data-glitch-live].glitch-hit.is-glitch-hover[data-glitch-style='ripple'],
+.volume-control.is-glitching[data-glitch-style='ripple'],
+[data-jukebox].is-glitching[data-glitch-style='ripple'] {
   animation-name: ui-glitch-live-ripple;
 }
-[data-mute-control].glitch-hit.is-glitching[data-glitch-style='static'],
-[data-mute-control].glitch-hit.is-glitch-hover[data-glitch-style='static'],
-.volume-control.is-glitching[data-glitch-style='static'] {
+[data-glitch-live].glitch-hit.is-glitching[data-glitch-style='static'],
+[data-glitch-live].glitch-hit.is-glitch-hover[data-glitch-style='static'],
+.volume-control.is-glitching[data-glitch-style='static'],
+[data-jukebox].is-glitching[data-glitch-style='static'] {
   animation-name: ui-glitch-live-static;
 }
-[data-mute-control].glitch-hit.is-glitching[data-glitch-style='shear'],
-[data-mute-control].glitch-hit.is-glitch-hover[data-glitch-style='shear'],
-.volume-control.is-glitching[data-glitch-style='shear'] {
+[data-glitch-live].glitch-hit.is-glitching[data-glitch-style='shear'],
+[data-glitch-live].glitch-hit.is-glitch-hover[data-glitch-style='shear'],
+.volume-control.is-glitching[data-glitch-style='shear'],
+[data-jukebox].is-glitching[data-glitch-style='shear'] {
   animation-name: ui-glitch-live-shear;
 }
-[data-mute-control].glitch-hit.is-glitching[data-glitch-style='blink'],
-[data-mute-control].glitch-hit.is-glitch-hover[data-glitch-style='blink'],
-.volume-control.is-glitching[data-glitch-style='blink'] {
+[data-glitch-live].glitch-hit.is-glitching[data-glitch-style='blink'],
+[data-glitch-live].glitch-hit.is-glitch-hover[data-glitch-style='blink'],
+.volume-control.is-glitching[data-glitch-style='blink'],
+[data-jukebox].is-glitching[data-glitch-style='blink'] {
   animation-name: ui-glitch-live-blink;
 }
-[data-mute-control].glitch-hit.is-glitching[data-glitch-style='wave'],
-[data-mute-control].glitch-hit.is-glitch-hover[data-glitch-style='wave'],
-.volume-control.is-glitching[data-glitch-style='wave'] {
+[data-glitch-live].glitch-hit.is-glitching[data-glitch-style='wave'],
+[data-glitch-live].glitch-hit.is-glitch-hover[data-glitch-style='wave'],
+.volume-control.is-glitching[data-glitch-style='wave'],
+[data-jukebox].is-glitching[data-glitch-style='wave'] {
   animation-name: ui-glitch-live-wave;
 }
-[data-mute-control].glitch-hit.is-glitching[data-glitch-style='punch'],
-[data-mute-control].glitch-hit.is-glitch-hover[data-glitch-style='punch'],
-.volume-control.is-glitching[data-glitch-style='punch'] {
+[data-glitch-live].glitch-hit.is-glitching[data-glitch-style='punch'],
+[data-glitch-live].glitch-hit.is-glitch-hover[data-glitch-style='punch'],
+.volume-control.is-glitching[data-glitch-style='punch'],
+[data-jukebox].is-glitching[data-glitch-style='punch'] {
   animation-name: ui-glitch-live-punch;
 }
-[data-mute-control].glitch-hit.is-glitching[data-glitch-style='tear'],
-[data-mute-control].glitch-hit.is-glitch-hover[data-glitch-style='tear'],
-.volume-control.is-glitching[data-glitch-style='tear'] {
+[data-glitch-live].glitch-hit.is-glitching[data-glitch-style='tear'],
+[data-glitch-live].glitch-hit.is-glitch-hover[data-glitch-style='tear'],
+.volume-control.is-glitching[data-glitch-style='tear'],
+[data-jukebox].is-glitching[data-glitch-style='tear'] {
   animation-name: ui-glitch-live-tear;
 }
 
 /* Mute-only continuous hover — one cycle at a time; JS re-rolls style after each end. */
-[data-mute-control].glitch-hit.is-glitch-continuous {
+[data-glitch-live].glitch-hit.is-glitch-continuous {
   animation: ui-glitch-live-tear var(--g-dur, 560ms) both;
 }
-[data-mute-control].glitch-hit.is-glitch-continuous[data-glitch-style='chroma'] {
+[data-glitch-live].glitch-hit.is-glitch-continuous[data-glitch-style='chroma'] {
   animation-name: ui-glitch-live-chroma;
 }
-[data-mute-control].glitch-hit.is-glitch-continuous[data-glitch-style='stutter'] {
+[data-glitch-live].glitch-hit.is-glitch-continuous[data-glitch-style='stutter'] {
   animation-name: ui-glitch-live-stutter;
 }
-[data-mute-control].glitch-hit.is-glitch-continuous[data-glitch-style='slice'] {
+[data-glitch-live].glitch-hit.is-glitch-continuous[data-glitch-style='slice'] {
   animation-name: ui-glitch-live-slice;
 }
-[data-mute-control].glitch-hit.is-glitch-continuous[data-glitch-style='ripple'] {
+[data-glitch-live].glitch-hit.is-glitch-continuous[data-glitch-style='ripple'] {
   animation-name: ui-glitch-live-ripple;
 }
-[data-mute-control].glitch-hit.is-glitch-continuous[data-glitch-style='static'] {
+[data-glitch-live].glitch-hit.is-glitch-continuous[data-glitch-style='static'] {
   animation-name: ui-glitch-live-static;
 }
-[data-mute-control].glitch-hit.is-glitch-continuous[data-glitch-style='shear'] {
+[data-glitch-live].glitch-hit.is-glitch-continuous[data-glitch-style='shear'] {
   animation-name: ui-glitch-live-shear;
 }
-[data-mute-control].glitch-hit.is-glitch-continuous[data-glitch-style='blink'] {
+[data-glitch-live].glitch-hit.is-glitch-continuous[data-glitch-style='blink'] {
   animation-name: ui-glitch-live-blink;
 }
-[data-mute-control].glitch-hit.is-glitch-continuous[data-glitch-style='wave'] {
+[data-glitch-live].glitch-hit.is-glitch-continuous[data-glitch-style='wave'] {
   animation-name: ui-glitch-live-wave;
 }
-[data-mute-control].glitch-hit.is-glitch-continuous[data-glitch-style='punch'] {
+[data-glitch-live].glitch-hit.is-glitch-continuous[data-glitch-style='punch'] {
   animation-name: ui-glitch-live-punch;
 }
-[data-mute-control].glitch-hit.is-glitch-continuous[data-glitch-style='tear'] {
+[data-glitch-live].glitch-hit.is-glitch-continuous[data-glitch-style='tear'] {
   animation-name: ui-glitch-live-tear;
 }
 
 .glitch-hit.is-glitching::before,
 .glitch-hit.is-glitch-hover::before,
 .glitch-hit.is-glitch-continuous::before,
-.volume-control.is-glitching::before {
+.volume-control.is-glitching::before,
+[data-jukebox].is-glitching::before {
   animation: glitch-scan-a var(--g-dur) both;
 }
 
 .glitch-hit.is-glitching::after,
 .glitch-hit.is-glitch-hover::after,
 .glitch-hit.is-glitch-continuous::after,
-.volume-control.is-glitching::after {
+.volume-control.is-glitching::after,
+[data-jukebox].is-glitching::after {
   animation: glitch-scan-b var(--g-dur) both;
 }
 
@@ -260,27 +280,27 @@
   opacity: 0;
 }
 
-[data-mute-control].glitch-hit.is-glitch-continuous::before {
+[data-glitch-live].glitch-hit.is-glitch-continuous::before {
   animation: glitch-scan-a var(--g-dur, 560ms) both;
 }
 
-[data-mute-control].glitch-hit.is-glitch-continuous::after {
+[data-glitch-live].glitch-hit.is-glitch-continuous::after {
   animation: glitch-scan-b var(--g-dur, 560ms) both;
 }
 
-[data-mute-control].glitch-hit.is-glitch-continuous[data-glitch-style='chroma']::before {
+[data-glitch-live].glitch-hit.is-glitch-continuous[data-glitch-style='chroma']::before {
   animation-name: glitch-scan-soft;
 }
 
-[data-mute-control].glitch-hit.is-glitch-continuous[data-glitch-style='chroma']::after {
+[data-glitch-live].glitch-hit.is-glitch-continuous[data-glitch-style='chroma']::after {
   animation-name: glitch-scan-soft-v;
 }
 
-[data-mute-control].glitch-hit.is-glitch-continuous[data-glitch-style='stutter']::before {
+[data-glitch-live].glitch-hit.is-glitch-continuous[data-glitch-style='stutter']::before {
   animation-name: glitch-scan-stutter;
 }
 
-[data-mute-control].glitch-hit.is-glitch-continuous[data-glitch-style='slice']::after {
+[data-glitch-live].glitch-hit.is-glitch-continuous[data-glitch-style='slice']::after {
   animation: none;
   opacity: 0;
 }
@@ -1147,9 +1167,31 @@
   .glitch-hit.is-glitch-continuous::before,
   .glitch-hit.is-glitch-continuous::after,
   .volume-control.is-glitching,
+  [data-jukebox].is-glitching,
   .volume-control.is-glitching::before,
-  .volume-control.is-glitching::after {
+  [data-jukebox].is-glitching::before,
+  .volume-control.is-glitching::after,
+  [data-jukebox].is-glitching::after {
     animation: none !important;
   }
+}
+
+/* Glitch language is Nightmare-only — other theme packs stay still. */
+html:not([data-theme='nightmare-crimson']) .glitch-hit.is-glitching,
+html:not([data-theme='nightmare-crimson']) .glitch-hit.is-glitch-hover,
+html:not([data-theme='nightmare-crimson']) .glitch-hit.is-glitch-continuous,
+html:not([data-theme='nightmare-crimson']) .glitch-hit.is-glitching::before,
+html:not([data-theme='nightmare-crimson']) .glitch-hit.is-glitching::after,
+html:not([data-theme='nightmare-crimson']) .glitch-hit.is-glitch-hover::before,
+html:not([data-theme='nightmare-crimson']) .glitch-hit.is-glitch-hover::after,
+html:not([data-theme='nightmare-crimson']) .glitch-hit.is-glitch-continuous::before,
+html:not([data-theme='nightmare-crimson']) .glitch-hit.is-glitch-continuous::after,
+html:not([data-theme='nightmare-crimson']) .volume-control.is-glitching,
+html:not([data-theme='nightmare-crimson']) [data-jukebox].is-glitching,
+html:not([data-theme='nightmare-crimson']) .volume-control.is-glitching::before,
+html:not([data-theme='nightmare-crimson']) [data-jukebox].is-glitching::before,
+html:not([data-theme='nightmare-crimson']) .volume-control.is-glitching::after,
+html:not([data-theme='nightmare-crimson']) [data-jukebox].is-glitching::after {
+  animation: none !important;
 }
 

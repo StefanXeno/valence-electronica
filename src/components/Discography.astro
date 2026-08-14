@@ -1,0 +1,116 @@
+---
+import { getValidJukeboxEntries } from '../lib/background';
+import { getValidReleases, type UiChrome } from '../lib/stage';
+
+interface Props {
+  chrome: UiChrome;
+  defaultId: string;
+}
+
+const { chrome, defaultId } = Astro.props;
+const [releases, videos] = await Promise.all([getValidReleases(), getValidJukeboxEntries()]);
+const validIds = new Set(videos.map((entry) => entry.id));
+---
+
+{
+  releases.length === 0 ? (
+    <p>{chrome.emptyReleases}</p>
+  ) : (
+    <ul class="discog">
+      {releases.map((release) => {
+        const bound = release.jukeboxId && validIds.has(release.jukeboxId) ? release.jukeboxId : undefined;
+        return (
+          <li>
+            <div class="discog__meta">
+              {release.url ? (
+                <a href={release.url} target="_blank" rel="noopener noreferrer">
+                  {release.title}
+                </a>
+              ) : (
+                <span>{release.title}</span>
+              )}
+              <span class="discog__year">
+                {release.year}
+                {release.kind ? ` · ${release.kind}` : ''}
+              </span>
+            </div>
+            {bound && (
+              <button
+                type="button"
+                data-stage-button={bound}
+                aria-pressed={bound === defaultId ? 'true' : 'false'}
+                aria-label={`${chrome.stageButtonLabel}: ${release.title}`}
+              >
+                {chrome.stageButtonLabel}
+              </button>
+            )}
+          </li>
+        );
+      })}
+    </ul>
+  )
+}
+
+<style>
+  .discog {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+  }
+
+  li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.4rem 0.75rem;
+  }
+
+  .discog__meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    min-width: 0;
+  }
+
+  a {
+    color: var(--color-text);
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+  }
+
+  a:hover {
+    color: var(--color-accent-alt);
+  }
+
+  .discog__year {
+    font-size: calc(0.75rem * var(--hud-scale));
+    color: var(--color-text-muted);
+  }
+
+  button {
+    appearance: none;
+    flex: 0 0 auto;
+    margin: 0;
+    padding: 0.25em 0.55em;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--color-text);
+    font-family: var(--font-display);
+    font-size: calc(0.7rem * var(--hud-scale));
+    cursor: pointer;
+  }
+
+  button:hover {
+    border-color: var(--color-accent);
+  }
+
+  button[aria-pressed='true'] {
+    border-color: var(--color-accent);
+    color: var(--color-accent-alt);
+  }
+</style>

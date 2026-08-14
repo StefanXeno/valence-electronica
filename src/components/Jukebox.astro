@@ -1,0 +1,435 @@
+---
+import { getBackgroundConfig } from '../lib/background';
+import { getChrome } from '../lib/stage';
+import { withBase } from '../lib/url';
+
+const chrome = await getChrome();
+const { videos, defaultVideoId } = await getBackgroundConfig();
+const catalog = videos.map((entry) => ({
+  id: entry.id,
+  themeId: entry.themeId,
+  hasAudio: entry.hasAudio,
+  poster: withBase(entry.poster),
+  sources: entry.sources.map((source) => ({ ...source, src: withBase(source.src) })),
+}));
+---
+
+{
+  videos.length > 0 && (
+    <details
+      class="jukebox"
+      aria-label={chrome.jukeboxLabel}
+      data-jukebox
+      data-stage-catalog={JSON.stringify(catalog)}
+      data-stage-default={defaultVideoId}
+    >
+      <summary
+        class="jukebox__toggle glitch-hit"
+        data-jukebox-toggle
+        data-glitch-live
+        aria-label={chrome.jukeboxLabel}
+      >
+        <svg
+          class="jukebox__icon"
+          viewBox="0 0 24 24"
+          width="33"
+          height="33"
+          aria-hidden="true"
+          focusable="false"
+        >
+          <path
+            fill="currentColor"
+            fill-rule="evenodd"
+            d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 8.15a1.85 1.85 0 1 0 0 3.7 1.85 1.85 0 0 0 0-3.7z"
+          ></path>
+          <circle
+            cx="12"
+            cy="12"
+            r="7.45"
+            fill="none"
+            stroke="var(--color-bg)"
+            stroke-width="0.55"
+            opacity="0.5"
+          ></circle>
+          <circle
+            cx="12"
+            cy="12"
+            r="5.55"
+            fill="none"
+            stroke="var(--color-bg)"
+            stroke-width="0.55"
+            opacity="0.5"
+          ></circle>
+          <circle
+            cx="12"
+            cy="12"
+            r="3.7"
+            fill="none"
+            stroke="var(--color-bg)"
+            stroke-width="0.55"
+            opacity="0.5"
+          ></circle>
+        </svg>
+      </summary>
+      <div class="jukebox__panel" id="jukebox-heading">
+        <p class="jukebox__heading">{chrome.jukeboxLabel}</p>
+        <div class="jukebox__list" role="group" aria-label={chrome.jukeboxLabel}>
+          {videos.map((entry) => (
+            <button
+              type="button"
+              class="glitch-hit"
+              data-jukebox-option={entry.id}
+              aria-pressed={entry.id === defaultVideoId ? 'true' : 'false'}
+              aria-current={entry.id === defaultVideoId ? 'true' : undefined}
+            >
+              {entry.label}
+            </button>
+          ))}
+        </div>
+      </div>
+    </details>
+  )
+}
+
+<script>
+  import { applyGlitchPreset, isGlitchThemeActive, playElementGlitch } from '../lib/glitch';
+  import { initStageSwitch, STAGE_SELECT_EVENT, type StageCatalogEntry } from '../lib/stage-switch';
+
+  function bootStageSwitch() {
+    const root = document.querySelector<HTMLDetailsElement>('[data-jukebox]');
+    const toggle = root?.querySelector<HTMLElement>('[data-jukebox-toggle]');
+    if (!root?.dataset.stageCatalog || !toggle) return;
+
+    const catalog = JSON.parse(root.dataset.stageCatalog) as StageCatalogEntry[];
+    const defaultId = root.dataset.stageDefault ?? '';
+    initStageSwitch(catalog, defaultId);
+
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let morphTimer: number | undefined;
+    let continuousTimer: number | undefined;
+    let continuousOnEnd: ((event: AnimationEvent) => void) | undefined;
+    let pointerOver = false;
+
+    const isCollapsed = () => !root.open;
+
+    const stopContinuousHover = () => {
+      window.clearTimeout(continuousTimer);
+      continuousTimer = undefined;
+      if (continuousOnEnd) {
+        toggle.removeEventListener('animationend', continuousOnEnd);
+        continuousOnEnd = undefined;
+      }
+      toggle.classList.remove('is-glitch-continuous', 'is-glitch-hover', 'is-glitching');
+      toggle.style.animation = '';
+    };
+
+    const cycleContinuousHover = () => {
+      if (
+        reduceMotion.matches ||
+        !isGlitchThemeActive() ||
+        !pointerOver ||
+        !isCollapsed() ||
+        root.classList.contains('is-glitching')
+      ) {
+        stopContinuousHover();
+        return;
+      }
+
+      window.clearTimeout(continuousTimer);
+      if (continuousOnEnd) {
+        toggle.removeEventListener('animationend', continuousOnEnd);
+        continuousOnEnd = undefined;
+      }
+
+      const preset = applyGlitchPreset(toggle);
+      toggle.classList.remove('is-glitching', 'is-glitch-hover', 'is-glitch-continuous');
+      toggle.style.animation = 'none';
+      void toggle.offsetWidth;
+      toggle.style.animation = '';
+      toggle.classList.add('is-glitch-continuous');
+
+      continuousOnEnd = (event: AnimationEvent) => {
+        if (event.target !== toggle) return;
+        if (continuousOnEnd) toggle.removeEventListener('animationend', continuousOnEnd);
+        continuousOnEnd = undefined;
+        window.clearTimeout(continuousTimer);
+        if (pointerOver && isCollapsed() && !root.classList.contains('is-glitching') && !reduceMotion.matches && isGlitchThemeActive()) {
+          cycleContinuousHover();
+        } else {
+          stopContinuousHover();
+        }
+      };
+      toggle.addEventListener('animationend', continuousOnEnd);
+      continuousTimer = window.setTimeout(() => {
+        if (!pointerOver || !toggle.classList.contains('is-glitch-continuous')) return;
+        if (root.classList.contains('is-glitching') || reduceMotion.matches || !isGlitchThemeActive() || !isCollapsed()) {
+          stopContinuousHover();
+          return;
+        }
+        cycleContinuousHover();
+      }, preset.dur + 50);
+    };
+
+    const playMorph = (direction: 'in' | 'out') => {
+      if (reduceMotion.matches || !isGlitchThemeActive()) return;
+      stopContinuousHover();
+      root.dataset.glitch = direction;
+      window.clearTimeout(morphTimer);
+      const dur = playElementGlitch(root, 'is-glitching');
+      morphTimer = window.setTimeout(() => {
+        root.classList.remove('is-glitching');
+        delete root.dataset.glitch;
+        if (pointerOver && isCollapsed()) cycleContinuousHover();
+      }, dur + 80);
+    };
+
+    toggle.addEventListener('pointerenter', () => {
+      pointerOver = true;
+      if (isCollapsed()) cycleContinuousHover();
+    });
+
+    toggle.addEventListener('pointerleave', () => {
+      pointerOver = false;
+      stopContinuousHover();
+    });
+
+    toggle.addEventListener('click', (event) => {
+      if (!root.open) return;
+      event.preventDefault();
+      if (root.classList.contains('is-glitching')) return;
+      playMorph('out');
+      window.setTimeout(() => {
+        root.open = false;
+      }, reduceMotion.matches || !isGlitchThemeActive() ? 0 : 280);
+    });
+
+    root.addEventListener('toggle', () => {
+      toggle.setAttribute('aria-expanded', root.open ? 'true' : 'false');
+      if (root.open) {
+        stopContinuousHover();
+        playMorph('in');
+      }
+    });
+
+    toggle.setAttribute('aria-expanded', 'false');
+
+    document.addEventListener('click', (event) => {
+      const target = (event.target as HTMLElement | null)?.closest<HTMLElement>(
+        '[data-jukebox-option], [data-stage-button]',
+      );
+      if (!target) return;
+      const id = target.dataset.jukeboxOption ?? target.dataset.stageButton;
+      if (!id) return;
+      document.dispatchEvent(new CustomEvent(STAGE_SELECT_EVENT, { detail: { id } }));
+    });
+  }
+
+  bootStageSwitch();
+</script>
+
+<style>
+  .jukebox {
+    position: relative;
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: flex-start;
+    width: var(--control-size);
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    background: var(--color-surface);
+    color: var(--color-text);
+    text-shadow: 0 1px 12px var(--bg-scrim);
+    transition:
+      padding 160ms steps(2, end),
+      width 160ms steps(2, end),
+      border-radius 160ms steps(2, end);
+  }
+
+  .jukebox[open] {
+    width: min(calc(13rem * var(--hud-scale)), calc(100vw - 2 * var(--hud-inset, 0.75rem)));
+    max-width: min(calc(13rem * var(--hud-scale)), calc(100vw - 2 * var(--hud-inset, 0.75rem)));
+    align-items: stretch;
+    border-radius: calc(0.85rem * var(--hud-scale));
+    padding: calc(0.35rem * var(--hud-scale));
+    overflow-x: clip;
+  }
+
+  .jukebox__toggle {
+    position: relative;
+    display: inline-grid;
+    place-items: center;
+    flex: 0 0 auto;
+    width: var(--control-size);
+    height: var(--control-size);
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .jukebox__toggle::marker {
+    content: '';
+  }
+
+  .jukebox[open] .jukebox__toggle {
+    width: calc(2.4rem * var(--hud-scale));
+    height: calc(2.4rem * var(--hud-scale));
+    align-self: flex-start;
+  }
+
+  .jukebox__toggle::-webkit-details-marker {
+    display: none;
+  }
+
+  .jukebox__toggle:hover {
+    color: var(--color-accent-alt);
+  }
+
+  .jukebox__icon {
+    display: block;
+    width: calc(22px * var(--hud-scale));
+    height: calc(22px * var(--hud-scale));
+  }
+
+  .jukebox__panel {
+    width: 0;
+    max-width: 0;
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .jukebox[open] .jukebox__panel {
+    width: 100%;
+    max-width: 100%;
+    max-height: min(30svh, calc(11rem * var(--hud-scale)));
+    min-width: 0;
+    opacity: 1;
+    overflow-x: hidden;
+    overflow-y: auto;
+    pointer-events: auto;
+    padding: 0 0.15rem 0.35rem;
+    box-sizing: border-box;
+  }
+
+  .jukebox__heading {
+    margin: 0 0 0.35rem;
+    font-family: var(--font-display);
+    font-size: calc(0.65rem * var(--hud-scale));
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+  }
+
+  .jukebox__list {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.25rem;
+    min-width: 0;
+    width: 100%;
+  }
+
+  .jukebox__list button {
+    appearance: none;
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0.35em 0.55em;
+    border: 1px solid transparent;
+    border-radius: 0.35rem;
+    background: transparent;
+    color: var(--color-text);
+    font-family: var(--font-display);
+    font-size: calc(0.8rem * var(--hud-scale));
+    text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+
+  .jukebox__list button:hover {
+    border-color: var(--color-border);
+  }
+
+  .jukebox__list button[aria-current='true'] {
+    border-color: var(--color-accent);
+    color: var(--color-accent-alt);
+  }
+
+  .jukebox.is-glitching[data-glitch='in'] .jukebox__panel {
+    animation: jukebox-panel-in var(--g-dur, 560ms) both;
+  }
+
+  .jukebox.is-glitching[data-glitch='out'] .jukebox__panel {
+    animation: jukebox-panel-out 520ms both;
+  }
+
+  @keyframes jukebox-panel-in {
+    0% {
+      width: 0;
+      max-width: 0;
+      max-height: 0;
+      opacity: 0;
+      animation-timing-function: steps(1, end);
+    }
+    35% {
+      width: 100%;
+      max-width: 100%;
+      max-height: min(30svh, calc(11rem * var(--hud-scale)));
+      opacity: 1;
+      animation-timing-function: steps(1, end);
+    }
+    100% {
+      width: 100%;
+      max-width: 100%;
+      max-height: min(30svh, calc(11rem * var(--hud-scale)));
+      opacity: 1;
+    }
+  }
+
+  @keyframes jukebox-panel-out {
+    0% {
+      width: 100%;
+      max-width: 100%;
+      max-height: min(30svh, calc(11rem * var(--hud-scale)));
+      opacity: 1;
+      animation-timing-function: steps(1, end);
+    }
+    55% {
+      width: 2rem;
+      max-width: 2rem;
+      opacity: 0.4;
+      animation-timing-function: steps(1, end);
+    }
+    100% {
+      width: 0;
+      max-width: 0;
+      max-height: 0;
+      opacity: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .jukebox {
+      transition: none;
+    }
+
+    .jukebox.is-glitching,
+    .jukebox.is-glitching .jukebox__panel {
+      animation: none !important;
+    }
+  }
+</style>
