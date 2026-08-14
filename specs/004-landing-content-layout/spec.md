@@ -90,8 +90,7 @@ file still hold unless they conflict with that session.
   discography show their empty-state copy; About stays hidden if missing. That
   MUST NOT look like a broken content config (Astro’s default glob loader omits
   empty folders from the store and warns on `getCollection`; this feature keeps
-  those collections addressable and watches the folder so the first file still
-  hot-loads).
+  those collections addressable).
 
 ### Session 2026-08-14 (content editing)
 
@@ -372,7 +371,9 @@ and that they did not edit layout or program files.
 - Instrumental or missing lyrics → lyrics region shows an explicit empty state.
 - Empty tour list → “no upcoming dates” message; control remains findable.
   Zero files in `src/content/shows/` is the same visitor state — not a missing
-  collection or a config error.
+  collection or a config error. Adding the first show file after a session that
+  started empty may need a dev-server restart (Astro glob does not watch empty
+  dirs).
 - Empty discography folder (zero files in `src/content/releases/`) → same as an
   empty catalog: control stays, empty-state copy, no config-error warning.
 - Very long lyrics, many releases, or many dates → scroll inside the edge region;

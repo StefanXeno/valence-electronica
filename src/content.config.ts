@@ -1,59 +1,22 @@
-import { fileURLToPath } from 'node:url';
 import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
-import type { Loader, LoaderContext } from 'astro/loaders';
+import type { Loader } from 'astro/loaders';
 import { z } from 'astro/zod';
 
 /**
- * Astro's glob loader skips empty folders (no store entry, no file watcher).
- * `getCollection()` then warns "does not exist or is empty" on every request.
- * Tour/releases/about are allowed to be empty, so keep an empty collection in
- * the store and watch the directory so the first Markdown file still hot-loads.
+ * Astro's glob loader skips empty folders, so `getCollection()` warns
+ * "does not exist or is empty". Seed an empty Map in the store instead.
+ * Do not import `node:*` here — `astro check` has no Node types.
  */
 function globAllowEmpty(options: { pattern: string; base: string }): Loader {
   const inner = glob(options);
-  let watching = false;
-
-  const ensureCollection = (context: LoaderContext) => {
-    if (context.store.keys().length > 0) return;
-    context.store.set({ id: '__empty__', data: {} });
-    context.store.delete('__empty__');
-  };
-
   return {
     name: 'glob-allow-empty',
     load: async (context) => {
-      const run = async () => {
-        await inner.load(context);
-        ensureCollection(context);
-      };
-
-      await run();
-
-      if (!context.watcher || watching) return;
-      watching = true;
-
-      const dir = fileURLToPath(
-        new URL(options.base.replace(/\/?$/, '/'), context.config.root),
-      );
-      context.watcher.add(dir);
-
-      const isInCollection = (changedPath: string) => {
-        const file = changedPath.replaceAll('\\', '/');
-        const root = dir.replaceAll('\\', '/').replace(/\/?$/, '/');
-        return file.startsWith(root) && file.endsWith('.md');
-      };
-
-      const onFs = async (changedPath: string) => {
-        if (!isInCollection(changedPath)) return;
-        // Inner glob already watches once it has seen at least one file.
-        if (context.store.keys().length > 0) return;
-        await run();
-      };
-
-      context.watcher.on('add', onFs);
-      context.watcher.on('change', onFs);
-      context.watcher.on('unlink', onFs);
+      await inner.load(context);
+      if (context.store.keys().length > 0) return;
+      context.store.set({ id: '__empty__', data: {} });
+      context.store.delete('__empty__');
     },
   };
 }
