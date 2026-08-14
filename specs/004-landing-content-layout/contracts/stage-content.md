@@ -139,8 +139,11 @@ Rules:
 - `date`, `city`, `venue` required or the show is omitted.
 - Timezone for “upcoming”: Europe/Berlin, calendar date.
 - Past dates are not listed on the stage.
-- v1 ships `example-augsburg.md` (clearly marked EXAMPLE). Zero shows is still a
-  valid empty state after that file is removed.
+- v1 ships `example-augsburg.md` (clearly marked EXAMPLE). Zero `.md` files in
+  the folder is still a valid empty state after that file is removed. The
+  collection loader MUST keep `shows` addressable when empty (do not rely on
+  Astro’s default glob, which omits empty folders and makes `getCollection`
+  warn).
 
 ## `src/data/site.json`
 

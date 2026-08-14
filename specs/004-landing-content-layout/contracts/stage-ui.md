@@ -67,7 +67,8 @@ Deep per-theme type/motion packs (IDEA-002) stay out of scope.
 
 ## Tour
 
-Upcoming shows only (Europe/Berlin, soonest first). Empty → `emptyShows`. Control stays.
+Upcoming shows only (Europe/Berlin, soonest first). Empty folder or no upcoming
+rows → `emptyShows`. Control stays. No “collection does not exist” warning.
 v1 ships at least one clearly marked EXAMPLE show.
 
 ## About / Lyrics

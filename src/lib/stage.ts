@@ -106,6 +106,7 @@ export async function getValidReleases(): Promise<ReleaseItem[]> {
   const raw = await getCollection('releases');
   const items: ReleaseItem[] = [];
   for (const entry of raw) {
+    if (entry.id.startsWith('__empty__')) continue;
     const title = entry.data.title?.trim();
     const year = entry.data.year;
     if (!title || typeof year !== 'number') {
@@ -129,6 +130,7 @@ export async function getUpcomingShows(): Promise<ShowItem[]> {
   const today = dateKey(berlinToday());
   const items: ShowItem[] = [];
   for (const entry of raw) {
+    if (entry.id.startsWith('__empty__')) continue;
     const { date, city, venue, ticketUrl } = entry.data;
     if (!date || !city?.trim() || !venue?.trim()) {
       console.warn(`[stage] omitted show "${entry.id}" (missing date, city, or venue)`);

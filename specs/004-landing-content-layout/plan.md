@@ -18,8 +18,9 @@ the content-configured default. No third-party players, no visit memory, no new 
 slots are frozen; jukebox is a collapsed vinyl control; socials are icon-only;
 footer is a transparent left cluster; looping video and glitch are Nightmare-only;
 poster-only jukebox entries are valid; visual success is typical laptop (phone HUD
-= IDEA-013). Historical plan bullets below that say “no glitch expansion” or
-“320px HUD polish” are superseded.
+= IDEA-013). Empty `shows`/`releases`/`about` folders stay loadable (glob wrapper;
+Astro’s default glob omits empty collections). Historical plan bullets below that
+say “no glitch expansion” or “320px HUD polish” are superseded.
 
 ## Technical Context
 

@@ -85,6 +85,13 @@ file still hold unless they conflict with that session.
 - Q: Do example tour dates ship? → A: Yes — at least one clearly marked EXAMPLE
   upcoming show in content, replaceable without a layout rewrite (same spirit as
   example releases and jukebox entries).
+- Q: What if a catalog folder has zero Markdown files? → A: Valid empty state.
+  Zero files in `shows/`, `releases/`, or `about/` MUST still publish: tour and
+  discography show their empty-state copy; About stays hidden if missing. That
+  MUST NOT look like a broken content config (Astro’s default glob loader omits
+  empty folders from the store and warns on `getCollection`; this feature keeps
+  those collections addressable and watches the folder so the first file still
+  hot-loads).
 
 ### Session 2026-08-14 (content editing)
 
@@ -363,9 +370,11 @@ and that they did not edit layout or program files.
 - Jukebox entry has no audio, or is not the Nightmare looping-video theme → mute
   control is hidden while that entry is active.
 - Instrumental or missing lyrics → lyrics region shows an explicit empty state.
-- Empty discography → control stays findable with a clear “no releases yet”
-  message; stage remains usable.
 - Empty tour list → “no upcoming dates” message; control remains findable.
+  Zero files in `src/content/shows/` is the same visitor state — not a missing
+  collection or a config error.
+- Empty discography folder (zero files in `src/content/releases/`) → same as an
+  empty catalog: control stays, empty-state copy, no config-error warning.
 - Very long lyrics, many releases, or many dates → scroll inside the edge region;
   center stays free; with scripting, at most one on-demand region at a time
   (this feature: all widths); persistent chrome stays available.
@@ -456,8 +465,10 @@ and that they did not edit layout or program files.
   a clear “no releases yet” (or equivalent) message — it MUST NOT be hidden.
 - **FR-011**: Tour dates MUST list upcoming shows only (date, city, venue,
   optional ticket link), soonest first, from structured content. Past dates MUST
-  NOT appear as upcoming. When none are upcoming, the region MUST show that no
-  dates are announced.
+  NOT appear as upcoming. When none are upcoming — including when the shows
+  folder has zero Markdown files — the region MUST show that no dates are
+  announced. That empty folder MUST NOT fail the build or surface a “collection
+  does not exist or is empty” error.
 - **FR-012**: Every visitor-facing text on the landing stage MUST live in plain
   content files, separate from layout and program files, in the same editing
   style as the existing Impressum and privacy pages (open a file, change the
@@ -502,7 +513,9 @@ and that they did not edit layout or program files.
   required field is left out of the published page rather than blocking the rest.
 - **FR-020**: If a content item is missing a required field, that item MUST be
   omitted and the rest of the landing MUST still publish. The page MUST NOT go
-  blank. If the whole publish fails for another reason, the last good public
+  blank. Zero Markdown files in `shows/`, `releases/`, or `about/` MUST be an
+  empty catalog (existing empty-state / hide-About rules), not a missing
+  collection. If the whole publish fails for another reason, the last good public
   version MUST stay online.
 
 ### Key Entities

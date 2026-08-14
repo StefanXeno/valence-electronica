@@ -47,7 +47,8 @@ npm run preview
    “No releases yet” (or chrome copy).
 6. **US6 — tour**: Open tour → shipped EXAMPLE Augsburg date (soonest-first); ticket
    link → new tab. Move the show file aside → “No upcoming dates” (or chrome copy),
-   control still there. Add a dated-in-the-past show → not listed.
+   control still there, **no** “collection does not exist or is empty” warning. Add a
+   dated-in-the-past show → not listed.
 7. **US7 — non-programmer edit**: Change `chrome.md` `aboutTitle`, one lyric line, Example
    EP title, and tagline in `site.json` only. Refresh. Expect those strings to update; no
    component edits. Follow README “Editing content”.
