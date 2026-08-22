@@ -1177,21 +1177,21 @@
 }
 
 /* Glitch language is Nightmare-only — other theme packs stay still. */
-html:not([data-theme='nightmare-crimson']) .glitch-hit.is-glitching,
-html:not([data-theme='nightmare-crimson']) .glitch-hit.is-glitch-hover,
-html:not([data-theme='nightmare-crimson']) .glitch-hit.is-glitch-continuous,
-html:not([data-theme='nightmare-crimson']) .glitch-hit.is-glitching::before,
-html:not([data-theme='nightmare-crimson']) .glitch-hit.is-glitching::after,
-html:not([data-theme='nightmare-crimson']) .glitch-hit.is-glitch-hover::before,
-html:not([data-theme='nightmare-crimson']) .glitch-hit.is-glitch-hover::after,
-html:not([data-theme='nightmare-crimson']) .glitch-hit.is-glitch-continuous::before,
-html:not([data-theme='nightmare-crimson']) .glitch-hit.is-glitch-continuous::after,
-html:not([data-theme='nightmare-crimson']) .volume-control.is-glitching,
-html:not([data-theme='nightmare-crimson']) [data-jukebox].is-glitching,
-html:not([data-theme='nightmare-crimson']) .volume-control.is-glitching::before,
-html:not([data-theme='nightmare-crimson']) [data-jukebox].is-glitching::before,
-html:not([data-theme='nightmare-crimson']) .volume-control.is-glitching::after,
-html:not([data-theme='nightmare-crimson']) [data-jukebox].is-glitching::after {
+html:not([data-hud-glitch='true']) .glitch-hit.is-glitching,
+html:not([data-hud-glitch='true']) .glitch-hit.is-glitch-hover,
+html:not([data-hud-glitch='true']) .glitch-hit.is-glitch-continuous,
+html:not([data-hud-glitch='true']) .glitch-hit.is-glitching::before,
+html:not([data-hud-glitch='true']) .glitch-hit.is-glitching::after,
+html:not([data-hud-glitch='true']) .glitch-hit.is-glitch-hover::before,
+html:not([data-hud-glitch='true']) .glitch-hit.is-glitch-hover::after,
+html:not([data-hud-glitch='true']) .glitch-hit.is-glitch-continuous::before,
+html:not([data-hud-glitch='true']) .glitch-hit.is-glitch-continuous::after,
+html:not([data-hud-glitch='true']) .volume-control.is-glitching,
+html:not([data-hud-glitch='true']) [data-jukebox].is-glitching,
+html:not([data-hud-glitch='true']) .volume-control.is-glitching::before,
+html:not([data-hud-glitch='true']) [data-jukebox].is-glitching::before,
+html:not([data-hud-glitch='true']) .volume-control.is-glitching::after,
+html:not([data-hud-glitch='true']) [data-jukebox].is-glitching::after {
   animation: none !important;
 }
 

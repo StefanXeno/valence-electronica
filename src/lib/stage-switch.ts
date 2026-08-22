@@ -1,3 +1,10 @@
+import {
+  applyThemeAttributes,
+  packAllowsMute,
+  packSupportsLoopingVideo,
+  resolveThemePack,
+} from './theme-packs';
+
 export type StageCatalogEntry = {
   id: string;
   themeId: string;
@@ -8,12 +15,6 @@ export type StageCatalogEntry = {
 
 export const STAGE_SELECT_EVENT = 'stage-select';
 
-const VIDEO_THEME_ID = 'nightmare-crimson';
-
-function entryPlaysVideo(entry: StageCatalogEntry): boolean {
-  return entry.themeId === VIDEO_THEME_ID && entry.sources.length > 0;
-}
-
 export function applyStageEntry(entry: StageCatalogEntry, keepMuted: boolean) {
   const root = document.documentElement;
   const atmosphere = document.querySelector<HTMLElement>('[data-atmosphere]');
@@ -21,8 +22,14 @@ export function applyStageEntry(entry: StageCatalogEntry, keepMuted: boolean) {
   const poster = atmosphere?.querySelector<HTMLImageElement>('[data-bg-poster]');
   if (!atmosphere || !video) return;
 
-  root.dataset.theme = entry.themeId;
-  atmosphere.dataset.hasAudio = entry.hasAudio && entryPlaysVideo(entry) ? 'true' : 'false';
+  const pack = resolveThemePack(entry.themeId);
+  const attrs = applyThemeAttributes(pack);
+  root.dataset.theme = attrs.themeId;
+  root.dataset.hudGlitch = attrs.hudGlitch;
+
+  const hasSources = entry.sources.length > 0;
+  const playsVideo = packSupportsLoopingVideo(pack, hasSources);
+  atmosphere.dataset.hasAudio = packAllowsMute(pack, entry.hasAudio, playsVideo) ? 'true' : 'false';
   atmosphere.dataset.activeId = entry.id;
 
   video.poster = entry.poster;
@@ -36,7 +43,7 @@ export function applyStageEntry(entry: StageCatalogEntry, keepMuted: boolean) {
   };
 
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-  if (!entryPlaysVideo(entry) || reduceMotion.matches) {
+  if (!playsVideo || reduceMotion.matches) {
     video.pause();
     video.load();
     atmosphere.dataset.bgState = 'fallback';

@@ -67,7 +67,10 @@
 
     new MutationObserver(() => {
       if (!isGlitchThemeActive()) clearAllGlitchClasses();
-    }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    }).observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['data-theme', 'data-hud-glitch'],
+    });
 
     document.addEventListener(
       'pointerover',

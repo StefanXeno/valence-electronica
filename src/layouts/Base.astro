@@ -9,7 +9,8 @@ import BackgroundAtmosphere from '../components/BackgroundAtmosphere.astro';
 import MuteControl from '../components/MuteControl.astro';
 import GlitchPress from '../components/GlitchPress.astro';
 import LegalOverlay from '../components/LegalOverlay.astro';
-import { getDefaultVideo, getValidJukeboxEntries, resolveThemeId } from '../lib/background';
+import { getDefaultVideo, getValidJukeboxEntries } from '../lib/background';
+import { applyThemeAttributes, resolveThemePack } from '../lib/theme-packs';
 import { withBase } from '../lib/url';
 
 interface Props {
@@ -20,12 +21,12 @@ interface Props {
 const { title = site.seo.title, description = site.artist.description } = Astro.props;
 const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : undefined;
 const [defaultVideo, videos] = await Promise.all([getDefaultVideo(), getValidJukeboxEntries()]);
-const themeId = resolveThemeId(defaultVideo.themeId);
+const themeAttrs = applyThemeAttributes(resolveThemePack(defaultVideo.themeId));
 const showMute = videos.some((entry) => entry.hasAudio);
 ---
 
 <!doctype html>
-<html lang="en" data-theme={themeId}>
+<html lang="en" data-theme={themeAttrs.themeId} data-hud-glitch={themeAttrs.hudGlitch}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />

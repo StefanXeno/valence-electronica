@@ -1,7 +1,8 @@
 /*
-  Basic theme packs (color / surface only).
-  Operators switch packs via jukebox Markdown `themeId` (existing ids only).
-  Adding a new mood requires a new [data-theme="…"] block here (dev task).
+  Theme pack color / surface tokens — one `[data-theme='…']` block per complete pack.
+  Capabilities (video, audio, HUD glitch) live in `src/lib/theme-packs.ts`.
+  Operators bind jukebox entries via Markdown `themeId`; developers add registry + CSS
+  together (see specs/005-theme-packs/contracts/theme-packs.md).
 
   `nightmare-crimson` is sampled from the NIGHTMARE loop (dominant #a00000 reds,
   near-black ink, pale text highlights).
@@ -19,7 +20,6 @@
   --bg-scrim: rgb(8 0 0 / 68%);
 }
 
-/* Active pack for the temp NIGHTMARE background clip */
 [data-theme='nightmare-crimson'] {
   --color-bg: #080000;
   --color-surface: rgb(28 6 6 / 82%);

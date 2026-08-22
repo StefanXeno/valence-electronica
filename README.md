@@ -29,7 +29,8 @@ updating the matching references.
   - Set `"seo": { "indexable": true }` at launch to allow search engines to index the site.
 - **`src/content/jukebox/`** — one Markdown file per stage record. Filename slug = stable
   id (e.g. `placeholder-loop.md` → `placeholder-loop`). Frontmatter: `label`, `themeId`
-  (must match a pack in `src/styles/themes.css`), `hasAudio`, `poster`, `sources`, and
+  (must match a **complete** theme pack — registry entry in `src/lib/theme-packs.ts` and
+  CSS block in `src/styles/themes.css`; see [Theme packs](#theme-packs) below), `hasAudio`,
   `default: true` on exactly one usable entry. The Markdown **body** is the lyrics for
   that record (leave empty for instrumentals).
   - Put media files under `public/videos/` and `public/images/posters/`, then point
@@ -50,6 +51,23 @@ updating the matching references.
 **Omit-invalid-item:** a release missing `title`/`year`, or a show missing `date`/`city`/
 `venue`, is dropped with a build warning. The rest of the page still builds. Unparseable
 Markdown can still fail the whole build — the last good live deploy stays up.
+
+## Theme packs
+
+Visual moods are **theme packs**: a registry entry plus matching CSS tokens. Jukebox
+`themeId` selects the pack; capabilities (looping video, mute, HUD glitch) are defined in
+code, not in Markdown.
+
+**Add or change a pack (developer):**
+
+1. Add the pack to `src/lib/theme-packs.ts` (capabilities) and `PACK_CSS_THEME_IDS`.
+2. Add a `[data-theme='your-id'] { … }` block in `src/styles/themes.css`.
+3. Set `themeId: your-id` on jukebox Markdown entries.
+4. Run `npm run check && npm run build`.
+
+Full contract: [`specs/005-theme-packs/contracts/theme-packs.md`](specs/005-theme-packs/contracts/theme-packs.md).
+
+Unknown or incomplete packs warn at build and fall back to **`default`** at runtime.
 
 Every merge to `main` is automatically checked, built, and deployed by GitHub Actions
 (`.github/workflows/deploy.yml`). If the build fails, the previous version stays live.

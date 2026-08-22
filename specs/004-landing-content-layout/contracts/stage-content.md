@@ -76,15 +76,18 @@ Rules:
 - Exactly one file SHOULD set `default: true`. Resolver still picks a valid default if
   marking is wrong (warn, do not blank the page).
 - Body = lyrics for that entry. Empty body → lyrics panel shows `emptyLyrics`.
-- `themeId` must match a pack in `src/styles/themes.css` (unknown → `default` pack).
+- `themeId` must match a **complete** theme pack (`src/lib/theme-packs.ts` registry entry
+  **and** `[data-theme='…']` block in `src/styles/themes.css`; see
+  `specs/005-theme-packs/contracts/theme-packs.md`). Unknown or incomplete → full
+  `default` pack at runtime (build warns).
 - Media paths are site-root paths under `public/` (honor Astro `base` when emitting).
-- `sources` optional. Looping video + unmute audio only when `themeId` is
-  `nightmare-crimson` and sources exist. Other entries MAY be poster-only stills
-  (`hasAudio: false`); mute stays hidden while they are active.
+- `sources` optional. Looping video + unmute audio follow the bound pack’s capabilities
+  (`loopingVideo`, `audioEligible`) when sources exist. Poster-only entries use
+  `hasAudio: false`; mute stays hidden while they are active.
 - Missing required logical fields (`label`, `poster`) → **omit this entry**, build
   the rest (FR-020).
 - Adding a new clip: drop poster (and optional video) in `public/`, then add a
-  Markdown file. New `themeId` values still need a CSS pack (developer).
+  Markdown file. New `themeId` values need a complete pack (registry + CSS — developer).
 
 v1 example set:
 

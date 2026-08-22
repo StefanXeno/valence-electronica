@@ -1,16 +1,23 @@
 ---
 import { getDefaultVideo } from '../lib/background';
+import {
+  packAllowsMute,
+  packSupportsLoopingVideo,
+  resolveThemePack,
+} from '../lib/theme-packs';
 import { withBase } from '../lib/url';
 
 const video = await getDefaultVideo();
 const posterSrc = withBase(video.poster);
-const useVideo = video.themeId === 'nightmare-crimson' && video.sources.length > 0;
+const pack = resolveThemePack(video.themeId);
+const useVideo = packSupportsLoopingVideo(pack, video.sources.length > 0);
 const sources = useVideo
   ? video.sources.map((source) => ({
       ...source,
       src: withBase(source.src),
     }))
   : [];
+const showMute = packAllowsMute(pack, video.hasAudio, useVideo);
 ---
 
 <div
@@ -18,7 +25,7 @@ const sources = useVideo
   data-atmosphere
   data-bg-state={useVideo ? 'playing' : 'fallback'}
   data-active-id={video.id}
-  data-has-audio={useVideo && video.hasAudio ? 'true' : 'false'}
+  data-has-audio={showMute ? 'true' : 'false'}
 >
   <video
     class="atmosphere__video"

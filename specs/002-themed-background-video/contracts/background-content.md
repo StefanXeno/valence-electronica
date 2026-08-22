@@ -40,10 +40,15 @@ Rules:
 - `hasAudio: true` ⇒ control MAY be offered only while the video is playing (not in
   reduced-motion or failure fallback).
 - Additional `videos[]` entries are allowed but MUST NOT surface a picker in this feature.
-- `themeId` MUST have a matching `[data-theme="…"]` pack in `src/styles/themes.css`
-  (unknown ids fall back to the `default` pack).
+- `themeId` MUST reference a **complete** theme pack (registry + CSS). See
+  `specs/005-theme-packs/contracts/theme-packs.md` (supersedes capability rules below for
+  features `005+`). Unknown or incomplete ids fall back to the full `default` pack.
 
 ## Theme packs (`src/styles/themes.css`)
+
+> **Superseded for capabilities** by [`specs/005-theme-packs/contracts/theme-packs.md`](../../005-theme-packs/contracts/theme-packs.md).
+> Color tokens remain in CSS; looping video, mute, and HUD glitch are driven by
+> `src/lib/theme-packs.ts`.
 
 Each basic pack overrides color/surface tokens only, for example:
 

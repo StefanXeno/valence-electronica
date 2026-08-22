@@ -1,5 +1,9 @@
 import { getCollection } from 'astro:content';
 import type { CollectionEntry } from 'astro:content';
+import { resolveThemeId, type ThemePackId } from './theme-packs';
+
+export type { ThemePackId };
+export { resolveThemeId, resolveThemePack } from './theme-packs';
 
 export interface MediaSource {
   src: string;
@@ -10,7 +14,7 @@ export interface BackgroundVideo {
   id: string;
   title?: string;
   label: string;
-  themeId: string;
+  themeId: ThemePackId;
   hasAudio: boolean;
   poster: string;
   sources: MediaSource[];
@@ -21,11 +25,6 @@ export interface BackgroundConfig {
   defaultVideoId: string;
   videos: BackgroundVideo[];
 }
-
-/** Theme packs defined in `src/styles/themes.css`. Unknown ids fall back to `default`. */
-export const KNOWN_THEME_IDS = ['default', 'nightmare-crimson', 'cyan-pulse'] as const;
-
-export type KnownThemeId = (typeof KNOWN_THEME_IDS)[number];
 
 function isUsableEntry(entry: CollectionEntry<'jukebox'>): boolean {
   const { label, poster } = entry.data;
@@ -78,10 +77,4 @@ export async function getDefaultVideo(): Promise<BackgroundVideo> {
     throw new Error('jukebox collection: no usable default entry');
   }
   return video;
-}
-
-export function resolveThemeId(themeId: string): KnownThemeId {
-  return (KNOWN_THEME_IDS as readonly string[]).includes(themeId)
-    ? (themeId as KnownThemeId)
-    : 'default';
 }
