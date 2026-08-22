@@ -24,7 +24,7 @@ const CHROME_FALLBACK: UiChrome = {
   emptyLyrics: 'Lyrics not available',
   emptyReleases: 'No releases yet',
   emptyShows: 'No upcoming dates',
-  jukeboxLabel: 'Jukebox',
+  jukeboxLabel: 'V-Flip',
   socialsLabel: 'Socials',
   comingSoon: 'coming soon',
   ticketLabel: 'Tickets',

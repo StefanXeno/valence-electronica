@@ -24,9 +24,9 @@ Jukebox Markdown references the pack by id:
 label: NIGHTMARE (temp loop)
 themeId: nightmare-crimson
 hasAudio: true
-poster: /images/posters/placeholder-loop.jpg
+poster: /images/posters/nightmare.jpg
 sources:
-  - src: /videos/placeholder-loop.mp4
+  - src: /videos/nightmare.mp4
     type: video/mp4
 default: true
 ---

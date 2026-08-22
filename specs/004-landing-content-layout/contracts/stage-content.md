@@ -58,10 +58,10 @@ Rules:
 label: Example Single
 themeId: nightmare-crimson
 hasAudio: true
-poster: /images/posters/placeholder-loop.jpg
+poster: /images/posters/nightmare.jpg
 default: true
 sources:
-  - src: /videos/placeholder-loop.mp4
+  - src: /videos/nightmare.mp4
     type: video/mp4
 ---
 
@@ -91,7 +91,7 @@ Rules:
 
 v1 example set:
 
-- `placeholder-loop.md` — NIGHTMARE temp media, `default: true`,
+- `nightmare.md` — NIGHTMARE temp media, `default: true`,
   `nightmare-crimson`, MP4 + poster, `hasAudio: true`
 - `example-cyan.md` — **poster only** (`/images/posters/placeholder-cyan.svg`),
   `themeId: cyan-pulse`, no `sources`, `hasAudio: false` (static still, no mute)
@@ -103,7 +103,7 @@ v1 example set:
 title: Example Single
 year: 2024
 kind: single
-jukeboxId: placeholder-loop
+jukeboxId: nightmare
 url: https://valenceelectronica.bandcamp.com/
 ---
 ```

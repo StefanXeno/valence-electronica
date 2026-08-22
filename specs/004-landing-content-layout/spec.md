@@ -623,7 +623,7 @@ and that they did not edit layout or program files.
   until the artist replaces them. Suggested placeholder titles for that set:
   “Example Single” (2024, single, bound) and “Example EP” (2025, EP, unbound).
   Tour ships at least one EXAMPLE upcoming show (e.g. Augsburg) until replaced.
-  Jukebox v1 examples: Nightmare (`placeholder-loop`, looping video + audio) and
+  Jukebox v1 examples: Nightmare (`nightmare`, looping video + audio) and
   Example Cyan (`example-cyan`, static poster, no video, no mute).
 - Glitch is Nightmare-only. As-built HUD targets: closed on-demand panels glitch
   on hover; click on the control glitches the whole box; open panels do not

@@ -28,7 +28,7 @@ updating the matching references.
     a real link; `"status": "placeholder"` shows a "coming soon" chip without a link.
   - Set `"seo": { "indexable": true }` at launch to allow search engines to index the site.
 - **`src/content/jukebox/`** — one Markdown file per stage record. Filename slug = stable
-  id (e.g. `placeholder-loop.md` → `placeholder-loop`). Frontmatter: `label`, `themeId`
+  id (e.g. `nightmare.md` → `nightmare`). Frontmatter: `label`, `themeId`
   (must match a **complete** theme pack — registry entry in `src/lib/theme-packs.ts` and
   CSS block in `src/styles/themes.css`; see [Theme packs](#theme-packs) below), `hasAudio`,
   `default: true` on exactly one usable entry. The Markdown **body** is the lyrics for

@@ -2,10 +2,10 @@
 label: Nightmare
 themeId: nightmare-crimson
 hasAudio: true
-poster: /images/posters/placeholder-loop.jpg
+poster: /images/posters/nightmare.jpg
 default: true
 sources:
-  - src: /videos/placeholder-loop.mp4
+  - src: /videos/nightmare.mp4
     type: video/mp4
 ---
 

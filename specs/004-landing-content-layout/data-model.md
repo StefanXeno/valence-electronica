@@ -61,7 +61,7 @@ Logical omit (FR-020): drop the entry if `label` or `poster` is empty. Poster-on
 entries (no `sources`) are valid stills. If the omitted entry was default, use another
 valid entry; if none remain, keep static/themed fallback so the page is not blank.
 
-Shipped examples: `placeholder-loop` (Nightmare, MP4 + audio, default), `example-cyan`
+Shipped examples: `nightmare` (Nightmare, MP4 + audio, default), `example-cyan`
 (cyan-pulse, static SVG poster, no sources, no mute).
 
 ### MediaSource

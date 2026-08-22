@@ -2,6 +2,6 @@
 title: Example Single
 year: 2024
 kind: single
-jukeboxId: placeholder-loop
+jukeboxId: nightmare
 url: https://valenceelectronica.bandcamp.com/
 ---
