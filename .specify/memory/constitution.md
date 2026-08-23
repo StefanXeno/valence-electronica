@@ -1,15 +1,14 @@
 <!--
 Sync Impact Report
 ==================
-Version change: (template) → 1.0.0
-Modified principles: all placeholders replaced (initial ratification)
+Version change: 1.0.0 → 1.1.0
+Modified principles: none renamed
 Added sections:
-  - Core Principles (I–VI)
-  - Additional Constraints
-  - Development Workflow
-  - Governance
+  - Core Principles VII. Artist-Facing Change Documentation
 Removed sections: none
-Follow-up TODOs: none
+Follow-up TODOs:
+  - Author or promote a dedicated artist guide (beyond README "Editing content")
+    when implementing this principle as a feature
 -->
 
 # Valence Artist Website Constitution
@@ -77,6 +76,24 @@ forbidden.
 Rationale: A small hobby project stays maintainable only if scope and complexity are
 guarded at every step.
 
+### VII. Artist-Facing Change Documentation
+
+The project MUST maintain artist-facing documentation that states, in plain language:
+
+1. What the artist MAY change himself (content files, data files, media assets, and any
+   other approved edit surfaces).
+2. What the artist MUST NOT change (layout, components, styles, build config, theme-pack
+   registry, and other developer-owned surfaces).
+3. How to preview changes locally and how a change reaches the live site.
+
+When a feature adds or removes an artist-editable surface, that feature's plan and
+implementation MUST update the artist-facing documentation in the same change set. The
+documentation MUST be accurate enough that the artist can perform routine updates without
+asking a developer which files to touch.
+
+Rationale: Content-code separation only works if the artist knows the safe edit boundary;
+undocumented surfaces force developer involvement for every content change.
+
 ## Additional Constraints
 
 - All repository artifacts — code, comments, file names, branch names, commit messages,
@@ -104,4 +121,4 @@ Sync Impact Report. Every feature plan MUST include a constitution compliance ch
 violations MUST be either resolved or explicitly justified and approved by the project owner
 before implementation.
 
-**Version**: 1.0.0 | **Ratified**: 2026-08-07 | **Last Amended**: 2026-08-07
+**Version**: 1.1.0 | **Ratified**: 2026-08-07 | **Last Amended**: 2026-08-23
