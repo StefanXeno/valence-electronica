@@ -1,0 +1,21 @@
+{
+  "timezone": "Europe/Berlin",
+  "rules": [
+    {
+      "type": "date",
+      "on": "10-31",
+      "jukeboxId": "nightmare"
+    },
+    {
+      "type": "range",
+      "from": "2026-12-24",
+      "to": "2026-12-26",
+      "jukeboxId": "example-cyan"
+    },
+    {
+      "type": "weekday",
+      "days": [5],
+      "jukeboxId": "example-cyan"
+    }
+  ]
+}

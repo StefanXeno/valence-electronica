@@ -4,6 +4,11 @@ import {
   packSupportsLoopingVideo,
   resolveThemePack,
 } from './theme-packs';
+import {
+  berlinCalendarParts,
+  resolveScheduledDefault,
+  type StageSchedule,
+} from './stage-schedule';
 
 export type StageCatalogEntry = {
   id: string;
@@ -97,9 +102,32 @@ export function syncStageUi(activeId: string) {
   });
 }
 
-export function initStageSwitch(catalog: StageCatalogEntry[], defaultId: string) {
+export function initStageSwitch(
+  catalog: StageCatalogEntry[],
+  staticFallbackId: string,
+  schedule?: StageSchedule,
+) {
   const byId = new Map(catalog.map((entry) => [entry.id, entry]));
-  let activeId = defaultId;
+  const catalogIds = new Set(catalog.map((entry) => entry.id));
+  let activeId = staticFallbackId;
+
+  if (schedule?.rules.length) {
+    activeId = resolveScheduledDefault(
+      schedule,
+      berlinCalendarParts(),
+      catalogIds,
+      staticFallbackId,
+    );
+  }
+
+  if (activeId !== staticFallbackId) {
+    const scheduled = byId.get(activeId);
+    if (scheduled) {
+      applyStageEntry(scheduled, true);
+    } else {
+      activeId = staticFallbackId;
+    }
+  }
 
   const select = (id: string) => {
     const entry = byId.get(id);

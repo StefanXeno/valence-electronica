@@ -18,8 +18,8 @@
 
 **Purpose**: Schedule data file and operator docs before resolver code
 
-- [ ] T001 Create starter `src/data/stage-schedule.json` with `timezone: Europe/Berlin` and commented-out or inactive example rules per `specs/007-scheduled-stage-default/contracts/stage-schedule.md` (ship with empty `rules: []` so behavior matches pre-feature until editor adds rules)
-- [ ] T002 [P] Add `src/data/stage-schedule.json` editing notes to the **Editing content** section in `README.md` (one file, rule types, link to contract, `npm run check` before publish)
+- [x] T001 Create starter `src/data/stage-schedule.json` with `timezone: Europe/Berlin` and example rules per `specs/007-scheduled-stage-default/contracts/stage-schedule.md` (rules use future or non-today dates where possible so dev default stays Nightmare until editors add active rules)
+- [x] T002 [P] Add `src/data/stage-schedule.json` editing notes to the **Editing content** section in `README.md` (one file, rule types, link to contract, `npm run check` before publish)
 
 ---
 
@@ -29,11 +29,11 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T003 Create `src/lib/stage-schedule.ts` with TypeScript types for `StageSchedule` and discriminated rule union (`date` | `range` | `weekday`) per `specs/007-scheduled-stage-default/data-model.md`
-- [ ] T004 Implement `berlinCalendarParts(now?: Date)` in `src/lib/stage-schedule.ts` using `Intl.DateTimeFormat` with `timeZone: Europe/Berlin` (year, month, day, ISO weekday 1–7)
-- [ ] T005 Implement `resolveScheduledDefault(schedule, parts, catalogIds, staticFallbackId)` in `src/lib/stage-schedule.ts` with tier order date → range → weekday → fallback and first-match-wins within each tier per `specs/007-scheduled-stage-default/data-model.md`
-- [ ] T006 Implement `loadStageSchedule()` in `src/lib/stage-schedule.ts` to read `src/data/stage-schedule.json`, treat missing file as empty rules, reject non-`Europe/Berlin` timezone at build, and parse rule arrays
-- [ ] T007 Implement `validateStageSchedule(schedule, usableJukeboxIds)` in `src/lib/stage-schedule.ts` to fail on unknown `jukeboxId`, invalid calendar dates (`MM-DD`, `YYYY-MM-DD`), and `range.from > range.to` with clear error messages
+- [x] T003 Create `src/lib/stage-schedule.ts` with TypeScript types for `StageSchedule` and discriminated rule union (`date` | `range` | `weekday`) per `specs/007-scheduled-stage-default/data-model.md`
+- [x] T004 Implement `berlinCalendarParts(now?: Date)` in `src/lib/stage-schedule.ts` using `Intl.DateTimeFormat` with `timeZone: Europe/Berlin` (year, month, day, ISO weekday 1–7)
+- [x] T005 Implement `resolveScheduledDefault(schedule, parts, catalogIds, staticFallbackId)` in `src/lib/stage-schedule.ts` with tier order date → range → weekday → fallback and first-match-wins within each tier per `specs/007-scheduled-stage-default/data-model.md`
+- [x] T006 Implement `loadStageSchedule()` in `src/lib/stage-schedule.ts` to read `src/data/stage-schedule.json`, treat missing file as empty rules, reject non-`Europe/Berlin` timezone at build, and parse rule arrays
+- [x] T007 Implement `validateStageSchedule(schedule, usableJukeboxIds)` in `src/lib/stage-schedule.ts` to fail on unknown `jukeboxId`, invalid calendar dates (`MM-DD`, `YYYY-MM-DD`), and `range.from > range.to` with clear error messages
 
 **Checkpoint**: `src/lib/stage-schedule.ts` exports resolver + loader + validator; no UI wiring yet
 
@@ -47,12 +47,12 @@
 
 ### Implementation for User Story 1
 
-- [ ] T008 [US1] Extend `getBackgroundConfig()` in `src/lib/background.ts` to call `loadStageSchedule()` and `validateStageSchedule()` against usable jukebox ids; keep `defaultVideoId` as **static fallback** (`default: true` entry); add `schedule` payload to returned config
-- [ ] T009 [US1] Ensure `getDefaultVideo()` in `src/lib/background.ts` and SSR in `src/layouts/Base.astro` continue to use static fallback only (not client-resolved id) for no-JS and initial HTML
-- [ ] T010 [US1] Embed schedule JSON and static fallback id on the jukebox root in `src/components/Jukebox.astro` via `data-stage-schedule` and `data-stage-fallback` (keep `data-stage-default` as SSR/static fallback id)
-- [ ] T011 [US1] Update `initStageSwitch()` in `src/lib/stage-switch.ts` to parse embedded schedule, call `berlinCalendarParts()` + `resolveScheduledDefault()`, and when result ≠ SSR `defaultId` immediately `applyStageEntry()` + `syncStageUi()` before user interaction
-- [ ] T012 [US1] Confirm `src/components/LyricsPanel.astro` and `src/components/BackgroundAtmosphere.astro` SSR the static fallback entry while client sync from `src/lib/stage-switch.ts` updates active lyrics/atmosphere when scheduled default differs
-- [ ] T013 [US1] Manually walk `specs/007-scheduled-stage-default/quickstart.md` scenario 1 (scheduled default on load) and fix regressions in `src/lib/stage-switch.ts` / `src/components/Jukebox.astro`
+- [x] T008 [US1] Extend `getBackgroundConfig()` in `src/lib/background.ts` to call `loadStageSchedule()` and `validateStageSchedule()` against usable jukebox ids; keep `defaultVideoId` as **static fallback** (`default: true` entry); add `schedule` payload to returned config
+- [x] T009 [US1] Ensure `getDefaultVideo()` in `src/lib/background.ts` and SSR in `src/layouts/Base.astro` continue to use static fallback only (not client-resolved id) for no-JS and initial HTML
+- [x] T010 [US1] Embed schedule JSON and static fallback id on the jukebox root in `src/components/Jukebox.astro` via `data-stage-schedule` and `data-stage-fallback` (keep `data-stage-default` as SSR/static fallback id)
+- [x] T011 [US1] Update `initStageSwitch()` in `src/lib/stage-switch.ts` to parse embedded schedule, call `berlinCalendarParts()` + `resolveScheduledDefault()`, and when result ≠ SSR `defaultId` immediately `applyStageEntry()` + `syncStageUi()` before user interaction
+- [x] T012 [US1] Confirm `src/components/LyricsPanel.astro`, `src/components/BackgroundAtmosphere.astro`, and discography stage buttons (`syncStageUi` / `data-stage-button`) SSR the static fallback while client sync from `src/lib/stage-switch.ts` updates active state when scheduled default differs
+- [x] T013 [US1] Manually walk `specs/007-scheduled-stage-default/quickstart.md` scenario 1 (scheduled default on load) and fix regressions in `src/lib/stage-switch.ts` / `src/components/Jukebox.astro`
 
 **Checkpoint**: MVP — calendar rule for today changes landing default without redeploy on reload
 
@@ -66,9 +66,9 @@
 
 ### Implementation for User Story 2
 
-- [ ] T014 [P] [US2] Populate `src/data/stage-schedule.json` with shipped example rules (yearly `10-31` → `nightmare`, sample range, sample weekday) per `specs/007-scheduled-stage-default/contracts/stage-schedule.md`; disable or comment rules that would override today in dev unless intentional
-- [ ] T015 [US2] Wire `validateStageSchedule()` into the build path from `src/lib/background.ts` so `astro check` / `npm run build` fails when schedule references invalid ids or dates (FR-008)
-- [ ] T016 [US2] Manually walk `specs/007-scheduled-stage-default/quickstart.md` scenario 3 (editor changes schedule file only, no component edits)
+- [x] T014 [P] [US2] Populate `src/data/stage-schedule.json` with shipped example rules (yearly `10-31` → `nightmare`, sample range, sample weekday) per `specs/007-scheduled-stage-default/contracts/stage-schedule.md` (use dates that do not override today in dev unless intentional)
+- [x] T015 [US2] Verify `validateStageSchedule()` wired via `src/lib/background.ts` causes `astro check` / `npm run build` to fail on invalid ids or dates (FR-008; no duplicate wiring)
+- [x] T016 [US2] Manually walk `specs/007-scheduled-stage-default/quickstart.md` scenario 3 (editor changes schedule file only, no component edits)
 
 **Checkpoint**: Non-programmer can retime defaults by editing one JSON file; bad ids fail CI
 
@@ -82,8 +82,8 @@
 
 ### Implementation for User Story 3
 
-- [ ] T017 [US3] Verify `initStageSwitch()` in `src/lib/stage-switch.ts` resolves schedule **once at boot** only; `STAGE_SELECT_EVENT` handler must not re-run schedule resolution (manual `activeId` until navigation reload)
-- [ ] T018 [US3] Manually walk `specs/007-scheduled-stage-default/quickstart.md` scenario 4 (override persists for visit, reload restores scheduled default)
+- [x] T017 [US3] Verify `initStageSwitch()` in `src/lib/stage-switch.ts` resolves schedule **once at boot** only; `STAGE_SELECT_EVENT` handler must not re-run schedule resolution (manual `activeId` until navigation reload)
+- [x] T018 [US3] Manually walk `specs/007-scheduled-stage-default/quickstart.md` scenario 4 (override persists for visit, reload restores scheduled default)
 
 **Checkpoint**: Jukebox explicit choice beats schedule; no cookies or storage added
 
@@ -97,10 +97,10 @@
 
 ### Implementation for User Story 4
 
-- [ ] T019 [US4] Ensure `loadStageSchedule()` in `src/lib/stage-schedule.ts` returns empty rules for missing file without throwing; `getBackgroundConfig()` in `src/lib/background.ts` behaves identically to pre-feature (static fallback only)
-- [ ] T020 [US4] Ensure `resolveScheduledDefault()` in `src/lib/stage-schedule.ts` skips rules whose `jukeboxId` ∉ `catalogIds` at runtime and falls through to next tier / static fallback (FR-009)
-- [ ] T021 [US4] Add build failure coverage for invalid `jukeboxId`, invalid date, and inverted range in `src/lib/stage-schedule.ts` / `src/lib/background.ts`; confirm error messages name the offending rule/id
-- [ ] T022 [US4] Manually walk `specs/007-scheduled-stage-default/quickstart.md` scenarios 5–10 (empty schedule, build fail on bad id, priority date vs weekday, yearly recurrence, no-JS static fallback)
+- [x] T019 [US4] Ensure `loadStageSchedule()` in `src/lib/stage-schedule.ts` returns empty rules for missing file without throwing; `getBackgroundConfig()` in `src/lib/background.ts` behaves identically to pre-feature (static fallback only)
+- [x] T020 [US4] Ensure `resolveScheduledDefault()` in `src/lib/stage-schedule.ts` skips rules whose `jukeboxId` ∉ `catalogIds` at runtime and falls through to next tier / static fallback (FR-009)
+- [x] T021 [US4] Add build failure coverage for invalid `jukeboxId`, invalid date, and inverted range in `src/lib/stage-schedule.ts` / `src/lib/background.ts`; confirm error messages name the offending rule/id
+- [x] T022 [US4] Manually walk `specs/007-scheduled-stage-default/quickstart.md` scenarios 5–10 (empty schedule, build fail on bad id, priority date vs weekday, yearly recurrence, no-JS static fallback); confirm legal footer links and keyboard navigation remain usable after scheduled boot (FR-015)
 
 **Checkpoint**: Broken or empty schedule degrades safely; editors get fast publish feedback
 
@@ -110,9 +110,9 @@
 
 **Purpose**: Full validation and docs alignment
 
-- [ ] T023 Run full `specs/007-scheduled-stage-default/quickstart.md` validation checklist and fix any gaps in `src/lib/stage-schedule.ts`, `src/lib/background.ts`, `src/lib/stage-switch.ts`, or `src/components/Jukebox.astro`
-- [ ] T024 [P] Run `npm run check` and `npm run build` from repository root; fix type or integration regressions
-- [ ] T025 [P] Update `README.md` **Editing content** if operator steps changed during implementation
+- [x] T023 Run full `specs/007-scheduled-stage-default/quickstart.md` validation checklist and fix any gaps in `src/lib/stage-schedule.ts`, `src/lib/background.ts`, `src/lib/stage-switch.ts`, or `src/components/Jukebox.astro`
+- [x] T024 [P] Run `npm run check` and `npm run build` from repository root; fix type or integration regressions
+- [x] T025 [P] Update `README.md` **Editing content** if operator steps changed during implementation
 
 ---
 

@@ -4,7 +4,7 @@ import { getChrome } from '../lib/stage';
 import { withBase } from '../lib/url';
 
 const chrome = await getChrome();
-const { videos, defaultVideoId } = await getBackgroundConfig();
+const { videos, defaultVideoId, schedule } = await getBackgroundConfig();
 const catalog = videos.map((entry) => ({
   id: entry.id,
   themeId: entry.themeId,
@@ -21,6 +21,8 @@ const catalog = videos.map((entry) => ({
       aria-label={chrome.jukeboxLabel}
       data-jukebox
       data-stage-catalog={JSON.stringify(catalog)}
+      data-stage-schedule={JSON.stringify(schedule)}
+      data-stage-fallback={defaultVideoId}
       data-stage-default={defaultVideoId}
     >
       <summary
@@ -94,6 +96,7 @@ const catalog = videos.map((entry) => ({
 <script>
   import { applyGlitchPreset, isGlitchThemeActive, playElementGlitch } from '../lib/glitch';
   import { initStageSwitch, STAGE_SELECT_EVENT, type StageCatalogEntry } from '../lib/stage-switch';
+  import type { StageSchedule } from '../lib/stage-schedule';
 
   function bootStageSwitch() {
     const root = document.querySelector<HTMLDetailsElement>('[data-jukebox]');
@@ -101,8 +104,11 @@ const catalog = videos.map((entry) => ({
     if (!root?.dataset.stageCatalog || !toggle) return;
 
     const catalog = JSON.parse(root.dataset.stageCatalog) as StageCatalogEntry[];
-    const defaultId = root.dataset.stageDefault ?? '';
-    initStageSwitch(catalog, defaultId);
+    const staticFallbackId = root.dataset.stageFallback ?? root.dataset.stageDefault ?? '';
+    const schedule = root.dataset.stageSchedule
+      ? (JSON.parse(root.dataset.stageSchedule) as StageSchedule)
+      : { timezone: 'Europe/Berlin', rules: [] };
+    initStageSwitch(catalog, staticFallbackId, schedule);
 
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
     let morphTimer: number | undefined;

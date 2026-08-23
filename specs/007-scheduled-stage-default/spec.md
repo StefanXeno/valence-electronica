@@ -4,7 +4,7 @@
 
 **Created**: 2026-08-23
 
-**Status**: Draft
+**Status**: Ready
 
 **Input**: User description: "Schedule which jukebox entry (background atmosphere and bound
 theme) is the landing default for given dates, date ranges, and recurring day-of-week rules.
@@ -30,9 +30,10 @@ publish, open the landing in a fresh session, confirm that entry is active on fi
 
 **Acceptance Scenarios**:
 
-1. **Given** a schedule rule matches today’s date in Europe/Berlin, **When** a visitor loads
-   the landing, **Then** that rule’s jukebox entry is the active atmosphere and theme on
-   first paint (before any manual jukebox interaction).
+1. **Given** a schedule rule matches today’s date in Europe/Berlin and scripting is available,
+   **When** a visitor loads the landing, **Then** that rule’s jukebox entry is the active
+   atmosphere and theme before the first manual jukebox interaction (SSR may briefly show
+   the static fallback until client resolution applies; see Assumptions).
 2. **Given** a schedule rule matches today and references an entry with audio, **When** the
    landing loads, **Then** mute behavior matches existing rules for that entry (muted until
    the visitor unmutes).
@@ -118,9 +119,10 @@ with no rule for today; confirm a usable default each time.
    uses the configured static fallback (the jukebox entry marked as default, or another
    documented last-resort if none is marked).
 2. **Given** a schedule rule references a jukebox id that does not exist or is unusable,
-   **When** the site is published, **Then** maintainers see a clear validation failure or
-   warning, and **When** the landing loads for visitors, **Then** that rule is skipped and
-   a safe fallback default is used (page never blank).
+   **When** the site is published, **Then** maintainers see a clear **build validation
+   failure** (the change MUST NOT go live), and **When** a previously valid deploy loads for
+   visitors after an entry became unusable, **Then** that rule is skipped at runtime and a
+   safe fallback default is used (page never blank).
 3. **Given** two rules could match today, **When** the scheduled default is resolved,
    **Then** the more specific rule wins according to the documented priority order.
 4. **Given** the schedule file is missing or contains no rules, **When** the landing loads,
@@ -160,8 +162,10 @@ with no rule for today; confirm a usable default each time.
   “today” and whether a date range or day-of-week rule applies.
 - **FR-004**: The scheduled default MUST update on the correct calendar day in Europe/Berlin
   **without requiring a new deploy** solely for the date change.
-- **FR-005**: When a schedule rule matches, the referenced jukebox entry MUST become the
-  landing default atmosphere and bound theme on first load.
+- **FR-005**: When a schedule rule matches and scripting is available, the referenced jukebox
+  entry MUST become the landing default atmosphere and bound theme before the first manual
+  jukebox interaction (SSR may prerender the static fallback first; client resolution applies
+  the scheduled entry without requiring redeploy).
 - **FR-006**: Rule resolution MUST follow explicit priority: **specific date → date range →
   day-of-week → static fallback** (most specific wins within the same tier: first listed
   rule in the schedule file wins unless documented otherwise in the operator guide).
@@ -203,8 +207,11 @@ with no rule for today; confirm a usable default each time.
 ### Measurable Outcomes
 
 - **SC-001**: For 100% of test days with a configured matching rule, first-time landing loads
-  show the scheduled jukebox entry as active within the same perceived load time as the
-  current static default (no extra full-page wait state).
+  **with scripting available** show the scheduled jukebox entry as active before the first
+  manual jukebox interaction, within the same perceived load time as the current static
+  default (no extra full-page wait state).
+- **SC-001b**: With scripting unavailable, 100% of landing loads show the static fallback
+  entry with a usable atmosphere (same progressive-enhancement bar as pre-feature).
 - **SC-002**: When the Europe/Berlin calendar date changes, 100% of test loads on the new day
   (without redeploy) show the new day’s scheduled default or fallback.
 - **SC-003**: A non-programmer can add or change a date rule in the schedule file and see the
@@ -225,6 +232,9 @@ with no rule for today; confirm a usable default each time.
 - Calendar accuracy without redeploy requires evaluating the schedule when the landing page
   loads in the visitor’s browser, using schedule data embedded in the published static site.
   Publish-time validation still runs so broken schedules never ship quietly.
+- When the scheduled default differs from the static fallback, SSR HTML may show the fallback
+  for one paint; client resolution applies the scheduled entry before interaction. This is
+  acceptable for v1 and does not apply when scripting is unavailable (static fallback only).
 - Optional daily scheduled rebuilds in CI are not required for v1 because client-side
   calendar evaluation satisfies FR-004; they may be added later for other reasons.
 - Week-of-year rules, complex recurrence (e.g. “first Monday of month”), and remembering

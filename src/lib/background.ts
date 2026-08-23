@@ -1,9 +1,11 @@
 import { getCollection } from 'astro:content';
 import type { CollectionEntry } from 'astro:content';
 import { resolveThemeId, type ThemePackId } from './theme-packs';
+import { loadStageSchedule, validateStageSchedule, type StageSchedule } from './stage-schedule';
 
 export type { ThemePackId };
 export { resolveThemeId, resolveThemePack } from './theme-packs';
+export type { StageSchedule } from './stage-schedule';
 
 export interface MediaSource {
   src: string;
@@ -22,7 +24,9 @@ export interface BackgroundVideo {
 }
 
 export interface BackgroundConfig {
+  /** Static fallback jukebox id (`default: true` entry). SSR and no-JS use this. */
   defaultVideoId: string;
+  schedule: StageSchedule;
   videos: BackgroundVideo[];
 }
 
@@ -66,7 +70,9 @@ export async function getBackgroundConfig(): Promise<BackgroundConfig> {
   if (!flagged && videos.length > 0) {
     console.warn(`[stage] no default jukebox flag; using "${defaultVideoId}"`);
   }
-  return { defaultVideoId, videos };
+  const schedule = loadStageSchedule();
+  validateStageSchedule(schedule, new Set(videos.map((entry) => entry.id)));
+  return { defaultVideoId, schedule, videos };
 }
 
 /** Resolve the configured default video; throws if none are usable. */
