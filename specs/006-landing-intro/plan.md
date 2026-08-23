@@ -6,12 +6,15 @@
 
 ## Summary
 
-Add a **landing-only, first-visit intro overlay**: a two-line greeting (**“Hi I'm”** then
-**“Valence”** on its own line). The name renders **transparent** so the site shows through;
-a **zoom-into-Valence** motion plays, then the stage HUD becomes fully interactive. A
-first-party `localStorage` playback flag prevents replay; skip via Escape or click/tap;
+Add a **landing-only, first-visit intro overlay**: the landing starts under a **full-viewport
+white sheet**. A two-line greeting (**“Hi I'm”** then **“Valence”** on its own line) is
+viewport-centered. The name is a **portal cut-out** in the white — the site shows through
+the letterforms. A **zoom-into-Valence** scale from the name’s center fills the viewport,
+then the overlay is removed and the stage HUD becomes fully interactive. A first-party
+`localStorage` playback flag prevents replay; skip via Escape or click/tap;
 `prefers-reduced-motion` and no-JS paths show the landing immediately. Lead and name strings
-live in `src/content/ui/chrome.md`.
+live in `src/content/ui/chrome.md`. Demo replay (`?replay-intro`, optional `/dev/intro`) is
+**dev-only**.
 
 ## Technical Context
 
@@ -37,8 +40,9 @@ requests. Landing usable within constitution IV targets after reveal.
 IV exception — impossible without JS for once-only + motion sequence). No cookies, tracking,
 or intro audio.
 
-**Scale/Scope**: One overlay component (two-line markup + transparent name), one small intro
-module, chrome schema extension (`introLead`, `introName`), CSS animation on `.landing-intro__name`, mount on landing only.
+**Scale/Scope**: One overlay component (white sheet + portal name cut-out + lead line), one
+small intro module, chrome schema extension (`introLead`, `introName`), CSS name-only zoom
+from center, mount on landing only; optional dev preview route.
 
 ## Constitution Check
 
@@ -79,15 +83,16 @@ specs/006-landing-intro/
 ```text
 src/
 ├── components/
-│   └── LandingIntro.astro      # two-line overlay; transparent name; client script
+│   └── LandingIntro.astro      # white sheet + portal name; client script
 ├── lib/
-│   └── intro.ts                # playback flag, reduced motion, demo query helpers
+│   └── intro.ts                # playback flag, reduced motion, dev-only replay helpers
 ├── content/ui/
 │   └── chrome.md               # + introLead, introName
 ├── pages/
-│   └── index.astro             # mount LandingIntro (landing only)
+│   ├── index.astro             # mount LandingIntro (landing only)
+│   └── dev/intro.astro         # optional: clear flag + redirect (dev build only)
 └── styles/
-    └── intro.css               # name-only zoom; transparent name; stage reveal
+    └── intro.css               # white sheet, name cut-out zoom, interactivity gating
 ```
 
 **Structure Decision**: Landing-only mount in `index.astro` keeps legal routes untouched.

@@ -28,6 +28,7 @@
 
 - **Decision**: Query parameter `replay-intro` (presence check, no value required) bypasses
   read of playback flag for that load only; completion/skip still writes flag.
+- **Status**: **Superseded by R12** for dev-only gating and optional `/dev/intro` route.
 - **Rationale**: Lets artist/dev preview without clearing all site data.
 - **Alternatives considered**:
   - `localStorage.removeItem` in devtools only — kept as fallback, not primary workflow.
@@ -77,11 +78,64 @@
 
 ## R8 — Transparent name treatment
 
-- **Decision**: Name line uses transparent fill with visible stroke and/or
-  `background-clip: text` over the live page layer so atmosphere/HUD show through
-  letterforms; contrast sufficient to read the name shape.
-- **Rationale**: Meets FR-003a / SC-001a without opaque blocking the site.
+- **Decision**: Name line is a **portal cut-out** in a full-viewport white sheet — holes in
+  the white show the live landing through the letterforms. Prefer techniques that keep the
+  site rendered underneath (see R9–R11).
+- **Rationale**: Meets FR-003a / SC-001a; matches product intent (white page → dive into
+  Valence → full site).
 - **Alternatives considered**:
-  - Semi-transparent rgba fill — rejected (still muddiess the view; spec asks see-through).
-  - Solid white text — rejected (hides site behind name).
+  - Semi-transparent rgba fill — rejected (muddies the view; spec asks see-through portal).
+  - Solid white/black text on scrim — rejected (hides site; not a cut-out).
+  - Stroke-only outline without cut-out — rejected (does not read as “zoom into the word”).
+
+## R9 — White sheet overlay
+
+- **Decision**: Intro uses a **full-viewport white layer** over the landing. Atmosphere and
+  stage stay in the DOM and paint behind the sheet; gate **pointer-events** on HUD regions
+  until reveal — do **not** set `opacity: 0` on the whole stage/page-shell.
+- **Rationale**: Portal cut-out requires the site to be visible through letterforms; hiding
+  the stage breaks the effect.
+- **Alternatives considered**:
+  - Fade stage in after intro — rejected (nothing to see through the name during zoom).
+  - Replace page with blank white SSR — rejected (flash; loses live atmosphere).
+
+## R10 — Portal cut-out implementation
+
+- **Decision**: Implementer chooses a cut-out technique that produces **holes in white**,
+  not visible black letterforms. Document the chosen approach in the component. Known
+  pitfalls from spike (2026-08-23):
+  - `mix-blend-mode: destination-out` on a sibling text layer can render as **solid black
+    text** instead of a cut-out when stacking/isolation is wrong.
+  - SVG `<text>` inside a mask with CSS `scale` can **drift off-center** if transform-origin
+    uses the text bounding box instead of the name center.
+  - SVG `viewBox` units for font size do not match HTML `clamp()` — avoid mismatched lead/name
+    sizing unless foreignObject or HTML drives layout.
+- **Rationale**: Visual quality is fragile; spec captures intent; implementation must verify
+  in browser (see quickstart scenario 10).
+- **Alternatives considered**:
+  - Single technique mandated in spec — rejected (browser/compositing differences; pick at
+    implement time with acceptance tests).
+
+## R11 — Zoom anchoring
+
+- **Decision**: Name zoom uses CSS `transform: scale()` with **`transform-origin: center
+  center`** on an element that is **flex- or translate-centered** in the viewport. Keyframes
+  include the centering transform (e.g. `translate(-50%, -50%) scale(...)`) if position is
+  absolute — do not scale from a corner.
+- **Rationale**: “Zoom into Valence” requires the portal to grow from the word’s center
+  without drift (user feedback 2026-08-23).
+- **Alternatives considered**:
+  - Scale from viewport center while text is off-center — rejected (does not feel like diving
+    into the name).
+  - Animate toward top-left HUD identity — rejected (out of scope unless requested later).
+
+## R12 — Dev preview path
+
+- **Decision**: `?replay-intro` honoured only when `import.meta.env.DEV` (or equivalent).
+  Optional `src/pages/dev/intro.astro` clears `valence-intro-seen` and redirects to landing
+  with replay — page omitted from production build output.
+- **Rationale**: Maintainers need repeatability without shipping demo hooks to GitHub Pages.
+- **Alternatives considered**:
+  - Replay query in production — rejected (fans could bookmark replay URL).
+  - localStorage clear in README only — kept as fallback, not primary workflow.
 

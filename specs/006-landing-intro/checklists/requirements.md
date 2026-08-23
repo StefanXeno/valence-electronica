@@ -32,7 +32,8 @@
 ## Notes
 
 - Clarifications session 2026-08-22 resolved once-only, skip, landing-only scope, reduced
-  motion, and demo replay query.
-- Session 2026-08-22 (visual): two-line layout (`introLead` + `introName`), transparent
-  name letterforms, name-only zoom — reflected in spec FR-003a/FR-003b and contract.
-- Ready for `/speckit-implement` after review.
+  motion, and demo replay query (dev-only per 2026-08-23).
+- Session 2026-08-23 (white portal): full-viewport white sheet, portal cut-out name,
+  viewport-centered layout, zoom from name center, dev-only replay — reflected in spec,
+  contract, research R9–R12, and tasks.
+- Ready for `/speckit-implement` after spec sync (2026-08-23).

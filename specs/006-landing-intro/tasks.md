@@ -6,7 +6,7 @@
 
 **Tests**: Not requested. CI gates (`astro check`, `astro build`) plus manual walks in `quickstart.md` are the validation path.
 
-**Organization**: Tasks grouped by user story. Chrome schema + intro helpers are foundational; US1 ships two-line transparent name + name-only zoom; US2 adds playback flag + skip + no-JS; US3 adds reduced motion + demo replay; US4 confirms content-only editing.
+**Organization**: Tasks grouped by user story. Chrome schema + intro helpers are foundational; US1 ships white sheet + portal cut-out + name-only zoom; US2 adds playback flag + skip + no-JS; US3 adds reduced motion + dev-only demo replay; US4 confirms content-only editing.
 
 ## Format: `[ID] [P?] [Story] Description`
 
@@ -18,8 +18,8 @@
 
 **Purpose**: Confirm feature context before code changes
 
-- [ ] T001 Verify branch `006-landing-intro` and read `specs/006-landing-intro/contracts/intro-ui.md` plus `specs/006-landing-intro/data-model.md` for two-line layout, transparent name, name-only zoom, and storage key
-- [ ] T002 [P] Read `specs/006-landing-intro/research.md` (R5–R8): stage visible through transparent name; zoom on `.landing-intro__name` only; `html[data-intro-active]` interactivity gating
+- [ ] T001 Verify branch `006-landing-intro` and read `specs/006-landing-intro/contracts/intro-ui.md` plus `specs/006-landing-intro/data-model.md` for white portal layout, name-only zoom, and storage key
+- [ ] T002 [P] Read `specs/006-landing-intro/research.md` (R5–R12): white sheet, portal cut-out, stage visible through name, zoom from center, dev-only replay, `html[data-intro-active]` gating
 
 ---
 
@@ -31,9 +31,9 @@
 
 - [ ] T003 Add optional `introLead` and `introName` string fields to the `ui` collection schema in `src/content.config.ts`
 - [ ] T004 [P] Set `introLead: "Hi I'm"` and `introName: "Valence"` in `src/content/ui/chrome.md`
-- [ ] T005 Extend `UiChrome` interface, fallbacks, and `getUiChrome()` in `src/lib/stage.ts` to expose `introLead` and `introName` (defaults per FR-002 when fields absent)
-- [ ] T006 Create `src/lib/intro.ts` with constants/helpers per contract: storage key `valence-intro-seen`, `hasIntroBeenSeen()`, `markIntroSeen()`, `prefersReducedMotion()`, `hasReplayIntroQuery()`, `shouldPlayIntro({ name })` (trim-empty `introName` → false)
-- [ ] T007 [P] Create `src/styles/intro.css` with transparent `.landing-intro__name` treatment (see-through letterforms per FR-003a), name-only zoom keyframes on `.landing-intro__name`, subtler `.landing-intro__lead` entrance, stage interactivity gating for `html[data-intro-active]`, and `@media (prefers-reduced-motion: reduce)` kill-switch
+- [ ] T005 Extend `UiChrome` interface, fallbacks, and `getChrome()` in `src/lib/stage.ts` to expose `introLead` and `introName` (defaults per FR-002 when fields absent)
+- [ ] T006 Create `src/lib/intro.ts` with constants/helpers per contract: storage key `valence-intro-seen`, `hasIntroBeenSeen()`, `markIntroSeen()`, `prefersReducedMotion()`, `hasReplayIntroQuery()` (**dev-only**), `shouldPlayIntro({ name })` (trim-empty `introName` → false)
+- [ ] T007 [P] Create `src/styles/intro.css` with full-viewport `.landing-intro__sheet` white field, **portal cut-out** on `.landing-intro__name` (FR-003a/c; see research R9–R11), name-only zoom from center (FR-003b), subtler `.landing-intro__lead` entrance + fade during zoom, HUD pointer-events gating for `html[data-intro-active]` (not stage `opacity: 0`), and `@media (prefers-reduced-motion: reduce)` kill-switch
 
 **Checkpoint**: `npm run check` passes; chrome loads intro fields; `intro.ts` exports compile
 
@@ -41,15 +41,15 @@
 
 ## Phase 3: User Story 1 - First-time visitor gets a short branded greeting (Priority: P1) 🎯 MVP
 
-**Goal**: Two-line greeting; transparent “Valence” on its own line; zoom into name only; stage fully interactive after reveal
+**Goal**: White sheet + viewport-centered two-line greeting; portal cut-out “Valence”; zoom into name from center; stage fully interactive after reveal
 
-**Independent Test**: Fresh profile, motion allowed, clear storage → load `/` → see through transparent name + name zoom → jukebox/socials work after reveal (quickstart scenarios 1, 10)
+**Independent Test**: Fresh profile, motion allowed, clear storage → load `/` → white sheet + portal cut-out + centered zoom → jukebox/socials work after reveal (quickstart scenarios 1, 10)
 
-- [ ] T008 [US1] Create `src/components/LandingIntro.astro` with stacked markup: `.landing-intro__lead` + `.landing-intro__name` on separate lines; no full opaque scrim over the name (atmosphere/stage visible through name per FR-003a)
-- [ ] T009 [US1] Import `src/styles/intro.css` in `src/components/LandingIntro.astro` and implement auto sequence: set `html[data-intro-active]` on start, run **name-only** zoom on `.landing-intro__name`, subtler lead entrance, cross-fade to full interactivity, remove overlay on completion; cap total auto path ~2–4 s with timeout fallback (FR-003b, FR-014)
-- [ ] T010 [US1] Ensure landing stage/atmosphere remain visible through transparent name during intro; gate pointer interaction on HUD until reveal completes (FR-012, SC-001a) in `src/styles/intro.css` and/or `src/styles/global.css`; avoid FOUC by defaulting non-interactive state before script runs when intro will play
-- [ ] T011 [US1] Mount `LandingIntro.astro` in `src/pages/index.astro` only, passing `introLead` and `introName` from `getUiChrome()` in `src/lib/stage.ts` — not in `src/layouts/Base.astro` (FR-010)
-- [ ] T012 [US1] Manually walk quickstart scenarios 1 and 10; confirm name is on its own line, transparent, zoom targets name only; jukebox, panels, socials, mute, and legal footer behave as before 004/002/003 after reveal
+- [ ] T008 [US1] Create `src/components/LandingIntro.astro` with white sheet + name portal cut-out + lead line (separate lines, viewport-centered per contract); site stays rendered behind sheet (FR-003c)
+- [ ] T009 [US1] Import `src/styles/intro.css` in `src/components/LandingIntro.astro` and implement auto sequence: set `html[data-intro-active]` on start, run **name-only** zoom from center on `.landing-intro__name` cut-out, subtler lead entrance, remove overlay on completion; cap total auto path ~2–4 s with timeout fallback (FR-003b, FR-014)
+- [ ] T010 [US1] Ensure atmosphere/stage remain visible **through the name cut-out** during intro; gate pointer interaction on HUD only until reveal completes (FR-012, SC-001a) — do not hide `.stage` with opacity; avoid FOUC with `html[data-intro-pending]` when intro will play
+- [ ] T011 [US1] Mount `LandingIntro.astro` in `src/pages/index.astro` only, passing `introLead` and `introName` from `getChrome()` in `src/lib/stage.ts` — not in `src/layouts/Base.astro` (FR-010)
+- [ ] T012 [US1] Manually walk quickstart scenarios 1 and 10; confirm portal cut-out (not black text), centered name, no zoom drift (SC-001b); jukebox, panels, socials, mute, and legal footer behave as before 004/002/003 after reveal
 
 **Checkpoint**: First-visit intro plays on landing; see-through name + name zoom verified
 
@@ -62,7 +62,7 @@
 **Independent Test**: Complete or skip intro → reload skips; Escape during intro → immediate reveal; disable JS → no blocking overlay (quickstart scenarios 2–4, 8)
 
 - [ ] T013 [US2] Wire `src/lib/intro.ts` in `src/components/LandingIntro.astro` client script: skip intro when `!shouldPlayIntro()`; call `markIntroSeen()` on natural completion (FR-004, FR-007)
-- [ ] T014 [US2] Add Escape key and overlay click/tap listeners in `src/components/LandingIntro.astro` to end intro immediately, clear `data-intro-active`, remove overlay, and `markIntroSeen()` (FR-006, FR-013, SC-003)
+- [ ] T014 [US2] Add Escape key and overlay click/tap listeners in `src/components/LandingIntro.astro` to end intro immediately, clear `data-intro-active`, remove overlay, and `markIntroSeen()` (FR-006, FR-013, SC-003 — perceived skip ≤300 ms)
 - [ ] T015 [US2] Verify reload after complete/skip does not replay intro when storage available (SC-002); handle storage write failures gracefully — intro still skippable, site usable (edge case: blocked storage)
 - [ ] T016 [US2] Progressive enhancement in `src/components/LandingIntro.astro`: without scripting, do not leave a blocking overlay — stage content visible from SSR (FR-009, SC-005)
 - [ ] T017 [P] [US2] Confirm `src/pages/legal/[slug].astro` and legal overlay flow do not import `LandingIntro.astro` (FR-010); walk quickstart scenario 8
@@ -73,13 +73,13 @@
 
 ## Phase 5: User Story 3 - Reduced motion and demo replay (Priority: P2)
 
-**Goal**: Reduced motion skips intro entirely; `?replay-intro` forces one playback for maintainers without clearing storage permanently
+**Goal**: Reduced motion skips intro entirely; dev-only `?replay-intro` and optional `/dev/intro` for maintainers
 
-**Independent Test**: Reduce motion → no intro; flag set + `?replay-intro` → intro once; reduce + query → still no intro (quickstart scenarios 5–6)
+**Independent Test**: Reduce motion → no intro; dev + flag set + `?replay-intro` → intro once; reduce + query → still no intro (quickstart scenarios 5–6, 6b)
 
 - [ ] T018 [US3] Ensure `shouldPlayIntro()` in `src/lib/intro.ts` returns false when `prefersReducedMotion()` and that `LandingIntro.astro` never activates overlay in that case (FR-008, SC-004)
-- [ ] T019 [US3] Implement `hasReplayIntroQuery()` bypass in `shouldPlayIntro()` (read-only bypass); demo query MUST NOT override reduced motion (FR-011)
-- [ ] T020 [US3] Manually walk quickstart scenarios 5 and 6 including skip-after-demo-query path (flag remains set on subsequent load without query)
+- [ ] T019 [US3] Implement `hasReplayIntroQuery()` bypass in `shouldPlayIntro()` gated by `import.meta.env.DEV` only (FR-011); demo query MUST NOT override reduced motion
+- [ ] T020 [US3] Add optional `src/pages/dev/intro.astro` that clears flag and redirects to `/?replay-intro` in dev; production build MUST omit or redirect away (FR-011a); walk quickstart scenarios 6 and 6b
 
 **Checkpoint**: Accessibility and maintainer replay paths verified
 
@@ -102,10 +102,10 @@
 
 **Purpose**: Documentation, build gates, full validation
 
-- [ ] T023 [P] Add **Landing intro** subsection to README.md: `introLead` / `introName` in `src/content/ui/chrome.md`, transparent name + name-only zoom behavior summary, `valence-intro-seen` storage key, `?replay-intro` demo query, link to `specs/006-landing-intro/contracts/intro-ui.md`
+- [ ] T023 [P] Add **Landing intro** subsection to README.md: white portal behavior, `introLead` / `introName` in `src/content/ui/chrome.md`, `valence-intro-seen` storage key, dev-only `?replay-intro` and `/dev/intro`, link to `specs/006-landing-intro/contracts/intro-ui.md`
 - [ ] T024 [P] Confirm no third-party scripts, cookies, or intro audio were added (FR-016, FR-017); note storage flag for future IDEA-009 privacy copy in README if helpful
 - [ ] T025 Run `npm run check && npm run build` from repository root and fix any type or content errors
-- [ ] T026 Execute the full `specs/006-landing-intro/quickstart.md` checklist (scenarios 1–11); spot-check ~320px width for two-line layout; note any follow-ups
+- [ ] T026 Execute the full `specs/006-landing-intro/quickstart.md` checklist (scenarios 1–11 and 6b); spot-check ~320px width for two-line layout; note any follow-ups
 
 ---
 
@@ -123,7 +123,7 @@
 
 ### User Story Dependencies
 
-- **US1 (P1)**: After Foundational — transparent name + name zoom; no dependency on US2–US4
+- **US1 (P1)**: After Foundational — white portal + name zoom; no dependency on US2–US4
 - **US2 (P1)**: After US1 overlay exists — adds flag + skip + no-JS
 - **US3 (P2)**: After US2 gating logic — reduced motion + demo query
 - **US4 (P2)**: Chrome fields in Foundational; validation after US1 component
@@ -142,7 +142,7 @@
 ```bash
 # After T003 schema lands:
 Task T004: chrome.md introLead + introName
-Task T007: intro.css transparent name + name zoom keyframes
+Task T007: intro.css white sheet + portal cut-out + name zoom keyframes
 # Then T005 (stage.ts) and T006 (intro.ts)
 ```
 
@@ -153,7 +153,7 @@ Task T007: intro.css transparent name + name zoom keyframes
 ### MVP First (User Story 1 only)
 
 1. Complete Phase 1–2 (Setup + Foundational)
-2. Complete Phase 3 (US1 two-line transparent name + zoom)
+2. Complete Phase 3 (US1 white portal + zoom)
 3. **STOP and VALIDATE** quickstart scenarios 1 and 10
 4. Demo intro motion before skip/storage polish
 
@@ -167,7 +167,7 @@ Task T007: intro.css transparent name + name zoom keyframes
 
 - Landing-only mount in `src/pages/index.astro` is intentional (FR-010)
 - Constitution IV exception: new client JS justified in plan Complexity Tracking
-- Zoom MUST target `.landing-intro__name` only — not the lead line (FR-003b)
-- Name MUST stay transparent so the site shows through (FR-003a)
+- Zoom MUST target `.landing-intro__name` cut-out only — not the lead line (FR-003b)
+- Name MUST be a portal cut-out in the white sheet — site visible through letterforms (FR-003a, SC-001a)
 - Do not persist jukebox selection — only intro seen flag (004 rule unchanged)
 - Mid-intro navigation: always clear overlay on skip/complete; never leave `data-intro-active` stuck

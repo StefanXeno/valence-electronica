@@ -18,10 +18,11 @@ Open `http://localhost:4321/valence-electronica/` (adjust for your base path).
 1. Open DevTools → Application → Local Storage → delete `valence-intro-seen`.
 2. Ensure OS/browser **does not** prefer reduced motion.
 3. Load `/`.
-4. **Expect**: Two-line greeting — **“Hi I'm”** on the first line, **“Valence”** on its own
-   second line. The name is **transparent** (site/atmosphere visible through the letters).
-   **Zoom motion targets “Valence” only** (not the lead line). Stage HUD fully interactive
-   within ~4 s; jukebox and socials work after reveal.
+4. **Expect**: White sheet covers the page. Two-line greeting — **“Hi I'm”** on the first
+   line, **“Valence”** on its own second line. The name is a **portal cut-out** (site/atmosphere
+   visible through the letters, not solid black text). **Zoom scales the cut-out from the
+   center of “Valence”** until the site fills the screen. Stage HUD fully interactive within
+   ~4 s; jukebox and socials work after reveal.
 
 ### 2 — No replay on reload
 
@@ -47,11 +48,17 @@ Open `http://localhost:4321/valence-electronica/` (adjust for your base path).
 2. Clear flag; load `/`.
 3. **Expect**: No intro; full landing immediately.
 
-### 6 — Demo replay query
+### 6 — Demo replay query (dev only)
 
-1. With flag set, load `/?replay-intro`.
+1. Run `npm run dev`. With flag set, load `/?replay-intro`.
 2. **Expect**: Intro plays once (if motion allowed); after complete/skip, reload without
    query skips intro.
+3. Production preview (`npm run preview` / deployed site): `?replay-intro` MUST NOT replay.
+
+### 6b — Dev intro route (optional)
+
+1. Run `npm run dev`; open `/dev/intro`.
+2. **Expect**: Redirect to landing with intro replaying (flag cleared for that flow).
 
 ### 7 — Empty name disables intro
 
@@ -75,7 +82,8 @@ Open `http://localhost:4321/valence-electronica/` (adjust for your base path).
 
 1. Clear flag; load `/` during intro.
 2. **Expect**: Through the “Valence” letterforms you can see the atmosphere (and/or stage
-   HUD) behind — not a solid opaque fill.
+   HUD) behind — a **hole in the white sheet**, not solid black or opaque fill. During zoom,
+   the cut-out stays centered on the name (no drift).
 
 ### 11 — Build gate
 
@@ -87,6 +95,7 @@ npm run check && npm run build
 
 ## Maintainer notes
 
-- **Reset intro locally**: delete `valence-intro-seen` in localStorage or use `?replay-intro`.
+- **Reset intro locally**: delete `valence-intro-seen` in localStorage, use `/?replay-intro`
+  in dev, or open `/dev/intro` if implemented.
 - **Privacy**: playback flag is documented in `contracts/intro-ui.md` for future privacy copy.
 - **Copy fields**: `introLead` (line 1), `introName` (line 2, required for intro to run).

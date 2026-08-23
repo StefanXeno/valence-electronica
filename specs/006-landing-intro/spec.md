@@ -26,11 +26,14 @@ keep greeting copy editable in content files."
   NOT replay it.
 - Q: What happens under `prefers-reduced-motion`? → A: **No intro animation.** The
   landing stage appears immediately, same as a return visit.
-- Q: How can the artist preview the intro again? → A: Load the landing with a documented
-  demo query (e.g. `?replay-intro`) that bypasses the playback flag for that page load
-  only; the flag is not cleared permanently.
+- Q: How can the artist preview the intro again? → A: In **development builds**, load the
+  landing with a documented demo query (e.g. `?replay-intro`) that bypasses the playback
+  flag for that page load only; production MUST ignore the query. The flag is not cleared
+  permanently. See also FR-011 / session 2026-08-23.
 
 ### Session 2026-08-22 (visual design)
+
+*Superseded in part by session 2026-08-23 (white portal). Retained for history.*
 
 - Q: How is the greeting laid out? → A: Two lines — lead text on the first line (default
   **“Hi I'm”**), artist name on its **own second line** (default **“Valence”**). Reads as
@@ -42,17 +45,39 @@ keep greeting copy editable in content files."
   “Valence”), as if the camera moves into that word; the lead line uses a subtler entrance
   and does not share the same zoom scale.
 
+### Session 2026-08-23 (visual design — white portal)
+
+- Q: What does the visitor see on first paint? → A: A **full-viewport white sheet**
+  covers the landing. The live site (atmosphere + stage HUD) stays **rendered underneath**
+  but is concealed by white except where the name letterforms cut through.
+- Q: How does “transparent Valence” work? → A: **Portal cut-out** — the name is a **hole
+  in the white sheet** showing the site through the letterforms. It MUST NOT render as solid
+  black (or any opaque) ink sitting on top of white.
+- Q: How does the intro end? → A: The name cut-out **scales up from its own center** until
+  it fills the viewport (zoom **into** Valence), then the overlay is removed and the landing
+  HUD becomes fully interactive. The hand-off MUST feel like diving through the word, not a
+  hard cut.
+- Q: Where is the greeting positioned? → A: **Viewport-centered** — lead and name stacked
+  and centered horizontally; the name sits on the second line near the vertical center of the
+  screen (lead above). The zoom origin is the **center of the name**, not the top-left HUD
+  identity block.
+- Q: How do maintainers preview in dev? → A: **`?replay-intro`** on the landing URL
+  (honoured in **dev builds only**; production MUST ignore the query). An optional
+  **`/dev/intro`** route MAY clear the playback flag and redirect to `/?replay-intro`; that
+  route MUST NOT exist in production builds.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - First-time visitor gets a short branded greeting (Priority: P1)
 
-A first-time visitor opens the landing URL. Before the stage HUD is fully interactive, they
-see a short, centered two-line greeting: **“Hi I'm”** on the first line and **“Valence”**
-on the second. The name is rendered as transparent letterforms so the atmosphere and landing
-stage remain visible through the word. A zoom motion moves **into the name line**, then the
-greeting eases away while the normal landing chrome (identity, socials, jukebox, panels,
-mute, legal footer) becomes fully interactive. The hand-off feels intentional — not a hard
-cut or a blank flash.
+A first-time visitor opens the landing URL. Before the stage HUD is fully interactive, the
+screen is covered by a **white sheet**. A centered two-line greeting appears: **“Hi I'm”**
+(opaque on white) on the first line and **“Valence”** on the second. The name is a
+**portal cut-out** in the white — the atmosphere and landing stage remain visible **through**
+the letterforms. A zoom motion scales the cut-out **from the center of the name** until it
+fills the viewport, then the overlay is removed and the normal landing chrome (identity,
+socials, jukebox, panels, mute, legal footer) becomes fully interactive. The hand-off feels
+intentional — not a hard cut or a blank flash.
 
 **Why this priority**: The greeting is the entire product intent of this feature. Without
 the zoom-and-reveal moment, there is nothing distinct to ship.
@@ -63,19 +88,23 @@ confirm the greeting plays once, then the stage is fully usable.
 **Acceptance Scenarios**:
 
 1. **Given** a first visit with motion allowed and no playback flag set, **When** the
-   landing loads, **Then** the two-line greeting appears with the name on its own line,
-   transparent so the site behind shows through, and the **name line** zooms before the
-   stage chrome is fully interactive.
+   landing loads, **Then** a white sheet covers the viewport, the two-line greeting appears
+   with the name on its own line as a **cut-out portal** (site visible through the letters),
+   and the **name cut-out zooms from its center** before the stage chrome is fully
+   interactive.
 2. **Given** the intro is playing, **When** the visitor looks at the name line, **Then**
-   they can see the atmosphere/stage through the transparent “Valence” letterforms (not an
-   opaque text block).
-3. **Given** the intro animation is running, **When** it completes without user skip,
+   they can see the atmosphere/stage through the “Valence” letterforms — not solid black or
+   opaque text on white.
+3. **Given** the intro is playing, **When** the name zoom runs, **Then** the cut-out stays
+   anchored to the **center of the name** (no visible drift) and grows until the site fills
+   the screen.
+4. **Given** the intro animation is running, **When** it completes without user skip,
    **Then** the landing stage matches the normal post-intro layout (same HUD regions as
    today) and all in-scope controls are usable.
-4. **Given** the intro has completed, **When** the visitor uses jukebox, panels, socials,
+5. **Given** the intro has completed, **When** the visitor uses jukebox, panels, socials,
    mute, or legal links, **Then** existing feature behavior is unchanged (004/002/003
    rules still apply).
-5. **Given** the intro is playing, **When** the visitor waits for the auto sequence,
+6. **Given** the intro is playing, **When** the visitor waits for the auto sequence,
    **Then** total intro duration stays short (target roughly 2–4 seconds excluding any
    optional fade overlap with the reveal).
 
@@ -123,11 +152,11 @@ query → intro plays once for that load.
 
 1. **Given** `prefers-reduced-motion: reduce` is active, **When** a first-time visitor
    loads `/`, **Then** no intro animation plays and the landing stage is shown immediately.
-2. **Given** a playback flag is already set, **When** the visitor loads `/` with the
-   documented demo replay query, **Then** the intro plays for that load only and the
-   playback flag behavior after completion/skip matches a normal first visit (flag set
-   again unless already set — demo query only bypasses read, not write semantics: after
-   demo intro completes, flag remains set).
+2. **Given** a playback flag is already set, **When** a maintainer loads `/` with the
+   documented demo replay query **in a development build**, **Then** the intro plays for
+   that load only and the playback flag behavior after completion/skip matches a normal
+   first visit (demo query only bypasses read, not write semantics: after demo intro
+   completes, flag remains set). **Production builds MUST ignore the query.**
 3. **Given** reduced motion is active, **When** the visitor loads `/` with the demo replay
    query, **Then** reduced motion still wins (no forced animation).
 
@@ -182,11 +211,17 @@ refresh dev preview, confirm new text appears in the intro.
   **“Valence”** on its own line — until changed in content.
 - **FR-003**: Intro lead and name copy MUST live in structured content (the existing UI
   chrome content collection), not hard-coded in components.
-- **FR-003a**: The name line MUST render as **transparent letterforms** so the landing
-  atmosphere and stage content behind remain visible through the text during the intro
-  (outline, stroke, or cut-out treatment — not an opaque fill blocking the view).
-- **FR-003b**: The primary **zoom** motion MUST apply to the **name line only**; the lead
-  line MUST NOT receive the same zoom scale (it MAY use a separate, subtler entrance).
+- **FR-003a**: The name line MUST render as a **portal cut-out** in the white sheet so the
+  landing atmosphere and stage content behind remain visible through the letterforms during
+  the intro. The name MUST NOT appear as opaque filled text blocking the view (no solid
+  black-on-white letterforms).
+- **FR-003b**: The primary **zoom** motion MUST apply to the **name cut-out only**, scaling
+  from the **center of the name** until the viewport is revealed; the lead line MUST NOT
+  receive the same zoom scale (it MAY use a separate, subtler entrance and fade out during
+  the zoom).
+- **FR-003c**: A **full-viewport white sheet** MUST cover the landing during the intro. The
+  site MUST remain rendered underneath (not removed from DOM); only pointer interaction is
+  gated until reveal completes.
 - **FR-004**: After the intro completes or is skipped, the site MUST record a first-party
   playback flag in browser storage so `/` does not replay the intro on later visits.
 - **FR-005**: The playback flag MUST NOT collect personal data, MUST NOT be used for
@@ -202,7 +237,11 @@ refresh dev preview, confirm new text appears in the intro.
 - **FR-010**: The intro MUST run only on the landing route, not on legal pages or overlays
   loaded directly.
 - **FR-011**: A documented demo replay query parameter MUST allow maintainers to force one
-  intro playback for a single load when testing (bypass read of playback flag only).
+  intro playback for a single load when testing in **development** (bypass read of playback
+  flag only). Production builds MUST ignore the query.
+- **FR-011a**: An optional dev-only preview route (`/dev/intro`) MAY clear the playback
+  flag and redirect to the landing with replay enabled; it MUST NOT ship in production
+  builds.
 - **FR-012**: The reveal MUST expose the existing stage HUD layout unchanged in structure
   (identity, socials, jukebox, panels, mute, footer/legal).
 - **FR-013**: Intro motion MUST NOT trap keyboard focus away from an eventual skip path;
@@ -218,22 +257,24 @@ refresh dev preview, confirm new text appears in the intro.
 ### Key Entities
 
 - **Intro lead line**: First-line greeting text (e.g. “Hi I'm”) from UI chrome content.
-- **Intro name line**: Second-line artist name (e.g. “Valence”); transparent treatment;
-  zoom target; empty → no intro.
+- **Intro name line**: Second-line artist name (e.g. “Valence”); **portal cut-out** in the
+  white sheet; zoom target; empty → no intro.
 - **Playback flag**: First-party browser-storage marker meaning “intro already seen/skipped
   in this browser”; boolean or equivalent; not shared across devices.
-- **Demo replay override**: Ephemeral URL signal that ignores the playback flag for one
-  landing load; documented for maintainers in README/quickstart.
+- **Demo replay override**: Ephemeral URL signal (**dev builds only**) that ignores the
+  playback flag for one landing load; documented for maintainers in README/quickstart.
 
 ## Success Criteria *(mandatory)*
 
 ### Measurable Outcomes
 
 - **SC-001**: In a fresh browser profile with motion allowed, 100% of first `/` loads show
-  the two-line greeting with transparent name and name-only zoom before full HUD interaction
-  (unless the name line is empty).
+  the two-line greeting with **portal cut-out name** and name-only zoom before full HUD
+  interaction (unless the name line is empty).
 - **SC-001a**: During the intro, 100% of testers can confirm the site/atmosphere is visible
-  through the transparent name letterforms.
+  through the name portal cut-out (not solid black or opaque letterforms on white).
+- **SC-001b**: During the name zoom, 100% of testers confirm the cut-out stays anchored to
+  the center of the name with no visible drift until the viewport is revealed.
 - **SC-002**: After intro completion or skip, 100% of subsequent `/` reloads in the same
   browser skip the intro (when storage is available).
 - **SC-003**: Skip via Escape or click/tap ends the intro in under 300 ms perceived delay.
@@ -243,8 +284,9 @@ refresh dev preview, confirm new text appears in the intro.
   reachable without an blocking overlay (same as pre-feature baseline).
 - **SC-006**: A non-programmer can change lead and name text in one content file and see the
   update on the next publish without touching components.
-- **SC-007**: Auto intro path completes and reveals the stage within 4 seconds on a typical
-  mobile connection after first paint (excluding background video buffer).
+- **SC-007**: Auto intro path completes and reveals the stage within 4 seconds **from intro
+  start** on a typical mobile connection (excluding background video buffer; aligns with
+  FR-014).
 
 ## Assumptions
 
@@ -253,7 +295,8 @@ refresh dev preview, confirm new text appears in the intro.
 - Typography uses the existing site fonts (Unbounded / system stack); Seravek (IDEA-007) is
   out of scope.
 - The atmospheric background (video or poster) and stage behind the greeting remain visible
-  **through** the transparent name line; the name zoom is the focal motion.
+  **through** the name portal cut-out; the name zoom is the focal motion. The intro starts
+  on a **white sheet** over the live page, not on a blank or hidden stage.
 - `localStorage` (or equivalent first-party persistent storage) is acceptable for the
   playback flag per IDEA-011 notes and constitution V (UX preference, not tracking).
 - Jukebox selection is still not persisted across reloads (004 rule unchanged); only intro
