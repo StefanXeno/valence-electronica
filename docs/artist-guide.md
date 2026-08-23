@@ -1,0 +1,312 @@
+# Artist guide — what you can change
+
+This guide is for **you** (Valence) to update the public website without touching layout
+or code. It is the **authoritative** list of what you may edit and what you must leave to
+the developer. The [README](../README.md) points here; if anything conflicts, **this guide
+wins**.
+
+---
+
+## What you may change
+
+Each item below is a **content surface** — a file or folder you can edit yourself. Change
+the file, open a pull request into `pre-release`, and merge it (see [How to publish](#how-to-publish-primary)).
+
+### Site identity and channels
+
+**File:** [`src/data/site.json`](../src/data/site.json)
+
+**Controls:** Artist name, tagline, short description, location, SEO title, and social /
+streaming links (Bandcamp, SoundCloud, YouTube, etc.).
+
+**Tips:**
+
+- Under `channels`, set `"status": "active"` with a `"url"` for a real link.
+- Set `"status": "placeholder"` to show a “coming soon” chip without a link.
+- Set `"seo": { "indexable": true }` when you are ready for search engines to index the site
+  (keep `false` while the site is still private / under construction).
+
+**Do not break:** Channel `id` values are stable references — do not rename them without
+developer help.
+
+---
+
+### Jukebox entries (stage records, lyrics, media)
+
+**Folder:** [`src/content/jukebox/`](../src/content/jukebox/)
+
+**Controls:** Each Markdown file is one stage record (atmosphere, theme, lyrics). The
+filename slug is the stable id (e.g. `nightmare.md` → `nightmare`).
+
+**Frontmatter you may edit:**
+
+- `label` — name shown in the jukebox
+- `themeId` — visual mood (see [Theme packs](#theme-packs-selection-only); use only listed ids)
+- `hasAudio` — whether mute/unmute applies
+- `default: true` — exactly **one** usable entry should have this (static fallback when no
+  schedule rule matches)
+- `poster`, `sources` — paths to images/video under `public/` (see [Media assets](#media-assets))
+
+**Body:** Lyrics for that record (leave empty for instrumentals).
+
+**Do not break:** Do not rename the file slug (`nightmare`, `example-cyan`, etc.) unless a
+developer updates every reference (releases, schedule, etc.).
+
+---
+
+### About (bio)
+
+**File:** [`src/content/about/me.md`](../src/content/about/me.md)
+
+**Controls:** Short artist bio. An empty or missing body hides the About control on the site.
+
+---
+
+### Releases (discography)
+
+**Folder:** [`src/content/releases/`](../src/content/releases/)
+
+**Controls:** Release rows: `title`, `year`, optional `kind`, `url`, `jukeboxId`.
+
+**Tips:**
+
+- `jukeboxId` must match a jukebox filename slug to show “Play on stage”.
+- A row missing `title` or `year` is dropped at build time (warning only — rest of site still builds).
+
+---
+
+### Shows (upcoming dates)
+
+**Folder:** [`src/content/shows/`](../src/content/shows/)
+
+**Controls:** Gig rows: `date`, `city`, `venue`, optional `ticketUrl`. Past dates
+(Europe/Berlin) are hidden automatically.
+
+**Tips:**
+
+- A row missing `date`, `city`, or `venue` is dropped at build time (warning only).
+- You can ship with no show files — the site shows empty-state copy.
+
+---
+
+### UI chrome (labels and intro copy)
+
+**File:** [`src/content/ui/chrome.md`](../src/content/ui/chrome.md)
+
+**Controls:** Region titles, empty-state strings, jukebox/social labels, stage-button label,
+and landing intro copy (`introLead`, `introName`). Empty `introName` disables the landing intro.
+
+---
+
+### Legal pages
+
+**Folder:** [`src/content/legal/`](../src/content/legal/)
+
+**Files:** `imprint.md` (Impressum), `privacy.md` (Datenschutzerklärung)
+
+**Controls:** Legally required texts for a German public presence. Write the content in
+**German** where the law requires it; this guide stays in English.
+
+**Important:** Both files are currently placeholders. **Replace them with real information
+before you promote the site publicly.** This is not legal advice — ask a lawyer if you are
+unsure what to include.
+
+---
+
+### Stage schedule (landing default by date)
+
+**File:** [`src/data/stage-schedule.json`](../src/data/stage-schedule.json)
+
+**Controls:** Which jukebox entry is the **landing default** on given dates, ranges, or
+weekdays (Europe/Berlin calendar).
+
+**Deep how-to:** [`docs/stage-schedule.md`](stage-schedule.md) — use that guide for rule
+syntax and examples. Here: edit **only** this JSON file to retime defaults; run
+`npm run check` after edits.
+
+---
+
+### Media assets
+
+**Folders:**
+
+- [`public/images/`](../public/images/) — posters and stills (e.g. `public/images/posters/`)
+- [`public/videos/`](../public/videos/) — looping background videos
+
+**Controls:** Files referenced from jukebox frontmatter (`poster`, `sources`).
+
+**Tips:**
+
+- Use paths like `/images/posters/nightmare.jpg` or `/videos/nightmare.mp4` in jukebox Markdown.
+- Prefer reasonably sized images and compressed video. **Oversized or wrong-format media
+  slows the site down** for fans on mobile — when in doubt, ask the developer to optimize.
+- Common formats: JPEG/WebP/SVG for posters; MP4 for video.
+
+---
+
+## Theme packs (selection only)
+
+You may set `themeId` on a jukebox entry to any **complete** pack below. Each id has
+matching registry and CSS in the codebase — do not invent new ids.
+
+| `themeId` | Mood (short) |
+|-----------|----------------|
+| `default` | Neutral fallback |
+| `nightmare-crimson` | Red / horror loop (video + audio + HUD glitch) |
+| `cyan-pulse` | Cyan still / pulse (no video loop) |
+
+**Developer only:** Creating or editing theme packs (`src/lib/theme-packs.ts`,
+`src/styles/themes.css`). Ask the developer for a new visual mood.
+
+Unknown or incomplete `themeId` values warn at build and fall back to `default` at runtime.
+
+---
+
+## What you must not change
+
+These are **developer-owned**. Editing them can break the build or the live site.
+
+| Area | Examples | Why |
+|------|----------|-----|
+| Layout and components | `src/components/`, `src/layouts/` | Page structure and behavior |
+| Styles and effects | `src/styles/`, `src/styles/glitch.css` | Visual system and animations |
+| Theme pack registry | `src/lib/theme-packs.ts`, theme CSS in `src/styles/themes.css` | Capabilities and colors tied to code |
+| Build and config | `astro.config.mjs`, `package.json`, `tsconfig.json` | Tooling and deploy settings |
+| CI / deploy | `.github/workflows/` | Automated build and GitHub Pages |
+| Specs and plans | `specs/`, `.specify/` | Developer workflow (not artist content) |
+
+---
+
+## Stable ids — do not rename casually
+
+Without developer help, **do not rename**:
+
+- Jukebox **filename slugs** (`nightmare.md`, etc.)
+- **`themeId`** values (only pick from the table above)
+- **`jukeboxId`** on releases or schedule rules
+- Legal **file slugs** (`imprint.md`, `privacy.md`)
+- Channel **`id`** values in `site.json`
+
+Renaming breaks links between content files until a developer updates all references.
+
+---
+
+## Integration vs release
+
+Two different steps — easy to confuse:
+
+| Term | Branch | What it means |
+|------|--------|----------------|
+| **Integration** | `pre-release` | Your content PR lands here. CI runs; **the public site does not change yet**. |
+| **Release (go live)** | `main` | Merging here deploys to the **live** public site (GitHub Pages). |
+
+Constitution rule: only **`main`** updates what fans see. If a build fails, the **last
+successful live version stays online**.
+
+---
+
+## How to edit (primary)
+
+Use the **GitHub website** — no install required.
+
+1. Open the repository on GitHub.
+2. Navigate to the file you need (see [What you may change](#what-you-may-change)).
+3. Click the pencil (**Edit this file**).
+4. Make your changes.
+5. Choose **Commit changes…** and commit to a **new branch** (not directly to `pre-release`
+   unless you know what you are doing).
+6. Continue to [How to publish](#how-to-publish-primary) to open a pull request.
+
+---
+
+## How to publish (primary)
+
+Goal: merge your content into **`pre-release`** (integration).
+
+1. After committing to a branch, GitHub offers **Compare & pull request** — open it.
+2. Set the **base** branch to **`pre-release`** (not `main` for routine content).
+3. Describe what you changed in plain language.
+4. Create the pull request.
+5. When checks pass (if shown), **Merge pull request** into `pre-release`.
+
+You do **not** need the developer for this step on routine content updates.
+
+**Normal path is not** opening content PRs directly into `main`. Content goes to
+`pre-release` first.
+
+---
+
+## How to go live (secondary)
+
+When integrated content on `pre-release` should become **public**:
+
+1. Open a **new pull request** on GitHub.
+2. Set **base** to **`main`** and **compare** to **`pre-release`**.
+3. Review the diff (content-only changes you expect).
+4. Merge when ready.
+
+Either **you or the developer** may perform this merge — whichever you agree on.
+
+**If the build fails after merging to `main`:** the live site keeps showing the **last
+good deployed version**. Fix the issue on a branch → PR to `pre-release` again, or ask the
+developer for help. Integration on `pre-release` alone never changed the live site.
+
+There is no special “promote button” in this repo — just a normal GitHub PR from
+`pre-release` to `main`.
+
+---
+
+## Optional: local preview
+
+If you want to **see changes on your computer** before publishing (recommended for big
+updates, but not required):
+
+**Requires:** Node.js 22+ (LTS) installed locally.
+
+```bash
+git clone <repository-url>
+cd valence-electronica
+npm install          # once
+npm run dev          # site at http://localhost:4321/valence-electronica/
+npm run check        # validate content (same as CI)
+```
+
+Edit files locally, refresh the browser, then commit and push your branch and follow the
+[publish steps](#how-to-publish-primary).
+
+Skipping local preview is OK — you rely on GitHub/CI feedback after merge. If the build
+fails, ask the developer.
+
+---
+
+## When to ask the developer
+
+- Stuck on GitHub, branches, or pull requests (including `pre-release` → `main`).
+- Build or deploy fails and you are not sure why.
+- You want a **new theme pack** or layout/visual change.
+- You need to **rename ids** or add a feature that is not in [What you may change](#what-you-may-change).
+- Media needs heavy compression or a new format.
+
+Routine text, links, shows, releases, jukebox lyrics, schedule rules, and channel updates
+should not require the developer if you follow this guide.
+
+---
+
+## Topic guides
+
+Some areas have a **deeper how-to** (this hub stays the inventory; details live there):
+
+| Topic | Guide |
+|-------|--------|
+| Stage schedule rules | [`docs/stage-schedule.md`](stage-schedule.md) |
+
+When a topic guide and this hub mention the same file, use the **same path** — the topic
+guide owns step-by-step detail.
+
+---
+
+## Maintainer note (for developers and future you)
+
+When **any feature** adds, removes, or moves an artist-editable surface, **update this
+guide in the same change set** (project constitution Principle VII). Otherwise the safe-edit
+map drifts and you will need the developer for every small update again.

@@ -4,7 +4,7 @@
 
 **Created**: 2026-08-23
 
-**Status**: Draft (clarified)
+**Status**: Ready
 
 **Input**: User description: "Add documentation for the artist so he knows what he can
 change and what he can adjust — a durable artist-facing guide covering editable surfaces,

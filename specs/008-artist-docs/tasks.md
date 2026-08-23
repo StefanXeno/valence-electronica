@@ -28,8 +28,8 @@
 
 **Purpose**: Create the guide artifact and confirm inventory source of truth against the repo.
 
-- [ ] T001 Create `docs/artist-guide.md` with all required section headings from `specs/008-artist-docs/contracts/artist-guide.md` (Purpose through Maintainer note)
-- [ ] T002 [P] Audit current artist-editable surfaces under `src/content/`, `src/data/`, and `public/` against the contract inventory checklist in `specs/008-artist-docs/contracts/artist-guide.md`
+- [x] T001 Create `docs/artist-guide.md` with all required section headings from `specs/008-artist-docs/contracts/artist-guide.md` (Purpose through Maintainer note)
+- [x] T002 [P] Audit current artist-editable surfaces under `src/content/`, `src/data/`, and `public/` against the contract inventory checklist in `specs/008-artist-docs/contracts/artist-guide.md`
 
 ---
 
@@ -39,8 +39,8 @@
 
 **⚠️ CRITICAL**: No user story content work until T003–T004 are complete.
 
-- [ ] T003 Write Purpose section in `docs/artist-guide.md` (artist audience, safe-edit map, authoritative over README)
-- [ ] T004 [P] Extract complete `themeId` values from `src/lib/theme-packs.ts` and `src/styles/themes.css` for later Theme packs section in `docs/artist-guide.md`
+- [x] T003 Write Purpose section in `docs/artist-guide.md` (artist audience, safe-edit map, authoritative over README)
+- [x] T004 [P] Extract complete `themeId` values from `src/lib/theme-packs.ts` and `src/styles/themes.css` for later Theme packs section in `docs/artist-guide.md`
 
 **Checkpoint**: Guide skeleton and inventory audit ready — user story phases can begin.
 
@@ -54,10 +54,10 @@
 
 ### Implementation for User Story 1
 
-- [ ] T005 [US1] Write "What you may change" entry for `src/data/site.json` in `docs/artist-guide.md` (name, path, site effect, channel/status rules)
-- [ ] T006 [P] [US1] Write inventory entries for `src/content/jukebox/`, `src/content/about/`, `src/content/releases/`, and `src/content/shows/` in `docs/artist-guide.md`
-- [ ] T007 [P] [US1] Write inventory entries for `src/content/ui/chrome.md`, `src/content/legal/` (include placeholder warning: replace Impressum/privacy with real information before public promotion — not legal advice), `src/data/stage-schedule.json` (with link to `docs/stage-schedule.md`), and `public/images/` / `public/videos/` (include media size/format guidance — oversized or wrong-format files hurt load time) in `docs/artist-guide.md`
-- [ ] T008 [US1] Verify 100% contract inventory coverage in `docs/artist-guide.md` against `specs/008-artist-docs/contracts/artist-guide.md` ship-time checklist (SC-004)
+- [x] T005 [US1] Write "What you may change" entry for `src/data/site.json` in `docs/artist-guide.md` (name, path, site effect, channel/status rules)
+- [x] T006 [P] [US1] Write inventory entries for `src/content/jukebox/`, `src/content/about/`, `src/content/releases/`, and `src/content/shows/` in `docs/artist-guide.md`
+- [x] T007 [P] [US1] Write inventory entries for `src/content/ui/chrome.md`, `src/content/legal/` (include placeholder warning: replace Impressum/privacy with real information before public promotion — not legal advice), `src/data/stage-schedule.json` (with link to `docs/stage-schedule.md`), and `public/images/` / `public/videos/` (include media size/format guidance — oversized or wrong-format files hurt load time) in `docs/artist-guide.md`
+- [x] T008 [US1] Verify 100% contract inventory coverage in `docs/artist-guide.md` against `specs/008-artist-docs/contracts/artist-guide.md` ship-time checklist (SC-004)
 
 **Checkpoint**: User Story 1 complete — editable inventory is authoritative and complete.
 
@@ -71,9 +71,9 @@
 
 ### Implementation for User Story 2
 
-- [ ] T009 [US2] Write "Theme packs (selection only)" section in `docs/artist-guide.md` listing complete `themeId` values from T004; state pack creation/editing is developer-only (also satisfies US1 acceptance scenario 4)
-- [ ] T010 [US2] Write "What you must not change" section in `docs/artist-guide.md` (layouts/components, styles, theme-pack registry/CSS, build config, CI workflows)
-- [ ] T011 [US2] Write "Stable ids" section in `docs/artist-guide.md` (do not rename jukebox slugs, `themeId`s, legal slugs without developer updating references)
+- [x] T009 [US2] Write "Theme packs (selection only)" section in `docs/artist-guide.md` listing complete `themeId` values from T004; state pack creation/editing is developer-only (also satisfies US1 acceptance scenario 4)
+- [x] T010 [US2] Write "What you must not change" section in `docs/artist-guide.md` (layouts/components, styles, theme-pack registry/CSS, build config, CI workflows)
+- [x] T011 [US2] Write "Stable ids" section in `docs/artist-guide.md` (do not rename jukebox slugs, `themeId`s, legal slugs without developer updating references)
 
 **Checkpoint**: User Stories 1 and 2 both independently testable — safe edit boundary is explicit.
 
@@ -87,10 +87,10 @@
 
 ### Implementation for User Story 3
 
-- [ ] T012 [US3] Write "How to edit (primary)" GitHub web editor steps in `docs/artist-guide.md`
-- [ ] T013 [US3] Write "How to publish (primary)" self-serve PR into `pre-release` steps in `docs/artist-guide.md` (must NOT make direct-to-`main` the normal path)
-- [ ] T014 [US3] Write "How to go live (secondary)" `pre-release` → `main` GitHub PR steps in `docs/artist-guide.md` (artist and/or developer; docs only — no automation; state explicitly that a failed build leaves the last good live site online and integration on `pre-release` is not public release)
-- [ ] T015 [P] [US3] Write "Optional: local preview" (`npm install`, `npm run dev`, `npm run check`) and "When to ask the developer" escalation sections in `docs/artist-guide.md`
+- [x] T012 [US3] Write "How to edit (primary)" GitHub web editor steps in `docs/artist-guide.md`
+- [x] T013 [US3] Write "How to publish (primary)" self-serve PR into `pre-release` steps in `docs/artist-guide.md` (must NOT make direct-to-`main` the normal path)
+- [x] T014 [US3] Write "How to go live (secondary)" `pre-release` → `main` GitHub PR steps in `docs/artist-guide.md` (artist and/or developer; docs only — no automation; state explicitly that a failed build leaves the last good live site online and integration on `pre-release` is not public release)
+- [x] T015 [P] [US3] Write "Optional: local preview" (`npm install`, `npm run dev`, `npm run check`) and "When to ask the developer" escalation sections in `docs/artist-guide.md`
 
 **Checkpoint**: User Story 3 complete — full edit and publish flow documented.
 
@@ -104,9 +104,9 @@
 
 ### Implementation for User Story 4
 
-- [ ] T016 [US4] Add Topic guides section in `docs/artist-guide.md` linking to `docs/stage-schedule.md` (hub one-liner + deep link; no duplicated schedule how-to)
-- [ ] T017 [US4] Add Maintainer note at end of `docs/artist-guide.md` (future features MUST update guide in same change set — Principle VII)
-- [ ] T018 [US4] Update `README.md` to link `docs/artist-guide.md` and shorten/remove duplicate full "Editing content" inventory per `specs/008-artist-docs/contracts/artist-guide.md` authority rules
+- [x] T016 [US4] Add Topic guides section in `docs/artist-guide.md` linking to `docs/stage-schedule.md` (hub one-liner + deep link; no duplicated schedule how-to)
+- [x] T017 [US4] Add Maintainer note at end of `docs/artist-guide.md` (future features MUST update guide in same change set — Principle VII)
+- [x] T018 [US4] Update `README.md` to link `docs/artist-guide.md` and shorten/remove duplicate full "Editing content" inventory per `specs/008-artist-docs/contracts/artist-guide.md` authority rules
 
 **Checkpoint**: All four user stories complete and cross-linked.
 
@@ -116,8 +116,8 @@
 
 **Purpose**: End-to-end validation and link hygiene.
 
-- [ ] T019 Run full validation checklist in `specs/008-artist-docs/quickstart.md` against `docs/artist-guide.md` and `README.md` (SC-001 through SC-005, FR-005b scope check)
-- [ ] T020 [P] Verify relative links in `docs/artist-guide.md` and `README.md` resolve correctly (including `docs/stage-schedule.md`)
+- [x] T019 Run full validation checklist in `specs/008-artist-docs/quickstart.md` against `docs/artist-guide.md` and `README.md` (SC-001 through SC-005, FR-005b scope check)
+- [x] T020 [P] Verify relative links in `docs/artist-guide.md` and `README.md` resolve correctly (including `docs/stage-schedule.md`)
 
 ---
 

@@ -16,78 +16,47 @@ npm run build     # check + static build into dist/
 npm run preview   # serve the built site locally
 ```
 
-## Editing content
+## Editing content (artist)
 
-All visitor-facing copy lives in structured data/files — no layout or component edits for
-routine updates. Preview locally with `npm run dev`. **Do not rename ids** (jukebox
-filename slugs, `jukeboxId` values, legal slugs, or `themeId`s) unless a developer is
-updating the matching references.
+**Start here:** [`docs/artist-guide.md`](docs/artist-guide.md) — authoritative map of what
+you may change, what you must not touch, and how to publish (GitHub web editor →
+`pre-release` → promote to `main`).
 
-- **`src/data/site.json`** — artist name, tagline, description, and the channel links.
-  - Add or edit entries under `channels`. Set `"status": "active"` with a `"url"` to show
-    a real link; `"status": "placeholder"` shows a "coming soon" chip without a link.
-  - Set `"seo": { "indexable": true }` at launch to allow search engines to index the site.
-- **`src/content/jukebox/`** — one Markdown file per stage record. Filename slug = stable
-  id (e.g. `nightmare.md` → `nightmare`). Frontmatter: `label`, `themeId`
-  (must match a **complete** theme pack — registry entry in `src/lib/theme-packs.ts` and
-  CSS block in `src/styles/themes.css`; see [Theme packs](#theme-packs) below), `hasAudio`,
-  `default: true` on exactly one usable entry. The Markdown **body** is the lyrics for
-  that record (leave empty for instrumentals).
-  - Put media files under `public/videos/` and `public/images/posters/`, then point
-    `sources` / `poster` at those paths. An entry with only a `poster` (no `sources`)
-    is a static still — looping video is used for the Nightmare theme (`nightmare-crimson`).
-- **`src/content/about/me.md`** — short bio. Empty or missing body hides the About control.
-- **`src/content/releases/`** — discography rows (`title`, `year`, optional `kind`, `url`,
-  `jukeboxId`). `jukeboxId` must match a jukebox filename slug to show “Play on stage”.
-  Rows are not the jukebox — following a link does not change the stage.
-- **`src/content/shows/`** — upcoming dates (`date`, `city`, `venue`, optional `ticketUrl`).
-  Past dates (Europe/Berlin) are hidden. v1 can ship with no show files (empty-state copy).
-- **`src/content/ui/chrome.md`** — region titles, empty-state strings, jukebox/social labels,
-  stage-button label, and landing intro copy (`introLead`, `introName`).
-- **`src/content/legal/`** — `imprint.md` (Impressum) and `privacy.md`
-  (Datenschutzerklärung). Both are placeholders and MUST be filled with real information
-  before the site is promoted publicly.
-- **`src/data/stage-schedule.json`** — calendar rules for which jukebox entry is the landing
-  default on a given day. Operator guide: [`docs/stage-schedule.md`](docs/stage-schedule.md).
-  Formal contract: [`specs/007-scheduled-stage-default/contracts/stage-schedule.md`](specs/007-scheduled-stage-default/contracts/stage-schedule.md).
-  Run `npm run check` after edits.
+Quick pointers:
 
-**Omit-invalid-item:** a release missing `title`/`year`, or a show missing `date`/`city`/
-`venue`, is dropped with a build warning. The rest of the page still builds. Unparseable
-Markdown can still fail the whole build — the last good live deploy stays up.
+- **Site info & channels:** `src/data/site.json`
+- **Stage schedule:** `src/data/stage-schedule.json` — see [`docs/stage-schedule.md`](docs/stage-schedule.md)
+- **Everything else** (jukebox, bio, releases, shows, UI copy, legal, media): see the artist guide.
 
-## Theme packs
+**Do not rename ids** (jukebox slugs, `jukeboxId`, legal slugs, `themeId`s) without developer help.
 
-Visual moods are **theme packs**: a registry entry plus matching CSS tokens. Jukebox
-`themeId` selects the pack; capabilities (looping video, mute, HUD glitch) are defined in
-code, not in Markdown.
+Run `npm run check` after content edits when using a local clone. Invalid schedule ids or
+dates fail the build; a release/show missing required fields is dropped with a warning.
 
-**Add or change a pack (developer):**
+## Theme packs (developer)
 
-1. Add the pack to `src/lib/theme-packs.ts` (capabilities) and `PACK_CSS_THEME_IDS`.
+Visual moods are **theme packs**: registry + CSS tokens. Jukebox `themeId` selects the pack.
+
+**Add or change a pack (developer only):**
+
+1. Add the pack to `src/lib/theme-packs.ts` and `PACK_CSS_THEME_IDS`.
 2. Add a `[data-theme='your-id'] { … }` block in `src/styles/themes.css`.
-3. Set `themeId: your-id` on jukebox Markdown entries.
+3. Update [`docs/artist-guide.md`](docs/artist-guide.md) theme table if artist-selectable.
 4. Run `npm run check && npm run build`.
 
 Full contract: [`specs/005-theme-packs/contracts/theme-packs.md`](specs/005-theme-packs/contracts/theme-packs.md).
 
-Unknown or incomplete packs warn at build and fall back to **`default`** at runtime.
-
 ## Landing intro
 
-First visit to `/` (motion allowed, scripting on) plays a **white-sheet portal** intro:
-**“Hi I'm”** then **“Valence”** as a cut-out showing the site through the letters, zooming
-into the name before the HUD becomes interactive. After completion or skip, a
-`localStorage` flag (`valence-intro-seen`) prevents replay.
+First visit to `/` plays a portal intro (copy in `src/content/ui/chrome.md`). Dev replay:
+`/?replay-intro` or `/dev/intro`. Contract:
+[`specs/006-landing-intro/contracts/intro-ui.md`](specs/006-landing-intro/contracts/intro-ui.md).
 
-- **Copy**: `introLead` and `introName` in `src/content/ui/chrome.md` (empty `introName`
-  disables the intro).
-- **Dev replay**: `/?replay-intro` (dev server only) or open `/dev/intro` to clear the flag
-  and replay.
-- **Contract**: [`specs/006-landing-intro/contracts/intro-ui.md`](specs/006-landing-intro/contracts/intro-ui.md)
+## Deploy
 
-Every merge to `main` is automatically checked, built, and deployed by GitHub Actions
-(`.github/workflows/deploy.yml`). If the build fails, the previous version stays live.
+Content integrates on **`pre-release`**; the **live** site updates when **`main`** is
+updated. GitHub Actions (`.github/workflows/deploy.yml`) builds and deploys from `main`.
+If the build fails, the previous version stays live.
 
 ## One-time GitHub setup
 
