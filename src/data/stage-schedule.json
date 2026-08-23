@@ -7,6 +7,11 @@
       "jukeboxId": "nightmare"
     },
     {
+      "type": "date",
+      "on": "2027-06-01",
+      "jukeboxId": "example-cyan"
+    },
+    {
       "type": "range",
       "from": "2026-12-24",
       "to": "2026-12-26",

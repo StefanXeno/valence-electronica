@@ -48,13 +48,9 @@ updating the matching references.
   (Datenschutzerklärung). Both are placeholders and MUST be filled with real information
   before the site is promoted publicly.
 - **`src/data/stage-schedule.json`** — calendar rules for which jukebox entry is the landing
-  default on given days (atmosphere + theme follow that entry). Set `"timezone":
-  "Europe/Berlin"`. Rule types: `date` (`MM-DD` yearly or `YYYY-MM-DD` one-off), `range`
-  (inclusive `YYYY-MM-DD` from/to), `weekday` (ISO days `1`=Mon … `7`=Sun). Each rule needs a
-  `jukeboxId` matching a usable jukebox filename slug. Priority: date → range → weekday →
-  jukebox entry with `default: true`. See
-  `specs/007-scheduled-stage-default/contracts/stage-schedule.md`. Run `npm run check` after
-  edits — invalid ids or dates fail the build.
+  default on a given day. Operator guide: [`docs/stage-schedule.md`](docs/stage-schedule.md).
+  Formal contract: [`specs/007-scheduled-stage-default/contracts/stage-schedule.md`](specs/007-scheduled-stage-default/contracts/stage-schedule.md).
+  Run `npm run check` after edits.
 
 **Omit-invalid-item:** a release missing `title`/`year`, or a show missing `date`/`city`/
 `venue`, is dropped with a build warning. The rest of the page still builds. Unparseable
