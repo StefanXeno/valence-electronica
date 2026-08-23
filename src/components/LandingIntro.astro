@@ -10,6 +10,7 @@ const { introLead, introName } = Astro.props;
 const nameTrimmed = introName.trim();
 const leadTrimmed = introLead.trim();
 const isDev = import.meta.env.DEV;
+const portalMaskId = `intro-portal-${nameTrimmed.replace(/\s+/g, '-').toLowerCase()}`;
 ---
 
 {
@@ -24,15 +25,13 @@ const isDev = import.meta.env.DEV;
       >
         <div class="landing-intro__cutout" aria-hidden="true">
           <svg
-            class="landing-intro__portal"
+            class="landing-intro__portal-svg"
             xmlns="http://www.w3.org/2000/svg"
-            width="100%"
-            height="100%"
-            preserveAspectRatio="none"
+            aria-hidden="true"
           >
             <defs>
               <mask
-                id="intro-portal-mask"
+                id={portalMaskId}
                 maskUnits="userSpaceOnUse"
                 x="0"
                 y="0"
@@ -40,20 +39,19 @@ const isDev = import.meta.env.DEV;
                 height="100%"
               >
                 <rect width="100%" height="100%" fill="white" />
-                <foreignObject
-                  xmlns="http://www.w3.org/1999/xhtml"
-                  x="0"
-                  y="0"
-                  width="100%"
-                  height="100%"
+                <text
+                  class="landing-intro__portal-text"
+                  x="50%"
+                  y="50%"
+                  dominant-baseline="central"
+                  text-anchor="middle"
+                  fill="black"
                 >
-                  <div class="landing-intro__mask-host">
-                    <p class="landing-intro__name">{nameTrimmed}</p>
-                  </div>
-                </foreignObject>
+                  {nameTrimmed}
+                </text>
               </mask>
             </defs>
-            <rect width="100%" height="100%" fill="white" mask="url(#intro-portal-mask)" />
+            <rect width="100%" height="100%" fill="#fff" mask={`url(#${portalMaskId})`} />
           </svg>
         </div>
         {leadTrimmed && <p class="landing-intro__lead">{leadTrimmed}</p>}
@@ -118,7 +116,7 @@ const isDev = import.meta.env.DEV;
           overlay.addEventListener('click', finishOnce);
           document.addEventListener('keydown', onKeyDown);
 
-          const nameEl = overlay.querySelector('.landing-intro__name');
+          const nameEl = overlay.querySelector('.landing-intro__portal-text');
           const fallbackMs = 4500;
           const fallbackTimer = window.setTimeout(finishOnce, fallbackMs);
 

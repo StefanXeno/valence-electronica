@@ -1,14 +1,10 @@
 /* Landing intro — white sheet with Valence portal cut-out zoom (006-landing-intro). */
 
+/* Site stays rendered behind the white layer; gate interaction and hide body-level HUD. */
 html[data-intro-pending] .stage,
 html[data-intro-active] .stage,
 html[data-intro-pending] .page-shell > footer,
 html[data-intro-active] .page-shell > footer,
-html[data-intro-pending] .volume-control,
-html[data-intro-active] .volume-control {
-  pointer-events: none !important;
-}
-
 html[data-intro-pending] .stage__identity,
 html[data-intro-pending] .stage__socials,
 html[data-intro-pending] .stage__jukebox,
@@ -18,6 +14,23 @@ html[data-intro-active] .stage__socials,
 html[data-intro-active] .stage__jukebox,
 html[data-intro-active] .stage__panels {
   pointer-events: none !important;
+}
+
+/* Mute + other body-level chrome sit above page-shell — hide during intro. */
+html[data-intro-pending] .volume-control,
+html[data-intro-active] .volume-control {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/*
+ * Lift intro above body-level HUD (mute z-index 4). Intro lives inside page-shell
+ * (z-index 1), so we raise the shell while the intro runs.
+ */
+html[data-intro-pending] .page-shell,
+html[data-intro-active] .page-shell {
+  z-index: 300;
 }
 
 .landing-intro {
@@ -35,13 +48,16 @@ html[data-intro-active] .stage__panels {
   display: none !important;
 }
 
+/* Full-viewport white sheet; only mask glyphs scale (holes grow, sheet stays edge-to-edge). */
 .landing-intro__cutout {
   position: fixed;
   inset: 0;
   pointer-events: none;
+  background: transparent;
+  overflow: hidden;
 }
 
-.landing-intro__portal {
+.landing-intro__portal-svg {
   position: absolute;
   inset: 0;
   display: block;
@@ -49,27 +65,14 @@ html[data-intro-active] .stage__panels {
   height: 100%;
 }
 
-/* HTML inside SVG foreignObject — flex-centred, scales from its own centre. */
-.landing-intro__mask-host {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.landing-intro__name {
-  margin: 0;
+.landing-intro__portal-text {
   font-family: var(--font-display);
   font-size: clamp(2.75rem, 15vw, 6.5rem);
   font-weight: 700;
-  line-height: 0.95;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  white-space: nowrap;
-  /* Black in mask = hole in white sheet (not painted on screen). */
-  color: #000;
   transform: scale(0.42);
+  transform-box: view-box;
   transform-origin: center center;
   will-change: transform;
   animation: intro-portal-zoom 2.85s cubic-bezier(0.33, 1, 0.38, 1) 0.4s forwards;
@@ -138,7 +141,7 @@ html[data-intro-active] .stage__panels {
 
 @media (prefers-reduced-motion: reduce) {
   .landing-intro__lead,
-  .landing-intro__name {
+  .landing-intro__portal-text {
     animation: none !important;
     opacity: 1;
     transform: scale(1);
