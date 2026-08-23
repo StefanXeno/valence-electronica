@@ -4,9 +4,14 @@ import Hero from '../components/Hero.astro';
 import Channels from '../components/Channels.astro';
 import Jukebox from '../components/Jukebox.astro';
 import StagePanels from '../components/StagePanels.astro';
+import LandingIntro from '../components/LandingIntro.astro';
+import { getChrome } from '../lib/stage';
+
+const chrome = await getChrome();
 ---
 
 <Base>
+  <LandingIntro introLead={chrome.introLead} introName={chrome.introName} />
   <div class="stage">
     <div class="stage__identity">
       <Hero />

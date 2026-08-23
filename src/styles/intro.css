@@ -1,0 +1,146 @@
+/* Landing intro — white sheet with Valence portal cut-out zoom (006-landing-intro). */
+
+html[data-intro-pending] .stage,
+html[data-intro-active] .stage,
+html[data-intro-pending] .page-shell > footer,
+html[data-intro-active] .page-shell > footer,
+html[data-intro-pending] .volume-control,
+html[data-intro-active] .volume-control {
+  pointer-events: none !important;
+}
+
+html[data-intro-pending] .stage__identity,
+html[data-intro-pending] .stage__socials,
+html[data-intro-pending] .stage__jukebox,
+html[data-intro-pending] .stage__panels,
+html[data-intro-active] .stage__identity,
+html[data-intro-active] .stage__socials,
+html[data-intro-active] .stage__jukebox,
+html[data-intro-active] .stage__panels {
+  pointer-events: none !important;
+}
+
+.landing-intro {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
+  background: transparent;
+  overflow: hidden;
+}
+
+.landing-intro[hidden] {
+  display: none !important;
+}
+
+.landing-intro__cutout {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+
+.landing-intro__portal {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* HTML inside SVG foreignObject — flex-centred, scales from its own centre. */
+.landing-intro__mask-host {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.landing-intro__name {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(2.75rem, 15vw, 6.5rem);
+  font-weight: 700;
+  line-height: 0.95;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  /* Black in mask = hole in white sheet (not painted on screen). */
+  color: #000;
+  transform: scale(0.42);
+  transform-origin: center center;
+  will-change: transform;
+  animation: intro-portal-zoom 2.85s cubic-bezier(0.33, 1, 0.38, 1) 0.4s forwards;
+}
+
+.landing-intro__lead {
+  position: fixed;
+  left: 50%;
+  top: calc(50% - clamp(4.5rem, 16vw, 7rem));
+  z-index: 201;
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.1rem, 4vw, 1.65rem);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: #111;
+  transform: translateX(-50%);
+  pointer-events: none;
+  opacity: 0;
+  animation:
+    intro-lead-in 0.55s ease-out 0.12s forwards,
+    intro-lead-out 2.4s ease-out 0.55s forwards;
+}
+
+@keyframes intro-lead-in {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(0.35rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+@keyframes intro-lead-out {
+  0%,
+  18% {
+    opacity: 1;
+  }
+
+  45%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes intro-portal-zoom {
+  0% {
+    transform: scale(0.42);
+  }
+
+  16% {
+    transform: scale(1);
+  }
+
+  42% {
+    transform: scale(1);
+  }
+
+  100% {
+    transform: scale(48);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-intro__lead,
+  .landing-intro__name {
+    animation: none !important;
+    opacity: 1;
+    transform: scale(1);
+  }
+}

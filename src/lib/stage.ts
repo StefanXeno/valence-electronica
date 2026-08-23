@@ -13,6 +13,8 @@ export interface UiChrome {
   socialsLabel: string;
   comingSoon: string;
   ticketLabel: string;
+  introLead: string;
+  introName: string;
 }
 
 const CHROME_FALLBACK: UiChrome = {
@@ -28,6 +30,8 @@ const CHROME_FALLBACK: UiChrome = {
   socialsLabel: 'Socials',
   comingSoon: 'coming soon',
   ticketLabel: 'Tickets',
+  introLead: "Hi I'm",
+  introName: 'Valence',
 };
 
 export interface ReleaseItem {
@@ -66,6 +70,8 @@ export async function getChrome(): Promise<UiChrome> {
     socialsLabel: entry.data.socialsLabel?.trim() || CHROME_FALLBACK.socialsLabel,
     comingSoon: entry.data.comingSoon?.trim() || CHROME_FALLBACK.comingSoon,
     ticketLabel: entry.data.ticketLabel?.trim() || CHROME_FALLBACK.ticketLabel,
+    introLead: entry.data.introLead?.trim() || CHROME_FALLBACK.introLead,
+    introName: entry.data.introName?.trim() || CHROME_FALLBACK.introName,
   };
 }
 

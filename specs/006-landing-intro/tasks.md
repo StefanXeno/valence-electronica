@@ -18,8 +18,8 @@
 
 **Purpose**: Confirm feature context before code changes
 
-- [ ] T001 Verify branch `006-landing-intro` and read `specs/006-landing-intro/contracts/intro-ui.md` plus `specs/006-landing-intro/data-model.md` for white portal layout, name-only zoom, and storage key
-- [ ] T002 [P] Read `specs/006-landing-intro/research.md` (R5–R12): white sheet, portal cut-out, stage visible through name, zoom from center, dev-only replay, `html[data-intro-active]` gating
+- [x] T001 Verify branch `006-landing-intro` and read `specs/006-landing-intro/contracts/intro-ui.md` plus `specs/006-landing-intro/data-model.md` for white portal layout, name-only zoom, and storage key
+- [x] T002 [P] Read `specs/006-landing-intro/research.md` (R5–R12): white sheet, portal cut-out, stage visible through name, zoom from center, dev-only replay, `html[data-intro-active]` gating
 
 ---
 
@@ -29,11 +29,11 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T003 Add optional `introLead` and `introName` string fields to the `ui` collection schema in `src/content.config.ts`
-- [ ] T004 [P] Set `introLead: "Hi I'm"` and `introName: "Valence"` in `src/content/ui/chrome.md`
-- [ ] T005 Extend `UiChrome` interface, fallbacks, and `getChrome()` in `src/lib/stage.ts` to expose `introLead` and `introName` (defaults per FR-002 when fields absent)
-- [ ] T006 Create `src/lib/intro.ts` with constants/helpers per contract: storage key `valence-intro-seen`, `hasIntroBeenSeen()`, `markIntroSeen()`, `prefersReducedMotion()`, `hasReplayIntroQuery()` (**dev-only**), `shouldPlayIntro({ name })` (trim-empty `introName` → false)
-- [ ] T007 [P] Create `src/styles/intro.css` with full-viewport `.landing-intro__sheet` white field, **portal cut-out** on `.landing-intro__name` (FR-003a/c; see research R9–R11), name-only zoom from center (FR-003b), subtler `.landing-intro__lead` entrance + fade during zoom, HUD pointer-events gating for `html[data-intro-active]` (not stage `opacity: 0`), and `@media (prefers-reduced-motion: reduce)` kill-switch
+- [x] T003 Add optional `introLead` and `introName` string fields to the `ui` collection schema in `src/content.config.ts`
+- [x] T004 [P] Set `introLead: "Hi I'm"` and `introName: "Valence"` in `src/content/ui/chrome.md`
+- [x] T005 Extend `UiChrome` interface, fallbacks, and `getChrome()` in `src/lib/stage.ts` to expose `introLead` and `introName` (defaults per FR-002 when fields absent)
+- [x] T006 Create `src/lib/intro.ts` with constants/helpers per contract: storage key `valence-intro-seen`, `hasIntroBeenSeen()`, `markIntroSeen()`, `prefersReducedMotion()`, `hasReplayIntroQuery()` (**dev-only**), `shouldPlayIntro({ name })` (trim-empty `introName` → false)
+- [x] T007 [P] Create `src/styles/intro.css` with full-viewport `.landing-intro__sheet` white field, **portal cut-out** on `.landing-intro__name` (FR-003a/c; see research R9–R11), name-only zoom from center (FR-003b), subtler `.landing-intro__lead` entrance + fade during zoom, HUD pointer-events gating for `html[data-intro-active]` (not stage `opacity: 0`), and `@media (prefers-reduced-motion: reduce)` kill-switch
 
 **Checkpoint**: `npm run check` passes; chrome loads intro fields; `intro.ts` exports compile
 
@@ -45,11 +45,11 @@
 
 **Independent Test**: Fresh profile, motion allowed, clear storage → load `/` → white sheet + portal cut-out + centered zoom → jukebox/socials work after reveal (quickstart scenarios 1, 10)
 
-- [ ] T008 [US1] Create `src/components/LandingIntro.astro` with white sheet + name portal cut-out + lead line (separate lines, viewport-centered per contract); site stays rendered behind sheet (FR-003c)
-- [ ] T009 [US1] Import `src/styles/intro.css` in `src/components/LandingIntro.astro` and implement auto sequence: set `html[data-intro-active]` on start, run **name-only** zoom from center on `.landing-intro__name` cut-out, subtler lead entrance, remove overlay on completion; cap total auto path ~2–4 s with timeout fallback (FR-003b, FR-014)
-- [ ] T010 [US1] Ensure atmosphere/stage remain visible **through the name cut-out** during intro; gate pointer interaction on HUD only until reveal completes (FR-012, SC-001a) — do not hide `.stage` with opacity; avoid FOUC with `html[data-intro-pending]` when intro will play
-- [ ] T011 [US1] Mount `LandingIntro.astro` in `src/pages/index.astro` only, passing `introLead` and `introName` from `getChrome()` in `src/lib/stage.ts` — not in `src/layouts/Base.astro` (FR-010)
-- [ ] T012 [US1] Manually walk quickstart scenarios 1 and 10; confirm portal cut-out (not black text), centered name, no zoom drift (SC-001b); jukebox, panels, socials, mute, and legal footer behave as before 004/002/003 after reveal
+- [x] T008 [US1] Create `src/components/LandingIntro.astro` with white sheet + name portal cut-out + lead line (separate lines, viewport-centered per contract); site stays rendered behind sheet (FR-003c)
+- [x] T009 [US1] Import `src/styles/intro.css` in `src/components/LandingIntro.astro` and implement auto sequence: set `html[data-intro-active]` on start, run **name-only** zoom from center on `.landing-intro__name` cut-out, subtler lead entrance, remove overlay on completion; cap total auto path ~2–4 s with timeout fallback (FR-003b, FR-014)
+- [x] T010 [US1] Ensure atmosphere/stage remain visible **through the name cut-out** during intro; gate pointer interaction on HUD only until reveal completes (FR-012, SC-001a) — do not hide `.stage` with opacity; avoid FOUC with `html[data-intro-pending]` when intro will play
+- [x] T011 [US1] Mount `LandingIntro.astro` in `src/pages/index.astro` only, passing `introLead` and `introName` from `getChrome()` in `src/lib/stage.ts` — not in `src/layouts/Base.astro` (FR-010)
+- [x] T012 [US1] Manually walk quickstart scenarios 1 and 10; confirm portal cut-out (not black text), centered name, no zoom drift (SC-001b); jukebox, panels, socials, mute, and legal footer behave as before 004/002/003 after reveal
 
 **Checkpoint**: First-visit intro plays on landing; see-through name + name zoom verified
 
@@ -61,11 +61,11 @@
 
 **Independent Test**: Complete or skip intro → reload skips; Escape during intro → immediate reveal; disable JS → no blocking overlay (quickstart scenarios 2–4, 8)
 
-- [ ] T013 [US2] Wire `src/lib/intro.ts` in `src/components/LandingIntro.astro` client script: skip intro when `!shouldPlayIntro()`; call `markIntroSeen()` on natural completion (FR-004, FR-007)
-- [ ] T014 [US2] Add Escape key and overlay click/tap listeners in `src/components/LandingIntro.astro` to end intro immediately, clear `data-intro-active`, remove overlay, and `markIntroSeen()` (FR-006, FR-013, SC-003 — perceived skip ≤300 ms)
-- [ ] T015 [US2] Verify reload after complete/skip does not replay intro when storage available (SC-002); handle storage write failures gracefully — intro still skippable, site usable (edge case: blocked storage)
-- [ ] T016 [US2] Progressive enhancement in `src/components/LandingIntro.astro`: without scripting, do not leave a blocking overlay — stage content visible from SSR (FR-009, SC-005)
-- [ ] T017 [P] [US2] Confirm `src/pages/legal/[slug].astro` and legal overlay flow do not import `LandingIntro.astro` (FR-010); walk quickstart scenario 8
+- [x] T013 [US2] Wire `src/lib/intro.ts` in `src/components/LandingIntro.astro` client script: skip intro when `!shouldPlayIntro()`; call `markIntroSeen()` on natural completion (FR-004, FR-007)
+- [x] T014 [US2] Add Escape key and overlay click/tap listeners in `src/components/LandingIntro.astro` to end intro immediately, clear `data-intro-active`, remove overlay, and `markIntroSeen()` (FR-006, FR-013, SC-003 — perceived skip ≤300 ms)
+- [x] T015 [US2] Verify reload after complete/skip does not replay intro when storage available (SC-002); handle storage write failures gracefully — intro still skippable, site usable (edge case: blocked storage)
+- [x] T016 [US2] Progressive enhancement in `src/components/LandingIntro.astro`: without scripting, do not leave a blocking overlay — stage content visible from SSR (FR-009, SC-005)
+- [x] T017 [P] [US2] Confirm `src/pages/legal/[slug].astro` and legal overlay flow do not import `LandingIntro.astro` (FR-010); walk quickstart scenario 8
 
 **Checkpoint**: Skip + no-replay + no-JS degradation verified
 
@@ -77,9 +77,9 @@
 
 **Independent Test**: Reduce motion → no intro; dev + flag set + `?replay-intro` → intro once; reduce + query → still no intro (quickstart scenarios 5–6, 6b)
 
-- [ ] T018 [US3] Ensure `shouldPlayIntro()` in `src/lib/intro.ts` returns false when `prefersReducedMotion()` and that `LandingIntro.astro` never activates overlay in that case (FR-008, SC-004)
-- [ ] T019 [US3] Implement `hasReplayIntroQuery()` bypass in `shouldPlayIntro()` gated by `import.meta.env.DEV` only (FR-011); demo query MUST NOT override reduced motion
-- [ ] T020 [US3] Add optional `src/pages/dev/intro.astro` that clears flag and redirects to `/?replay-intro` in dev; production build MUST omit or redirect away (FR-011a); walk quickstart scenarios 6 and 6b
+- [x] T018 [US3] Ensure `shouldPlayIntro()` in `src/lib/intro.ts` returns false when `prefersReducedMotion()` and that `LandingIntro.astro` never activates overlay in that case (FR-008, SC-004)
+- [x] T019 [US3] Implement `hasReplayIntroQuery()` bypass in `shouldPlayIntro()` gated by `import.meta.env.DEV` only (FR-011); demo query MUST NOT override reduced motion
+- [x] T020 [US3] Add optional `src/pages/dev/intro.astro` that clears flag and redirects to `/?replay-intro` in dev; production build MUST omit or redirect away (FR-011a); walk quickstart scenarios 6 and 6b
 
 **Checkpoint**: Accessibility and maintainer replay paths verified
 
@@ -91,8 +91,8 @@
 
 **Independent Test**: Edit `chrome.md` → new two-line text in intro; empty `introName` → no intro (quickstart scenarios 7, 9)
 
-- [ ] T021 [US4] In `src/components/LandingIntro.astro`, omit overlay entirely when trimmed `introName` is empty — no blank layer (FR-015)
-- [ ] T022 [US4] Manually walk quickstart scenarios 7 and 9; confirm no component edits required for lead/name changes (FR-003, SC-006)
+- [x] T021 [US4] In `src/components/LandingIntro.astro`, omit overlay entirely when trimmed `introName` is empty — no blank layer (FR-015)
+- [x] T022 [US4] Manually walk quickstart scenarios 7 and 9; confirm no component edits required for lead/name changes (FR-003, SC-006)
 
 **Checkpoint**: Content-only two-line greeting workflow confirmed
 
@@ -102,10 +102,10 @@
 
 **Purpose**: Documentation, build gates, full validation
 
-- [ ] T023 [P] Add **Landing intro** subsection to README.md: white portal behavior, `introLead` / `introName` in `src/content/ui/chrome.md`, `valence-intro-seen` storage key, dev-only `?replay-intro` and `/dev/intro`, link to `specs/006-landing-intro/contracts/intro-ui.md`
-- [ ] T024 [P] Confirm no third-party scripts, cookies, or intro audio were added (FR-016, FR-017); note storage flag for future IDEA-009 privacy copy in README if helpful
-- [ ] T025 Run `npm run check && npm run build` from repository root and fix any type or content errors
-- [ ] T026 Execute the full `specs/006-landing-intro/quickstart.md` checklist (scenarios 1–11 and 6b); spot-check ~320px width for two-line layout; note any follow-ups
+- [x] T023 [P] Add **Landing intro** subsection to README.md: white portal behavior, `introLead` / `introName` in `src/content/ui/chrome.md`, `valence-intro-seen` storage key, dev-only `?replay-intro` and `/dev/intro`, link to `specs/006-landing-intro/contracts/intro-ui.md`
+- [x] T024 [P] Confirm no third-party scripts, cookies, or intro audio were added (FR-016, FR-017); note storage flag for future IDEA-009 privacy copy in README if helpful
+- [x] T025 Run `npm run check && npm run build` from repository root and fix any type or content errors
+- [x] T026 Execute the full `specs/006-landing-intro/quickstart.md` checklist (scenarios 1–11 and 6b); spot-check ~320px width for two-line layout; note any follow-ups
 
 ---
 

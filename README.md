@@ -43,7 +43,7 @@ updating the matching references.
 - **`src/content/shows/`** — upcoming dates (`date`, `city`, `venue`, optional `ticketUrl`).
   Past dates (Europe/Berlin) are hidden. v1 can ship with no show files (empty-state copy).
 - **`src/content/ui/chrome.md`** — region titles, empty-state strings, jukebox/social labels,
-  and the stage-button label.
+  stage-button label, and landing intro copy (`introLead`, `introName`).
 - **`src/content/legal/`** — `imprint.md` (Impressum) and `privacy.md`
   (Datenschutzerklärung). Both are placeholders and MUST be filled with real information
   before the site is promoted publicly.
@@ -68,6 +68,19 @@ code, not in Markdown.
 Full contract: [`specs/005-theme-packs/contracts/theme-packs.md`](specs/005-theme-packs/contracts/theme-packs.md).
 
 Unknown or incomplete packs warn at build and fall back to **`default`** at runtime.
+
+## Landing intro
+
+First visit to `/` (motion allowed, scripting on) plays a **white-sheet portal** intro:
+**“Hi I'm”** then **“Valence”** as a cut-out showing the site through the letters, zooming
+into the name before the HUD becomes interactive. After completion or skip, a
+`localStorage` flag (`valence-intro-seen`) prevents replay.
+
+- **Copy**: `introLead` and `introName` in `src/content/ui/chrome.md` (empty `introName`
+  disables the intro).
+- **Dev replay**: `/?replay-intro` (dev server only) or open `/dev/intro` to clear the flag
+  and replay.
+- **Contract**: [`specs/006-landing-intro/contracts/intro-ui.md`](specs/006-landing-intro/contracts/intro-ui.md)
 
 Every merge to `main` is automatically checked, built, and deployed by GitHub Actions
 (`.github/workflows/deploy.yml`). If the build fails, the previous version stays live.

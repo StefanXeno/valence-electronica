@@ -1,0 +1,30 @@
+---
+import { INTRO_REPLAY_QUERY } from '../../lib/intro';
+import { withBase } from '../../lib/url';
+
+if (!import.meta.env.DEV) {
+  return Astro.redirect(withBase('/'));
+}
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Intro preview</title>
+    <meta name="robots" content="noindex" />
+  </head>
+  <body>
+    <p>Loading intro preview…</p>
+    <script is:inline define:vars={{ home: withBase('/'), query: INTRO_REPLAY_QUERY }}>
+      try {
+        localStorage.removeItem('valence-intro-seen');
+      } catch (e) {
+        /* ignore */
+      }
+      const join = home.includes('?') ? '&' : '?';
+      location.replace(home + join + query);
+    </script>
+  </body>
+</html>

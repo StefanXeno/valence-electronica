@@ -11,4 +11,6 @@ jukeboxLabel: V-Flip
 socialsLabel: Socials
 comingSoon: coming soon
 ticketLabel: Tickets
+introLead: "Hi I'm"
+introName: Valence
 ---

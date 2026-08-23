@@ -1,0 +1,137 @@
+---
+import '../styles/intro.css';
+
+interface Props {
+  introLead: string;
+  introName: string;
+}
+
+const { introLead, introName } = Astro.props;
+const nameTrimmed = introName.trim();
+const leadTrimmed = introLead.trim();
+const isDev = import.meta.env.DEV;
+---
+
+{
+  nameTrimmed && (
+    <>
+      <div
+        class="landing-intro"
+        hidden
+        data-landing-intro
+        data-intro-name={nameTrimmed}
+        role="presentation"
+      >
+        <div class="landing-intro__cutout" aria-hidden="true">
+          <svg
+            class="landing-intro__portal"
+            xmlns="http://www.w3.org/2000/svg"
+            width="100%"
+            height="100%"
+            preserveAspectRatio="none"
+          >
+            <defs>
+              <mask
+                id="intro-portal-mask"
+                maskUnits="userSpaceOnUse"
+                x="0"
+                y="0"
+                width="100%"
+                height="100%"
+              >
+                <rect width="100%" height="100%" fill="white" />
+                <foreignObject
+                  xmlns="http://www.w3.org/1999/xhtml"
+                  x="0"
+                  y="0"
+                  width="100%"
+                  height="100%"
+                >
+                  <div class="landing-intro__mask-host">
+                    <p class="landing-intro__name">{nameTrimmed}</p>
+                  </div>
+                </foreignObject>
+              </mask>
+            </defs>
+            <rect width="100%" height="100%" fill="white" mask="url(#intro-portal-mask)" />
+          </svg>
+        </div>
+        {leadTrimmed && <p class="landing-intro__lead">{leadTrimmed}</p>}
+        <span class="visually-hidden">{nameTrimmed}</span>
+      </div>
+
+      <script is:inline define:vars={{ introName: nameTrimmed, isDev }}>
+        (function () {
+          try {
+            if (!introName) return;
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+            var params = new URLSearchParams(location.search);
+            var replay = isDev && params.has('replay-intro');
+            if (!replay && localStorage.getItem('valence-intro-seen') === '1') {
+              return;
+            }
+            document.documentElement.dataset.introPending = 'true';
+          } catch (e) {
+            /* ignore */
+          }
+        })();
+      </script>
+
+      <script>
+        import { markIntroSeen, shouldPlayIntro } from '../lib/intro';
+
+        const root = document.documentElement;
+        const overlay = document.querySelector<HTMLElement>('[data-landing-intro]');
+        const introName = overlay?.dataset.introName ?? '';
+
+        function clearIntroState() {
+          delete root.dataset.introActive;
+          delete root.dataset.introPending;
+        }
+
+        function finishIntro() {
+          markIntroSeen();
+          clearIntroState();
+          overlay?.remove();
+        }
+
+        if (!overlay || !shouldPlayIntro(introName)) {
+          clearIntroState();
+        } else {
+          let finished = false;
+
+          const finishOnce = () => {
+            if (finished) return;
+            finished = true;
+            document.removeEventListener('keydown', onKeyDown);
+            overlay.removeEventListener('click', finishOnce);
+            finishIntro();
+          };
+
+          const onKeyDown = (event: KeyboardEvent) => {
+            if (event.key === 'Escape') finishOnce();
+          };
+
+          overlay.hidden = false;
+          root.dataset.introActive = 'true';
+
+          overlay.addEventListener('click', finishOnce);
+          document.addEventListener('keydown', onKeyDown);
+
+          const nameEl = overlay.querySelector('.landing-intro__name');
+          const fallbackMs = 4500;
+          const fallbackTimer = window.setTimeout(finishOnce, fallbackMs);
+
+          nameEl?.addEventListener(
+            'animationend',
+            () => {
+              window.clearTimeout(fallbackTimer);
+              window.setTimeout(finishOnce, 80);
+            },
+            { once: true },
+          );
+        }
+      </script>
+    </>
+  )
+}

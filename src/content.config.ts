@@ -86,6 +86,8 @@ const ui = defineCollection({
     socialsLabel: z.string().optional(),
     comingSoon: z.string().optional(),
     ticketLabel: z.string().optional(),
+    introLead: z.string().optional(),
+    introName: z.string().optional(),
   }),
 });
 
