@@ -85,10 +85,23 @@ That overwrites the live URL, so prefer the `/pre-release/` preview above.
 
 1. Create the GitHub repository (name `valence-electronica` matches the configured base
    path) and push this repo.
-2. In the repository: Settings → Pages → Build and deployment → Source: **GitHub Actions**.
-3. Replace `OWNER` in `astro.config.mjs` with the GitHub username/organization.
+2. Settings → Pages → Build and deployment → Source: **GitHub Actions**.
+3. Settings → Environments → **`github-pages`** → *Deployment branches and tags* →
+   **Add deployment branch or tag rule** → ref type **Branch**, pattern `pre-release`.
 
-The site is then served at `https://<owner>.github.io/valence-electronica/`.
+   GitHub restricts this environment to the default branch, so without the rule a
+   `pre-release` push fails with *"Branch 'pre-release' is not allowed to deploy to
+   github-pages due to environment protection rules"*.
+
+   ⚠️ This grants `pre-release` publish rights to the **whole** Pages site, not just the
+   `/pre-release/` subpath — GitHub scopes the rule per branch, not per path. The live
+   root stays safe because `deploy.yml` always rebuilds it from `main`, but that is now
+   enforced by the workflow rather than by the environment. Review changes to
+   `deploy.yml` on `pre-release` with that in mind.
+
+The site is then served at `https://<owner>.github.io/valence-electronica/`. The owner is
+resolved from `GITHUB_REPOSITORY_OWNER` in CI, so no source edit is needed; only local
+builds fall back to the hardcoded default in `astro.config.mjs`.
 
 ## Project workflow
 
