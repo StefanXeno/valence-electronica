@@ -88,8 +88,6 @@ export function syncStageUi(activeId: string) {
   document.querySelectorAll<HTMLElement>('[data-jukebox-option]').forEach((option) => {
     const on = option.dataset.jukeboxOption === activeId;
     option.setAttribute('aria-pressed', on ? 'true' : 'false');
-    if (on) option.setAttribute('aria-current', 'true');
-    else option.removeAttribute('aria-current');
   });
 
   document.querySelectorAll<HTMLElement>('[data-lyrics-for]').forEach((node) => {

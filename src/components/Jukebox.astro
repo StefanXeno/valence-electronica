@@ -73,16 +73,15 @@ const catalog = videos.map((entry) => ({
           ></circle>
         </svg>
       </summary>
-      <div class="jukebox__panel" id="jukebox-heading">
-        <p class="jukebox__heading">{chrome.jukeboxLabel}</p>
-        <div class="jukebox__list" role="group" aria-label={chrome.jukeboxLabel}>
+      <div class="jukebox__panel">
+        <p class="jukebox__heading" id="jukebox-heading">{chrome.jukeboxLabel}</p>
+        <div class="jukebox__list" role="group" aria-labelledby="jukebox-heading">
           {videos.map((entry) => (
             <button
               type="button"
               class="glitch-hit"
               data-jukebox-option={entry.id}
               aria-pressed={entry.id === defaultVideoId ? 'true' : 'false'}
-              aria-current={entry.id === defaultVideoId ? 'true' : undefined}
             >
               {entry.label}
             </button>
@@ -301,7 +300,7 @@ const catalog = videos.map((entry) => ({
     border-color: var(--color-border);
   }
 
-  .jukebox__list button[aria-current='true'] {
+  .jukebox__list button[aria-pressed='true'] {
     border-color: var(--color-accent);
     color: var(--color-accent-alt);
   }

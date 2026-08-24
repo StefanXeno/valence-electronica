@@ -45,13 +45,7 @@ function toVideo(entry: CollectionEntry<'jukebox'>): BackgroundVideo {
   };
 }
 
-/** Label, poster, and source shape are enforced by the collection schema at build time. */
-export async function getValidJukeboxEntries(): Promise<BackgroundVideo[]> {
-  const raw = await getCollection('jukebox');
-  return raw.map(toVideo);
-}
-
-export async function getBackgroundConfig(): Promise<BackgroundConfig> {
+async function buildBackgroundConfig(): Promise<BackgroundConfig> {
   const raw = await getCollection('jukebox');
   const videos = raw.map(toVideo);
   const flagged = raw.find((entry) => entry.data.default);
@@ -62,6 +56,24 @@ export async function getBackgroundConfig(): Promise<BackgroundConfig> {
   const schedule = loadStageSchedule();
   validateStageSchedule(schedule, new Set(videos.map((entry) => entry.id)));
   return { defaultVideoId, schedule, videos };
+}
+
+/**
+ * Several components resolve the stage per page. Memoized so schedule validation
+ * and the default-flag warning run once per build rather than once per caller.
+ */
+let configPromise: Promise<BackgroundConfig> | undefined;
+
+export function getBackgroundConfig(): Promise<BackgroundConfig> {
+  // Dev rebuilds every call so content edits show up on reload.
+  if (import.meta.env.DEV) return buildBackgroundConfig();
+  configPromise ??= buildBackgroundConfig();
+  return configPromise;
+}
+
+/** Label, poster, and source shape are enforced by the collection schema at build time. */
+export async function getValidJukeboxEntries(): Promise<BackgroundVideo[]> {
+  return (await getBackgroundConfig()).videos;
 }
 
 /** Resolve the configured default video; throws if none are usable. */
