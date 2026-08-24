@@ -1,8 +1,13 @@
 version: 2
+
+# Dependabot reads this file from the default branch only, but pre-release is
+# where check.yml runs, so updates are opened there and reach main through the
+# normal promotion instead of landing unvalidated on the live branch.
 updates:
   # Actions are pinned by commit SHA; Dependabot keeps the pins moving.
   - package-ecosystem: github-actions
     directory: /
+    target-branch: pre-release
     schedule:
       interval: monthly
     commit-message:
@@ -10,6 +15,7 @@ updates:
 
   - package-ecosystem: npm
     directory: /
+    target-branch: pre-release
     schedule:
       interval: monthly
     commit-message:
