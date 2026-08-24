@@ -209,6 +209,20 @@ Two different steps — easy to confuse:
 Constitution rule: only **`main`** updates what fans see. If a build fails, the **last
 successful live version stays online**.
 
+### Seeing your changes before release
+
+A few minutes after your PR lands on `pre-release`, your changes appear at the **preview
+address**:
+
+`https://stefanxeno.github.io/valence-electronica/pre-release/`
+
+That page is the `pre-release` branch — it is your rehearsal stage. It is hidden from
+Google and is **not** what fans see. The live address stays unchanged until `main` is
+updated.
+
+If the preview shows an old version or a “404”, the last `pre-release` build failed. Check
+the red ✗ in the Actions tab, or ask the developer.
+
 ---
 
 ## How to edit (primary)

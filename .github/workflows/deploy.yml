@@ -1,8 +1,13 @@
 name: Deploy to GitHub Pages
 
+# GitHub Pages only supports one atomic deployment per repository, so the live
+# site and the pre-release preview must be built together and uploaded as a
+# single artifact:
+#   /valence-electronica/             → main
+#   /valence-electronica/pre-release/ → pre-release
 on:
   push:
-    branches: [main]
+    branches: [main, pre-release]
   workflow_dispatch:
     inputs:
       branch:
@@ -23,22 +28,97 @@ concurrency:
   group: pages
   cancel-in-progress: false
 
+env:
+  ASTRO_TELEMETRY_DISABLED: '1'
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      # Values reach the shell as env vars, never as inline expressions.
+      - name: Resolve the branch that owns the site root
+        id: refs
+        env:
+          EVENT: ${{ github.event_name }}
+          INPUT_BRANCH: ${{ inputs.branch }}
+          REF_NAME: ${{ github.ref_name }}
+          SHA: ${{ github.sha }}
+        run: |
+          if [ "$EVENT" = "workflow_dispatch" ]; then
+            root="$INPUT_BRANCH"
+          elif [ "$REF_NAME" = "main" ]; then
+            # Deploy the exact pushed commit, not whatever main points at now.
+            root="$SHA"
+          else
+            # A pre-release push refreshes the preview; the root stays on main.
+            root="main"
+          fi
+          echo "root=$root" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout site root source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          # Push to main → deploy that commit. Manual run → selected branch (e.g. pre-release).
-          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.branch || github.sha }}
-      # Runs the package "build" script (astro check && astro build) and uploads dist/
-      - name: Install, check, build, and upload site
-        uses: withastro/action@e84f40bd8d2caa9e768ec82ad30dd81f0b280853 # v6.1.2
+          ref: ${{ steps.refs.outputs.root }}
+          path: root
+
+      - name: Checkout pre-release source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: pre-release
+          path: preview
+
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          # Literal, not root/.nvmrc: the root checkout can be any branch or an
+          # older commit, and not all of them carry that file. Keep in sync with
+          # .nvmrc and the engines field in package.json.
           node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            root/package-lock.json
+            preview/package-lock.json
+
+      # Runs the package "build" script (astro check && astro build).
+      - name: Build site root
+        working-directory: root
+        run: |
+          npm ci
+          npm run build
+
+      - name: Stage site root
+        run: |
+          mkdir -p _site
+          cp -r root/dist/. _site/
+
+      # A broken pre-release must never block a live deploy, so this step is
+      # allowed to fail. The preview path is simply absent until it builds again.
+      - name: Build pre-release preview
+        id: preview
+        continue-on-error: true
+        working-directory: preview
         env:
-          ASTRO_TELEMETRY_DISABLED: '1'
+          PAGES_BASE: /valence-electronica/pre-release
+        run: |
+          npm ci
+          npm run build
+
+      - name: Stage pre-release preview
+        if: steps.preview.outcome == 'success'
+        run: |
+          mkdir -p _site/pre-release
+          cp -r preview/dist/. _site/pre-release/
+
+      - name: Warn when the preview was skipped
+        if: steps.preview.outcome != 'success'
+        run: |
+          echo "::warning title=Preview not published::pre-release failed to build; \
+          /pre-release/ is absent from this deployment."
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: _site
 
   deploy:
     needs: build

@@ -56,12 +56,30 @@ First visit to `/` plays a portal intro (copy in `src/content/ui/chrome.md`). De
 ## Deploy
 
 Content integrates on **`pre-release`**; the **live** site updates when **`main`** is
-updated. GitHub Actions (`.github/workflows/deploy.yml`) builds and deploys from `main`.
-If the build fails, the previous version stays live.
+updated. If the build fails, the previous version stays live.
 
-To deploy another integration branch (currently `pre-release`) without merging to `main`:
-Actions → **Deploy to GitHub Pages** → **Run workflow** → use workflow from `main` →
-choose the target branch. That overwrites the same GitHub Pages URL.
+Two URLs are published from one Pages site:
+
+| URL                                | Branch        | Indexable       |
+| ---------------------------------- | ------------- | --------------- |
+| `/valence-electronica/`            | `main`        | per `site.json` |
+| `/valence-electronica/pre-release/` | `pre-release` | never           |
+
+GitHub Pages allows only one atomic deployment per repository, so
+`.github/workflows/deploy.yml` builds **both** branches in a single run and uploads one
+combined artifact. A push to either branch refreshes both paths. A pre-release push never
+changes the live site: the root is always rebuilt from `main`.
+
+The preview build sets `PAGES_BASE=/valence-electronica/pre-release`, which flows through
+`import.meta.env.BASE_URL`, and is forced to `noindex` regardless of `seo.indexable`.
+
+If `pre-release` fails to build, that step is skipped rather than failing the run — the
+live deploy still goes out and the `/pre-release/` path is simply absent until it builds
+again.
+
+To deploy an integration branch to the **live root** without merging to `main`:
+Actions → **Deploy to GitHub Pages** → **Run workflow** → choose the target branch.
+That overwrites the live URL, so prefer the `/pre-release/` preview above.
 
 ## One-time GitHub setup
 
