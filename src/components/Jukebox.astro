@@ -94,8 +94,8 @@ const catalog = videos.map((entry) => ({
 }
 
 <script>
-  import { applyGlitchPreset, isGlitchThemeActive, playElementGlitch } from '../lib/glitch';
-  import { initStageSwitch, STAGE_SELECT_EVENT, type StageCatalogEntry } from '../lib/stage-switch';
+  import { createContinuousGlitch, isGlitchThemeActive, playElementGlitch } from '../lib/glitch';
+  import { initStageSwitch, type StageCatalogEntry } from '../lib/stage-switch';
   import type { StageSchedule } from '../lib/stage-schedule';
 
   function bootStageSwitch() {
@@ -112,91 +112,35 @@ const catalog = videos.map((entry) => ({
 
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
     let morphTimer: number | undefined;
-    let continuousTimer: number | undefined;
-    let continuousOnEnd: ((event: AnimationEvent) => void) | undefined;
     let pointerOver = false;
 
-    const isCollapsed = () => !root.open;
-
-    const stopContinuousHover = () => {
-      window.clearTimeout(continuousTimer);
-      continuousTimer = undefined;
-      if (continuousOnEnd) {
-        toggle.removeEventListener('animationend', continuousOnEnd);
-        continuousOnEnd = undefined;
-      }
-      toggle.classList.remove('is-glitch-continuous', 'is-glitch-hover', 'is-glitching');
-      toggle.style.animation = '';
-    };
-
-    const cycleContinuousHover = () => {
-      if (
-        reduceMotion.matches ||
-        !isGlitchThemeActive() ||
-        !pointerOver ||
-        !isCollapsed() ||
-        root.classList.contains('is-glitching')
-      ) {
-        stopContinuousHover();
-        return;
-      }
-
-      window.clearTimeout(continuousTimer);
-      if (continuousOnEnd) {
-        toggle.removeEventListener('animationend', continuousOnEnd);
-        continuousOnEnd = undefined;
-      }
-
-      const preset = applyGlitchPreset(toggle);
-      toggle.classList.remove('is-glitching', 'is-glitch-hover', 'is-glitch-continuous');
-      toggle.style.animation = 'none';
-      void toggle.offsetWidth;
-      toggle.style.animation = '';
-      toggle.classList.add('is-glitch-continuous');
-
-      continuousOnEnd = (event: AnimationEvent) => {
-        if (event.target !== toggle) return;
-        if (continuousOnEnd) toggle.removeEventListener('animationend', continuousOnEnd);
-        continuousOnEnd = undefined;
-        window.clearTimeout(continuousTimer);
-        if (pointerOver && isCollapsed() && !root.classList.contains('is-glitching') && !reduceMotion.matches && isGlitchThemeActive()) {
-          cycleContinuousHover();
-        } else {
-          stopContinuousHover();
-        }
-      };
-      toggle.addEventListener('animationend', continuousOnEnd);
-      continuousTimer = window.setTimeout(() => {
-        if (!pointerOver || !toggle.classList.contains('is-glitch-continuous')) return;
-        if (root.classList.contains('is-glitching') || reduceMotion.matches || !isGlitchThemeActive() || !isCollapsed()) {
-          stopContinuousHover();
-          return;
-        }
-        cycleContinuousHover();
-      }, preset.dur + 50);
-    };
+    // Idle vinyl only glitches while collapsed; the open/close morph owns the element otherwise.
+    const hoverGlitch = createContinuousGlitch(
+      toggle,
+      () => pointerOver && !root.open && !root.classList.contains('is-glitching'),
+    );
 
     const playMorph = (direction: 'in' | 'out') => {
       if (reduceMotion.matches || !isGlitchThemeActive()) return;
-      stopContinuousHover();
+      hoverGlitch.stop();
       root.dataset.glitch = direction;
       window.clearTimeout(morphTimer);
       const dur = playElementGlitch(root, 'is-glitching');
       morphTimer = window.setTimeout(() => {
         root.classList.remove('is-glitching');
         delete root.dataset.glitch;
-        if (pointerOver && isCollapsed()) cycleContinuousHover();
+        hoverGlitch.start();
       }, dur + 80);
     };
 
     toggle.addEventListener('pointerenter', () => {
       pointerOver = true;
-      if (isCollapsed()) cycleContinuousHover();
+      hoverGlitch.start();
     });
 
     toggle.addEventListener('pointerleave', () => {
       pointerOver = false;
-      stopContinuousHover();
+      hoverGlitch.stop();
     });
 
     toggle.addEventListener('click', (event) => {
@@ -210,23 +154,10 @@ const catalog = videos.map((entry) => ({
     });
 
     root.addEventListener('toggle', () => {
-      toggle.setAttribute('aria-expanded', root.open ? 'true' : 'false');
       if (root.open) {
-        stopContinuousHover();
+        hoverGlitch.stop();
         playMorph('in');
       }
-    });
-
-    toggle.setAttribute('aria-expanded', 'false');
-
-    document.addEventListener('click', (event) => {
-      const target = (event.target as HTMLElement | null)?.closest<HTMLElement>(
-        '[data-jukebox-option], [data-stage-button]',
-      );
-      if (!target) return;
-      const id = target.dataset.jukeboxOption ?? target.dataset.stageButton;
-      if (!id) return;
-      document.dispatchEvent(new CustomEvent(STAGE_SELECT_EVENT, { detail: { id } }));
     });
   }
 

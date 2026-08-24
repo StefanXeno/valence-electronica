@@ -247,9 +247,6 @@ export function applyGlitchPreset(el: HTMLElement): GlitchPreset {
   return preset;
 }
 
-/** @deprecated Use applyGlitchPreset — kept as alias for call sites. */
-export const rollGlitchVars = applyGlitchPreset;
-
 /** Glitch motion only runs when the active pack enables HUD glitch. */
 export function isGlitchThemeActive(): boolean {
   return document.documentElement.dataset.hudGlitch === 'true';
@@ -264,4 +261,59 @@ export function playElementGlitch(el: HTMLElement, className = 'is-glitching'): 
   el.style.animation = '';
   el.classList.add(className);
   return preset.dur;
+}
+
+export type ContinuousGlitch = {
+  /** Begin (or restart) the loop. Stops instead if `shouldRun` is false. */
+  start(): void;
+  stop(): void;
+};
+
+/**
+ * Re-rolls a glitch preset on `el` for as long as `shouldRun` holds, so a hovered
+ * control keeps mutating instead of freezing after one pass. Callers own the
+ * condition; this owns the animation, listener, and timer bookkeeping.
+ */
+export function createContinuousGlitch(
+  el: HTMLElement,
+  shouldRun: () => boolean,
+): ContinuousGlitch {
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  let timer: number | undefined;
+  let onEnd: ((event: AnimationEvent) => void) | undefined;
+
+  const stop = () => {
+    window.clearTimeout(timer);
+    timer = undefined;
+    if (onEnd) {
+      el.removeEventListener('animationend', onEnd);
+      onEnd = undefined;
+    }
+    el.classList.remove('is-glitch-continuous', 'is-glitch-hover', 'is-glitching');
+    el.style.animation = '';
+  };
+
+  const start = () => {
+    stop();
+    if (reduceMotion.matches || !shouldRun()) return;
+
+    // Returns 0 when the active theme pack has HUD glitch disabled.
+    const duration = playElementGlitch(el, 'is-glitch-continuous');
+    if (!duration) {
+      stop();
+      return;
+    }
+
+    onEnd = (event: AnimationEvent) => {
+      // Pseudo-element animations bubble here too; only the host ends a cycle.
+      if (event.target !== el) return;
+      start();
+    };
+    el.addEventListener('animationend', onEnd);
+
+    // Fallback for animationend swallowed by pseudo-element noise or browser quirks.
+    timer = window.setTimeout(start, duration + 50);
+  };
+
+  return { start, stop };
 }

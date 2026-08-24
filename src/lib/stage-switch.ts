@@ -147,5 +147,14 @@ export function initStageSwitch(
     if (id) select(id);
   });
 
+  // Delegated so jukebox options and the panel stage buttons share one path.
+  document.addEventListener('click', (event) => {
+    const target = (event.target as HTMLElement | null)?.closest<HTMLElement>(
+      '[data-jukebox-option], [data-stage-button]',
+    );
+    const id = target?.dataset.jukeboxOption ?? target?.dataset.stageButton;
+    if (id) select(id);
+  });
+
   syncStageUi(activeId);
 }

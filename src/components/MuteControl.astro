@@ -54,7 +54,7 @@
 </div>
 
 <script>
-  import { applyGlitchPreset, isGlitchThemeActive, playElementGlitch } from '../lib/glitch';
+  import { createContinuousGlitch, isGlitchThemeActive, playElementGlitch } from '../lib/glitch';
 
   function initMuteControl() {
     const root = document.querySelector<HTMLElement>('[data-atmosphere]');
@@ -68,97 +68,33 @@
     let lastVolume = Number(slider.value) || 0.7;
     let wasMuted = true;
     let glitchTimer: number | undefined;
-    let continuousTimer: number | undefined;
-    let continuousOnEnd: ((event: AnimationEvent) => void) | undefined;
     let pointerOverMute = false;
     video.volume = lastVolume;
 
     const isAudioPlaying = () => !(video.muted || video.volume === 0);
 
-    const stopContinuousHover = () => {
-      window.clearTimeout(continuousTimer);
-      continuousTimer = undefined;
-      if (continuousOnEnd) {
-        button.removeEventListener('animationend', continuousOnEnd);
-        continuousOnEnd = undefined;
-      }
-      button.classList.remove('is-glitch-continuous', 'is-glitch-hover', 'is-glitching');
-      button.style.animation = '';
-    };
-
-    const cycleContinuousHover = () => {
-      // Continuous mute hover only while muted — quiet when audio is playing
-      if (
-        reduceMotion.matches ||
-        !isGlitchThemeActive() ||
-        !pointerOverMute ||
-        control.hidden ||
-        isAudioPlaying()
-      ) {
-        stopContinuousHover();
-        return;
-      }
-      // Morph owns the click — don't stack continuous on top of shell morph
-      if (control.classList.contains('is-glitching')) return;
-
-      window.clearTimeout(continuousTimer);
-      if (continuousOnEnd) {
-        button.removeEventListener('animationend', continuousOnEnd);
-        continuousOnEnd = undefined;
-      }
-
-      const preset = applyGlitchPreset(button);
-      button.classList.remove('is-glitching', 'is-glitch-hover', 'is-glitch-continuous');
-      button.style.animation = 'none';
-      void button.offsetWidth;
-      button.style.animation = '';
-      button.classList.add('is-glitch-continuous');
-
-      continuousOnEnd = (event: AnimationEvent) => {
-        if (event.target !== button) return;
-        if (continuousOnEnd) button.removeEventListener('animationend', continuousOnEnd);
-        continuousOnEnd = undefined;
-        window.clearTimeout(continuousTimer);
-        if (
-          pointerOverMute &&
-          !isAudioPlaying() &&
-          !control.classList.contains('is-glitching') &&
-          !reduceMotion.matches &&
-          isGlitchThemeActive()
-        ) {
-          cycleContinuousHover();
-        } else {
-          stopContinuousHover();
-        }
-      };
-      button.addEventListener('animationend', continuousOnEnd);
-      // Fallback if animationend is missed (pseudo-element noise / browser quirks)
-      continuousTimer = window.setTimeout(() => {
-        if (!pointerOverMute || !button.classList.contains('is-glitch-continuous')) return;
-        if (control.classList.contains('is-glitching') || reduceMotion.matches || !isGlitchThemeActive() || isAudioPlaying()) {
-          stopContinuousHover();
-          return;
-        }
-        cycleContinuousHover();
-      }, preset.dur + 50);
-    };
-
-    const startContinuousHover = () => {
-      cycleContinuousHover();
-    };
+    // Idle mute button only glitches while muted — it goes quiet once audio plays,
+    // and the shell morph owns the element during a toggle.
+    const hoverGlitch = createContinuousGlitch(
+      button,
+      () =>
+        pointerOverMute &&
+        !control.hidden &&
+        !isAudioPlaying() &&
+        !control.classList.contains('is-glitching'),
+    );
 
     const playGlitch = (direction: 'in' | 'out') => {
       if (reduceMotion.matches || !isGlitchThemeActive()) return;
       // Morph supersedes continuous mute hover for this click
-      stopContinuousHover();
+      hoverGlitch.stop();
       control.dataset.glitch = direction;
       window.clearTimeout(glitchTimer);
       const dur = playElementGlitch(control, 'is-glitching');
       glitchTimer = window.setTimeout(() => {
         control.classList.remove('is-glitching');
         delete control.dataset.glitch;
-        // Resume continuous only while muted and pointer still over mute
-        if (pointerOverMute && !isAudioPlaying()) startContinuousHover();
+        hoverGlitch.start();
       }, dur + 80);
     };
 
@@ -174,14 +110,14 @@
       const hasAudio = root.getAttribute('data-has-audio') === 'true';
       if (fallback) {
         control.hidden = true;
-        stopContinuousHover();
+        hoverGlitch.stop();
         applySoundUi(true);
         wasMuted = true;
         return;
       }
       if (!hasAudio) {
         control.hidden = true;
-        stopContinuousHover();
+        hoverGlitch.stop();
         return;
       }
       control.hidden = false;
@@ -191,7 +127,7 @@
       const turningOff = !wasMuted && muted;
 
       // Audio playing → no continuous mute hover
-      if (!muted) stopContinuousHover();
+      if (!muted) hoverGlitch.stop();
 
       if (turningOff && !reduceMotion.matches) {
         // Keep pill visible briefly so the slider can glitch-collapse, then go circular
@@ -202,7 +138,7 @@
           applySoundUi(true);
           control.classList.remove('is-glitching');
           delete control.dataset.glitch;
-          if (pointerOverMute && !isAudioPlaying()) startContinuousHover();
+          hoverGlitch.start();
         }, 480);
       } else {
         applySoundUi(muted);
@@ -214,12 +150,12 @@
 
     button.addEventListener('pointerenter', () => {
       pointerOverMute = true;
-      startContinuousHover();
+      hoverGlitch.start();
     });
 
     button.addEventListener('pointerleave', () => {
       pointerOverMute = false;
-      stopContinuousHover();
+      hoverGlitch.stop();
     });
 
     button.addEventListener('click', () => {
@@ -244,7 +180,7 @@
 
     root.addEventListener('bg-state-change', sync);
     reduceMotion.addEventListener('change', () => {
-      if (reduceMotion.matches) stopContinuousHover();
+      if (reduceMotion.matches) hoverGlitch.stop();
       sync();
     });
     sync();
