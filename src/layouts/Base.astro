@@ -23,6 +23,12 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : un
 const [defaultVideo, videos] = await Promise.all([getDefaultVideo(), getValidJukeboxEntries()]);
 const themeAttrs = applyThemeAttributes(resolveThemePack(defaultVideo.themeId));
 const showMute = videos.some((entry) => entry.hasAudio);
+
+// Link previews need an absolute raster URL; scrapers reject SVG posters.
+const shareImage =
+  Astro.site && /\.(jpe?g|png|webp)$/i.test(defaultVideo.poster)
+    ? new URL(withBase(defaultVideo.poster), Astro.site).href
+    : undefined;
 ---
 
 <!doctype html>
@@ -34,9 +40,16 @@ const showMute = videos.some((entry) => entry.hasAudio);
     <meta name="description" content={description} />
     {!site.seo.indexable && <meta name="robots" content="noindex" />}
     <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={site.artist.name} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     {canonical && <meta property="og:url" content={canonical} />}
+    {shareImage && <meta property="og:image" content={shareImage} />}
+    {shareImage && <meta property="og:image:alt" content={`${site.artist.name} stage artwork`} />}
+    <meta name="twitter:card" content={shareImage ? 'summary_large_image' : 'summary'} />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    {shareImage && <meta name="twitter:image" content={shareImage} />}
     {canonical && <link rel="canonical" href={canonical} />}
     <link rel="icon" type="image/svg+xml" href={withBase('/favicon.svg')} />
     <meta name="generator" content={Astro.generator} />
