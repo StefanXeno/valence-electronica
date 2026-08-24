@@ -73,7 +73,7 @@ jobs:
           # Literal, not root/.nvmrc: the root checkout can be any branch or an
           # older commit, and not all of them carry that file. Keep in sync with
           # .nvmrc and the engines field in package.json.
-          node-version: 22
+          node-version: 24
           cache: npm
           cache-dependency-path: |
             root/package-lock.json
