@@ -1,0 +1,21 @@
+version: 2
+updates:
+  # Actions are pinned by commit SHA; Dependabot keeps the pins moving.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: ci
+
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: build
+    groups:
+      astro:
+        patterns:
+          - astro
+          - '@astrojs/*'
