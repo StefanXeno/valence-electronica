@@ -40,12 +40,13 @@ filename slug is the stable id (e.g. `nightmare.md` → `nightmare`).
 
 **Frontmatter you may edit:**
 
-- `label` — name shown in the jukebox
+- `label` — name shown in the jukebox (required)
 - `themeId` — visual mood (see [Theme packs](#theme-packs-selection-only); use only listed ids)
 - `hasAudio` — whether mute/unmute applies
 - `default: true` — exactly **one** usable entry should have this (static fallback when no
   schedule rule matches)
-- `poster`, `sources` — paths to images/video under `public/` (see [Media assets](#media-assets))
+- `poster` (required), `sources` — paths to images/video under `public/`, always starting with
+  `/` (see [Media assets](#media-assets))
 
 **Body:** Lyrics for that record (leave empty for instrumentals).
 
@@ -66,12 +67,14 @@ developer updates every reference (releases, schedule, etc.).
 
 **Folder:** [`src/content/releases/`](../src/content/releases/)
 
-**Controls:** Release rows: `title`, `year`, optional `kind`, `url`, `jukeboxId`.
+**Controls:** Release rows: `title`, `year` (both required), optional `kind`, `url`, `jukeboxId`.
 
 **Tips:**
 
 - `jukeboxId` must match a jukebox filename slug to show “Play on stage”.
-- A row missing `title` or `year` is dropped at build time (warning only — rest of site still builds).
+- A row missing `title` or `year` **fails the build** and names the file — nothing disappears
+  silently. Fix the file and push again.
+- `url` must be a full address including `https://`.
 
 ---
 
@@ -79,12 +82,14 @@ developer updates every reference (releases, schedule, etc.).
 
 **Folder:** [`src/content/shows/`](../src/content/shows/)
 
-**Controls:** Gig rows: `date`, `city`, `venue`, optional `ticketUrl`. Past dates
+**Controls:** Gig rows: `date`, `city`, `venue` (all required), optional `ticketUrl`. Past dates
 (Europe/Berlin) are hidden automatically.
 
 **Tips:**
 
-- A row missing `date`, `city`, or `venue` is dropped at build time (warning only).
+- A row missing `date`, `city`, or `venue` **fails the build** and names the file — nothing
+  disappears silently. Fix the file and push again.
+- `ticketUrl` must be a full address including `https://`.
 - You can ship with no show files — the site shows empty-state copy.
 
 ---

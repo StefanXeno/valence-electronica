@@ -31,7 +31,8 @@ Quick pointers:
 **Do not rename ids** (jukebox slugs, `jukeboxId`, legal slugs, `themeId`s) without developer help.
 
 Run `npm run check` after content edits when using a local clone. Invalid schedule ids or
-dates fail the build; a release/show missing required fields is dropped with a warning.
+dates, and content files missing required fields, fail the build and name the offending
+file. Pushes to `pre-release` and pull requests run the same checks in CI.
 
 ## Theme packs (developer)
 

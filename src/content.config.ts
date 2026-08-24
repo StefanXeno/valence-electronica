@@ -28,18 +28,26 @@ const legal = defineCollection({
   }),
 });
 
+/** Trimmed so a whitespace-only value is a build error, not an invisible blank. */
+const filledText = z.string().trim().min(1);
+
+/** Media lives in public/ and is referenced from the site root. */
+const publicPath = filledText.refine((value) => value.startsWith('/'), {
+  message: 'must start with "/" and point into public/, e.g. /images/posters/clip.jpg',
+});
+
 const mediaSource = z.object({
-  src: z.string().optional(),
-  type: z.string().optional(),
+  src: publicPath,
+  type: filledText,
 });
 
 const jukebox = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/jukebox' }),
   schema: z.object({
-    label: z.string().optional(),
-    themeId: z.string().optional(),
+    label: filledText,
+    themeId: filledText.optional(),
     hasAudio: z.boolean().optional(),
-    poster: z.string().optional(),
+    poster: publicPath,
     default: z.boolean().optional(),
     sources: z.array(mediaSource).optional(),
   }),
@@ -53,21 +61,21 @@ const about = defineCollection({
 const releases = defineCollection({
   loader: globAllowEmpty({ pattern: '**/*.md', base: './src/content/releases' }),
   schema: z.object({
-    title: z.string().optional(),
-    year: z.number().optional(),
-    kind: z.string().optional(),
-    url: z.string().optional(),
-    jukeboxId: z.string().optional(),
+    title: filledText,
+    year: z.number().int().min(1900).max(2100),
+    kind: filledText.optional(),
+    url: z.url().optional(),
+    jukeboxId: filledText.optional(),
   }),
 });
 
 const shows = defineCollection({
   loader: globAllowEmpty({ pattern: '**/*.md', base: './src/content/shows' }),
   schema: z.object({
-    date: z.coerce.date().optional(),
-    city: z.string().optional(),
-    venue: z.string().optional(),
-    ticketUrl: z.string().optional(),
+    date: z.coerce.date(),
+    city: filledText,
+    venue: filledText,
+    ticketUrl: z.url().optional(),
   }),
 });
 

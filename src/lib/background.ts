@@ -30,42 +30,31 @@ export interface BackgroundConfig {
   videos: BackgroundVideo[];
 }
 
-function isUsableEntry(entry: CollectionEntry<'jukebox'>): boolean {
-  const { label, poster } = entry.data;
-  return Boolean(label?.trim() && poster?.trim());
-}
-
 function toVideo(entry: CollectionEntry<'jukebox'>): BackgroundVideo {
-  const sources = (entry.data.sources ?? [])
-    .filter((source): source is MediaSource => Boolean(source.src?.trim() && source.type?.trim()))
-    .map((source) => ({ src: source.src as string, type: source.type as string }));
+  const sources: MediaSource[] = entry.data.sources ?? [];
 
   return {
     id: entry.id,
     title: entry.data.label,
-    label: entry.data.label ?? entry.id,
+    label: entry.data.label,
     themeId: resolveThemeId(entry.data.themeId ?? 'default'),
     hasAudio: Boolean(entry.data.hasAudio) && sources.length > 0,
-    poster: entry.data.poster as string,
+    poster: entry.data.poster,
     sources,
     lyricsEmpty: !entry.body?.trim(),
   };
 }
 
+/** Label, poster, and source shape are enforced by the collection schema at build time. */
 export async function getValidJukeboxEntries(): Promise<BackgroundVideo[]> {
   const raw = await getCollection('jukebox');
-  const valid = raw.filter(isUsableEntry).map(toVideo);
-  if (raw.length !== valid.length) {
-    const dropped = raw.filter((entry) => !isUsableEntry(entry)).map((entry) => entry.id);
-    console.warn(`[stage] omitted unusable jukebox entries: ${dropped.join(', ')}`);
-  }
-  return valid;
+  return raw.map(toVideo);
 }
 
 export async function getBackgroundConfig(): Promise<BackgroundConfig> {
-  const videos = await getValidJukeboxEntries();
   const raw = await getCollection('jukebox');
-  const flagged = raw.find((entry) => entry.data.default && isUsableEntry(entry));
+  const videos = raw.map(toVideo);
+  const flagged = raw.find((entry) => entry.data.default);
   const defaultVideoId = flagged?.id ?? videos[0]?.id ?? '';
   if (!flagged && videos.length > 0) {
     console.warn(`[stage] no default jukebox flag; using "${defaultVideoId}"`);
