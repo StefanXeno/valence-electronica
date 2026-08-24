@@ -4,7 +4,7 @@
 
 **Created**: 2026-08-14
 
-**Status**: As-built (matches the landing HUD as of 2026-08-14)
+**Status**: As-built (synced to code 2026-08-24; successors `005`–`008` landed)
 
 **Input**: User description: "Add landing content (lyrics, discography, tour dates,
 About me, existing socials, and a theme switcher presented as a jukebox that plays
@@ -37,8 +37,10 @@ file still hold unless they conflict with that session.
   on the row can switch the stage (song + theme) to that entry. Unbound releases
   have no such button. Outbound listen/store links still work.
 - Q: After a visitor picks a jukebox entry (or uses the discography stage button),
-  should that choice still be there if they reload the page? → A: Each load uses
-  the configured default. A jukebox pick lasts only until reload. No visit memory.
+  should that choice still be there if they reload the page? → A: Jukebox picks are
+  not remembered. Each load uses the **static fallback** (`default: true`) for SSR /
+  no-JS; with scripting, feature `007` may apply today’s scheduled entry on boot. No
+  visit memory of the visitor’s last pick.
 - Q: When there are no releases yet, should visitors still see a discography
   control? → A: Always show discography. If empty, show a clear “no releases yet”
   (or similar) message. The shipped content also includes a few clearly marked
@@ -67,17 +69,19 @@ file still hold unless they conflict with that session.
 - Q: How does the jukebox present when idle? → A: Collapsed to a vinyl-record
   control (same family as the mute circle). Opening it expands a compact list
   along that edge; it does not dump the song list in the center.
-- Q: Do new HUD controls glitch? → A: Yes, but only while the Nightmare visual
-  theme (`nightmare-crimson`) is active. Closed on-demand boxes glitch on hover;
-  clicking the control glitches the whole box; hovering an already-open panel
-  does not. Jukebox expand/collapse and collapsed-vinyl hover follow the mute
-  morph language. Existing `003` targets (active socials, legal links, legal
-  exit, mute) keep their treatments, still Nightmare-only. Other themes stay
-  still. Deep per-theme type/motion packs (IDEA-002) remain out of scope.
-- Q: Does every jukebox entry play the looping atmosphere video? → A: No. The
-  looping video (and its unmute audio) belongs to the Nightmare theme. Other
-  entries MAY be a static poster only (temporary stills allowed) with no looping
-  video and no mute control while they are active.
+- Q: Do new HUD controls glitch? → A: Yes, but only while the active theme pack has
+  `hudGlitch` (`data-hud-glitch='true'` — feature `005`). Closed on-demand boxes
+  glitch on hover; clicking the control glitches the whole box; hovering an
+  already-open panel does not. Jukebox expand/collapse and collapsed-vinyl hover
+  follow the mute morph language. Existing `003` targets (active socials, legal
+  links, legal exit, mute) keep their treatments under the same enable gate.
+  Packs without `hudGlitch` stay still. Deep per-theme type/motion packs
+  (IDEA-002) remain out of scope.
+- Q: Does every jukebox entry play the looping atmosphere video? → A: No. Looping
+  video (and unmute audio) follow the bound pack’s capabilities (`loopingVideo`,
+  `audioEligible`) when the entry has video sources. Other entries MAY be a static
+  poster only (temporary stills allowed) with no looping video and no mute control
+  while they are active.
 - Q: Is the phone HUD in scope for this feature’s visual success? → A: No. v1
   is a typical-laptop stage. A dedicated mobile/small-screen composition is
   deferred (IDEA-013). The landing MUST remain reachable on small screens (no
@@ -442,12 +446,14 @@ and that they did not edit layout or program files.
   family as the mute circle). Opening it MUST list selectable song entries from
   structured content along that edge. Selecting an entry MUST set the active song
   identity and MUST update the bound atmosphere and bound visual theme together.
-  Looping atmosphere video (and unmute audio) MUST play only for the Nightmare
-  theme (`nightmare-crimson`) when that entry has video sources. Other entries
+  Looping atmosphere video (and unmute audio) MUST follow the active entry’s theme
+  pack capabilities (`loopingVideo`, `audioEligible`) when that entry has video
+  sources. Entries whose pack does not allow looping video, or that lack sources,
   MUST show a static poster and MUST NOT start the loop. The jukebox is the
-  visitor-facing theme switcher for this site. Each fresh load of the landing
-  page MUST start from the content-configured default entry; a visitor’s pick
-  MUST NOT be remembered across reload.
+  visitor-facing theme switcher for this site. Each fresh load MUST NOT restore a
+  visitor’s last pick. SSR / no-JS MUST start from the content-configured static
+  fallback (`default: true`); with scripting, schedule resolution (feature `007`)
+  MAY change the boot entry for “today” before the visitor interacts.
 - **FR-008**: Jukebox audio MUST follow existing mute rules: no sound without a
   visitor unmute; mute/unmute state MUST survive a jukebox switch when the new
   entry has looping video with audio; mute control MUST stay hidden when the
@@ -502,16 +508,18 @@ and that they did not edit layout or program files.
   cookies, forms, completed legal texts, required portraits, a new primary
   typeface, or deep per-theme type/motion packs beyond the existing bound visual
   theme. Glitch on HUD chrome (jukebox, on-demand panels, plus existing `003`
-  targets) MUST run only while `data-theme` is `nightmare-crimson`. Other themes
-  MUST stay still.
+  targets) MUST run only while the active pack has `hudGlitch`
+  (`data-hud-glitch='true'`). Packs without that capability MUST stay still.
+  *(Intro playback flag storage is feature `006`, not this feature.)*
 - **FR-018**: This feature MUST NOT invent extra site pages (no standalone lyrics
   page, no standalone tour page, no standalone discography page).
-- **FR-019**: The project MUST include a short editing guide, aimed at someone who
-  does not write code, that names where each kind of landing text lives (identity,
-  About, lyrics, discography, tour dates, jukebox labels, socials, region titles,
-  empty states) and how to preview a change — in the same spirit as the existing
-  content guide for legal pages. The guide MUST also say that an item missing a
-  required field is left out of the published page rather than blocking the rest.
+- **FR-019**: The project MUST include an editing guide at `docs/artist-guide.md`,
+  aimed at someone who does not write code, that names where each kind of landing
+  text lives (identity, About, lyrics, discography, tour dates, jukebox labels,
+  socials, region titles, empty states) and how to preview a change — in the same
+  spirit as the existing content guide for legal pages. The guide MUST also say
+  that an item missing a required field is left out of the published page rather
+  than blocking the rest. README MAY link to the guide; the guide is authoritative.
 - **FR-020**: If a content item is missing a required field, that item MUST be
   omitted and the rest of the landing MUST still publish. The page MUST NOT go
   blank. Zero Markdown files in `shows/`, `releases/`, or `about/` MUST be an
@@ -533,8 +541,8 @@ and that they did not edit layout or program files.
   `--hud-scale: 1.5` on the laptop HUD.
 - **Jukebox entry**: A selectable song/atmosphere item with stable identity,
   visitor-facing label, bound visual theme, poster, optional video sources,
-  optional audio (only with Nightmare looping video), and optional lyrics. The
-  active entry is “what the stage is playing.”
+  optional audio (only when the pack allows looping video + audio eligibility),
+  and optional lyrics. The active entry is “what the stage is playing.”
 - **Lyrics**: The words for one jukebox entry (or an explicit instrumental/empty
   state). Always tied to the active entry.
 - **Release**: One discography item (title, year, optional kind, optional outbound
@@ -585,9 +593,10 @@ and that they did not edit layout or program files.
 - **SC-011**: Using only the short editing guide and content files, a person who
   does not write code can change a chosen visible text and see it on a local
   preview (or the next published version) in under 15 minutes on the first try.
-- **SC-012**: After switching away from the default and reloading, 100% of fresh
-  landing loads show the content-configured default entry again (not the last
-  pick).
+- **SC-012**: After switching away from the boot entry and reloading, 100% of fresh
+  landing loads do **not** restore the visitor’s last pick. SSR / no-JS shows the
+  static `default: true` fallback; with scripting, boot follows schedule rules
+  (`007`) then that fallback.
 - **SC-013**: With one deliberately broken list item (missing a required field)
   and the rest valid, the published landing still loads and shows the valid
   items; the broken item is absent; the page is not blank.
@@ -615,8 +624,9 @@ and that they did not edit layout or program files.
   (IDEA-005) is not required here.
 - Per-track credits, honorable mentions, and extra listen-link panels (IDEA-006)
   stay a separate idea unless a discography row already has an outbound link.
-- Scheduled default clip/theme (IDEA-004), Seravek, intro animation, logo loader,
-  completed Impressum/privacy copy, and repo license remain separate.
+- Scheduled default clip/theme is feature `007` (IDEA-004). Landing intro is
+  `006`. Artist operator docs are `008`. Seravek, logo loader, completed
+  Impressum/privacy copy, and repo license remain separate.
 - Real lyrics, bio, dates, and extra atmosphere clips may still be placeholders
   or samples; the structure must accept real data later. Discography MUST ship
   with at least two clearly marked example releases (one jukebox-bound, one not)
@@ -625,21 +635,24 @@ and that they did not edit layout or program files.
   Tour ships at least one EXAMPLE upcoming show (e.g. Augsburg) until replaced.
   Jukebox v1 examples: Nightmare (`nightmare`, looping video + audio) and
   Example Cyan (`example-cyan`, static poster, no video, no mute).
-- Glitch is Nightmare-only. As-built HUD targets: closed on-demand panels glitch
-  on hover; click on the control glitches the whole box; open panels do not
-  glitch on hover. Jukebox collapsed-vinyl hover and expand/collapse follow the
-  mute morph language; option buttons are hit targets when the list is open.
-  Existing `003` targets (active socials, legal links, legal exit, mute) keep
-  their treatments. Other `data-theme` values stay still. Deep packs (IDEA-002)
-  remain out of scope.
-- No new tracking, cookies, or visitor accounts. Jukebox picks are not stored;
-  each load uses the configured default.
+- Glitch enable is pack `hudGlitch` → `data-hud-glitch` (`005`). As-built HUD
+  targets: closed on-demand panels glitch on hover; click on the control glitches
+  the whole box; open panels do not glitch on hover. Jukebox collapsed-vinyl
+  hover and expand/collapse follow the mute morph language; option buttons are
+  hit targets when the list is open. Existing `003` targets (active socials,
+  legal links, legal exit, mute) keep their treatments. Packs without `hudGlitch`
+  stay still. Deep packs (IDEA-002) remain out of scope.
+- No new tracking or visitor accounts. Jukebox picks are not stored. Intro
+  playback flag (`006`) is separate. Each load does not restore the visitor’s
+  last pick; static fallback is `default: true`; schedule may pick today’s entry
+  with JS (`007`).
 - The site stays a single public landing plus the existing legal overlay.
 - “Same way as the legal pages” means the editing experience: plain content files
   a non-programmer can type into, not a new login/CMS (that would break
   static-first / zero-ops). Dropping a new atmosphere media file into a known
   folder is allowed when adding a jukebox clip; changing words still never
-  requires touching layout or program files.
+  requires touching layout or program files. Authoritative map:
+  `docs/artist-guide.md` (`008`).
 - “Every text” means every visitor-facing string, including chrome (region titles
   and empty states), not only long prose. Internal technical keys (stable ids for
   channels or jukebox entries) may stay as-is so existing links and bindings do

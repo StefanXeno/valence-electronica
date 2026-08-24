@@ -1,6 +1,6 @@
 # Contract: Stage Content Files
 
-**Date**: 2026-08-14 | **Plan**: [../plan.md](../plan.md) | **Data model**: [../data-model.md](../data-model.md)
+**Date**: 2026-08-14 (as-built sync 2026-08-24) | **Plan**: [../plan.md](../plan.md) | **Data model**: [../data-model.md](../data-model.md)
 
 Maintainer-facing contract. A non-programmer edits these files the same way as
 `src/content/legal/*.md`. Do not rename stable ids (`jukebox` filename, `channels[].id`,
@@ -23,10 +23,12 @@ stageButtonLabel: Play on stage
 emptyLyrics: Lyrics not available
 emptyReleases: No releases yet
 emptyShows: No upcoming dates
-jukeboxLabel: Jukebox
+jukeboxLabel: V-Flip
 socialsLabel: Socials
 comingSoon: coming soon
 ticketLabel: Tickets
+introLead: "Hi I'm"
+introName: Valence
 ---
 ```
 
@@ -34,6 +36,8 @@ Rules:
 
 - One file. Change labels here, not in components.
 - Empty-state strings are what visitors see when lists/lyrics are empty.
+- `introLead` / `introName` are owned by feature `006` (landing portal). Empty
+  `introName` disables the intro.
 
 ## `src/content/about/me.md`
 
@@ -162,5 +166,6 @@ Unchanged shape from `001` (`artist`, `seo`, `channels`). Stage identity uses
 
 ## README
 
-Extend the existing “Editing content” section so a non-programmer can find each file
-type, the omit-invalid-item rule, and “do not rename ids”.
+Point operators at [`docs/artist-guide.md`](../../../docs/artist-guide.md) (feature
+`008`) for the full inventory, omit-invalid-item rule, and “do not rename ids”.
+README is an entry link, not a second full guide.

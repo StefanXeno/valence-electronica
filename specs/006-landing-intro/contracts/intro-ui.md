@@ -27,10 +27,10 @@ stays rendered underneath; only pointer interaction is gated until reveal comple
 
 | Element | Treatment |
 |---------|-----------|
-| `.landing-intro__sheet` (or equivalent) | Full-viewport **opaque white** field |
+| `.landing-intro__portal-svg` | Full-viewport **opaque white** field with SVG **mask** cut-outs (name letterforms are holes showing the site) |
+| `.landing-intro__portal-text` | Mask text inside the SVG `<mask>` — MUST NOT render as solid black ink on white |
 | `.landing-intro__lead` | Opaque dark text on white; **fade-in ~0.55 s ease-out**, then **fade out from ~45% of zoom phase**; **not** the zoom target |
-| `.landing-intro__name` | **Portal cut-out** — letterforms are **holes in the white sheet** showing the site through. MUST NOT render as solid black (or opaque) ink on white |
-| Zoom motion | Applied to the **name cut-out only** — `scale` from the **center of the name** until the hole fills the viewport (camera moves **into** Valence) |
+| Zoom motion | Applied to the **portal SVG / name cut-out only** — `scale` from the **center of the name** until the hole fills the viewport (camera moves **into** Valence). JS safety fallback ~4.5 s if animationend misses. |
 
 ### Layout
 
@@ -90,16 +90,23 @@ Without scripting:
 
 ## HTML surface (implementation hint)
 
-Prerender overlay on landing only. Suggested structure:
+Prerender overlay on landing only. As-built structure:
 
 ```html
 <div class="landing-intro" data-landing-intro hidden>
-  <div class="landing-intro__cutout">
-    <div class="landing-intro__sheet"></div>
-    <!-- name cut-out: mask or blend technique — see research.md R9–R12 -->
-    <p class="landing-intro__name" aria-label="Valence">Valence</p>
+  <div class="landing-intro__cutout" aria-hidden="true">
+    <svg class="landing-intro__portal-svg" …>
+      <defs>
+        <mask id="…">
+          <rect fill="white" … />
+          <text class="landing-intro__portal-text" fill="black">Valence</text>
+        </mask>
+      </defs>
+      <rect fill="#fff" mask="url(#…)" … />
+    </svg>
   </div>
   <p class="landing-intro__lead">Hi I'm</p>
+  <span class="visually-hidden">Valence</span>
 </div>
 ```
 

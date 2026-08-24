@@ -4,7 +4,7 @@
 
 **Created**: 2026-08-07
 
-**Status**: Draft
+**Status**: As-built (skeleton; later features extend presentation)
 
 **Input**: User description: "Set up the skeleton of a static artist website for Valence, an electronic music artist from Augsburg, Germany (bandcamp: https://valenceelectronica.bandcamp.com/). The site must be publicly reachable without running own infrastructure and must publish automatically whenever content changes. Real assets (photos, logo, final copy) are not available yet, so the skeleton starts with placeholders that can be swapped later without structural changes."
 
@@ -138,7 +138,8 @@ Datenschutzerklärung and verify both pages are reachable.
 - **FR-010**: The site MUST provide a maintained title and description for search engines
   and link previews (social sharing).
 - **FR-011**: The project MUST include a short guide describing how to change content and
-  preview the site locally (for the operator, eventually for the artist).
+  preview the site locally (for the operator, eventually for the artist). *(As-built:
+  authoritative guide is `docs/artist-guide.md` from feature `008`; README links to it.)*
 
 ### Key Entities
 

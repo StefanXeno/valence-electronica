@@ -171,6 +171,7 @@ These are **developer-owned**. Editing them can break the build or the live site
 | Layout and components | `src/components/`, `src/layouts/` | Page structure and behavior |
 | Styles and effects | `src/styles/`, `src/styles/glitch.css` | Visual system and animations |
 | Theme pack registry | `src/lib/theme-packs.ts`, theme CSS in `src/styles/themes.css` | Capabilities and colors tied to code |
+| App logic under `src/lib/` | `background.ts`, `stage*.ts`, `glitch.ts`, `intro.ts`, … | Stage, schedule, glitch, intro helpers (not content) |
 | Build and config | `astro.config.mjs`, `package.json`, `tsconfig.json` | Tooling and deploy settings |
 | CI / deploy | `.github/workflows/` | Automated build and GitHub Pages |
 | Specs and plans | `specs/`, `.specify/` | Developer workflow (not artist content) |

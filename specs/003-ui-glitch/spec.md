@@ -4,7 +4,7 @@
 
 **Created**: 2026-08-10
 
-**Status**: Draft
+**Status**: As-built (base language; HUD hit-set expanded by `004`, enable gate by `005`)
 
 **Input**: User description: "Extract the press/hover glitch motion language from the
 themed background video work into its own feature. Interactive controls (channel links,
@@ -15,14 +15,22 @@ a separate idea)."
 
 ## Clarifications
 
+### Session 2026-08-24 (as-built sync)
+
+- Q: Is the hit-target set still only channels / legal / exit / mute? → A: No. Feature
+  `004` amended the closed set to also include jukebox vinyl/options and on-demand stage
+  panels. Continuous hover is allowed on mute (while muted) **and** on the collapsed
+  jukebox vinyl. Enable gate is pack `hudGlitch` → `data-hud-glitch`, not a hard-coded
+  Nightmare `data-theme` check. See `contracts/glitch-ui.md`.
+
 ### Session 2026-08-12
 
 - Q: When a visitor clicks mute/unmute, separate press glitch plus morph, or morph only?
   → A: Morph only for mute/unmute clicks; hover/focus glitch on the mute button still
   allowed. Exception: while the pointer hovers the mute button **and audio is muted**,
-  that button may glitch continuously for the duration of the hover — mute button only;
-  no other element may use continuous hover glitch. Continuous mute hover MUST NOT run
-  while background audio is playing.
+  that button may glitch continuously for the duration of the hover. Continuous mute
+  hover MUST NOT run while background audio is playing. *(Later amended: collapsed
+  jukebox vinyl may also use continuous hover — see 2026-08-24 session.)*
 
 ### Session 2026-08-12 (post-implement owner polish)
 
@@ -32,12 +40,12 @@ a separate idea)."
   → A: X icon with accessible name “Exit” (legal overlay presentation owned by feature
   `002`; glitch hit-target rules unchanged).
 - Q: Which interactive elements are in scope as glitch hit targets?
-  → A: Closed set only: active channel links, legal links, legal exit, and the mute
-  button (plus mute shell morph on unmute/mute). Volume slider and “coming soon”
-  placeholders are out of scope for glitch treatments.
+  → A: Originally: active channel links, legal links, legal exit, and the mute button
+  (plus mute shell morph). Volume slider and “coming soon” placeholders stay out.
+  *(Superseded expansion: see 2026-08-24 session / FR-011 as-built.)*
 - Q: How hard should glitch intensity be capped for flash/photosensitivity?
   → A: Soft safety bar: about ≤3 distinct flashes per second, no large full-viewport
-  flashes; same cap for continuous mute hover. Final intensity/taste within that bar is
+  flashes; same cap for continuous hover. Final intensity/taste within that bar is
   decided by the project owner (manual judgment), not by automated compliance tooling.
 - Q: If multiple glitch triggers fire at once on one control, what should happen?
   → A: At most one active glitch per control; press supersedes hover/focus; no stacked
@@ -88,9 +96,10 @@ When the visitor unmutes or mutes background audio, the mute/volume control’s 
 (circle ↔ pill with volume) is accompanied by the same glitch language so the expand and
 collapse feel intentional rather than a plain layout jump. A mute/unmute click does not
 also fire a separate press glitch on the button — the morph is the click treatment. While
-the pointer rests on the mute button **and audio is muted**, that button alone may keep
-glitching for the whole hover (continuous); no other control may do that, and continuous
-hover MUST NOT run while audio is playing.
+the pointer rests on the mute button **and audio is muted**, that button may keep
+glitching for the whole hover (continuous). The collapsed jukebox vinyl may also use
+continuous hover (feature `004`). Continuous mute hover MUST NOT run while audio is
+playing.
 
 **Why this priority**: The mute control is the most distinctive interactive chrome on the
 atmospheric landing page; tying its morph to the glitch language completes the motion
@@ -116,9 +125,9 @@ operable throughout.
    glitch continuously for the duration of the hover and stops when the pointer leaves.
 5. **Given** motion is allowed and audio is playing, **When** the visitor hovers the mute
    button, **Then** continuous hover glitch MUST NOT run.
-6. **Given** motion is allowed, **When** the visitor hovers any in-scope control that is
-   not the mute button, **Then** that control MUST NOT use continuous hover glitch
-   (one-shot only per User Story 1).
+6. **Given** motion is allowed, **When** the visitor hovers an in-scope control that is
+   neither the mute button nor the collapsed jukebox vinyl, **Then** that control MUST NOT
+   use continuous hover glitch (one-shot only per User Story 1).
 
 ---
 
@@ -180,18 +189,21 @@ confirm no glitch animations run and actions still work.
 
 - **FR-001**: In-scope glitch hit targets (see FR-011) on the landing experience and legal
   panel MUST present a short glitch treatment on pointer hover and on keyboard-visible
-  focus when motion is allowed. Focus caused by a mouse click MUST NOT trigger the focus
-  glitch. For controls other than the mute button, hover glitch MUST be one-shot (not
-  continuous while idle).
-- **FR-002**: In-scope hit targets other than the mute/unmute control MUST present a short
-  glitch treatment on press when motion is allowed, without preventing the control’s
-  normal action. Mute/unmute clicks are covered by FR-005 instead (no separate stacked
-  press glitch on that click).
+  focus when motion is allowed and HUD glitch is enabled (`data-hud-glitch='true'`). Focus
+  caused by a mouse click MUST NOT trigger the focus glitch. For controls other than the
+  mute button and collapsed jukebox vinyl, hover glitch MUST be one-shot (not continuous
+  while idle).
+- **FR-002**: In-scope hit targets other than the mute/unmute control and jukebox
+  expand/collapse MUST present a short glitch treatment on press when motion is allowed,
+  without preventing the control’s normal action. Mute/unmute and jukebox open/close
+  clicks are covered by morph rules instead (no separate stacked press glitch on that
+  click).
 - **FR-003**: Glitch treatments MUST be calm enough that text/icons remain recognizable
-  during and after the effect. Non-mute hover/press/keyboard-focus treatments MUST be
-  brief and non-looping for a single idle hover. The mute button MAY glitch continuously
-  while the pointer hovers it **and** audio is muted; continuous hover glitch is forbidden
-  on every other element and MUST NOT run while background audio is playing.
+  during and after the effect. Non-continuous hover/press/keyboard-focus treatments MUST
+  be brief and non-looping for a single idle hover. The mute button MAY glitch continuously
+  while the pointer hovers it **and** audio is muted; the collapsed jukebox vinyl MAY
+  glitch continuously while the pointer hovers it. Continuous hover MUST NOT run on other
+  elements; mute continuous hover MUST NOT run while background audio is playing.
 - **FR-004**: While a glitch is playing, the affected control MUST remain activatable
   (click/tap/keyboard); the effect MUST NOT remove or meaningfully shrink the hit target.
 - **FR-005**: When motion is allowed, mute/unmute transitions that expand or collapse the
@@ -209,12 +221,16 @@ confirm no glitch animations run and actions still work.
 - **FR-009**: After any glitch completes (or is skipped), or when continuous mute hover
   ends (pointer leaves), the control MUST return to a stable, non-glitched visual resting
   state.
-- **FR-010**: Continuous hover glitch MUST apply only to the mute button, and only while
-  background audio is muted; it MUST stop when audio is playing. Other in-scope hit
-  targets MUST remain one-shot on hover.
-- **FR-011**: The closed set of glitch hit targets for this feature is exactly: active
-  channel links, legal footer links, legal-panel exit, and the mute button (with mute
-  shell morph on unmute/mute). No other elements are in scope unless this spec is amended.
+- **FR-010**: Continuous hover glitch MUST apply only to (a) the mute button while
+  background audio is muted, and (b) the collapsed jukebox vinyl toggle. Continuous mute
+  hover MUST stop when audio is playing. Other in-scope hit targets MUST remain one-shot
+  on hover.
+- **FR-011**: The closed set of glitch hit targets (as-built, including `004` HUD expansion)
+  is exactly: active channel links, legal footer links, legal-panel exit, mute button
+  (with mute shell morph), jukebox vinyl toggle (with expand/collapse morph), jukebox
+  option buttons, and on-demand stage `<details>` panels. Treatments run only while
+  `data-hud-glitch='true'`. Volume slider and placeholder channel chips remain out of
+  set. No other elements are in scope unless this spec is amended.
 - **FR-012**: Glitch treatments (including continuous mute hover) MUST stay within a soft
   safety bar of roughly ≤3 distinct visual flashes per second and MUST NOT use large
   full-viewport flashes. Final intensity within that bar is owner-approved by eye (no
@@ -234,14 +250,16 @@ confirm no glitch animations run and actions still work.
 ### Key Entities
 
 - **Glitch hit target**: One of the closed-set interactive controls: active channel link,
-  legal link, legal exit, or mute button (shell morph is a mute-specific treatment, not a
-  separate hit target).
+  legal link, legal exit, mute button, jukebox vinyl/options, or on-demand stage panel
+  (shell morph is a mute/jukebox-specific treatment, not a separate hit target).
 - **Glitch treatment**: A short, one-shot visual disturbance (displacement / tear / color
-  fringing character) triggered by pointer hover, keyboard-visible focus, press, or mute
-  morph — except continuous hover glitch, which is allowed only on the mute button while
-  the pointer remains over it and audio is muted.
+  fringing character) triggered by pointer hover, keyboard-visible focus, press, or shell
+  morph — except continuous hover glitch, which is allowed on the mute button while muted
+  and on the collapsed jukebox vinyl while the pointer remains over it.
 - **Motion preference**: Visitor/OS preference for reduced motion; when set, all glitch
-  treatments (including continuous mute hover) are omitted.
+  treatments (including continuous hover) are omitted.
+- **Enable gate**: Active theme pack `hudGlitch` capability → `data-hud-glitch` on
+  `<html>` (feature `005`).
 
 ## Success Criteria *(mandatory)*
 

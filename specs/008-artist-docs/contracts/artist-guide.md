@@ -29,7 +29,8 @@ MUST cover each obligation):
    set on jukebox entries; explicit statement that creating/editing packs (registry/CSS)
    is developer-only.
 4. **What you must not change** — Developer-owned surfaces with short reasons (at least:
-   layouts/components, styles, theme-pack registry/CSS, build config, CI workflows).
+   layouts/components, styles, `src/lib/` app helpers, theme-pack registry/CSS, build
+   config, CI workflows).
 5. **Stable ids** — Do not rename jukebox filename slugs, `themeId`s, legal slugs, or other
    referenced ids without a developer updating matching references.
 6. **How to edit (primary)** — GitHub web editor steps for allowed files.

@@ -4,7 +4,7 @@
 
 **Created**: 2026-08-22
 
-**Status**: Draft
+**Status**: As-built
 
 **Input**: User description: "Add a one-time landing intro: text like ‘Hi, I’m Valence’
 zooms in, then the rest of the page reveals smoothly. After that, the intro should not

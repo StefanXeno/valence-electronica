@@ -21,7 +21,7 @@ The file MUST set:
 
 Other values are rejected at build in v1.
 
-## Example file (starter)
+## Example file (starter / shipped shape)
 
 ```json
 {
@@ -31,6 +31,11 @@ Other values are rejected at build in v1.
       "type": "date",
       "on": "10-31",
       "jukeboxId": "nightmare"
+    },
+    {
+      "type": "date",
+      "on": "2027-06-01",
+      "jukeboxId": "example-cyan"
     },
     {
       "type": "range",
@@ -50,6 +55,7 @@ Other values are rejected at build in v1.
 Interpretation:
 
 - **Every 31 October** → `nightmare` (yearly).
+- **1 June 2027 only** → `example-cyan` (one-off date rule).
 - **24–26 Dec 2026 inclusive** → `example-cyan`.
 - **Every Friday** → `example-cyan` (only if no date/range rule matched that day).
 

@@ -21,7 +21,7 @@ Existing chrome fields unchanged.
 |------|------------|
 | Portal cut-out (holes in white sheet showing site behind) | `introName` only |
 | Full-viewport white sheet during intro | overlay |
-| Primary zoom animation from name center | `introName` only (`.landing-intro__name`) |
+| Primary zoom animation from name center | `introName` only (`.landing-intro__portal-svg`) |
 | Lead fade-in ~0.55 s; fade out during zoom | `introLead` (`.landing-intro__lead`) |
 
 ## Client state — playback flag
@@ -48,10 +48,11 @@ Existing chrome fields unchanged.
 | `data-intro-pending` | `<html>` | Optional: intro will play; gate clicks before hydration |
 | `data-intro-active` | `<html>` | Intro running; HUD pointer-events gated |
 | `data-landing-intro` | overlay root | Intro layer; click target for skip |
-| `.landing-intro__cutout` | wrapper | White sheet + portal mask group |
-| `.landing-intro__sheet` | white field | Full-viewport opaque white |
+| `.landing-intro__cutout` | wrapper | Portal SVG group |
+| `.landing-intro__portal-svg` | white field + mask | Full-viewport opaque white with name cut-outs |
+| `.landing-intro__portal-text` | mask text | Letterforms punched through the white sheet |
 | `.landing-intro__lead` | first line | Lead text (e.g. “Hi I'm”) |
-| `.landing-intro__name` | second line | Portal cut-out; zoom target |
+| `.visually-hidden` | a11y name | Same string as portal text for screen readers |
 
 ## State machine (landing, scripting available)
 

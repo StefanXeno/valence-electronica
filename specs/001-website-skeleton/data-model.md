@@ -12,7 +12,7 @@ File: `src/data/site.json` — exactly one instance.
 |-------|------|----------|--------------------------|
 | `artist.name` | string | yes | Stage name, non-empty. Initial value: `"Valence"` |
 | `artist.tagline` | string | yes | One-line hook shown in the hero. Placeholder until confirmed |
-| `artist.description` | string | yes | 1–3 sentence intro; also used as meta/OG description |
+| `artist.description` | string | yes | 1–3 sentence intro used as meta/OG description (`Base.astro`). **Not** shown in stage Hero chrome (Hero = name + tagline only; About body is separate). |
 | `artist.location` | string | no | e.g. `"Augsburg, Germany"` |
 | `seo.title` | string | yes | Browser/OG title |
 | `seo.indexable` | boolean | yes | `false` → render `<meta name="robots" content="noindex">`; flip to `true` at launch |
@@ -40,7 +40,7 @@ mapped (presentation chrome; content URL/label stay in `site.json`).
 ## Entity: LegalPage
 
 Astro content collection `legal`, files in `src/content/legal/*.md`, schema enforced via
-Zod in `src/content/config.ts`. Build fails on schema violations (supports FR-008).
+Zod in `src/content.config.ts`. Build fails on schema violations (supports FR-008).
 
 | Field | Type | Required | Description / Validation |
 |-------|------|----------|--------------------------|

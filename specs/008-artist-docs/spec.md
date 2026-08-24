@@ -4,7 +4,7 @@
 
 **Created**: 2026-08-23
 
-**Status**: Ready
+**Status**: As-built
 
 **Input**: User description: "Add documentation for the artist so he knows what he can
 change and what he can adjust — a durable artist-facing guide covering editable surfaces,
@@ -183,8 +183,9 @@ acceptance checklist for that feature would fail if the artist guide were not up
   listed as artist-allowed; inventing new theme ids or editing theme-pack registry/CSS MUST
   NOT be listed as artist-allowed.
 - **FR-003**: The guide MUST list developer-owned surfaces the artist MUST NOT change,
-  including layout, components, styles, build configuration, and theme-pack registry/CSS
-  (creating or modifying packs).
+  including layout, components, styles, `src/lib/` helpers (stage, schedule, glitch,
+  intro, etc.), build configuration, and theme-pack registry/CSS (creating or modifying
+  packs).
 - **FR-004**: The guide MUST document a primary edit path using the GitHub web editor for
   allowed files, and MUST document local clone + local preview as a secondary optional
   path (plain-language steps). Local preview MUST NOT be required to complete the primary

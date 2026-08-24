@@ -4,7 +4,7 @@
 
 **Created**: 2026-08-23
 
-**Status**: Ready
+**Status**: As-built
 
 **Input**: User description: "Schedule which jukebox entry (background atmosphere and bound
 theme) is the landing default for given dates, date ranges, and recurring day-of-week rules.

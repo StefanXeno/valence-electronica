@@ -4,7 +4,7 @@
 
 **Created**: 2026-08-22
 
-**Status**: Draft
+**Status**: As-built
 
 **Input**: User description: "Start work on IDEA-002 (per-video theme packs). The
 Nightmare theme already exists; establish a logical structure so future themes are
@@ -241,14 +241,17 @@ forces glitch or other disallowed motion; text stays readable on poster/static f
 - **001-website-skeleton** — base landing and content model.
 - **002-themed-background-video** — atmosphere video, mute, basic `[data-theme]` color
   packs (starting point to refactor).
-- **003-ui-glitch** — glitch motion language; Nightmare-only rule carried forward via
-  pack capability.
+- **003-ui-glitch** — glitch motion language; enable gate is pack `hudGlitch` →
+  `data-hud-glitch` (not a hard-coded Nightmare theme id).
 - **004-landing-content-layout** — jukebox switcher, active entry drives theme; lyrics and
   HUD regions that must stay readable per pack.
+- **007-scheduled-stage-default** — may change which entry (and pack) boots on the client;
+  ActiveTheme reload story acknowledges schedule (this feature still owns pack registry).
 
 ## Out of Scope
 
-- Scheduled or calendar-driven default theme (IDEA-004).
+- Scheduled or calendar-driven default theme was delivered as feature `007` (out of *this*
+  feature’s original scope; see ActiveTheme in `data-model.md`).
 - Seravek licensing and primary typeface rollout (IDEA-007).
 - Per-track info / credits panel (IDEA-006).
 - Mobile-specific HUD redesign (IDEA-013).

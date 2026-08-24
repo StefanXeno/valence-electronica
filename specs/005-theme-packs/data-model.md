@@ -74,9 +74,10 @@ Ephemeral visitor state; not persisted.
 | Aspect | Rule |
 |--------|------|
 | Driver | Active jukebox entry for this page load |
-| SSR default | Default jukebox entry’s resolved pack on first paint |
+| SSR / no-JS | Static fallback jukebox entry’s resolved pack (`default: true`) on first paint |
+| Client boot | Feature `007` schedule MAY switch to today’s entry (and its pack) immediately after hydration |
 | Switch | `applyStageEntry` updates `data-theme`, `data-hud-glitch`, video sources, poster |
-| Reload | Resets to default entry (unchanged from `004`) |
+| Reload | Re-resolves: SSR static fallback, then schedule on client — never restores the visitor’s last manual pick |
 
 ## Registry: shipped packs (v1 migration)
 
@@ -113,13 +114,16 @@ Active jukebox entry ──► ActiveTheme (one pack at a time)
 ## State transitions (theme switch)
 
 ```text
-[default entry SSR] ──visitor picks entry──► [active pack = resolveThemePack(themeId)]
-       ▲                                        │
-       └──────────── full page reload ──────────┘
+[static default SSR] ──(JS: schedule may apply)──► [boot pack]
+       ▲                                              │
+       │         visitor picks entry                  │
+       │                    ▼                         │
+       └──────────── full page reload ◄── [active pack = resolveThemePack(themeId)]
 ```
 
 Within session: switching entries swaps pack atomically (no mixed tokens). Incomplete or
-unknown `themeId` resolves to full `default` for that switch.
+unknown `themeId` resolves to full `default` for that switch. Reload does not restore the
+visitor’s last pick; schedule (`007`) re-runs on client boot.
 
 ## Unchanged entities from prior features
 

@@ -4,7 +4,7 @@
 
 **Created**: 2026-08-10
 
-**Status**: Draft
+**Status**: As-built (atmosphere behavior; catalog superseded by `004` jukebox)
 
 **Input**: User description: "Full-bleed background video on the artist landing page that
 plays muted by default with a visitor-controlled unmute. The active clip drives a matching
@@ -233,8 +233,10 @@ reload when JS is available, and successful dismiss back to the landing page.
   remains usable; clips SHOULD stay short (about 8–20 seconds) and lightweight rather than
   long-form files.
 - **FR-011**: This feature MUST NOT require a visitor-facing video picker, schedule rules,
-  deep per-theme typography/motion packs, or per-video track-info panels (those are
-  separate future features).
+  deep per-theme typography/motion packs, or per-video track-info panels. *(As-built note:
+  jukebox switching is feature `004`; schedule defaults are `007`; track-info panels remain
+  out of scope. FR-011 describes this feature’s original boundary, not a ban on later
+  features.)*
 - **FR-012**: Impressum and privacy MUST each open in a near-fullscreen content panel with
   visible margin on all sides over the landing atmosphere, MUST appear with a smooth
   animation when motion is allowed, and MUST provide a top exit control (X icon with
@@ -291,8 +293,9 @@ reload when JS is available, and successful dismiss back to the landing page.
 - “Basic theme” in this feature means color and surface mood only. Richer per-video packs
   (typography, motion language, hover treatments) are a separate feature (IDEA-002).
 - A visitor-facing switcher for multiple clips, calendar-based defaults, and per-video
-  track info panels are separate features (IDEA-003, IDEA-004, IDEA-006) even if the data
-  model can already name more than one video.
+  track info panels were separate features (IDEA-003 / `004`, IDEA-004 / `007`, IDEA-006).
+  The atmosphere **catalog** is the jukebox collection (`004`); this feature’s data files
+  no longer include `background.json`.
 - Impressum and privacy remain reachable legal destinations; this feature presents them as
   a dismissible near-fullscreen panel over the landing atmosphere (in-page overlay with
   shareable `/legal/{slug}` URLs) rather than a plain full-page layout without that

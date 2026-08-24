@@ -1,24 +1,37 @@
 # Contract: Glitch UI Behavior
 
-**Date**: 2026-08-12 | **Plan**: [../plan.md](../plan.md) | **Data model**: [../data-model.md](../data-model.md)
+**Date**: 2026-08-12 (as-built sync 2026-08-24) | **Plan**: [../plan.md](../plan.md) | **Data model**: [../data-model.md](../data-model.md)
 
 Visitor- and maintainer-facing behavior contract for UI glitch interactions. Stable so
 acceptance tests and implementation refinements share one checklist. There is **no** new
 content JSON for this feature.
 
+## Enable gate (as-built)
+
+Glitch runs only while `html[data-hud-glitch='true']` (set from the active theme pack’s
+`hudGlitch` capability — see feature `005`). Packs without `hudGlitch` stay still,
+including leftover classes cleaned on theme switch.
+
+Feature `003` originally shipped the base language; feature `004` expanded the HUD hit
+set. This contract is the **as-built closed set**.
+
 ## Closed hit-target set
 
-MUST glitch (when motion allowed):
+MUST glitch (when motion allowed **and** `data-hud-glitch='true'`):
 
 1. Active channel links (real URLs only)
 2. Legal footer links
 3. Legal panel Exit
 4. Mute button (hover/focus/morph rules below)
+5. Jukebox collapsed vinyl toggle (`data-glitch-live`) — continuous hover while collapsed
+6. Jukebox option buttons (list open)
+7. On-demand stage panels (`StagePanels` `<details>`): whole box is the hit
 
 MUST NOT glitch:
 
 - Volume range/slider
 - “Coming soon” placeholder channel chips
+- Open on-demand panel body hover (no hover glitch while open; click summary still glitches)
 - Any other element unless `spec.md` is amended
 
 ## Trigger matrix
@@ -27,6 +40,9 @@ MUST NOT glitch:
 |--------|---------------|------------------------|---------------|-------|
 | Channel / legal / exit | One-shot | One-shot | One-shot | Idle hover does not loop |
 | Mute button | Continuous while pointer over button **and muted** | One-shot | Morph only (no stacked press) | Continuous ends on pointer-out or when audio plays |
+| Jukebox collapsed vinyl | Continuous while collapsed and pointer over toggle | One-shot | Morph on expand/collapse | Same continuous language as mute; not mute-gated |
+| Jukebox options | One-shot | One-shot | One-shot | Only while list open |
+| On-demand `<details>` | One-shot while **closed** | One-shot | Click summary glitches whole box | **Open:** no hover glitch |
 | Volume slider | None | None | None | Out of set |
 | Placeholder chip | None | None | None | Out of set |
 
@@ -38,7 +54,8 @@ MUST NOT glitch:
 - Mute/unmute click: **morph wins** over continuous mute hover for that click. Continuous
   hover may resume only if the pointer is still over the mute button, audio is muted, and
   morph has ended.
-- During any glitch (including continuous mute hover and morph), the control MUST remain
+- Jukebox expand/collapse: **morph wins** over continuous vinyl hover for that click.
+- During any glitch (including continuous hover and morph), the control MUST remain
   activatable; the effect MUST NOT remove or meaningfully shrink the hit target.
 - At ~320px width, glitch displacement MUST NOT push critical controls permanently
   off-screen or cover primary content.
@@ -48,19 +65,19 @@ MUST NOT glitch:
 When `prefers-reduced-motion: reduce`:
 
 - No one-shot, continuous, or morph glitch plays.
-- Mute may still expand/collapse for clarity without glitch language.
+- Mute / jukebox may still expand/collapse for clarity without glitch language.
 - Focus/activation remain clear without relying on glitch cues.
 
 ## Theme tint
 
-- Glitch colors MUST reuse existing theme tokens (e.g. accent / text) from feature `002`.
+- Glitch colors MUST reuse existing theme tokens (e.g. accent / text).
 - MUST NOT introduce per-video deep motion packs or a visitor motion picker (FR-008).
 
 ## Privacy & weight
 
 - First-party CSS/JS only.
 - MUST NOT add tracking, cookies, persistent visitor storage, or third-party motion
-  libraries.
+  libraries. (Landing intro playback flag is feature `006`, unrelated to glitch.)
 
 ## Intensity gate
 
@@ -71,5 +88,6 @@ When `prefers-reduced-motion: reduce`:
 
 ## Markup convention (implementation hint for maintainers)
 
-In-scope controls are marked consistently (today: class `glitch-hit` on the closed set).
-Do not sprinkle that marker onto slider, placeholders, or unrelated chrome.
+In-scope controls use class `glitch-hit`. Continuous targets also use `data-glitch-live`
+(mute toggle, jukebox vinyl). Do not sprinkle those markers onto slider, placeholders, or
+unrelated chrome. Enable gate is `data-hud-glitch`, not a hard-coded `data-theme` string.
