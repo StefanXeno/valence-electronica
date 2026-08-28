@@ -183,7 +183,8 @@ const panels = [
   }
 
   html:not([data-hud-glitch='true']) .stage-panel.is-panel-closing .stage-panel__body,
-  html:not([data-hud-glitch='true']) .stage-panel.is-panel-opening .stage-panel__body {
+  html:not([data-hud-glitch='true']) .stage-panel.is-panel-opening .stage-panel__body,
+  html:not([data-hud-glitch='true']) .stage-panel[open].is-panel-opening .stage-panel__body {
     max-height: 0;
     opacity: 0;
     pointer-events: none;
@@ -269,7 +270,7 @@ const panels = [
     color: var(--color-text);
   }
 
-  .stage-panel[open] .stage-panel__body {
+  .stage-panel[open]:not(.is-panel-opening) .stage-panel__body {
     max-height: min(30svh, calc(11rem * var(--hud-scale)));
     opacity: 1;
     overflow: auto;

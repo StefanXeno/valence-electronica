@@ -31,4 +31,15 @@ describe('pickOtherId', () => {
     expect(pickOtherId(['solo'], 'solo')).toBeUndefined();
     expect(pickOtherId([], 'solo')).toBeUndefined();
   });
+
+  it('respects an allow-list predicate', () => {
+    for (let i = 0; i < 30; i += 1) {
+      const next = pickOtherId(ids, 'a', (id) => id === 'c');
+      expect(next).toBe('c');
+    }
+  });
+
+  it('returns undefined when no allowed alternatives exist', () => {
+    expect(pickOtherId(ids, 'b', (id) => id === 'b')).toBeUndefined();
+  });
 });

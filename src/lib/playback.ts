@@ -21,8 +21,12 @@ export function dwellSeconds(
   return NO_AUDIO_DWELL_SEC;
 }
 
-export function pickOtherId(ids: string[], current: string): string | undefined {
-  const others = ids.filter((id) => id !== current);
+export function pickOtherId(
+  ids: string[],
+  current: string,
+  isAllowed: (id: string) => boolean = () => true,
+): string | undefined {
+  const others = ids.filter((id) => id !== current && isAllowed(id));
   if (others.length === 0) return undefined;
   return others[Math.floor(Math.random() * others.length)]!;
 }

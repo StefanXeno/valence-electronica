@@ -3,7 +3,7 @@ label: Show Me How
 sortDate: 2026-02-26
 kind: single
 themeId: electric-cyan
-hasAudio: true
+hasAudio: false
 poster: /images/posters/show-me-how.jpg
 listenLinks:
   - platform: bandcamp

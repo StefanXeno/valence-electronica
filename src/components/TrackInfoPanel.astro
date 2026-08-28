@@ -3,12 +3,14 @@ import { getCollection } from 'astro:content';
 import { getBackgroundConfig } from '../lib/background';
 import { parseListenLinks } from '../lib/catalog-tracks';
 import type { UiChrome } from '../lib/stage';
+import ChannelIcon from './ChannelIcon.astro';
 
 interface Props {
   chrome: UiChrome;
+  trackOrder: string[];
 }
 
-const { chrome } = Astro.props;
+const { chrome, trackOrder } = Astro.props;
 const { videos, defaultVideoId } = await getBackgroundConfig();
 const validIds = new Set(videos.map((entry) => entry.id));
 const raw = await getCollection('jukebox');
@@ -18,94 +20,251 @@ const dateFmt = new Intl.DateTimeFormat('en-GB', {
   year: 'numeric',
 });
 
-const tracks = raw
-  .filter((entry) => validIds.has(entry.id))
-  .map((entry) => ({
-    id: entry.id,
-    themeId: entry.data.themeId?.trim() ?? '',
-    sortDate: entry.data.sortDate,
-    listenLinks: parseListenLinks(entry.data.listenLinks, entry.id),
-  }));
+const byId = new Map(
+  raw
+    .filter((entry) => validIds.has(entry.id))
+    .map((entry) => [
+      entry.id,
+      {
+        id: entry.id,
+        label: entry.data.label?.trim() ?? entry.id,
+        themeId: entry.data.themeId?.trim() ?? '',
+        sortDate: entry.data.sortDate,
+        listenLinks: parseListenLinks(entry.data.listenLinks, entry.id),
+      },
+    ]),
+);
+
+const tracks = trackOrder.map((id) => byId.get(id)).filter((track): track is NonNullable<typeof track> => Boolean(track));
 ---
 
-<div class="track-info">
+<div class="jukebox__list" role="group" aria-label={chrome.jukeboxLabel}>
   {
     tracks.map((track) => (
-      <div
-        data-track-info-for={track.id}
-        data-theme-id={track.themeId}
-        hidden={track.id !== defaultVideoId}
-      >
-        {track.sortDate && (
-          <p class="track-info__released">
-            <span class="track-info__released-label">{chrome.releasedLabel}</span>
-            <time datetime={track.sortDate.toISOString().slice(0, 10)}>
-              {dateFmt.format(track.sortDate)}
-            </time>
-          </p>
-        )}
-        {track.listenLinks.length > 0 ? (
-          <ul class="track-info__links">
-            {track.listenLinks.map((link) => (
-              <li>
-                <a href={link.url} target="_blank" rel="noopener noreferrer">{link.label}</a>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p>{chrome.emptyTrackLinks}</p>
-        )}
+      <div class="jukebox__track-row">
+        <button
+          type="button"
+          class="glitch-hit jukebox__track-select"
+          data-jukebox-option={track.id}
+          aria-pressed={track.id === defaultVideoId ? 'true' : 'false'}
+        >
+          {track.label}
+        </button>
+        <div
+          class="jukebox__track-detail"
+          data-track-info-for={track.id}
+          hidden={track.id !== defaultVideoId}
+        >
+          <div class="jukebox__track-meta">
+            {track.sortDate && (
+              <p class="track-info__released">
+                <span class="track-info__released-label">{chrome.releasedLabel}</span>
+                <time datetime={track.sortDate.toISOString().slice(0, 10)}>
+                  {dateFmt.format(track.sortDate)}
+                </time>
+              </p>
+            )}
+            {track.listenLinks.length > 0 ? (
+              <div class="track-info__listen">
+                <span class="track-info__listen-label">{chrome.listenOnLabel}</span>
+                <ul class="track-info__listen-links">
+                  {track.listenLinks.map((link) => (
+                    <li>
+                      <a
+                        href={link.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={link.label}
+                        data-hud-label={link.label}
+                        data-hud-label-anchor="above"
+                      >
+                        <ChannelIcon id={link.platform} label={link.label} />
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : (
+              <p class="track-info__empty">{chrome.emptyTrackLinks}</p>
+            )}
+          </div>
+        </div>
       </div>
     ))
   }
 </div>
 
 <style>
-  .track-info {
-    font-size: calc(0.9rem * var(--hud-scale));
+  .jukebox__list {
+    display: flex;
+    flex-direction: column;
+    gap: calc(0.15rem * var(--hud-scale));
+    min-width: 0;
+  }
+
+  .jukebox__track-row {
+    border: 1px solid transparent;
+    border-radius: calc(0.4rem * var(--hud-scale));
+    background: transparent;
+    overflow: hidden;
+    transition:
+      border-color 160ms ease,
+      background-color 160ms ease,
+      box-shadow 160ms ease;
+  }
+
+  .jukebox__track-row:not(:last-child) {
+    border-bottom-color: color-mix(in srgb, var(--color-border) 28%, transparent);
+  }
+
+  .jukebox__track-row:has(.jukebox__track-select[aria-pressed='true']) {
+    border-color: color-mix(in srgb, var(--color-accent) 55%, var(--color-border));
+    background: color-mix(in srgb, var(--color-accent) 8%, transparent);
+    box-shadow: inset 0 1px 0 color-mix(in srgb, var(--color-text) 6%, transparent);
+  }
+
+  .jukebox__track-row:has(.jukebox__track-select[aria-pressed='true']):not(:last-child) {
+    border-bottom-color: color-mix(in srgb, var(--color-accent) 55%, var(--color-border));
+  }
+
+  .jukebox__track-select {
+    appearance: none;
+    display: block;
+    width: 100%;
+    margin: 0;
+    padding: 0.45em 0.6em;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: var(--color-text-muted);
+    font-family: var(--font-display);
+    font-size: calc(0.76rem * var(--hud-scale));
+    font-weight: 500;
+    letter-spacing: 0.03em;
+    text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: color 160ms ease;
+  }
+
+  .jukebox__track-row:hover:not(:has(.jukebox__track-select[aria-pressed='true'])) {
+    background: color-mix(in srgb, var(--color-bg) 18%, transparent);
+  }
+
+  .jukebox__track-row:hover .jukebox__track-select {
     color: var(--color-text);
   }
 
-  .track-info [hidden] {
+  .jukebox__track-row:has(.jukebox__track-select[aria-pressed='true']) .jukebox__track-select {
+    color: var(--color-accent-alt);
+    font-weight: 600;
+  }
+
+  .jukebox__track-detail {
+    padding: 0 0.6em 0.55em;
+  }
+
+  .jukebox__track-detail[hidden] {
     display: none;
   }
 
+  .jukebox__track-meta {
+    display: flex;
+    flex-direction: column;
+    gap: calc(0.4rem * var(--hud-scale));
+    padding-top: calc(0.15rem * var(--hud-scale));
+    border-top: 1px solid color-mix(in srgb, var(--color-border) 35%, transparent);
+  }
+
   .track-info__released {
-    margin: 0 0 0.65rem;
+    margin: 0;
     display: flex;
     flex-wrap: wrap;
     gap: 0.35rem;
     align-items: baseline;
+    font-size: calc(0.72rem * var(--hud-scale));
+    color: var(--color-text-muted);
   }
 
   .track-info__released-label {
     font-family: var(--font-display);
-    font-size: calc(0.7rem * var(--hud-scale));
+    font-size: calc(0.58rem * var(--hud-scale));
+    font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.1em;
     color: var(--color-accent-alt);
+    opacity: 0.75;
   }
 
-  .track-info__links {
+  .track-info__listen {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: calc(0.4rem * var(--hud-scale));
+    min-width: 0;
+  }
+
+  .track-info__listen-label {
+    font-family: var(--font-display);
+    font-size: calc(0.58rem * var(--hud-scale));
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-accent-alt);
+    opacity: 0.75;
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+
+  .track-info__listen-links {
     list-style: none;
     margin: 0;
     padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.35rem;
+    display: inline-flex;
+    flex-flow: row nowrap;
+    align-items: center;
+    gap: calc(0.3rem * var(--hud-scale));
+    flex: 0 0 auto;
   }
 
-  .track-info__links a {
-    color: var(--color-text);
-    text-decoration: underline;
-    text-underline-offset: 0.15em;
-  }
-
-  .track-info__links a:hover {
-    color: var(--color-accent-alt);
-  }
-
-  .track-info :global(p) {
+  .track-info__listen-links li {
+    list-style: none;
     margin: 0;
+    padding: 0;
+  }
+
+  .track-info__listen-links a {
+    display: inline-grid;
+    place-items: center;
+    width: calc(1.55rem * var(--hud-scale));
+    height: calc(1.55rem * var(--hud-scale));
+    border: 1px solid color-mix(in srgb, var(--color-border) 60%, transparent);
+    border-radius: 999px;
+    color: var(--color-text-muted);
+    background: color-mix(in srgb, var(--color-bg) 30%, transparent);
+    transition:
+      color 160ms ease,
+      border-color 160ms ease,
+      background-color 160ms ease;
+  }
+
+  .track-info__listen-links a:hover {
+    color: var(--color-accent-alt);
+    border-color: color-mix(in srgb, var(--color-accent) 45%, var(--color-border));
+    background: color-mix(in srgb, var(--color-accent) 10%, transparent);
+  }
+
+  .track-info__listen-links :global(.channel-icon) {
+    width: calc(0.95rem * var(--hud-scale));
+    height: calc(0.95rem * var(--hud-scale));
+  }
+
+  .track-info__empty {
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: calc(0.72rem * var(--hud-scale));
   }
 </style>

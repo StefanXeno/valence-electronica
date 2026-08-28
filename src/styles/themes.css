@@ -6,7 +6,63 @@
 
   `nightmare-crimson` is sampled from the NIGHTMARE loop (dominant #a00000 reds,
   near-black ink, pale text highlights).
+
+  Registered custom properties interpolate during `data-stage-crossfade` handoffs.
 */
+
+@property --color-bg {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #0a0000;
+}
+
+@property --color-surface {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #1a0808;
+}
+
+@property --color-border {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #4a1515;
+}
+
+@property --color-text {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #f5ecec;
+}
+
+@property --color-text-muted {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #b89898;
+}
+
+@property --color-accent {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #c01010;
+}
+
+@property --color-accent-alt {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #f0c8c8;
+}
+
+@property --bg-scrim {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: rgb(8 0 0 / 68%);
+}
+
+@property --jukebox-mute-width {
+  syntax: '<length>';
+  inherits: true;
+  initial-value: 0px;
+}
 
 :root,
 [data-theme='default'] {
@@ -67,16 +123,51 @@
 }
 
 html[data-stage-crossfade='true'] {
+  --theme-crossfade-ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --theme-crossfade-dur: 700ms;
+
   transition:
-    background-color 700ms cubic-bezier(0.4, 0, 0.2, 1),
-    color 700ms cubic-bezier(0.4, 0, 0.2, 1);
+    --color-bg var(--theme-crossfade-dur) var(--theme-crossfade-ease),
+    --color-surface var(--theme-crossfade-dur) var(--theme-crossfade-ease),
+    --color-border var(--theme-crossfade-dur) var(--theme-crossfade-ease),
+    --color-text var(--theme-crossfade-dur) var(--theme-crossfade-ease),
+    --color-text-muted var(--theme-crossfade-dur) var(--theme-crossfade-ease),
+    --color-accent var(--theme-crossfade-dur) var(--theme-crossfade-ease),
+    --color-accent-alt var(--theme-crossfade-dur) var(--theme-crossfade-ease),
+    --bg-scrim var(--theme-crossfade-dur) var(--theme-crossfade-ease),
+    background-color var(--theme-crossfade-dur) var(--theme-crossfade-ease),
+    color var(--theme-crossfade-dur) var(--theme-crossfade-ease);
 }
 
+html[data-stage-crossfade='true'] body,
+html[data-stage-crossfade='true'] .atmosphere,
+html[data-stage-crossfade='true'] .atmosphere__scrim,
+html[data-stage-crossfade='true'] .atmosphere__poster,
 html[data-stage-crossfade='true'] .jukebox,
 html[data-stage-crossfade='true'] .stage-panel,
-html[data-stage-crossfade='true'] .volume-control:not(.volume-control--in-jukebox) {
+html[data-stage-crossfade='true'] .stage-dock,
+html[data-stage-crossfade='true'] .volume-control,
+html[data-stage-crossfade='true'] .hud-label-reveal,
+html[data-stage-crossfade='true'] .jukebox__track-row,
+html[data-stage-crossfade='true'] .stage__identity,
+html[data-stage-crossfade='true'] .stage__socials {
   transition:
-    background-color 700ms cubic-bezier(0.4, 0, 0.2, 1),
-    border-color 700ms cubic-bezier(0.4, 0, 0.2, 1),
-    color 700ms cubic-bezier(0.4, 0, 0.2, 1);
+    background-color var(--theme-crossfade-dur) var(--theme-crossfade-ease),
+    border-color var(--theme-crossfade-dur) var(--theme-crossfade-ease),
+    color var(--theme-crossfade-dur) var(--theme-crossfade-ease),
+    text-shadow var(--theme-crossfade-dur) var(--theme-crossfade-ease),
+    fill var(--theme-crossfade-dur) var(--theme-crossfade-ease),
+    stroke var(--theme-crossfade-dur) var(--theme-crossfade-ease),
+    accent-color var(--theme-crossfade-dur) var(--theme-crossfade-ease);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-stage-crossfade='true'],
+  html[data-stage-crossfade='true'] body,
+  html[data-stage-crossfade='true'] .atmosphere,
+  html[data-stage-crossfade='true'] .atmosphere__scrim,
+  html[data-stage-crossfade='true'] .jukebox,
+  html[data-stage-crossfade='true'] .stage-panel {
+    transition: none !important;
+  }
 }

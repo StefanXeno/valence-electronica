@@ -12,6 +12,8 @@ export interface UiChrome {
   emptyReleases: string;
   emptyShows: string;
   jukeboxLabel: string;
+  jukeboxPanelTitle: string;
+  jukeboxPanelTooltip: string;
   socialsLabel: string;
   comingSoon: string;
   ticketLabel: string;
@@ -31,6 +33,7 @@ export interface UiChrome {
   trackInfoIcon: HudIconToken;
   trackInfoIconEmoji?: string;
   releasedLabel: string;
+  listenOnLabel: string;
   emptyTrackLinks: string;
   shuffleLabel: string;
   loopLabel: string;
@@ -55,6 +58,8 @@ const CHROME_FALLBACK: UiChrome = {
   emptyReleases: 'No releases yet',
   emptyShows: 'No upcoming dates',
   jukeboxLabel: 'V-Flip',
+  jukeboxPanelTitle: 'V-Flip aka. Jukebox',
+  jukeboxPanelTooltip: 'Pick a track to switch stages—the site theme changes with each one.',
   socialsLabel: 'Socials',
   comingSoon: 'coming soon',
   ticketLabel: 'Tickets',
@@ -68,6 +73,7 @@ const CHROME_FALLBACK: UiChrome = {
   trackInfoTitle: 'Track info',
   trackInfoIcon: 'info',
   releasedLabel: 'Released',
+  listenOnLabel: 'Listen On',
   emptyTrackLinks: 'No streaming links yet',
   shuffleLabel: 'Shuffle',
   loopLabel: 'Loop',
@@ -113,6 +119,9 @@ export async function getChrome(): Promise<UiChrome> {
     emptyReleases: entry.data.emptyReleases?.trim() || CHROME_FALLBACK.emptyReleases,
     emptyShows: entry.data.emptyShows?.trim() || CHROME_FALLBACK.emptyShows,
     jukeboxLabel: entry.data.jukeboxLabel?.trim() || CHROME_FALLBACK.jukeboxLabel,
+    jukeboxPanelTitle: entry.data.jukeboxPanelTitle?.trim() || CHROME_FALLBACK.jukeboxPanelTitle,
+    jukeboxPanelTooltip:
+      entry.data.jukeboxPanelTooltip?.trim() || CHROME_FALLBACK.jukeboxPanelTooltip,
     socialsLabel: entry.data.socialsLabel?.trim() || CHROME_FALLBACK.socialsLabel,
     comingSoon: entry.data.comingSoon?.trim() || CHROME_FALLBACK.comingSoon,
     ticketLabel: entry.data.ticketLabel?.trim() || CHROME_FALLBACK.ticketLabel,
@@ -148,6 +157,7 @@ export async function getChrome(): Promise<UiChrome> {
     })(),
     trackInfoTitle: entry.data.trackInfoTitle?.trim() || CHROME_FALLBACK.trackInfoTitle,
     releasedLabel: entry.data.releasedLabel?.trim() || CHROME_FALLBACK.releasedLabel,
+    listenOnLabel: entry.data.listenOnLabel?.trim() || CHROME_FALLBACK.listenOnLabel,
     emptyTrackLinks: entry.data.emptyTrackLinks?.trim() || CHROME_FALLBACK.emptyTrackLinks,
     shuffleLabel: entry.data.shuffleLabel?.trim() || CHROME_FALLBACK.shuffleLabel,
     loopLabel: entry.data.loopLabel?.trim() || CHROME_FALLBACK.loopLabel,

@@ -28,8 +28,17 @@ export function initLabelReveal(): void {
     floater.classList.remove('is-visible', 'is-reduced');
   };
 
+  const readVolumeLabelAnchor = (el: HTMLElement): HTMLElement | null => {
+    const volumeRoot = el.closest('.volume-control--in-jukebox');
+    if (!volumeRoot || !el.matches('[data-volume-slider]')) return null;
+    const toggle = volumeRoot.querySelector<HTMLElement>('[data-mute-control]');
+    return toggle ?? null;
+  };
+
   const positionFloater = (el: HTMLElement, label: string) => {
     const rect = el.getBoundingClientRect();
+    const volumeToggle = readVolumeLabelAnchor(el);
+    const anchorRect = volumeToggle?.getBoundingClientRect() ?? rect;
     const centerX = rect.left + rect.width / 2;
     const anchor = readAnchor(el);
 
@@ -38,10 +47,10 @@ export function initLabelReveal(): void {
     floater.style.left = `${centerX}px`;
 
     if (anchor === 'below') {
-      floater.style.top = `${rect.bottom + LABEL_GAP_PX}px`;
+      floater.style.top = `${anchorRect.bottom + LABEL_GAP_PX}px`;
       floater.style.transform = 'translate(-50%, 0)';
     } else {
-      floater.style.top = `${rect.top - LABEL_GAP_PX}px`;
+      floater.style.top = `${anchorRect.top - LABEL_GAP_PX}px`;
       floater.style.transform = 'translate(-50%, -100%)';
     }
 
@@ -54,6 +63,13 @@ export function initLabelReveal(): void {
     if (!label) return;
     const panel = el.closest('details');
     if (panel instanceof HTMLDetailsElement && panel.open) return;
+    // Open V-Flip uses an inline track title — no floater on the vinyl toggle.
+    if (
+      el.matches('[data-jukebox-toggle]') &&
+      el.closest('[data-jukebox]')?.classList.contains('is-open')
+    ) {
+      return;
+    }
     active = el;
     positionFloater(el, label);
   };

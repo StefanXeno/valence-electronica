@@ -33,6 +33,31 @@ export type StageCatalogEntry = {
 export const STAGE_SELECT_EVENT = 'stage-select';
 const CROSSFADE_MS = 700;
 
+let themeCrossfadeTimer: number | undefined;
+
+function applyThemeForHandoff(
+  attrs: ReturnType<typeof applyThemeAttributes>,
+  animated: boolean,
+): void {
+  window.clearTimeout(themeCrossfadeTimer);
+
+  if (!animated) {
+    delete document.documentElement.dataset.stageCrossfade;
+    document.documentElement.dataset.theme = attrs.themeId;
+    document.documentElement.dataset.hudGlitch = attrs.hudGlitch;
+    return;
+  }
+
+  document.documentElement.dataset.stageCrossfade = 'true';
+  requestAnimationFrame(() => {
+    document.documentElement.dataset.theme = attrs.themeId;
+    document.documentElement.dataset.hudGlitch = attrs.hudGlitch;
+    themeCrossfadeTimer = window.setTimeout(() => {
+      delete document.documentElement.dataset.stageCrossfade;
+    }, CROSSFADE_MS);
+  });
+}
+
 function getAtmosphereVideos() {
   const atmosphere = document.querySelector<HTMLElement>('[data-atmosphere]');
   const current = atmosphere?.querySelector<HTMLVideoElement>('[data-bg-video]');
@@ -41,6 +66,27 @@ function getAtmosphereVideos() {
   return { atmosphere, current, next, poster };
 }
 
+function entryHasPlayableAudio(entry: StageCatalogEntry): boolean {
+  const pack = resolveThemePack(entry.themeId);
+  const playsVideo = packSupportsLoopingVideo(pack, entry.sources.length > 0);
+  return packAllowsMute(pack, entry.hasAudio, playsVideo);
+}
+
+function isVideoUnmuted(video: HTMLVideoElement | null): boolean {
+  return Boolean(video && !(video.muted || video.volume === 0));
+}
+
+function shuffleCandidateIds(
+  catalogIds: string[],
+  byId: Map<string, StageCatalogEntry>,
+  preferAudio: boolean,
+): string[] {
+  if (!preferAudio) return catalogIds;
+  return catalogIds.filter((id) => {
+    const entry = byId.get(id);
+    return entry ? entryHasPlayableAudio(entry) : false;
+  });
+}
 function updateAtmosphereMeta(
   atmosphere: HTMLElement,
   entry: StageCatalogEntry,
@@ -73,14 +119,37 @@ function loadVideoSources(
   video.load();
 }
 
+function resetVideoBuffer(video: HTMLVideoElement) {
+  video.pause();
+  video.classList.remove('atmosphere__video--active');
+  video.style.transition = '';
+  video.style.opacity = '0';
+  video.querySelectorAll('source').forEach((node) => node.remove());
+  video.removeAttribute('src');
+  video.muted = true;
+  video.load();
+}
+
+/** After crossfade, the playing element becomes `[data-bg-video]`; the old one is cleared. */
+function swapAtmosphereVideos(current: HTMLVideoElement, next: HTMLVideoElement) {
+  current.removeAttribute('data-bg-video');
+  next.removeAttribute('data-bg-video-next');
+  next.setAttribute('data-bg-video', '');
+  current.setAttribute('data-bg-video-next', '');
+
+  current.classList.remove('atmosphere__video--current');
+  current.classList.add('atmosphere__video--next');
+  next.classList.remove('atmosphere__video--next');
+  next.classList.add('atmosphere__video--current');
+}
+
 export function applyStageEntry(entry: StageCatalogEntry, keepMuted: boolean) {
   const { atmosphere, current, poster } = getAtmosphereVideos();
   if (!atmosphere || !current) return;
 
   const pack = resolveThemePack(entry.themeId);
   const attrs = applyThemeAttributes(pack);
-  document.documentElement.dataset.theme = attrs.themeId;
-  document.documentElement.dataset.hudGlitch = attrs.hudGlitch;
+  applyThemeForHandoff(attrs, false);
 
   const hasSources = entry.sources.length > 0;
   const playsVideo = packSupportsLoopingVideo(pack, hasSources);
@@ -134,22 +203,19 @@ async function crossfadeStageEntry(entry: StageCatalogEntry, keepMuted: boolean)
   const hasSources = entry.sources.length > 0;
   const playsVideo = packSupportsLoopingVideo(pack, hasSources);
 
-  document.documentElement.dataset.theme = attrs.themeId;
-  document.documentElement.dataset.hudGlitch = attrs.hudGlitch;
-  updateAtmosphereMeta(atmosphere, entry, playsVideo);
-  if (poster) poster.src = entry.poster;
-
-  const notify = () => {
-    atmosphere.dispatchEvent(new CustomEvent('bg-state-change', { bubbles: true }));
-  };
-
   if (!next || !playsVideo || reduceMotion) {
     applyStageEntry(entry, keepMuted);
     delete document.documentElement.dataset.stageCrossfade;
     return;
   }
 
-  document.documentElement.dataset.stageCrossfade = 'true';
+  applyThemeForHandoff(attrs, true);
+  updateAtmosphereMeta(atmosphere, entry, playsVideo);
+
+  const notify = () => {
+    atmosphere.dispatchEvent(new CustomEvent('bg-state-change', { bubbles: true }));
+  };
+
   const volume = current.volume;
   loadVideoSources(next, entry, keepMuted, volume);
 
@@ -175,31 +241,21 @@ async function crossfadeStageEntry(entry: StageCatalogEntry, keepMuted: boolean)
 
   await new Promise((resolve) => window.setTimeout(resolve, CROSSFADE_MS));
 
-  loadVideoSources(current, entry, keepMuted, volume);
-  current.style.transition = '';
-  current.style.opacity = '1';
-  next.pause();
+  swapAtmosphereVideos(current, next);
+
+  resetVideoBuffer(current);
+
   next.classList.remove('atmosphere__video--active');
   next.style.transition = '';
-  next.style.opacity = '0';
-  next.querySelectorAll('source').forEach((node) => node.remove());
-  next.removeAttribute('src');
-  next.load();
+  next.style.opacity = '1';
+
+  if (poster) poster.src = entry.poster;
 
   atmosphere.dataset.bgState = 'playing';
-  delete document.documentElement.dataset.stageCrossfade;
   notify();
-
-  const playCurrent = current.play();
-  if (playCurrent) {
-    playCurrent.catch(() => {
-      atmosphere.dataset.bgState = 'fallback';
-      notify();
-    });
-  }
 }
 
-export function syncStageUi(activeId: string, catalog?: StageCatalogEntry[]) {
+export function syncStageUi(activeId: string) {
   document.querySelectorAll<HTMLElement>('[data-jukebox-option]').forEach((option) => {
     const on = option.dataset.jukeboxOption === activeId;
     option.setAttribute('aria-pressed', on ? 'true' : 'false');
@@ -217,12 +273,6 @@ export function syncStageUi(activeId: string, catalog?: StageCatalogEntry[]) {
     const on = button.dataset.stageButton === activeId;
     button.setAttribute('aria-pressed', on ? 'true' : 'false');
   });
-
-  const title = document.querySelector<HTMLElement>('[data-now-playing-title]');
-  if (title && catalog) {
-    const entry = catalog.find((item) => item.id === activeId);
-    if (entry) title.textContent = entry.label;
-  }
 
   document.querySelectorAll<HTMLButtonElement>('[data-shuffle-toggle]').forEach((button) => {
     button.setAttribute('aria-pressed', getPlaybackMode().shuffle ? 'true' : 'false');
@@ -274,7 +324,10 @@ export function initStageSwitch(
   };
 
   const hop = () => {
-    const nextId = pickOtherId(catalogIds, activeId);
+    const video = document.querySelector<HTMLVideoElement>('[data-bg-video]');
+    const pool = shuffleCandidateIds(catalogIds, byId, isVideoUnmuted(video));
+    const isAllowed = (id: string) => pool.includes(id);
+    const nextId = pickOtherId(catalogIds, activeId, isAllowed);
     if (!nextId) return;
     select(nextId, true);
   };
@@ -283,7 +336,7 @@ export function initStageSwitch(
     const entry = byId.get(id);
     if (!entry) return;
     if (id === activeId && !fromHop) {
-      syncStageUi(activeId, catalog);
+      syncStageUi(activeId);
       return;
     }
 
@@ -292,7 +345,7 @@ export function initStageSwitch(
     activeId = id;
 
     void crossfadeStageEntry(entry, keepMuted).then(() => {
-      syncStageUi(activeId, catalog);
+      syncStageUi(activeId);
       restartClock();
     });
   };
@@ -318,7 +371,7 @@ export function initStageSwitch(
       event.preventDefault();
       const next = !getPlaybackMode().shuffle;
       setShuffle(next);
-      syncStageUi(activeId, catalog);
+      syncStageUi(activeId);
       if (next && !getPlaybackMode().loop) restartClock();
       else clearAdvanceTimer();
       return;
@@ -331,7 +384,7 @@ export function initStageSwitch(
       event.preventDefault();
       const next = !getPlaybackMode().loop;
       setLoop(next);
-      syncStageUi(activeId, catalog);
+      syncStageUi(activeId);
       if (!next && getPlaybackMode().shuffle) restartClock();
     }
   });
@@ -344,6 +397,6 @@ export function initStageSwitch(
     () => restartClock(),
   );
 
-  syncStageUi(activeId, catalog);
+  syncStageUi(activeId);
   restartClock();
 }

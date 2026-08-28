@@ -115,30 +115,37 @@ const showMute = packAllowsMute(pack, video.hasAudio, useVideo);
     width: 100%;
     height: 100%;
     object-fit: cover;
+    z-index: 0;
   }
 
   .atmosphere__video--next {
     opacity: 0;
     z-index: 1;
     pointer-events: none;
-  }
-
-  .atmosphere__video--next.atmosphere__video--active {
-    z-index: 2;
+    transition: opacity 700ms cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .atmosphere__video--current {
     z-index: 1;
+    transition: opacity 700ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .atmosphere__video--next.atmosphere__video--active {
+    z-index: 1;
   }
 
   .atmosphere__poster {
+    z-index: 0;
     display: none;
   }
 
   .atmosphere__scrim {
     position: absolute;
     inset: 0;
+    z-index: 2;
     background: var(--bg-scrim);
+    pointer-events: none;
+    transition: background-color 700ms cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .atmosphere[data-bg-state='fallback'] .atmosphere__video {
@@ -152,10 +159,20 @@ const showMute = packAllowsMute(pack, video.hasAudio, useVideo);
   @media (prefers-reduced-motion: reduce) {
     .atmosphere__video {
       display: none;
+      transition: none;
+    }
+
+    .atmosphere__video--current,
+    .atmosphere__video--next {
+      transition: none;
     }
 
     .atmosphere__poster {
       display: block;
+    }
+
+    .atmosphere__scrim {
+      transition: none;
     }
   }
 </style>

@@ -82,12 +82,13 @@ const {
 
   function initMuteControl() {
     const root = document.querySelector<HTMLElement>('[data-atmosphere]');
-    const video = root?.querySelector<HTMLVideoElement>('[data-bg-video]');
     const control = document.querySelector<HTMLElement>('[data-volume-control]');
     const button = control?.querySelector<HTMLButtonElement>('[data-mute-control]');
     const sliderWrap = control?.querySelector<HTMLElement>('[data-volume-wrap]');
     const slider = control?.querySelector<HTMLInputElement>('[data-volume-slider]');
-    if (!root || !video || !control || !button || !sliderWrap || !slider) return;
+    if (!root || !control || !button || !sliderWrap || !slider) return;
+
+    const getVideo = () => root.querySelector<HTMLVideoElement>('[data-bg-video]');
 
     const unmuteTooltip = control.dataset.unmuteTooltip ?? 'Unmute';
     const muteTooltip = control.dataset.muteTooltip ?? 'Mute';
@@ -97,9 +98,14 @@ const {
     let wasMuted = true;
     let glitchTimer: number | undefined;
     let pointerOverMute = false;
-    video.volume = lastVolume;
 
-    const isAudioPlaying = () => !(video.muted || video.volume === 0);
+    const videoAtInit = getVideo();
+    if (videoAtInit) videoAtInit.volume = lastVolume;
+
+    const isAudioPlaying = () => {
+      const video = getVideo();
+      return Boolean(video && !(video.muted || video.volume === 0));
+    };
 
     // Idle mute button only glitches while muted — it goes quiet once audio plays,
     // and the shell morph owns the element during a toggle.
@@ -126,6 +132,13 @@ const {
       }, dur + 80);
     };
 
+    const muteSlot = control.closest<HTMLElement>('[data-jukebox-mute-slot]');
+
+    const setMuteSlotVisible = (visible: boolean) => {
+      control.hidden = !visible;
+      if (muteSlot) muteSlot.hidden = !visible;
+    };
+
     const applySoundUi = (muted: boolean) => {
       control.dataset.sound = muted ? 'off' : 'on';
       button.setAttribute('aria-pressed', muted ? 'true' : 'false');
@@ -133,24 +146,32 @@ const {
       button.setAttribute('aria-label', label);
       button.dataset.hudLabel = label;
       sliderWrap.toggleAttribute('inert', muted);
-      if (!muted) slider.value = String(video.volume);
+      const video = getVideo();
+      if (!muted && video) slider.value = String(video.volume);
     };
 
     const sync = () => {
+      const video = getVideo();
+      if (!video) return;
+
       const fallback = root.getAttribute('data-bg-state') === 'fallback' || reduceMotion.matches;
       const hasAudio = root.getAttribute('data-has-audio') === 'true';
       if (fallback) {
-        control.hidden = true;
+        setMuteSlotVisible(false);
         hoverGlitch.stop();
         applySoundUi(true);
         wasMuted = true;
         return;
       }
       if (!hasAudio) {
-        control.hidden = true;
+        setMuteSlotVisible(false);
         hoverGlitch.stop();
+        applySoundUi(true);
+        wasMuted = true;
         return;
       }
+      setMuteSlotVisible(true);
+
       control.hidden = false;
 
       const muted = video.muted || video.volume === 0;
@@ -160,7 +181,12 @@ const {
       // Audio playing → no continuous mute hover
       if (!muted) hoverGlitch.stop();
 
-      if (turningOff && !reduceMotion.matches && isGlitchThemeActive()) {
+      if (
+        turningOff &&
+        !reduceMotion.matches &&
+        isGlitchThemeActive() &&
+        !control.classList.contains('volume-control--in-jukebox')
+      ) {
         // Keep pill visible briefly so the slider can glitch-collapse, then go circular
         applySoundUi(false);
         playGlitch('out');
@@ -174,7 +200,7 @@ const {
       } else {
         // Non-glitch themes (e.g. Taking Over) collapse immediately via CSS ease
         applySoundUi(muted);
-        if (turningOn) playGlitch('in');
+        if (turningOn && !control.classList.contains('volume-control--in-jukebox')) playGlitch('in');
       }
 
       wasMuted = muted;
@@ -190,7 +216,11 @@ const {
       hoverGlitch.stop();
     });
 
-    button.addEventListener('click', () => {
+    button.addEventListener('click', (event) => {
+      event.stopPropagation();
+      const video = getVideo();
+      if (!video) return;
+
       if (video.muted || video.volume === 0) {
         video.muted = false;
         video.volume = lastVolume > 0 ? lastVolume : 0.7;
@@ -203,6 +233,9 @@ const {
     });
 
     slider.addEventListener('input', () => {
+      const video = getVideo();
+      if (!video) return;
+
       const next = Number(slider.value);
       video.volume = next;
       video.muted = next === 0;
@@ -241,15 +274,90 @@ const {
   }
 
   .volume-control--in-jukebox {
+    --volume-slider-size: var(--jukebox-volume-slider-size, min(calc(5.5rem * var(--hud-scale)), 24vw));
+
     border: 0;
     background: transparent;
-    min-width: calc(2.4rem * var(--hud-scale));
-    height: calc(2.4rem * var(--hud-scale));
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    max-width: none;
+    flex: none;
+    overflow: visible;
+    gap: 0;
+    padding: 0;
   }
 
+  .volume-control--in-jukebox[data-sound='off'],
   .volume-control--in-jukebox[data-sound='on'] {
-    min-width: auto;
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    max-width: none;
+    padding: 0;
+    gap: 0;
+    flex: none;
+  }
+
+  .volume-control--in-jukebox .volume-control__toggle {
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 1;
+    width: var(--control-size);
     height: var(--control-size);
+    flex: none;
+  }
+
+  .volume-control--in-jukebox .volume-control__slider-wrap {
+    position: absolute;
+    left: calc(var(--control-size) + var(--jukebox-toolbar-gap, calc(0.2rem * var(--hud-scale))));
+    top: 50%;
+    right: auto;
+    transform: translateY(-50%);
+    display: inline-flex;
+    align-items: center;
+    flex: none;
+    min-width: 0;
+    margin: 0;
+    transform-origin: left center;
+    overflow: visible;
+    box-sizing: content-box;
+  }
+
+  .volume-control--in-jukebox[data-sound='on'] .volume-control__slider-wrap {
+    width: var(--volume-slider-size);
+    max-width: var(--volume-slider-size);
+    padding-right: var(--jukebox-slider-thumb-inset, calc(0.35rem * var(--hud-scale)));
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  .volume-control--in-jukebox[data-sound='off'] .volume-control__slider-wrap {
+    width: 0;
+    max-width: 0;
+    padding-right: 0;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  .volume-control--in-jukebox .volume-control__slider {
+    width: var(--volume-slider-size);
+    min-width: 0;
+    max-width: var(--volume-slider-size);
+    margin: 0;
+  }
+
+  html:not([data-hud-glitch='true']) .volume-control--in-jukebox .volume-control__slider-wrap {
+    transition:
+      width 280ms cubic-bezier(0.4, 0, 0.2, 1),
+      max-width 280ms cubic-bezier(0.4, 0, 0.2, 1),
+      opacity 220ms cubic-bezier(0.4, 0, 0.2, 1),
+      visibility 0s linear 280ms;
   }
 
   /* Nightmare: stepped shell so the glitch morph owns the shape change */
@@ -359,27 +467,27 @@ const {
     cursor: pointer;
   }
 
-  .volume-control.is-glitching {
+  .volume-control.is-glitching:not(.volume-control--in-jukebox) {
     animation: volume-shell-glitch var(--g-dur) both;
   }
 
-  .volume-control.is-glitching .volume-control__toggle {
+  .volume-control.is-glitching:not(.volume-control--in-jukebox) .volume-control__toggle {
     animation: volume-icon-glitch var(--g-dur) both;
   }
 
-  .volume-control.is-glitching[data-glitch='in'] .volume-control__slider-wrap {
+  .volume-control.is-glitching:not(.volume-control--in-jukebox)[data-glitch='in'] .volume-control__slider-wrap {
     animation: volume-slider-glitch-in var(--g-dur) both;
   }
 
-  .volume-control.is-glitching[data-glitch='in'] .volume-control__slider {
+  .volume-control.is-glitching:not(.volume-control--in-jukebox)[data-glitch='in'] .volume-control__slider {
     animation: volume-slider-track-glitch var(--g-dur) both;
   }
 
-  .volume-control.is-glitching[data-glitch='out'] .volume-control__slider-wrap {
+  .volume-control.is-glitching:not(.volume-control--in-jukebox)[data-glitch='out'] .volume-control__slider-wrap {
     animation: volume-slider-glitch-out 520ms both;
   }
 
-  .volume-control.is-glitching[data-glitch='out'] .volume-control__slider {
+  .volume-control.is-glitching:not(.volume-control--in-jukebox)[data-glitch='out'] .volume-control__slider {
     animation: volume-slider-track-glitch 520ms both;
   }
 

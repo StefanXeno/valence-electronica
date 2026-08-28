@@ -3,13 +3,11 @@ import { getBackgroundConfig } from '../lib/background';
 import { getChrome } from '../lib/stage';
 import { withBase } from '../lib/url';
 import HudIcon from './HudIcon.astro';
-import LyricsPanel from './LyricsPanel.astro';
 import MuteControl from './MuteControl.astro';
 import TrackInfoPanel from './TrackInfoPanel.astro';
 
 const chrome = await getChrome();
 const { videos, defaultVideoId, schedule } = await getBackgroundConfig();
-const defaultEntry = videos.find((entry) => entry.id === defaultVideoId) ?? videos[0];
 const catalog = videos.map((entry) => ({
   id: entry.id,
   label: entry.label,
@@ -23,7 +21,7 @@ const showMute = videos.some((entry) => entry.hasAudio);
 
 {
   videos.length > 0 && (
-    <details
+    <div
       class="jukebox"
       aria-label={chrome.jukeboxLabel}
       data-jukebox
@@ -34,24 +32,68 @@ const showMute = videos.some((entry) => entry.hasAudio);
       data-shuffle-default={chrome.shuffleDefault ? 'true' : 'false'}
       data-loop-default={chrome.loopDefault ? 'true' : 'false'}
     >
-      <div class="jukebox__head">
-        <summary
-          class="jukebox__toggle glitch-hit"
+      <div class="jukebox__drawer" id="jukebox-drawer" data-jukebox-drawer>
+        <div class="jukebox__drawer-inner">
+          <div class="jukebox__panel">
+            <header class="jukebox__header">
+              <p
+                class="jukebox__title"
+                data-hud-label={chrome.jukeboxPanelTooltip}
+                data-hud-label-anchor="above"
+                tabindex="0"
+              >
+                {chrome.jukeboxPanelTitle}
+              </p>
+            </header>
+
+            <section class="jukebox__section jukebox__section--list" aria-label={chrome.jukeboxLabel}>
+              <TrackInfoPanel chrome={chrome} trackOrder={videos.map((entry) => entry.id)} />
+            </section>
+          </div>
+        </div>
+      </div>
+
+      <div class="jukebox__toolbar" data-jukebox-toolbar>
+        <button
+          type="button"
+          class="jukebox__tool jukebox__tool--vinyl glitch-hit"
           data-jukebox-toggle
           data-glitch-live
           data-hud-label={chrome.jukeboxLabel}
           data-hud-label-anchor="above"
+          aria-expanded="false"
+          aria-controls="jukebox-drawer"
           aria-label={chrome.jukeboxLabel}
         >
-          <span class="jukebox__vinyl">
-            <HudIcon token={chrome.jukeboxIcon} emoji={chrome.jukeboxIconEmoji} />
-          </span>
-        </summary>
-        <span class="jukebox__title" data-now-playing-title>
-          {defaultEntry?.label ?? chrome.jukeboxLabel}
-        </span>
+          <HudIcon token={chrome.jukeboxIcon} emoji={chrome.jukeboxIconEmoji} />
+        </button>
+
+        <button
+          type="button"
+          class="jukebox__tool jukebox__tool--shuffle glitch-hit"
+          data-shuffle-toggle
+          aria-pressed={chrome.shuffleDefault ? 'true' : 'false'}
+          aria-label={chrome.shuffleLabel}
+          data-hud-label={chrome.shuffleLabel}
+          data-hud-label-anchor="above"
+        >
+          <HudIcon token={chrome.shuffleIcon} emoji={chrome.shuffleIconEmoji} />
+        </button>
+
+        <button
+          type="button"
+          class="jukebox__tool jukebox__tool--loop glitch-hit"
+          data-loop-toggle
+          aria-pressed={chrome.loopDefault ? 'true' : 'false'}
+          aria-label={chrome.loopLabel}
+          data-hud-label={chrome.loopLabel}
+          data-hud-label-anchor="above"
+        >
+          <HudIcon token={chrome.loopIcon} emoji={chrome.loopIconEmoji} />
+        </button>
+
         {showMute && (
-          <div class="jukebox__mute">
+          <div class="jukebox__tool jukebox__tool--mute" data-jukebox-mute-slot hidden>
             <MuteControl
               unmuteTooltip={chrome.unmuteTooltip}
               muteTooltip={chrome.muteTooltip}
@@ -61,53 +103,7 @@ const showMute = videos.some((entry) => entry.hasAudio);
           </div>
         )}
       </div>
-
-      <div class="jukebox__transport">
-        <button
-          type="button"
-          class="jukebox__transport-btn glitch-hit"
-          data-shuffle-toggle
-          aria-pressed={chrome.shuffleDefault ? 'true' : 'false'}
-          aria-label={chrome.shuffleLabel}
-        >
-          <HudIcon token={chrome.shuffleIcon} emoji={chrome.shuffleIconEmoji} />
-          <span class="jukebox__transport-label">{chrome.shuffleLabel}</span>
-        </button>
-        <button
-          type="button"
-          class="jukebox__transport-btn glitch-hit"
-          data-loop-toggle
-          aria-pressed={chrome.loopDefault ? 'true' : 'false'}
-          aria-label={chrome.loopLabel}
-        >
-          <HudIcon token={chrome.loopIcon} emoji={chrome.loopIconEmoji} />
-          <span class="jukebox__transport-label">{chrome.loopLabel}</span>
-        </button>
-      </div>
-
-      <div class="jukebox__panel">
-        <section class="jukebox__section" aria-label={chrome.trackInfoTitle}>
-          <h3 class="jukebox__section-title">{chrome.trackInfoTitle}</h3>
-          <TrackInfoPanel chrome={chrome} />
-        </section>
-        <section class="jukebox__section" aria-label={chrome.lyricsTitle}>
-          <h3 class="jukebox__section-title">{chrome.lyricsTitle}</h3>
-          <LyricsPanel chrome={chrome} />
-        </section>
-        <div class="jukebox__list" role="group" aria-label={chrome.jukeboxLabel}>
-          {videos.map((entry) => (
-            <button
-              type="button"
-              class="glitch-hit"
-              data-jukebox-option={entry.id}
-              aria-pressed={entry.id === defaultVideoId ? 'true' : 'false'}
-            >
-              {entry.label}
-            </button>
-          ))}
-        </div>
-      </div>
-    </details>
+    </div>
   )
 }
 
@@ -118,9 +114,10 @@ const showMute = videos.some((entry) => entry.hasAudio);
   import type { StageSchedule } from '../lib/stage-schedule';
 
   function bootStageSwitch() {
-    const root = document.querySelector<HTMLDetailsElement>('[data-jukebox]');
-    const toggle = root?.querySelector<HTMLElement>('[data-jukebox-toggle]');
-    if (!root?.dataset.stageCatalog || !toggle) return;
+    const root = document.querySelector<HTMLElement>('[data-jukebox]');
+    const toggle = root?.querySelector<HTMLButtonElement>('[data-jukebox-toggle]');
+    const drawer = root?.querySelector<HTMLElement>('[data-jukebox-drawer]');
+    if (!root?.dataset.stageCatalog || !toggle || !drawer) return;
 
     const catalog = JSON.parse(root.dataset.stageCatalog) as StageCatalogEntry[];
     const staticFallbackId = root.dataset.stageFallback ?? root.dataset.stageDefault ?? '';
@@ -135,10 +132,17 @@ const showMute = videos.some((entry) => entry.hasAudio);
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
     let morphTimer: number | undefined;
     let pointerOver = false;
+    let isOpen = false;
+
+    const setOpen = (next: boolean) => {
+      isOpen = next;
+      root.classList.toggle('is-open', next);
+      toggle.setAttribute('aria-expanded', next ? 'true' : 'false');
+    };
 
     const hoverGlitch = createContinuousGlitch(
       toggle,
-      () => pointerOver && !root.open && !root.classList.contains('is-glitching'),
+      () => pointerOver && !isOpen && !root.classList.contains('is-glitching'),
     );
 
     const playMorph = (direction: 'in' | 'out') => {
@@ -150,7 +154,7 @@ const showMute = videos.some((entry) => entry.hasAudio);
       morphTimer = window.setTimeout(() => {
         root.classList.remove('is-glitching');
         delete root.dataset.glitch;
-        hoverGlitch.start();
+        if (!isOpen) hoverGlitch.start();
       }, dur + 80);
     };
 
@@ -165,15 +169,20 @@ const showMute = videos.some((entry) => entry.hasAudio);
     });
 
     toggle.addEventListener('click', (event) => {
-      if (!root.open) {
-        if (!shouldSmoothPanelOpen(reduceMotion.matches)) return;
-        event.preventDefault();
-        root.open = true;
-        runSmoothPanelOpen(root, reduceMotion.matches);
+      event.preventDefault();
+      event.stopPropagation();
+
+      if (!isOpen) {
+        if (shouldSmoothPanelOpen(reduceMotion.matches)) {
+          setOpen(true);
+          runSmoothPanelOpen(root, reduceMotion.matches);
+        } else {
+          setOpen(true);
+          playMorph('in');
+        }
         return;
       }
 
-      event.preventDefault();
       if (root.classList.contains('is-glitching')) return;
 
       if (isGlitchThemeActive()) {
@@ -183,17 +192,12 @@ const showMute = videos.some((entry) => entry.hasAudio);
       }
 
       window.setTimeout(() => {
-        root.open = false;
+        setOpen(false);
         root.classList.remove('is-panel-closing');
       }, panelCloseDelayMs(reduceMotion.matches));
     });
 
-    root.addEventListener('toggle', () => {
-      if (root.open) {
-        hoverGlitch.stop();
-        playMorph('in');
-      }
-    });
+    setOpen(false);
   }
 
   bootStageSwitch();
@@ -201,21 +205,56 @@ const showMute = videos.some((entry) => entry.hasAudio);
 
 <style>
   .jukebox {
+    --jukebox-ease: cubic-bezier(0.4, 0, 0.2, 1);
+    --jukebox-dur: 280ms;
+    --jukebox-panel-inset: calc(0.65rem * var(--hud-scale));
+    --jukebox-toolbar-gap: calc(0.2rem * var(--hud-scale));
+    --jukebox-toolbar-pad: calc(0.25rem * var(--hud-scale));
+    --jukebox-volume-slider-size: min(calc(5rem * var(--hud-scale)), 22vw);
+    --jukebox-slider-thumb-inset: calc(0.35rem * var(--hud-scale));
+    --jukebox-open-width: min(calc(22rem * var(--hud-scale)), calc(100vw - 2 * var(--hud-inset, 0.75rem)));
+    --jukebox-mute-width: var(--control-size);
+    --jukebox-closed-width: calc(
+      3 * var(--control-size) + var(--jukebox-mute-width) + 3 * var(--jukebox-toolbar-gap) +
+        2 * var(--jukebox-toolbar-pad)
+    );
+
     position: relative;
     display: inline-flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    align-items: center;
-    width: auto;
-    max-width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    width: var(--jukebox-closed-width);
+    max-width: var(--jukebox-open-width);
     box-sizing: border-box;
     margin: 0;
     padding: 0;
     border: 1px solid var(--color-border);
     border-radius: 999px;
-    background: var(--color-surface);
+    background: color-mix(in srgb, var(--color-surface) 92%, transparent);
+    backdrop-filter: blur(10px);
     color: var(--color-text);
     text-shadow: 0 1px 12px var(--bg-scrim);
+    overflow: hidden;
+  }
+
+  .jukebox:not(:has(.jukebox__tool--mute:not([hidden]))) {
+    --jukebox-closed-width: calc(
+      3 * var(--control-size) + 2 * var(--jukebox-toolbar-gap) + 2 * var(--jukebox-toolbar-pad)
+    );
+  }
+
+  .jukebox:has(.volume-control--in-jukebox[data-sound='on']) {
+    --jukebox-mute-width: calc(
+      var(--control-size) + var(--jukebox-toolbar-gap) + var(--jukebox-volume-slider-size) +
+        var(--jukebox-slider-thumb-inset)
+    );
+  }
+
+  html:not([data-hud-glitch='true']) .jukebox {
+    transition:
+      width var(--jukebox-dur) var(--jukebox-ease),
+      border-radius var(--jukebox-dur) var(--jukebox-ease),
+      --jukebox-mute-width var(--jukebox-dur) var(--jukebox-ease);
   }
 
   html[data-hud-glitch='true'] .jukebox {
@@ -224,238 +263,175 @@ const showMute = videos.some((entry) => entry.hasAudio);
       border-radius 160ms steps(2, end);
   }
 
-  html:not([data-hud-glitch='true']) .jukebox {
-    transition:
-      width 280ms cubic-bezier(0.4, 0, 0.2, 1),
-      border-radius 280ms cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  .jukebox__head {
-    display: inline-flex;
-    flex-direction: row;
-    align-items: center;
-    min-width: 0;
-    flex: 0 1 auto;
-  }
-
-  .jukebox[open] {
-    flex-direction: column;
-    align-items: stretch;
-    width: min(calc(22rem * var(--hud-scale)), calc(100vw - 2 * var(--hud-inset, 0.75rem)));
-    max-width: min(calc(22rem * var(--hud-scale)), calc(100vw - 2 * var(--hud-inset, 0.75rem)));
+  .jukebox.is-open {
+    width: var(--jukebox-open-width);
     border-radius: calc(0.85rem * var(--hud-scale));
-    overflow-x: clip;
   }
 
-  .jukebox[open] .jukebox__head {
+  .jukebox__drawer {
     width: 100%;
-    padding: calc(0.35rem * var(--hud-scale));
-    box-sizing: border-box;
-    gap: calc(0.35rem * var(--hud-scale));
+    max-width: 100%;
+    overflow: hidden;
   }
 
-  .jukebox__toggle {
-    position: relative;
+  .jukebox__drawer-inner {
     display: flex;
-    align-items: center;
-    flex: 0 0 auto;
-    width: var(--control-size);
-    height: var(--control-size);
-    min-width: var(--control-size);
-    min-height: var(--control-size);
-    margin: 0;
+    flex-direction: column;
+    min-width: 0;
     padding: 0;
-    border: 0;
-    border-radius: 999px;
-    background: transparent;
-    color: inherit;
-    cursor: pointer;
-    list-style: none;
-    box-sizing: border-box;
   }
 
-  .jukebox__vinyl {
-    flex: 0 0 var(--control-size);
-    display: grid;
-    place-items: center;
-    width: var(--control-size);
-    height: var(--control-size);
+  .jukebox.is-open:not(.is-panel-opening) .jukebox__drawer-inner {
+    padding: calc(0.65rem * var(--hud-scale)) calc(0.65rem * var(--hud-scale)) 0;
   }
 
-  .jukebox__toggle::marker {
-    content: '';
-  }
-
-  .jukebox__toggle::-webkit-details-marker {
-    display: none;
-  }
-
-  .jukebox__toggle:hover {
-    color: var(--color-accent-alt);
+  .jukebox__header {
+    margin: 0 0 calc(0.5rem * var(--hud-scale));
+    padding-bottom: calc(0.45rem * var(--hud-scale));
+    border-bottom: 1px solid color-mix(in srgb, var(--color-border) 45%, transparent);
   }
 
   .jukebox__title {
-    display: none;
-    flex: 1 1 auto;
-    min-width: 0;
+    margin: 0;
     font-family: var(--font-display);
-    font-size: calc(18px * var(--hud-scale));
-    line-height: 1.1;
-    letter-spacing: 0.04em;
+    font-size: calc(0.8rem * var(--hud-scale));
+    font-weight: 600;
+    line-height: 1.25;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-  }
-
-  .jukebox[open] .jukebox__title {
-    display: block;
-  }
-
-  .jukebox__mute {
-    flex: 0 0 auto;
-    min-width: 0;
-  }
-
-  .jukebox__transport {
-    display: none;
-    flex-direction: row;
-    gap: calc(0.35rem * var(--hud-scale));
-    padding: 0 calc(0.35rem * var(--hud-scale));
-  }
-
-  .jukebox[open] .jukebox__transport {
-    display: flex;
-  }
-
-  .jukebox__transport-btn {
-    appearance: none;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    margin: 0;
-    padding: 0.35em 0.55em;
-    border: 1px solid transparent;
-    border-radius: 0.35rem;
-    background: transparent;
     color: var(--color-text);
-    font-family: var(--font-display);
-    font-size: calc(0.75rem * var(--hud-scale));
-    cursor: pointer;
+    cursor: help;
+    outline: none;
   }
 
-  .jukebox__transport-btn:hover {
-    border-color: var(--color-border);
+  .jukebox__title:focus-visible {
     color: var(--color-accent-alt);
-  }
-
-  .jukebox__transport-btn[aria-pressed='true'] {
-    border-color: var(--color-accent);
-    color: var(--color-accent-alt);
-  }
-
-  .jukebox__transport-label {
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
   }
 
   .jukebox__panel {
-    width: 0;
-    max-width: 0;
+    width: 100%;
+    max-width: 100%;
     max-height: 0;
     opacity: 0;
     overflow: hidden;
     pointer-events: none;
+    padding: 0;
+    box-sizing: border-box;
   }
 
   html:not([data-hud-glitch='true']) .jukebox__panel {
     transition:
-      max-height 280ms cubic-bezier(0.4, 0, 0.2, 1),
-      opacity 220ms cubic-bezier(0.4, 0, 0.2, 1),
-      width 280ms cubic-bezier(0.4, 0, 0.2, 1),
-      max-width 280ms cubic-bezier(0.4, 0, 0.2, 1),
-      padding 280ms cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  .jukebox[open] .jukebox__panel {
-    width: 100%;
-    max-width: 100%;
-    max-height: min(42svh, calc(18rem * var(--hud-scale)));
-    min-width: 0;
-    opacity: 1;
-    overflow-x: hidden;
-    overflow-y: auto;
-    pointer-events: auto;
-    padding: 0 calc(0.35rem * var(--hud-scale)) calc(0.35rem * var(--hud-scale));
-    box-sizing: border-box;
-  }
-
-  .jukebox__section {
-    margin-bottom: calc(0.65rem * var(--hud-scale));
-  }
-
-  .jukebox__section-title {
-    margin: 0 0 0.35rem;
-    font-family: var(--font-display);
-    font-size: calc(0.7rem * var(--hud-scale));
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--color-accent-alt);
-  }
-
-  .jukebox__list {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0.25rem;
-    min-width: 0;
-    width: 100%;
-    margin-top: calc(0.35rem * var(--hud-scale));
-  }
-
-  .jukebox__list button {
-    appearance: none;
-    display: block;
-    width: 100%;
-    max-width: 100%;
-    min-width: 0;
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0.35em 0.55em;
-    border: 1px solid transparent;
-    border-radius: 0.35rem;
-    background: transparent;
-    color: var(--color-text);
-    font-family: var(--font-display);
-    font-size: calc(0.8rem * var(--hud-scale));
-    text-align: left;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    cursor: pointer;
-  }
-
-  .jukebox__list button:hover {
-    border-color: var(--color-border);
-  }
-
-  .jukebox__list button[aria-pressed='true'] {
-    border-color: var(--color-accent);
-    color: var(--color-accent-alt);
+      max-height var(--jukebox-dur) var(--jukebox-ease),
+      opacity 220ms var(--jukebox-ease),
+      padding var(--jukebox-dur) var(--jukebox-ease);
   }
 
   html:not([data-hud-glitch='true']) .jukebox.is-panel-closing .jukebox__panel,
-  html:not([data-hud-glitch='true']) .jukebox.is-panel-opening .jukebox__panel {
-    width: 0;
-    max-width: 0;
+  html:not([data-hud-glitch='true']) .jukebox.is-panel-opening .jukebox__panel,
+  html:not([data-hud-glitch='true']) .jukebox.is-open.is-panel-opening .jukebox__panel {
     max-height: 0;
     opacity: 0;
-    padding: 0;
     pointer-events: none;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
+  .jukebox.is-open:not(.is-panel-opening) .jukebox__panel {
+    max-height: min(44svh, calc(19rem * var(--hud-scale)));
+    opacity: 1;
+    overflow: auto;
+    pointer-events: auto;
+    padding-bottom: calc(0.25rem * var(--hud-scale));
   }
 
   html[data-hud-glitch='true'] .jukebox.is-glitching .jukebox__panel {
     transition: none;
+  }
+
+  .jukebox__section--list {
+    padding: 0;
+    border: 0;
+  }
+
+  .jukebox__toolbar {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: var(--jukebox-toolbar-gap);
+    flex: 0 0 auto;
+    width: 100%;
+    min-height: var(--control-size);
+    padding: var(--jukebox-toolbar-pad);
+    box-sizing: border-box;
+    border-top: 1px solid transparent;
+    overflow: hidden;
+  }
+
+  .jukebox.is-open:not(.is-panel-opening) .jukebox__toolbar {
+    border-top-color: color-mix(in srgb, var(--color-border) 45%, transparent);
+  }
+
+  .jukebox__tool {
+    appearance: none;
+    display: inline-grid;
+    place-items: center;
+    flex: 0 0 var(--control-size);
+    width: var(--control-size);
+    height: var(--control-size);
+    margin: 0;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    box-sizing: border-box;
+    transition:
+      border-color 160ms ease,
+      color 160ms ease,
+      background-color 160ms ease;
+  }
+
+  .jukebox__tool:hover {
+    color: var(--color-accent-alt);
+    border-color: color-mix(in srgb, var(--color-border) 80%, transparent);
+  }
+
+  .jukebox__tool[aria-pressed='true'] {
+    border-color: var(--color-accent);
+    background: color-mix(in srgb, var(--color-accent) 16%, transparent);
+    color: var(--color-accent-alt);
+  }
+
+  .jukebox__tool--mute {
+    position: relative;
+    flex: 0 0 var(--jukebox-mute-width);
+    width: var(--jukebox-mute-width);
+    min-width: var(--jukebox-mute-width);
+    height: var(--control-size);
+    border: 0;
+    padding: 0;
+    overflow: visible;
+  }
+
+  .jukebox__tool--mute[hidden] {
+    display: none;
+  }
+
+  html:not([data-hud-glitch='true']) .jukebox__tool--mute {
+    transition:
+      width var(--jukebox-dur) var(--jukebox-ease),
+      flex-basis var(--jukebox-dur) var(--jukebox-ease),
+      min-width var(--jukebox-dur) var(--jukebox-ease);
+  }
+
+  .jukebox__tool--shuffle,
+  .jukebox__tool--loop {
+    flex: 0 0 auto;
   }
 
   .jukebox.is-glitching[data-glitch='in'] .jukebox__panel {
@@ -468,44 +444,33 @@ const showMute = videos.some((entry) => entry.hasAudio);
 
   @keyframes jukebox-panel-in {
     0% {
-      width: 0;
-      max-width: 0;
       max-height: 0;
       opacity: 0;
       animation-timing-function: steps(1, end);
     }
     35% {
-      width: 100%;
-      max-width: 100%;
-      max-height: min(42svh, calc(18rem * var(--hud-scale)));
+      max-height: min(44svh, calc(19rem * var(--hud-scale)));
       opacity: 1;
       animation-timing-function: steps(1, end);
     }
     100% {
-      width: 100%;
-      max-width: 100%;
-      max-height: min(42svh, calc(18rem * var(--hud-scale)));
+      max-height: min(44svh, calc(19rem * var(--hud-scale)));
       opacity: 1;
     }
   }
 
   @keyframes jukebox-panel-out {
     0% {
-      width: 100%;
-      max-width: 100%;
-      max-height: min(42svh, calc(18rem * var(--hud-scale)));
+      max-height: min(44svh, calc(19rem * var(--hud-scale)));
       opacity: 1;
       animation-timing-function: steps(1, end);
     }
     55% {
-      width: 2rem;
-      max-width: 2rem;
+      max-height: var(--control-size);
       opacity: 0.4;
       animation-timing-function: steps(1, end);
     }
     100% {
-      width: 0;
-      max-width: 0;
       max-height: 0;
       opacity: 0;
     }
@@ -514,7 +479,7 @@ const showMute = videos.some((entry) => entry.hasAudio);
   @media (prefers-reduced-motion: reduce) {
     .jukebox,
     .jukebox__panel,
-    .jukebox__toggle {
+    .jukebox__tool {
       transition: none !important;
     }
 
