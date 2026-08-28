@@ -4,19 +4,36 @@ import Hero from '../components/Hero.astro';
 import Channels from '../components/Channels.astro';
 import Jukebox from '../components/Jukebox.astro';
 import MuteControl from '../components/MuteControl.astro';
+import NowPlayingControl from '../components/NowPlayingControl.astro';
 import StagePanels from '../components/StagePanels.astro';
 import StageDock from '../components/StageDock.astro';
 import LandingIntro from '../components/LandingIntro.astro';
 import { getValidJukeboxEntries } from '../lib/background';
+import { getValidCatalogTracks } from '../lib/catalog-tracks';
 import { getChrome } from '../lib/stage';
 
-const [chrome, videos] = await Promise.all([getChrome(), getValidJukeboxEntries()]);
+const [chrome, videos, catalogTracks] = await Promise.all([
+  getChrome(),
+  getValidJukeboxEntries(),
+  getValidCatalogTracks(),
+]);
 const showMute = videos.some((entry) => entry.hasAudio);
+const showNowPlaying = catalogTracks.length > 0;
+const catalogJson = JSON.stringify(
+  catalogTracks.map((track) => ({
+    id: track.id,
+    title: track.title,
+    blurb: track.blurb,
+    listenLinks: track.listenLinks,
+    credits: track.credits,
+    mentions: track.mentions,
+  })),
+);
 ---
 
 <Base>
   <LandingIntro introLead={chrome.introLead} introName={chrome.introName} />
-  <div class="stage">
+  <div class="stage" data-track-catalog={catalogJson}>
     <div class="stage__identity">
       <Hero />
     </div>
@@ -25,6 +42,7 @@ const showMute = videos.some((entry) => entry.hasAudio);
     </div>
     <StageDock>
       <Jukebox slot="jukebox" />
+      {showNowPlaying && <NowPlayingControl slot="nowPlaying" chrome={chrome} />}
       {showMute && <MuteControl slot="mute" />}
       <StagePanels slot="panels" />
     </StageDock>

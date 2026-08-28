@@ -19,7 +19,7 @@
 
 **Purpose**: Align implementer with contracts before code changes
 
-- [ ] T001 Review `specs/010-track-catalog/contracts/track-catalog-content.md` and `specs/010-track-catalog/contracts/track-catalog-ui.md` against current `src/components/StagePanels.astro` and `src/content/jukebox/` layout
+- [X] T001 Review `specs/010-track-catalog/contracts/track-catalog-content.md` and `specs/010-track-catalog/contracts/track-catalog-ui.md` against current `src/components/StagePanels.astro` and `src/content/jukebox/` layout
 
 ---
 
@@ -29,14 +29,14 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T002 Extend jukebox Zod schema in `src/content.config.ts` with `sortDate`, optional `blurb`, `listenLinks`, `credits`, `mentions` per `specs/010-track-catalog/data-model.md`
-- [ ] T003 [P] Extend `ui` collection schema in `src/content.config.ts` with `catalogTitle`, `catalogIcon`, `nowPlayingLabel`, `nowPlayingIcon`, `emptyCatalog`
-- [ ] T004 Create `src/lib/catalog-tracks.ts` — types, platform/url validation, `getValidCatalogTracks()` wired to `getCollection('jukebox')`, sort + warn-and-omit rules
-- [ ] T005 [P] Add `src/lib/catalog-tracks.test.ts` — sort order, tie-break by title, invalid link/credit omission
-- [ ] T006 Extend `HudIconToken` and `resolveHudIcon` defaults in `src/lib/hud-icons.ts` with `catalog` and `info` tokens
-- [ ] T007 [P] Add SVG paths for `catalog` and `info` tokens in `src/components/HudIcon.astro`
-- [ ] T008 Extend `UiChrome` interface and `getChrome()` in `src/lib/stage.ts` for catalog + now-playing chrome fields with fallbacks
-- [ ] T009 [P] Add `catalogTitle`, `catalogIcon`, `nowPlayingLabel`, `nowPlayingIcon`, `emptyCatalog` to `src/content/ui/chrome.md`
+- [X] T002 Extend jukebox Zod schema in `src/content.config.ts` with `sortDate`, optional `blurb`, `listenLinks`, `credits`, `mentions` per `specs/010-track-catalog/data-model.md`
+- [X] T003 [P] Extend `ui` collection schema in `src/content.config.ts` with `catalogTitle`, `catalogIcon`, `nowPlayingLabel`, `nowPlayingIcon`, `emptyCatalog`
+- [X] T004 Create `src/lib/catalog-tracks.ts` — types, platform/url validation, `getValidCatalogTracks()` wired to `getCollection('jukebox')`, sort + warn-and-omit rules
+- [X] T005 [P] Add `src/lib/catalog-tracks.test.ts` — sort order, tie-break by title, invalid link/credit omission
+- [X] T006 Extend `HudIconToken` and `resolveHudIcon` defaults in `src/lib/hud-icons.ts` with `catalog` and `info` tokens
+- [X] T007 [P] Add SVG paths for `catalog` and `info` tokens in `src/components/HudIcon.astro`
+- [X] T008 Extend `UiChrome` interface and `getChrome()` in `src/lib/stage.ts` for catalog + now-playing chrome fields with fallbacks
+- [X] T009 [P] Add `catalogTitle`, `catalogIcon`, `nowPlayingLabel`, `nowPlayingIcon`, `emptyCatalog` to `src/content/ui/chrome.md`
 
 **Checkpoint**: `npm run check` passes; `getValidCatalogTracks()` returns empty until jukebox files have `sortDate`
 
@@ -50,12 +50,12 @@
 
 ### Implementation for User Story 1
 
-- [ ] T010 [P] [US1] Add `sortDate` and placeholder catalog fields to `src/content/jukebox/nightmare.md`
-- [ ] T011 [P] [US1] Add `sortDate` and placeholder catalog fields to `src/content/jukebox/taking-over.md`
-- [ ] T012 [P] [US1] Add `sortDate` and placeholder catalog fields to `src/content/jukebox/show-me-how.md`
-- [ ] T013 [P] [US1] Add `sortDate` and placeholder catalog fields to `src/content/jukebox/example-cyan.md`
-- [ ] T014 [US1] Verify `getValidCatalogTracks()` maps `label` → title and omits entries missing `sortDate` with console warn (covered by T004 + T005 tests)
-- [ ] T015 [US1] Verify build warns when one jukebox file lacks `sortDate` but stage entry still builds; edit `blurb` on one file and confirm rebuild updates catalog row (quickstart Scenario 2)
+- [X] T010 [P] [US1] Add `sortDate` and placeholder catalog fields to `src/content/jukebox/nightmare.md`
+- [X] T011 [P] [US1] Add `sortDate` and placeholder catalog fields to `src/content/jukebox/taking-over.md`
+- [X] T012 [P] [US1] Add `sortDate` and placeholder catalog fields to `src/content/jukebox/show-me-how.md`
+- [X] T013 [P] [US1] Add `sortDate` and placeholder catalog fields to `src/content/jukebox/example-cyan.md`
+- [X] T014 [US1] Verify `getValidCatalogTracks()` maps `label` → title and omits entries missing `sortDate` with console warn (covered by T004 + T005 tests)
+- [X] T015 [US1] Verify build warns when one jukebox file lacks `sortDate` but stage entry still builds; edit `blurb` on one file and confirm rebuild updates catalog row (quickstart Scenario 2)
 
 **Checkpoint**: Catalog data layer complete — four valid tracks with stable ids
 
@@ -69,9 +69,9 @@
 
 ### Implementation for User Story 2
 
-- [ ] T016 [US2] Create `src/components/TrackCatalog.astro` — scrollable list from `getValidCatalogTracks()`; title + year; optional blurb ellipsis; `emptyCatalog` state
-- [ ] T017 [US2] Register catalog panel in `src/components/StagePanels.astro` — `catalogTitle`/`catalogIcon`, horizontal row order (About, Lyrics, Tracks, Discography, Tour); `glitch-hit` + panel-motion parity with siblings
-- [ ] T018 [US2] Manually walk quickstart.md Scenario 1; fix panel width/scroll until exclusive-open and chronological order pass (Scenario 2 content edit validated in T015)
+- [X] T016 [US2] Create `src/components/TrackCatalog.astro` — scrollable list from `getValidCatalogTracks()`; title + year; optional blurb ellipsis; `emptyCatalog` state
+- [X] T017 [US2] Register catalog panel in `src/components/StagePanels.astro` — `catalogTitle`/`catalogIcon`, horizontal row order (About, Lyrics, Tracks, Discography, Tour); `glitch-hit` + panel-motion parity with siblings
+- [X] T018 [US2] Manually walk quickstart.md Scenario 1; fix panel width/scroll until exclusive-open and chronological order pass (Scenario 2 content edit validated in T015)
 
 **Checkpoint**: MVP UI — visitor can browse full track catalog from dock
 
@@ -85,12 +85,12 @@
 
 ### Implementation for User Story 3
 
-- [ ] T019 [US3] Create `src/components/NowPlayingControl.astro` — `glitch-hit` + `data-hud-label`/`data-hud-label-anchor="above"` on trigger; icon trigger, popover shell, SSR catalog JSON via `data-track-catalog` on `src/pages/index.astro`
-- [ ] T020 [US3] Create `src/lib/now-playing.ts` — popover open/close, Escape/outside click, focus trap while open with focus return to trigger, sync on `bg-state-change` and jukebox option clicks
-- [ ] T021 [US3] Add `nowPlaying` slot to `src/components/StageDock.astro` left cluster (order: jukebox → nowPlaying → mute) and mount `NowPlayingControl` from `src/pages/index.astro`
-- [ ] T022 [US3] Add listen link rows in popover — platform labels, `target="_blank"` + `rel="noopener noreferrer"`; hide when no URLs
-- [ ] T023 [P] [US3] Add sample `listenLinks` on `src/content/jukebox/taking-over.md` for manual Scenario 3
-- [ ] T024 [US3] Manually walk quickstart.md Scenario 3 and regression jukebox/theme/mute/lyrics (FR-010)
+- [X] T019 [US3] Create `src/components/NowPlayingControl.astro` — `glitch-hit` + `data-hud-label`/`data-hud-label-anchor="above"` on trigger; icon trigger, popover shell, SSR catalog JSON via `data-track-catalog` on `src/pages/index.astro`
+- [X] T020 [US3] Create `src/lib/now-playing.ts` — popover open/close, Escape/outside click, focus trap while open with focus return to trigger, sync on `bg-state-change` and jukebox option clicks
+- [X] T021 [US3] Add `nowPlaying` slot to `src/components/StageDock.astro` left cluster (order: jukebox → nowPlaying → mute) and mount `NowPlayingControl` from `src/pages/index.astro`
+- [X] T022 [US3] Add listen link rows in popover — platform labels, `target="_blank"` + `rel="noopener noreferrer"`; hide when no URLs
+- [X] T023 [P] [US3] Add sample `listenLinks` on `src/content/jukebox/taking-over.md` for manual Scenario 3
+- [X] T024 [US3] Manually walk quickstart.md Scenario 3 and regression jukebox/theme/mute/lyrics (FR-010)
 
 **Checkpoint**: Active track discoverable with outbound links in ≤2 interactions
 
@@ -104,9 +104,9 @@
 
 ### Implementation for User Story 4
 
-- [ ] T025 [US4] Render optional `credits` list and `mentions` prose in `src/components/NowPlayingControl.astro` popover (omit empty sections)
-- [ ] T026 [P] [US4] Add sample `credits` and `mentions` to one jukebox file (e.g. `src/content/jukebox/nightmare.md`) for quickstart Scenario 4
-- [ ] T027 [US4] Manually walk quickstart.md Scenario 4; confirm long credits scroll inside popover without layout break at 320px width
+- [X] T025 [US4] Render optional `credits` list and `mentions` prose in `src/components/NowPlayingControl.astro` popover (omit empty sections)
+- [X] T026 [P] [US4] Add sample `credits` and `mentions` to one jukebox file (e.g. `src/content/jukebox/nightmare.md`) for quickstart Scenario 4
+- [X] T027 [US4] Manually walk quickstart.md Scenario 4; confirm long credits scroll inside popover without layout break at 320px width
 
 **Checkpoint**: Full IDEA-006 context in popover without empty chrome
 
@@ -116,11 +116,11 @@
 
 **Purpose**: Docs, contracts cross-link, full validation
 
-- [ ] T028 [P] Update `docs/artist-guide.md` — new jukebox catalog fields and chrome keys per `specs/010-track-catalog/contracts/track-catalog-content.md`
-- [ ] T029 [P] Amend `specs/004-landing-content-layout/contracts/stage-content.md` jukebox section with catalog field summary (or pointer to `010` content contract)
-- [ ] T030 [P] Add cross-reference row to `specs/009-desktop-stage-ui/contracts/desktop-hud-ui.md` for Tracks + now-playing controls (pointer to `010/contracts/track-catalog-ui.md`)
-- [ ] T031 Run `npm run check`, `npm run build`, and `npm test`
-- [ ] T032 Walk full `specs/010-track-catalog/quickstart.md` (Scenarios 1–8); explicitly confirm discography panel unchanged (FR-011); note follow-ups in plan or PR if any
+- [X] T028 [P] Update `docs/artist-guide.md` — new jukebox catalog fields and chrome keys per `specs/010-track-catalog/contracts/track-catalog-content.md`
+- [X] T029 [P] Amend `specs/004-landing-content-layout/contracts/stage-content.md` jukebox section with catalog field summary (or pointer to `010` content contract)
+- [X] T030 [P] Add cross-reference row to `specs/009-desktop-stage-ui/contracts/desktop-hud-ui.md` for Tracks + now-playing controls (pointer to `010/contracts/track-catalog-ui.md`)
+- [X] T031 Run `npm run check`, `npm run build`, and `npm test`
+- [X] T032 Walk full `specs/010-track-catalog/quickstart.md` (Scenarios 1–8); explicitly confirm discography panel unchanged (FR-011); note follow-ups in plan or PR if any
 
 ---
 

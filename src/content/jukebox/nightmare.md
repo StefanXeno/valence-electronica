@@ -1,5 +1,13 @@
 ---
 label: Nightmare
+sortDate: 2024-03-15
+blurb: Something's coming in the red of the night.
+credits:
+  - role: Producer
+    name: Valence
+  - role: Visuals
+    name: Studio Void
+mentions: Thanks to everyone who pushed this track into the red.
 themeId: nightmare-crimson
 hasAudio: true
 poster: /images/posters/nightmare.jpg

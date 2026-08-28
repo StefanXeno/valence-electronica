@@ -1,6 +1,21 @@
-export type HudIconToken = 'jukebox' | 'about' | 'lyrics' | 'discography' | 'tour';
+export type HudIconToken =
+  | 'jukebox'
+  | 'about'
+  | 'lyrics'
+  | 'discography'
+  | 'tour'
+  | 'catalog'
+  | 'info';
 
-const KNOWN: HudIconToken[] = ['jukebox', 'about', 'lyrics', 'discography', 'tour'];
+const KNOWN: HudIconToken[] = [
+  'jukebox',
+  'about',
+  'lyrics',
+  'discography',
+  'tour',
+  'catalog',
+  'info',
+];
 
 /** True when the chrome value is an emoji override rather than a token id. */
 export function isEmojiIcon(value: string): boolean {

@@ -93,6 +93,9 @@ Rules:
 - Adding a new clip: drop poster (and optional video) in `public/`, then add a
   Markdown file. New `themeId` values need a complete pack (registry + CSS — developer).
 
+**Catalog fields** (`sortDate`, `blurb`, `listenLinks`, `credits`, `mentions`): see
+`specs/010-track-catalog/contracts/track-catalog-content.md`.
+
 v1 example set:
 
 - `nightmare.md` — NIGHTMARE temp media, `default: true`,

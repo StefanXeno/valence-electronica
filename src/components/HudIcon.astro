@@ -46,6 +46,17 @@ const { token, emoji } = Astro.props;
         d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z"
       />
     </svg>
+  ) : token === 'catalog' ? (
+    <svg class="hud-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path fill="currentColor" d="M4 6h16v2H4zm0 5h16v2H4zm0 5h10v2H4z" />
+    </svg>
+  ) : token === 'info' ? (
+    <svg class="hud-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path
+        fill="currentColor"
+        d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"
+      />
+    </svg>
   ) : (
     <svg class="hud-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
       <path

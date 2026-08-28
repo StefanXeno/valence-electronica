@@ -27,6 +27,13 @@ export interface UiChrome {
   discographyIconEmoji?: string;
   tourIcon: HudIconToken;
   tourIconEmoji?: string;
+  catalogTitle: string;
+  catalogIcon: HudIconToken;
+  catalogIconEmoji?: string;
+  nowPlayingLabel: string;
+  nowPlayingIcon: HudIconToken;
+  nowPlayingIconEmoji?: string;
+  emptyCatalog: string;
 }
 
 const CHROME_FALLBACK: UiChrome = {
@@ -49,6 +56,11 @@ const CHROME_FALLBACK: UiChrome = {
   lyricsIcon: 'lyrics',
   discographyIcon: 'discography',
   tourIcon: 'tour',
+  catalogTitle: 'Tracks',
+  catalogIcon: 'catalog',
+  nowPlayingLabel: 'Track info',
+  nowPlayingIcon: 'info',
+  emptyCatalog: 'No tracks yet',
 };
 
 export interface ReleaseItem {
@@ -95,6 +107,8 @@ export async function getChrome(): Promise<UiChrome> {
       const lyrics = resolveHudIcon(entry.data.lyricsIcon, 'lyrics');
       const discography = resolveHudIcon(entry.data.discographyIcon, 'discography');
       const tour = resolveHudIcon(entry.data.tourIcon, 'tour');
+      const catalog = resolveHudIcon(entry.data.catalogIcon, 'catalog');
+      const nowPlaying = resolveHudIcon(entry.data.nowPlayingIcon, 'info');
       return {
         jukeboxIcon: jukebox.token,
         jukeboxIconEmoji: jukebox.emoji,
@@ -106,8 +120,15 @@ export async function getChrome(): Promise<UiChrome> {
         discographyIconEmoji: discography.emoji,
         tourIcon: tour.token,
         tourIconEmoji: tour.emoji,
+        catalogIcon: catalog.token,
+        catalogIconEmoji: catalog.emoji,
+        nowPlayingIcon: nowPlaying.token,
+        nowPlayingIconEmoji: nowPlaying.emoji,
       };
     })(),
+    catalogTitle: entry.data.catalogTitle?.trim() || CHROME_FALLBACK.catalogTitle,
+    nowPlayingLabel: entry.data.nowPlayingLabel?.trim() || CHROME_FALLBACK.nowPlayingLabel,
+    emptyCatalog: entry.data.emptyCatalog?.trim() || CHROME_FALLBACK.emptyCatalog,
   };
 }
 

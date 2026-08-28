@@ -1,5 +1,7 @@
 ---
 label: Show ME How
+sortDate: 2024-09-01
+blurb: Signal breaks through.
 themeId: electric-cyan
 hasAudio: true
 poster: /images/posters/show-me-how.jpg

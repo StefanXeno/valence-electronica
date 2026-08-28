@@ -1,0 +1,146 @@
+---
+import HudIcon from './HudIcon.astro';
+import type { UiChrome } from '../lib/stage';
+
+interface Props {
+  chrome: UiChrome;
+}
+
+const { chrome } = Astro.props;
+---
+
+<div class="now-playing" data-now-playing data-open="false">
+  <button
+    type="button"
+    class="now-playing__trigger glitch-hit"
+    data-now-playing-trigger
+    data-hud-label={chrome.nowPlayingLabel}
+    data-hud-label-anchor="above"
+    aria-label={chrome.nowPlayingLabel}
+    aria-expanded="false"
+    aria-haspopup="dialog"
+  >
+    <span class="visually-hidden">{chrome.nowPlayingLabel}</span>
+    <HudIcon token={chrome.nowPlayingIcon} emoji={chrome.nowPlayingIconEmoji} />
+  </button>
+  <div
+    class="now-playing__popover"
+    data-now-playing-popover
+    role="dialog"
+    aria-label={chrome.nowPlayingLabel}
+    hidden
+    tabindex="-1"
+  >
+    <p class="now-playing__title" data-now-playing-title></p>
+    <p class="now-playing__blurb" data-now-playing-blurb hidden></p>
+    <div class="now-playing__links" data-now-playing-links hidden></div>
+    <ul class="now-playing__credits" data-now-playing-credits hidden></ul>
+    <p class="now-playing__mentions" data-now-playing-mentions hidden></p>
+  </div>
+</div>
+
+<script>
+  import { initNowPlaying } from '../lib/now-playing';
+  initNowPlaying();
+</script>
+
+<style>
+  .now-playing {
+    position: relative;
+  }
+
+  .now-playing__trigger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--control-size);
+    height: var(--control-size);
+    min-width: var(--control-size);
+    min-height: var(--control-size);
+    padding: 0;
+    margin: 0;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--color-surface) 90%, transparent);
+    backdrop-filter: blur(8px);
+    color: var(--color-text);
+    cursor: pointer;
+    box-sizing: border-box;
+  }
+
+  .now-playing__trigger:hover {
+    color: var(--color-accent-alt);
+  }
+
+  .now-playing__popover {
+    position: absolute;
+    bottom: calc(100% + 0.45rem * var(--hud-scale));
+    left: 0;
+    z-index: 20;
+    width: min(calc(16rem * var(--hud-scale)), calc(100vw - 2 * var(--hud-inset)));
+    max-height: min(40svh, calc(14rem * var(--hud-scale)));
+    overflow: auto;
+    padding: calc(0.65rem * var(--hud-scale));
+    border: 1px solid var(--color-border);
+    border-radius: calc(0.85rem * var(--hud-scale));
+    background: color-mix(in srgb, var(--color-surface) 95%, transparent);
+    backdrop-filter: blur(10px);
+    box-sizing: border-box;
+    font-size: calc(0.85rem * var(--hud-scale));
+    color: var(--color-text);
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+  }
+
+  .now-playing__title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: calc(0.95rem * var(--hud-scale));
+    line-height: 1.2;
+    color: var(--color-text);
+  }
+
+  .now-playing__blurb,
+  .now-playing__mentions {
+    margin: 0;
+    font-size: calc(0.8rem * var(--hud-scale));
+    color: var(--color-text-muted);
+    line-height: 1.35;
+  }
+
+  .now-playing__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 0.65rem;
+  }
+
+  .now-playing__links :global(a) {
+    color: var(--color-text);
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+    font-size: calc(0.8rem * var(--hud-scale));
+  }
+
+  .now-playing__links :global(a:hover) {
+    color: var(--color-accent-alt);
+  }
+
+  .now-playing__credits {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    font-size: calc(0.8rem * var(--hud-scale));
+  }
+
+  .now-playing__credits :global(li span) {
+    font-family: var(--font-display);
+    color: var(--color-accent-alt);
+    font-size: calc(0.7rem * var(--hud-scale));
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+</style>

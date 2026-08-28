@@ -13,4 +13,9 @@ comingSoon: coming soon
 ticketLabel: Tickets
 introLead: "Hi I'm"
 introName: Valence
+catalogTitle: Tracks
+catalogIcon: catalog
+nowPlayingLabel: Track info
+nowPlayingIcon: info
+emptyCatalog: No tracks yet
 ---

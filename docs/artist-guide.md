@@ -47,6 +47,13 @@ filename slug is the stable id (e.g. `nightmare.md` → `nightmare`).
   schedule rule matches)
 - `poster` (required), `sources` — paths to images/video under `public/`, always starting with
   `/` (see [Media assets](#media-assets))
+- `sortDate` — release date for the **Tracks** catalog (ISO date, e.g. `2025-06-01`). Required
+  for catalog listing; missing → track still works on stage but is omitted from Tracks panel
+- `blurb` — optional one-line hook in catalog and track info popover
+- `listenLinks` — optional outbound links (`platform`: `bandcamp`, `spotify`, `youtube`,
+  `soundcloud`, or `tidal`; `url` must start with `https://`)
+- `credits` — optional list of `{ role, name }` rows (shown in track info popover)
+- `mentions` — optional thank-you line or short prose (track info popover)
 
 **Body:** Lyrics for that record (leave empty for instrumentals).
 
@@ -100,13 +107,21 @@ developer updates every reference (releases, schedule, etc.).
 
 **Controls:** Region titles, empty-state strings, jukebox/social labels, stage-button label,
 landing intro copy (`introLead`, `introName`), and optional **HUD icon overrides**
-(`jukeboxIcon`, `aboutIcon`, `lyricsIcon`, `discographyIcon`, `tourIcon`).
+(`jukeboxIcon`, `aboutIcon`, `lyricsIcon`, `discographyIcon`, `tourIcon`, `catalogIcon`,
+`nowPlayingIcon`).
+
+**Tracks catalog chrome (optional):**
+
+- `catalogTitle` — Tracks panel title (default: Tracks)
+- `nowPlayingLabel` — accessible name for the track info control beside the jukebox
+- `emptyCatalog` — message when no catalog rows exist
+- `catalogIcon` / `nowPlayingIcon` — same token or emoji override rules as other HUD icons
 
 **Icon overrides (optional):**
 
 - Leave an `*Icon` field out to use the default pictogram for that control.
-- Set a **token** to pick a built-in icon: `jukebox`, `about`, `lyrics`, `discography`, or
-  `tour`.
+- Set a **token** to pick a built-in icon: `jukebox`, `about`, `lyrics`, `discography`,
+  `tour`, `catalog`, or `info`.
 - Set a **single emoji** (e.g. `lyricsIcon: "🎤"`) to show that character instead of the
   default pictogram.
 

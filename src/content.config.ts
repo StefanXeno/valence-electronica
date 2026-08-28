@@ -41,10 +41,27 @@ const mediaSource = z.object({
   type: filledText,
 });
 
+const listenPlatform = z.enum(['bandcamp', 'spotify', 'youtube', 'soundcloud', 'tidal']);
+
+const listenLink = z.object({
+  platform: listenPlatform,
+  url: z.url(),
+});
+
+const credit = z.object({
+  role: filledText,
+  name: filledText,
+});
+
 const jukebox = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/jukebox' }),
   schema: z.object({
     label: filledText,
+    sortDate: z.coerce.date().optional(),
+    blurb: z.string().optional(),
+    listenLinks: z.array(listenLink).optional(),
+    credits: z.array(credit).optional(),
+    mentions: z.string().optional(),
     themeId: filledText.optional(),
     hasAudio: z.boolean().optional(),
     poster: publicPath,
@@ -101,6 +118,11 @@ const ui = defineCollection({
     lyricsIcon: z.string().optional(),
     discographyIcon: z.string().optional(),
     tourIcon: z.string().optional(),
+    catalogTitle: z.string().optional(),
+    catalogIcon: z.string().optional(),
+    nowPlayingLabel: z.string().optional(),
+    nowPlayingIcon: z.string().optional(),
+    emptyCatalog: z.string().optional(),
   }),
 });
 
