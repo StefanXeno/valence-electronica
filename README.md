@@ -26,6 +26,7 @@ Quick pointers:
 
 - **Site info & channels:** `src/data/site.json`
 - **Stage schedule:** `src/data/stage-schedule.json` — see [`docs/stage-schedule.md`](docs/stage-schedule.md)
+- **Tagline pool:** `src/data/tagline-pool.json` — rotating subtext under the wordmark (60 s cycle); see [`specs/012-rotating-tagline/contracts/tagline-pool.md`](specs/012-rotating-tagline/contracts/tagline-pool.md)
 - **Everything else** (jukebox, bio, releases, shows, UI copy, legal, media): see the artist guide.
 
 **Do not rename ids** (jukebox slugs, `jukeboxId`, legal slugs, `themeId`s) without developer help.

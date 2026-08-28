@@ -1,10 +1,14 @@
 ---
 import site from '../data/site.json';
 import { withBase } from '../lib/url';
+import { formatTagline, loadTaglinePool, validateTaglinePool } from '../lib/tagline-pool';
 
 const { name, tagline } = site.artist;
+validateTaglinePool(loadTaglinePool());
+
 const wordmarkSrc = withBase('/images/brand/valence-wordmark.webp');
 const wordmarkFallback = withBase('/images/brand/valence-wordmark.png');
+const fallbackTagline = formatTagline(tagline.trim());
 ---
 
 <section class="identity" aria-label={name}>
@@ -22,8 +26,24 @@ const wordmarkFallback = withBase('/images/brand/valence-wordmark.png');
       />
     </picture>
   </h1>
-  <p class="tagline glitch-hit">{tagline.replace(' for ', ' for\u00A0')}</p>
+  <p
+    class="tagline glitch-hit"
+    data-tagline-root
+    data-tagline-fallback={fallbackTagline}
+  >
+    {fallbackTagline}
+  </p>
 </section>
+
+<script>
+  import { initTaglineRotator } from '../lib/tagline-rotator';
+
+  const root = document.querySelector('[data-tagline-root]');
+  if (root instanceof HTMLElement) {
+    const fallback = root.dataset.taglineFallback ?? root.textContent ?? '';
+    initTaglineRotator(root, fallback);
+  }
+</script>
 
 <style>
   .identity {

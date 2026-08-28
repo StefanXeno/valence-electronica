@@ -1,0 +1,66 @@
+{
+  "timezone": "Europe/Berlin",
+  "lines": [
+    {
+      "text": "Something's coming for you."
+    },
+    {
+      "text": "Electronic moods from Augsburg."
+    },
+    {
+      "text": "Press play on the night."
+    },
+    {
+      "text": "Something wicked this way loops.",
+      "rules": [
+        {
+          "type": "date",
+          "on": "10-31"
+        }
+      ]
+    },
+    {
+      "text": "Unwrap the drop.",
+      "rules": [
+        {
+          "type": "range",
+          "from": "2026-12-24",
+          "to": "2026-12-26"
+        }
+      ]
+    },
+    {
+      "text": "Show me how you move.",
+      "rules": [
+        {
+          "type": "weekday",
+          "days": [5]
+        }
+      ]
+    },
+    {
+      "text": "Friday night mode.",
+      "rules": [
+        {
+          "type": "weekday",
+          "days": [5]
+        },
+        {
+          "type": "time",
+          "from": "22:00",
+          "to": "04:00"
+        }
+      ]
+    },
+    {
+      "text": "Still awake?",
+      "rules": [
+        {
+          "type": "time",
+          "from": "22:00",
+          "to": "04:00"
+        }
+      ]
+    }
+  ]
+}

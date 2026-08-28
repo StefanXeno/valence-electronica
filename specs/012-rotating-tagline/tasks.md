@@ -18,8 +18,8 @@
 
 **Purpose**: Pool data file and operator pointer before library code
 
-- [ ] T001 Create starter `src/data/tagline-pool.json` with `timezone: Europe/Berlin`, normal lines, and example easter-egg rules per `specs/012-rotating-tagline/contracts/tagline-pool.md`
-- [ ] T002 [P] Add **Tagline pool** pointer to the **Editing content** section in `README.md` (one file, 60 s rotation summary, link to contract, `npm run check` before publish)
+- [x] T001 Create starter `src/data/tagline-pool.json` with `timezone: Europe/Berlin`, normal lines, and example easter-egg rules per `specs/012-rotating-tagline/contracts/tagline-pool.md`
+- [x] T002 [P] Add **Tagline pool** pointer to the **Editing content** section in `README.md` (one file, 60 s rotation summary, link to contract, `npm run check` before publish)
 
 ---
 
@@ -29,13 +29,13 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T003 Create `src/lib/tagline-pool.ts` with types for `TaglinePool`, `TaglineLine`, and discriminated `TaglineRule` union (`date` | `range` | `weekday` | `time`) per `specs/012-rotating-tagline/data-model.md`
-- [ ] T004 Implement `berlinTimeParts(now?: Date)` and rule matchers (`matchesDateRule`, `matchesRangeRule`, `matchesWeekdayRule`, `matchesTimeRule` including cross-midnight) in `src/lib/tagline-pool.ts`; reuse `berlinCalendarParts()` from `src/lib/stage-schedule.ts`
-- [ ] T005 Implement `buildEligibleSet(pool, now)` in `src/lib/tagline-pool.ts` — all matching easter eggs in file order, else weight-expanded normal lines; return `[]` when nothing eligible
-- [ ] T006 Implement `loadTaglinePool()` and `validateTaglinePool(pool)` in `src/lib/tagline-pool.ts` with clear `lines[n]` / `rules[m]` error messages; missing or unparsable `src/data/tagline-pool.json` MUST fail at build import time (FR-010)
-- [ ] T007 Implement `formatTagline(text)` in `src/lib/tagline-pool.ts` preserving the ` for ` non-breaking space rule from `src/components/Hero.astro`
-- [ ] T008 [P] Create `src/lib/tagline-pool.test.ts` with vitest coverage for eligibility, weight expansion, validation failures, and time-window matching
-- [ ] T009 Call `validateTaglinePool(loadTaglinePool())` from the frontmatter of `src/components/Hero.astro` so `astro check` / `npm run build` fail on invalid pool data
+- [x] T003 Create `src/lib/tagline-pool.ts` with types for `TaglinePool`, `TaglineLine`, and discriminated `TaglineRule` union (`date` | `range` | `weekday` | `time`) per `specs/012-rotating-tagline/data-model.md`
+- [x] T004 Implement `berlinTimeParts(now?: Date)` and rule matchers (`matchesDateRule`, `matchesRangeRule`, `matchesWeekdayRule`, `matchesTimeRule` including cross-midnight) in `src/lib/tagline-pool.ts`; reuse `berlinCalendarParts()` from `src/lib/stage-schedule.ts`
+- [x] T005 Implement `buildEligibleSet(pool, now)` in `src/lib/tagline-pool.ts` — all matching easter eggs in file order, else weight-expanded normal lines; return `[]` when nothing eligible
+- [x] T006 Implement `loadTaglinePool()` and `validateTaglinePool(pool)` in `src/lib/tagline-pool.ts` with clear `lines[n]` / `rules[m]` error messages; missing or unparsable `src/data/tagline-pool.json` MUST fail at build import time (FR-010)
+- [x] T007 Implement `formatTagline(text)` in `src/lib/tagline-pool.ts` preserving the ` for ` non-breaking space rule from `src/components/Hero.astro`
+- [x] T008 [P] Create `src/lib/tagline-pool.test.ts` with vitest coverage for eligibility, weight expansion, validation failures, and time-window matching
+- [x] T009 Call `validateTaglinePool(loadTaglinePool())` from the frontmatter of `src/components/Hero.astro` so `astro check` / `npm run build` fail on invalid pool data
 
 **Checkpoint**: `src/lib/tagline-pool.ts` exports loader, validator, eligibility, and formatter; build validates pool; tests pass for pure logic
 
@@ -49,12 +49,12 @@
 
 ### Implementation for User Story 1
 
-- [ ] T010 [P] Create `src/styles/tagline-rotate.css` with opacity transitions for `[data-tagline-phase="out"]` and `[data-tagline-phase="in"]` (~400–600 ms each); `@media (prefers-reduced-motion: reduce)` disables transitions
-- [ ] T011 [US1] Update `src/components/Hero.astro` frontmatter to SSR-render `artist.tagline` from `src/data/site.json` on `.tagline` with `data-tagline-root`; import `src/styles/tagline-rotate.css`
-- [ ] T012 [US1] Add client `<script>` in `src/components/Hero.astro` that imports `loadTaglinePool`, `buildEligibleSet`, and `formatTagline`; on load compute eligible set, apply `eligible[0]` if non-empty, else keep SSR fallback and do not start timer (FR-008)
-- [ ] T013 [US1] Implement 60-second rotation in `src/components/Hero.astro` client script: advance index with wrap; schedule next step **60 s after** the previous transition completes (FR-006, FR-018)
-- [ ] T014 [US1] Implement sequential fade in `src/components/Hero.astro` + `src/styles/tagline-rotate.css`: phase `out` (opacity 0) → swap `textContent` → phase `in` (opacity 1) on `transitionend`; skip animation when next text equals current (FR-015, FR-017)
-- [ ] T015 [US1] Manually walk `specs/012-rotating-tagline/quickstart.md` scenarios 1–4 (60 s rotation, sequential fade, same-line skip, typography / 320px); confirm fade reads cleanly on `.tagline.glitch-hit`
+- [x] T010 [P] Create `src/styles/tagline-rotate.css` with opacity transitions for `[data-tagline-phase="out"]` and `[data-tagline-phase="in"]` (~400–600 ms each); `@media (prefers-reduced-motion: reduce)` disables transitions
+- [x] T011 [US1] Update `src/components/Hero.astro` frontmatter to SSR-render `artist.tagline` from `src/data/site.json` on `.tagline` with `data-tagline-root`; import `src/styles/tagline-rotate.css`
+- [x] T012 [US1] Add client `<script>` in `src/components/Hero.astro` that imports `loadTaglinePool`, `buildEligibleSet`, and `formatTagline`; on load compute eligible set, apply `eligible[0]` if non-empty, else keep SSR fallback and do not start timer (FR-008)
+- [x] T013 [US1] Implement 60-second rotation in `src/components/Hero.astro` client script: advance index with wrap; schedule next step **60 s after** the previous transition completes (FR-006, FR-018)
+- [x] T014 [US1] Implement sequential fade in `src/components/Hero.astro` + `src/styles/tagline-rotate.css`: phase `out` (opacity 0) → swap `textContent` → phase `in` (opacity 1) on `transitionend`; skip animation when next text equals current (FR-015, FR-017)
+- [x] T015 [US1] Manually walk `specs/012-rotating-tagline/quickstart.md` scenarios 1–4 (60 s rotation, sequential fade, same-line skip, typography / 320px); confirm fade reads cleanly on `.tagline.glitch-hit`
 
 **Checkpoint**: MVP — normal pool rotates every minute with fade; fallback when pool empty
 
@@ -68,11 +68,11 @@
 
 ### Implementation for User Story 2
 
-- [ ] T016 [US2] Add vitest assertions in `src/lib/tagline-pool.test.ts` that `buildEligibleSet()` excludes normal lines when easter eggs match and includes **all** matching easter eggs (covered by T005; this task verifies via tests + contract alignment)
-- [ ] T017 [P] [US2] Align shipped examples in `src/data/tagline-pool.json` with easter-egg scenarios in `specs/012-rotating-tagline/contracts/tagline-pool.md` (date, range, weekday, time, combined AND rules)
-- [ ] T018 [US2] Extend `src/lib/tagline-pool.test.ts` for multiple matching easter eggs, AND rule groups, and normal-pool exclusion when eggs match
-- [ ] T019 [US2] Update rotator in `src/components/Hero.astro` to recompute `buildEligibleSet()` on each tick; clamp or reset index when eligible length changes (FR-005, spec edge case rule boundaries)
-- [ ] T020 [US2] Manually walk `specs/012-rotating-tagline/quickstart.md` scenarios 5–7 (easter-egg set only, time boundary, AND rules)
+- [x] T016 [US2] Add vitest assertions in `src/lib/tagline-pool.test.ts` that `buildEligibleSet()` excludes normal lines when easter eggs match and includes **all** matching easter eggs (covered by T005; this task verifies via tests + contract alignment)
+- [x] T017 [P] [US2] Align shipped examples in `src/data/tagline-pool.json` with easter-egg scenarios in `specs/012-rotating-tagline/contracts/tagline-pool.md` (date, range, weekday, time, combined AND rules)
+- [x] T018 [US2] Extend `src/lib/tagline-pool.test.ts` for multiple matching easter eggs, AND rule groups, and normal-pool exclusion when eggs match
+- [x] T019 [US2] Update rotator in `src/components/Hero.astro` to recompute `buildEligibleSet()` on each tick; clamp or reset index when eligible length changes (FR-005, spec edge case rule boundaries)
+- [x] T020 [US2] Manually walk `specs/012-rotating-tagline/quickstart.md` scenarios 5–7 (easter-egg set only, time boundary, AND rules)
 
 **Checkpoint**: Easter eggs join rotation set; normal pool excluded while eggs match
 
@@ -86,9 +86,9 @@
 
 ### Implementation for User Story 3
 
-- [ ] T021 [US3] Verify `validateTaglinePool()` via `src/components/Hero.astro` rejects empty text, `rules: []`, bad dates/times, inverted ranges, and bad weights with indexed errors; confirm `npm run check` fails (SC-006)
-- [ ] T022 [P] [US3] Add **Tagline pool** subsection to `docs/artist-guide.md` — file path, normal vs easter-egg lines, 60 s rotation, fade behavior, weight, fallback to `site.json`, link to `specs/012-rotating-tagline/contracts/tagline-pool.md` (FR-014)
-- [ ] T023 [US3] Manually walk quickstart scenario 8 (editor changes pool only; build failure on invalid data)
+- [x] T021 [US3] Verify `validateTaglinePool()` via `src/components/Hero.astro` rejects empty text, `rules: []`, bad dates/times, inverted ranges, and bad weights with indexed errors; confirm `npm run check` fails (SC-006)
+- [x] T022 [P] [US3] Add **Tagline pool** subsection to `docs/artist-guide.md` — file path, normal vs easter-egg lines, 60 s rotation, fade behavior, weight, fallback to `site.json`, link to `specs/012-rotating-tagline/contracts/tagline-pool.md` (FR-014)
+- [x] T023 [US3] Manually walk quickstart scenario 8 (editor changes pool only; build failure on invalid data)
 
 **Checkpoint**: One-file editing workflow documented; CI guards pool quality
 
@@ -102,10 +102,10 @@
 
 ### Implementation for User Story 4
 
-- [ ] T024 [US4] Confirm `src/components/Hero.astro` without scripting renders only `site.json` tagline and never leaves subtext blank (FR-009, SC-003)
-- [ ] T025 [US4] In `src/components/Hero.astro` rotator, honor `prefers-reduced-motion: reduce` with instant text swap (no `data-tagline-phase` transitions) while keeping 60 s scheduling (FR-016)
-- [ ] T026 [US4] Add `pagehide` / teardown handler in `src/components/Hero.astro` rotator to clear timers and avoid overlapping fade sequences when leaving the page (spec edge cases)
-- [ ] T027 [US4] Manually walk `specs/012-rotating-tagline/quickstart.md` scenarios 9–11 (no-JS, reduced motion, legal overlay route with identity chrome)
+- [x] T024 [US4] Confirm `src/components/Hero.astro` without scripting renders only `site.json` tagline and never leaves subtext blank (FR-009, SC-003)
+- [x] T025 [US4] In `src/components/Hero.astro` rotator, honor `prefers-reduced-motion: reduce` with instant text swap (no `data-tagline-phase` transitions) while keeping 60 s scheduling (FR-016)
+- [x] T026 [US4] Add `pagehide` / teardown handler in `src/components/Hero.astro` rotator to clear timers and avoid overlapping fade sequences when leaving the page (spec edge cases)
+- [x] T027 [US4] Manually walk `specs/012-rotating-tagline/quickstart.md` scenarios 9–11 (no-JS, reduced motion, legal overlay route with identity chrome)
 
 **Checkpoint**: Accessible degradation paths verified; no timer leaks
 
@@ -115,9 +115,9 @@
 
 **Purpose**: Full validation, CI green, docs alignment
 
-- [ ] T028 [P] Smoke-test landing with rotator active: jukebox pick, intro skip/replay, theme/atmosphere, and mute unchanged (FR-013); run full `specs/012-rotating-tagline/quickstart.md` checklist and fix gaps in `src/lib/tagline-pool.ts`, `src/components/Hero.astro`, or `src/styles/tagline-rotate.css`
-- [ ] T029 [P] Run `npm run check`, `npm run build`, and `npm test` from repository root; fix type, integration, or test regressions
-- [ ] T030 [P] Update `README.md` **Editing content** if operator steps changed during implementation
+- [x] T028 [P] Smoke-test landing with rotator active: jukebox pick, intro skip/replay, theme/atmosphere, and mute unchanged (FR-013); run full `specs/012-rotating-tagline/quickstart.md` checklist and fix gaps in `src/lib/tagline-pool.ts`, `src/components/Hero.astro`, or `src/styles/tagline-rotate.css`
+- [x] T029 [P] Run `npm run check`, `npm run build`, and `npm test` from repository root; fix type, integration, or test regressions
+- [x] T030 [P] Update `README.md` **Editing content** if operator steps changed during implementation
 
 ---
 
@@ -205,7 +205,7 @@ T017: Expand easter-egg examples in src/data/tagline-pool.json
 - SSR always prerender `site.json` tagline; expect brief correction when first pool line differs (plan Complexity Tracking)
 - Production rotation interval is **60 seconds**; dev-only shorter interval is optional YAGNI (research R14)
 - `[P]` tasks touching `src/lib/tagline-pool.ts` still require sequential edits within that file unless split by exported functions after T003
-- Sequential tasks on `src/components/Hero.astro` client script: T012 → T013 → T014 → T019 → T025 → T026
+- Sequential tasks on rotator: `src/lib/tagline-rotator.ts` (imported from `Hero.astro`)
 
 ---
 

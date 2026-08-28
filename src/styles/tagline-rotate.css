@@ -1,0 +1,32 @@
+/* Identity subtext rotation — sequential fade (012-rotating-tagline). */
+
+.tagline[data-tagline-phase] {
+  transition: opacity 0.5s ease;
+}
+
+.tagline[data-tagline-phase='out'] {
+  opacity: 0;
+}
+
+.tagline[data-tagline-phase='in'] {
+  opacity: 0;
+  animation: tagline-fade-in 0.5s ease forwards;
+}
+
+@keyframes tagline-fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tagline[data-tagline-phase] {
+    transition: none !important;
+    animation: none !important;
+    opacity: 1 !important;
+  }
+}

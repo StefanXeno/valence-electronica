@@ -190,6 +190,27 @@ syntax and examples. Here: edit **only** this JSON file to retime defaults; run
 
 ---
 
+### Tagline pool (rotating subtext)
+
+**File:** [`src/data/tagline-pool.json`](../src/data/tagline-pool.json)
+
+**Controls:** Short hooks under the Valence wordmark. The site rotates through **normal**
+lines every **60 seconds** (fade out, then fade in). **Easter-egg** lines with schedule
+rules can replace the normal pool on matching days or times (Europe/Berlin).
+
+**Fallback:** If nothing matches, the site shows `artist.tagline` from
+[`src/data/site.json`](../src/data/site.json) (also used when JavaScript is off).
+
+**Rule syntax:** [`specs/012-rotating-tagline/contracts/tagline-pool.md`](../specs/012-rotating-tagline/contracts/tagline-pool.md)
+
+**Tips:**
+
+- Normal line: `{ "text": "Your hook." }` — optional `"weight": 2` for more airtime per cycle.
+- Easter egg: add `"rules": [ … ]` (date, range, weekday, and/or time windows).
+- Keep hooks short (one line on desktop). Run `npm run check` after edits.
+
+---
+
 ### Media assets
 
 **Folders:**
@@ -380,6 +401,7 @@ Some areas have a **deeper how-to** (this hub stays the inventory; details live 
 | Topic | Guide |
 |-------|--------|
 | Stage schedule rules | [`docs/stage-schedule.md`](stage-schedule.md) |
+| Tagline pool (rotating subtext) | [`specs/012-rotating-tagline/contracts/tagline-pool.md`](../specs/012-rotating-tagline/contracts/tagline-pool.md) |
 
 When a topic guide and this hub mention the same file, use the **same path** — the topic
 guide owns step-by-step detail.
