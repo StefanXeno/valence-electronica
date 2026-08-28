@@ -1,5 +1,7 @@
 import { getCollection, getEntry } from 'astro:content';
 
+import { resolveHudIcon, type HudIconToken } from './hud-icons';
+
 export interface UiChrome {
   aboutTitle: string;
   lyricsTitle: string;
@@ -15,6 +17,16 @@ export interface UiChrome {
   ticketLabel: string;
   introLead: string;
   introName: string;
+  jukeboxIcon: HudIconToken;
+  jukeboxIconEmoji?: string;
+  aboutIcon: HudIconToken;
+  aboutIconEmoji?: string;
+  lyricsIcon: HudIconToken;
+  lyricsIconEmoji?: string;
+  discographyIcon: HudIconToken;
+  discographyIconEmoji?: string;
+  tourIcon: HudIconToken;
+  tourIconEmoji?: string;
 }
 
 const CHROME_FALLBACK: UiChrome = {
@@ -32,6 +44,11 @@ const CHROME_FALLBACK: UiChrome = {
   ticketLabel: 'Tickets',
   introLead: "Hi I'm",
   introName: 'Valence',
+  jukeboxIcon: 'jukebox',
+  aboutIcon: 'about',
+  lyricsIcon: 'lyrics',
+  discographyIcon: 'discography',
+  tourIcon: 'tour',
 };
 
 export interface ReleaseItem {
@@ -72,6 +89,25 @@ export async function getChrome(): Promise<UiChrome> {
     ticketLabel: entry.data.ticketLabel?.trim() || CHROME_FALLBACK.ticketLabel,
     introLead: entry.data.introLead?.trim() || CHROME_FALLBACK.introLead,
     introName: entry.data.introName?.trim() || CHROME_FALLBACK.introName,
+    ...(() => {
+      const jukebox = resolveHudIcon(entry.data.jukeboxIcon, 'jukebox');
+      const about = resolveHudIcon(entry.data.aboutIcon, 'about');
+      const lyrics = resolveHudIcon(entry.data.lyricsIcon, 'lyrics');
+      const discography = resolveHudIcon(entry.data.discographyIcon, 'discography');
+      const tour = resolveHudIcon(entry.data.tourIcon, 'tour');
+      return {
+        jukeboxIcon: jukebox.token,
+        jukeboxIconEmoji: jukebox.emoji,
+        aboutIcon: about.token,
+        aboutIconEmoji: about.emoji,
+        lyricsIcon: lyrics.token,
+        lyricsIconEmoji: lyrics.emoji,
+        discographyIcon: discography.token,
+        discographyIconEmoji: discography.emoji,
+        tourIcon: tour.token,
+        tourIconEmoji: tour.emoji,
+      };
+    })(),
   };
 }
 

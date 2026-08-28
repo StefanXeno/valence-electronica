@@ -7,12 +7,10 @@ html[data-intro-pending] .page-shell > footer,
 html[data-intro-active] .page-shell > footer,
 html[data-intro-pending] .stage__identity,
 html[data-intro-pending] .stage__socials,
-html[data-intro-pending] .stage__jukebox,
-html[data-intro-pending] .stage__panels,
+html[data-intro-pending] .stage-dock,
 html[data-intro-active] .stage__identity,
 html[data-intro-active] .stage__socials,
-html[data-intro-active] .stage__jukebox,
-html[data-intro-active] .stage__panels {
+html[data-intro-active] .stage-dock {
   pointer-events: none !important;
 }
 

@@ -31,6 +31,8 @@ const channels = site.channels.map((channel) => {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={channel.label}
+                data-hud-label={channel.label}
+                title={channel.label}
               >
                 <ChannelIcon id={channel.id} label={channel.label} />
               </a>

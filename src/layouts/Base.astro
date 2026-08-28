@@ -70,6 +70,11 @@ const indexable = site.seo.indexable && !isPreview;
     {showMute && <MuteControl />}
     <LegalOverlay />
     <GlitchPress />
+    <div id="hud-label-reveal" class="hud-label-reveal" aria-hidden="true" hidden></div>
+    <script>
+      import { initLabelReveal } from '../lib/label-reveal';
+      initLabelReveal();
+    </script>
   </body>
 </html>
 

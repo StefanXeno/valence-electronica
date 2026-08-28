@@ -4,6 +4,7 @@ import Hero from '../components/Hero.astro';
 import Channels from '../components/Channels.astro';
 import Jukebox from '../components/Jukebox.astro';
 import StagePanels from '../components/StagePanels.astro';
+import StageDock from '../components/StageDock.astro';
 import LandingIntro from '../components/LandingIntro.astro';
 import { getChrome } from '../lib/stage';
 
@@ -19,11 +20,13 @@ const chrome = await getChrome();
     <div class="stage__socials">
       <Channels />
     </div>
-    <div class="stage__jukebox">
-      <Jukebox />
-    </div>
-    <div class="stage__panels">
-      <StagePanels />
-    </div>
+    <StageDock>
+      <div slot="jukebox">
+        <Jukebox />
+      </div>
+      <div slot="panels">
+        <StagePanels />
+      </div>
+    </StageDock>
   </div>
 </Base>

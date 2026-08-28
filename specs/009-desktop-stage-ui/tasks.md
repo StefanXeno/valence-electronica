@@ -18,9 +18,9 @@
 
 **Purpose**: Extend chrome content model for icon tokens before UI refactor
 
-- [ ] T001 Add optional `jukeboxIcon`, `aboutIcon`, `lyricsIcon`, `discographyIcon`, and `tourIcon` fields to `src/content/ui/chrome.md` (omit or leave defaults — see `specs/009-desktop-stage-ui/data-model.md`)
-- [ ] T002 [P] Extend `ui` collection Zod schema in `src/content.config.ts` with optional string fields for the five `*Icon` keys
-- [ ] T003 Extend `getChrome()` and `UiChrome` type in `src/lib/stage.ts` to expose icon tokens with shipped defaults when fields are omitted (`jukebox`, `about`, `lyrics`, `discography`, `tour`)
+- [x] T001 Add optional `jukeboxIcon`, `aboutIcon`, `lyricsIcon`, `discographyIcon`, and `tourIcon` fields to `src/content/ui/chrome.md` (omit or leave defaults — see `specs/009-desktop-stage-ui/data-model.md`)
+- [x] T002 [P] Extend `ui` collection Zod schema in `src/content.config.ts` with optional string fields for the five `*Icon` keys
+- [x] T003 Extend `getChrome()` and `UiChrome` type in `src/lib/stage.ts` to expose icon tokens with shipped defaults when fields are omitted (`jukebox`, `about`, `lyrics`, `discography`, `tour`)
 
 ---
 
@@ -30,11 +30,11 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T004 [P] Create `src/components/HudIcon.astro` — map known tokens to inline SVG; render emoji when chrome value is a non-ASCII grapheme override
-- [ ] T005 Create `src/components/StageDock.astro` with root `class="stage-dock"` — bottom horizontal dock with left segment (jukebox slot) and right segment (on-demand row + mute trail) per `specs/009-desktop-stage-ui/contracts/desktop-hud-ui.md`
-- [ ] T006 Refactor stage layout in `src/styles/global.css` — three-band shell (top identity/socials, bottom dock, footer band); remove bottom-right vertical panel stack positioning; keep 320px no horizontal scroll
-- [ ] T007 Refactor `src/pages/index.astro` to compose `StageDock`, mount jukebox/panels/mute inside dock slots, and keep `LandingIntro` unchanged
-- [ ] T008 [P] Update intro hide selectors in `src/styles/intro.css` if stage slot class names or structure change in T007
+- [x] T004 [P] Create `src/components/HudIcon.astro` — map known tokens to inline SVG; render emoji when chrome value is a non-ASCII grapheme override
+- [x] T005 Create `src/components/StageDock.astro` with root `class="stage-dock"` — bottom horizontal dock with left segment (jukebox slot) and right segment (on-demand row + mute trail) per `specs/009-desktop-stage-ui/contracts/desktop-hud-ui.md`
+- [x] T006 Refactor stage layout in `src/styles/global.css` — three-band shell (top identity/socials, bottom dock, footer band); remove bottom-right vertical panel stack positioning; keep 320px no horizontal scroll
+- [x] T007 Refactor `src/pages/index.astro` to compose `StageDock`, mount jukebox/panels/mute inside dock slots, and keep `LandingIntro` unchanged
+- [x] T008 [P] Update intro hide selectors in `src/styles/intro.css` if stage slot class names or structure change in T007
 
 **Checkpoint**: `npm run check` passes; landing loads with dock shell even if controls still show legacy text summaries
 
@@ -48,11 +48,11 @@
 
 ### Implementation for User Story 1
 
-- [ ] T009 [US1] Refactor `src/components/StagePanels.astro` — icon-only `<summary>` via `HudIcon`; visually hidden accessible labels from chrome titles; horizontal flex row in dock right segment; panel bodies expand from dock edge
-- [ ] T010 [US1] Refactor `src/components/Jukebox.astro` — icon-first collapsed trigger in dock left segment (vinyl token default); hide permanent text label at rest; keep existing switch/morph logic
-- [ ] T011 [P] [US1] Tune `src/components/Hero.astro` and `src/components/Channels.astro` plus top-band rules in `src/styles/global.css` for matched identity/social visual weight
-- [ ] T012 [US1] Constrain open panel max dimensions and internal scroll in `src/components/StagePanels.astro` / `src/styles/global.css` so bodies stay peripheral
-- [ ] T013 [US1] Manually walk quickstart.md §1 (symmetric minimal stage) and fix dock spacing until SC-001 visual review passes
+- [x] T009 [US1] Refactor `src/components/StagePanels.astro` — icon-only `<summary>` via `HudIcon`; visually hidden accessible labels from chrome titles; horizontal flex row in dock right segment; panel bodies expand from dock edge
+- [x] T010 [US1] Refactor `src/components/Jukebox.astro` — icon-first collapsed trigger in dock left segment (vinyl token default); hide permanent text label at rest; keep existing switch/morph logic
+- [x] T011 [P] [US1] Tune `src/components/Hero.astro` and `src/components/Channels.astro` plus top-band rules in `src/styles/global.css` for matched identity/social visual weight
+- [x] T012 [US1] Constrain open panel max dimensions and internal scroll in `src/components/StagePanels.astro` / `src/styles/global.css` so bodies stay peripheral
+- [x] T013 [US1] Manually walk quickstart.md §1 (symmetric minimal stage) and fix dock spacing until SC-001 visual review passes
 
 **Checkpoint**: MVP — desktop stage reads balanced and icon-minimal at rest
 
@@ -66,11 +66,11 @@
 
 ### Implementation for User Story 2
 
-- [ ] T014 [P] [US2] Create `src/lib/label-reveal.ts` — mount lifecycle, position floater at control center, animate `translateX` toward viewport horizontal center, teardown on leave/blur; reduced-motion branch (fade near control)
-- [ ] T015 [US2] Add `#hud-label-reveal` mount point in `src/layouts/Base.astro` and initialize `label-reveal.ts` on landing pages only
-- [ ] T016 [US2] Add `data-hud-label` hooks and label text to dock triggers in `src/components/StagePanels.astro`, `src/components/Jukebox.astro`, and social links in `src/components/Channels.astro`
-- [ ] T017 [US2] Add floater styles in `src/styles/global.css` (z-index above dock, readable contrast, motion via `@media (prefers-reduced-motion)`)
-- [ ] T018 [US2] Manually walk quickstart.md §2 including reduced-motion and a `lyricsTitle` edit in `src/content/ui/chrome.md` rebuild smoke test
+- [x] T014 [P] [US2] Create `src/lib/label-reveal.ts` — mount lifecycle, position floater at control center, animate `translateX` toward viewport horizontal center, teardown on leave/blur; reduced-motion branch (fade near control)
+- [x] T015 [US2] Add `#hud-label-reveal` mount point in `src/layouts/Base.astro` and initialize `label-reveal.ts` on landing pages only
+- [x] T016 [US2] Add `data-hud-label` hooks and label text to dock triggers in `src/components/StagePanels.astro`, `src/components/Jukebox.astro`, and social links in `src/components/Channels.astro`
+- [x] T017 [US2] Add floater styles in `src/styles/global.css` (z-index above dock, readable contrast, motion via `@media (prefers-reduced-motion)`)
+- [x] T018 [US2] Manually walk quickstart.md §2 including reduced-motion and a `lyricsTitle` edit in `src/content/ui/chrome.md` rebuild smoke test
 
 **Checkpoint**: Label reveal works on all HUD icon controls without permanent text chrome
 
@@ -84,9 +84,9 @@
 
 ### Implementation for User Story 3
 
-- [ ] T019 [US3] Refactor `src/components/Footer.astro` — bottom-center cluster (`left: 50%`, flex row, transparent) per `specs/009-desktop-stage-ui/contracts/desktop-hud-ui.md`
-- [ ] T020 [US3] Adjust `--hud-footer`, dock bottom inset, and mute trailing position in `src/styles/global.css` so footer clears jukebox and mute hit targets at 1280×800
-- [ ] T021 [US3] Manually walk quickstart.md §3 (legal overlay from centered footer)
+- [x] T019 [US3] Refactor `src/components/Footer.astro` — bottom-center cluster (`left: 50%`, flex row, transparent) per `specs/009-desktop-stage-ui/contracts/desktop-hud-ui.md`
+- [x] T020 [US3] Adjust `--hud-footer`, dock bottom inset, and mute trailing position in `src/styles/global.css` so footer clears jukebox and mute hit targets at 1280×800
+- [x] T021 [US3] Manually walk quickstart.md §3 (legal overlay from centered footer)
 
 **Checkpoint**: Footer meets FR-006 / SC-003
 
@@ -100,9 +100,9 @@
 
 ### Implementation for User Story 4
 
-- [ ] T022 [US4] Add `data-glitch-live` to on-demand `<details>` summaries in `src/components/StagePanels.astro` (and jukebox trigger if not already live-safe)
-- [ ] T023 [US4] Extend live-safe selector block in `src/styles/glitch.css` so `.stage-dock details.glitch-hit.is-glitching` (and hover) use `ui-glitch-live-*` keyframes; confirm summary keeps `pointer-events: auto`
-- [ ] T024 [US4] Manually walk quickstart.md §4 — zero failed activations during active glitch (SC-004)
+- [x] T022 [US4] Add `data-glitch-live` to on-demand `<details>` summaries in `src/components/StagePanels.astro` (and jukebox trigger if not already live-safe)
+- [x] T023 [US4] Extend live-safe selector block in `src/styles/glitch.css` so `.stage-dock details.glitch-hit.is-glitching` (and hover) use `ui-glitch-live-*` keyframes; confirm summary keeps `pointer-events: auto`
+- [x] T024 [US4] Manually walk quickstart.md §4 — zero failed activations during active glitch (SC-004)
 
 **Checkpoint**: FR-008 satisfied on all dock HUD triggers
 
@@ -116,10 +116,10 @@
 
 ### Implementation for User Story 5
 
-- [ ] T025 [US5] Verify and fix exclusive-open listener in `src/components/StagePanels.astro` after dock refactor (at most one panel open when scripting available)
-- [ ] T026 [US5] Verify jukebox switch, lyrics follow active entry, and mute visibility in `src/components/Jukebox.astro`, `src/components/LyricsPanel.astro`, and `src/components/MuteControl.astro` — fix regressions only
-- [ ] T027 [US5] Verify discography stage button and tour empty states in `src/components/Discography.astro` and `src/components/TourDates.astro` still work from dock-open panels
-- [ ] T028 [US5] Manually walk quickstart.md §5 (`004` regression matrix)
+- [x] T025 [US5] Verify and fix exclusive-open listener in `src/components/StagePanels.astro` after dock refactor (at most one panel open when scripting available)
+- [x] T026 [US5] Verify jukebox switch, lyrics follow active entry, and mute visibility in `src/components/Jukebox.astro`, `src/components/LyricsPanel.astro`, and `src/components/MuteControl.astro` — fix regressions only
+- [x] T027 [US5] Verify discography stage button and tour empty states in `src/components/Discography.astro` and `src/components/TourDates.astro` still work from dock-open panels
+- [x] T028 [US5] Manually walk quickstart.md §5 (`004` regression matrix)
 
 **Checkpoint**: SC-005 — all legacy stage behaviors pass on desktop
 
@@ -129,11 +129,11 @@
 
 **Purpose**: Docs, contract cross-links, build gates, full quickstart
 
-- [ ] T029 [P] Confirm desktop supersession note and layout-row footnotes in `specs/004-landing-content-layout/contracts/stage-ui.md` point to `specs/009-desktop-stage-ui/contracts/desktop-hud-ui.md`
-- [ ] T030 [P] Confirm live-safe dock amendment in `specs/003-ui-glitch/contracts/glitch-ui.md` (add if missing)
-- [ ] T031 [P] Update `docs/artist-guide.md` — document optional `*Icon` fields in `src/content/ui/chrome.md` (constitution VII)
-- [ ] T032 Run `npm run check` and `npm run build` from repository root
-- [ ] T033 Manually walk full `specs/009-desktop-stage-ui/quickstart.md` (all sections, optional emoji override, and 320px load smoke — no horizontal scroll, content reachable)
+- [x] T029 [P] Confirm desktop supersession note and layout-row footnotes in `specs/004-landing-content-layout/contracts/stage-ui.md` point to `specs/009-desktop-stage-ui/contracts/desktop-hud-ui.md`
+- [x] T030 [P] Confirm live-safe dock amendment in `specs/003-ui-glitch/contracts/glitch-ui.md` (add if missing)
+- [x] T031 [P] Update `docs/artist-guide.md` — document optional `*Icon` fields in `src/content/ui/chrome.md` (constitution VII)
+- [x] T032 Run `npm run check` and `npm run build` from repository root
+- [x] T033 Manually walk full `specs/009-desktop-stage-ui/quickstart.md` (all sections, optional emoji override, and 320px load smoke — no horizontal scroll, content reachable)
 
 ---
 

@@ -12,7 +12,7 @@
   --control-size: calc(3.1rem * var(--hud-scale));
   --hud-inset: calc(0.75rem * var(--hud-scale));
   --hud-footer: calc(2.4rem * var(--hud-scale));
-  --hud-mute: calc(5.5rem * var(--hud-scale));
+  --hud-dock-bottom: calc(var(--hud-footer) + 0.2rem);
 }
 
 *,
@@ -90,8 +90,7 @@ a {
 
 .stage__identity,
 .stage__socials,
-.stage__jukebox,
-.stage__panels {
+.stage-dock {
   pointer-events: auto;
   position: fixed;
   z-index: 2;
@@ -100,23 +99,74 @@ a {
 .stage__identity {
   top: var(--hud-inset);
   left: var(--hud-inset);
-  max-width: min(calc(18rem * var(--hud-scale)), calc(100vw - 10rem));
+  max-width: min(calc(16rem * var(--hud-scale)), calc(100vw - 10rem));
 }
 
 .stage__socials {
   top: var(--hud-inset);
   right: var(--hud-inset);
-  max-width: calc(100vw - 7.5rem);
+  max-width: min(calc(50vw - var(--hud-inset)), calc(100vw - 7.5rem));
 }
 
-.stage__jukebox {
+.stage-dock {
   left: var(--hud-inset);
-  bottom: var(--hud-footer);
-  max-width: min(16rem, calc(100vw - 2 * var(--hud-inset)));
+  right: var(--hud-inset);
+  bottom: var(--hud-dock-bottom);
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: calc(0.75rem * var(--hud-scale));
+  pointer-events: none;
 }
 
-.stage__panels {
-  right: var(--space-m);
-  bottom: var(--hud-mute);
-  width: min(calc(14rem * var(--hud-scale)), calc(100vw - 2 * var(--hud-inset)));
+.stage-dock__left,
+.stage-dock__right {
+  pointer-events: auto;
+  display: flex;
+  align-items: flex-end;
+  gap: calc(0.35rem * var(--hud-scale));
+}
+
+.stage-dock__right {
+  flex: 1 1 auto;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  max-width: min(calc(100% - var(--control-size) - 1rem), 100%);
+}
+
+/* Floating HUD label reveal (009-desktop-stage-ui) */
+.hud-label-reveal {
+  position: fixed;
+  z-index: 5;
+  margin: 0;
+  padding: 0.25em 0.65em;
+  border-radius: 0.35rem;
+  background: color-mix(in srgb, var(--color-surface) 92%, transparent);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  font-family: var(--font-display);
+  font-size: calc(0.72rem * var(--hud-scale));
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition:
+    opacity 120ms ease,
+    transform 420ms cubic-bezier(0.33, 1, 0.38, 1);
+  text-shadow: 0 1px 10px var(--bg-scrim);
+}
+
+.hud-label-reveal.is-visible {
+  opacity: 1;
+}
+
+.hud-label-reveal.is-reduced {
+  transition: opacity 120ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hud-label-reveal {
+    transition: opacity 120ms ease;
+  }
 }

@@ -96,6 +96,11 @@ const ui = defineCollection({
     ticketLabel: z.string().optional(),
     introLead: z.string().optional(),
     introName: z.string().optional(),
+    jukeboxIcon: z.string().optional(),
+    aboutIcon: z.string().optional(),
+    lyricsIcon: z.string().optional(),
+    discographyIcon: z.string().optional(),
+    tourIcon: z.string().optional(),
   }),
 });
 

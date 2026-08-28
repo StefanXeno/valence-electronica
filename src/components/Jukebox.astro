@@ -2,6 +2,7 @@
 import { getBackgroundConfig } from '../lib/background';
 import { getChrome } from '../lib/stage';
 import { withBase } from '../lib/url';
+import HudIcon from './HudIcon.astro';
 
 const chrome = await getChrome();
 const { videos, defaultVideoId, schedule } = await getBackgroundConfig();
@@ -29,53 +30,14 @@ const catalog = videos.map((entry) => ({
         class="jukebox__toggle glitch-hit"
         data-jukebox-toggle
         data-glitch-live
+        data-hud-label={chrome.jukeboxLabel}
+        title={chrome.jukeboxLabel}
         aria-label={chrome.jukeboxLabel}
       >
-        <svg
-          class="jukebox__icon"
-          viewBox="0 0 24 24"
-          width="33"
-          height="33"
-          aria-hidden="true"
-          focusable="false"
-        >
-          <path
-            fill="currentColor"
-            fill-rule="evenodd"
-            d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 8.15a1.85 1.85 0 1 0 0 3.7 1.85 1.85 0 0 0 0-3.7z"
-          ></path>
-          <circle
-            cx="12"
-            cy="12"
-            r="7.45"
-            fill="none"
-            stroke="var(--color-bg)"
-            stroke-width="0.55"
-            opacity="0.5"
-          ></circle>
-          <circle
-            cx="12"
-            cy="12"
-            r="5.55"
-            fill="none"
-            stroke="var(--color-bg)"
-            stroke-width="0.55"
-            opacity="0.5"
-          ></circle>
-          <circle
-            cx="12"
-            cy="12"
-            r="3.7"
-            fill="none"
-            stroke="var(--color-bg)"
-            stroke-width="0.55"
-            opacity="0.5"
-          ></circle>
-        </svg>
+        <HudIcon token={chrome.jukeboxIcon} emoji={chrome.jukeboxIconEmoji} />
       </summary>
       <div class="jukebox__panel">
-        <p class="jukebox__heading" id="jukebox-heading">{chrome.jukeboxLabel}</p>
-        <div class="jukebox__list" role="group" aria-labelledby="jukebox-heading">
+        <div class="jukebox__list" role="group" aria-label={chrome.jukeboxLabel}>
           {videos.map((entry) => (
             <button
               type="button"
@@ -228,12 +190,6 @@ const catalog = videos.map((entry) => ({
     color: var(--color-accent-alt);
   }
 
-  .jukebox__icon {
-    display: block;
-    width: calc(22px * var(--hud-scale));
-    height: calc(22px * var(--hud-scale));
-  }
-
   .jukebox__panel {
     width: 0;
     max-width: 0;
@@ -252,17 +208,8 @@ const catalog = videos.map((entry) => ({
     overflow-x: hidden;
     overflow-y: auto;
     pointer-events: auto;
-    padding: 0 0.15rem 0.35rem;
+    padding: 0.35rem 0.15rem 0.35rem;
     box-sizing: border-box;
-  }
-
-  .jukebox__heading {
-    margin: 0 0 0.35rem;
-    font-family: var(--font-display);
-    font-size: calc(0.65rem * var(--hud-scale));
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--color-text-muted);
   }
 
   .jukebox__list {

@@ -3,6 +3,7 @@ import AboutPanel from './AboutPanel.astro';
 import LyricsPanel from './LyricsPanel.astro';
 import Discography from './Discography.astro';
 import TourDates from './TourDates.astro';
+import HudIcon from './HudIcon.astro';
 import { getBackgroundConfig } from '../lib/background';
 import { getAboutEntry, getChrome } from '../lib/stage';
 
@@ -16,28 +17,43 @@ const [chrome, about, { defaultVideoId }] = await Promise.all([
 <div class="stage-panels" data-stage-panels>
   {
     about && (
-      <details class="glitch-hit">
-        <summary>{chrome.aboutTitle}</summary>
+      <details class="stage-panel glitch-hit" data-glitch-live>
+        <summary
+          data-hud-label={chrome.aboutTitle}
+          title={chrome.aboutTitle}
+        >
+          <span class="visually-hidden">{chrome.aboutTitle}</span>
+          <HudIcon token={chrome.aboutIcon} emoji={chrome.aboutIconEmoji} />
+        </summary>
         <div class="stage-panel__body">
           <AboutPanel />
         </div>
       </details>
     )
   }
-  <details class="glitch-hit">
-    <summary>{chrome.lyricsTitle}</summary>
+  <details class="stage-panel glitch-hit" data-glitch-live>
+    <summary data-hud-label={chrome.lyricsTitle} title={chrome.lyricsTitle}>
+      <span class="visually-hidden">{chrome.lyricsTitle}</span>
+      <HudIcon token={chrome.lyricsIcon} emoji={chrome.lyricsIconEmoji} />
+    </summary>
     <div class="stage-panel__body">
       <LyricsPanel chrome={chrome} />
     </div>
   </details>
-  <details class="glitch-hit">
-    <summary>{chrome.discographyTitle}</summary>
+  <details class="stage-panel glitch-hit" data-glitch-live>
+    <summary data-hud-label={chrome.discographyTitle} title={chrome.discographyTitle}>
+      <span class="visually-hidden">{chrome.discographyTitle}</span>
+      <HudIcon token={chrome.discographyIcon} emoji={chrome.discographyIconEmoji} />
+    </summary>
     <div class="stage-panel__body">
       <Discography chrome={chrome} defaultId={defaultVideoId} />
     </div>
   </details>
-  <details class="glitch-hit">
-    <summary>{chrome.tourTitle}</summary>
+  <details class="stage-panel glitch-hit" data-glitch-live>
+    <summary data-hud-label={chrome.tourTitle} title={chrome.tourTitle}>
+      <span class="visually-hidden">{chrome.tourTitle}</span>
+      <HudIcon token={chrome.tourIcon} emoji={chrome.tourIconEmoji} />
+    </summary>
     <div class="stage-panel__body">
       <TourDates chrome={chrome} />
     </div>
@@ -68,26 +84,38 @@ const [chrome, about, { defaultVideoId }] = await Promise.all([
 <style>
   .stage-panels {
     display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0.35rem;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: flex-end;
+    gap: calc(0.35rem * var(--hud-scale));
   }
 
-  details {
+  .stage-panel {
+    position: relative;
     overflow: visible;
+    margin: 0;
+    width: var(--control-size);
     border: 1px solid var(--color-border);
-    border-radius: 0.55rem;
+    border-radius: 999px;
     background: color-mix(in srgb, var(--color-surface) 90%, transparent);
     backdrop-filter: blur(8px);
   }
 
+  .stage-panel[open] {
+    border-radius: calc(0.85rem * var(--hud-scale));
+    width: min(calc(14rem * var(--hud-scale)), calc(100vw - 2 * var(--hud-inset)));
+    max-width: min(calc(14rem * var(--hud-scale)), calc(100vw - 2 * var(--hud-inset)));
+  }
+
   summary {
+    display: inline-grid;
+    place-items: center;
+    width: var(--control-size);
+    height: var(--control-size);
     cursor: pointer;
-    padding: 0.45em 0.75em;
-    font-family: var(--font-display);
-    font-size: calc(0.75rem * var(--hud-scale));
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+    padding: 0;
+    margin: 0;
     color: var(--color-text);
     list-style: none;
   }
@@ -100,12 +128,20 @@ const [chrome, about, { defaultVideoId }] = await Promise.all([
     display: none;
   }
 
+  summary:hover {
+    color: var(--color-accent-alt);
+  }
+
   .stage-panel__body {
     padding: 0 0.75em 0.75em;
     max-height: min(30svh, calc(11rem * var(--hud-scale)));
     overflow: auto;
     font-size: calc(0.9rem * var(--hud-scale));
     color: var(--color-text);
+  }
+
+  .stage-panel:not([open]) .stage-panel__body {
+    display: none;
   }
 
   .stage-panel__body :global(p) {

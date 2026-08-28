@@ -99,7 +99,19 @@ developer updates every reference (releases, schedule, etc.).
 **File:** [`src/content/ui/chrome.md`](../src/content/ui/chrome.md)
 
 **Controls:** Region titles, empty-state strings, jukebox/social labels, stage-button label,
-and landing intro copy (`introLead`, `introName`). Empty `introName` disables the landing intro.
+landing intro copy (`introLead`, `introName`), and optional **HUD icon overrides**
+(`jukeboxIcon`, `aboutIcon`, `lyricsIcon`, `discographyIcon`, `tourIcon`).
+
+**Icon overrides (optional):**
+
+- Leave an `*Icon` field out to use the default pictogram for that control.
+- Set a **token** to pick a built-in icon: `jukebox`, `about`, `lyrics`, `discography`, or
+  `tour`.
+- Set a **single emoji** (e.g. `lyricsIcon: "🎤"`) to show that character instead of the
+  default pictogram.
+
+**Do not break:** Region title fields (`aboutTitle`, `lyricsTitle`, etc.) still control the
+readable label on hover/focus and for accessibility — icons are visual only.
 
 ---
 
