@@ -24,9 +24,21 @@ export interface CatalogTrack {
   title: string;
   sortDate: Date;
   blurb?: string;
+  kind?: string;
   listenLinks: ListenLink[];
   credits: Credit[];
   mentions?: string;
+}
+
+/** Discography row derived from a jukebox file (single source of truth). */
+export interface DiscographyEntry {
+  id: string;
+  title: string;
+  year: number;
+  kind?: string;
+  url?: string;
+  /** Stage id when this release can be played on stage (same as id). */
+  jukeboxId?: string;
 }
 
 export const PLATFORM_LABELS: Record<ListenPlatform, string> = {
@@ -70,6 +82,16 @@ export function parseListenLinks(
     links.push({ platform, url: row.url, label: PLATFORM_LABELS[platform] });
   }
   return links;
+}
+
+/** Prefer Bandcamp for discography title links, then Spotify, then first valid link. */
+export function pickPrimaryListenUrl(links: ListenLink[]): string | undefined {
+  const order: ListenPlatform[] = ['bandcamp', 'spotify', 'youtube', 'soundcloud', 'tidal'];
+  for (const platform of order) {
+    const match = links.find((link) => link.platform === platform);
+    if (match) return match.url;
+  }
+  return links[0]?.url;
 }
 
 export function parseCredits(
@@ -130,4 +152,37 @@ export async function getValidCatalogTracks(): Promise<CatalogTrack[]> {
   }
 
   return sortCatalogTracks(items);
+}
+
+export async function getDiscographyFromJukebox(
+  validStageIds: ReadonlySet<string>,
+): Promise<DiscographyEntry[]> {
+  const { getCollection } = await import('astro:content');
+  const raw = await getCollection('jukebox');
+  const items: DiscographyEntry[] = [];
+
+  for (const entry of raw) {
+    if (entry.id.startsWith('__empty__')) continue;
+    if (entry.data.inDiscography === false) continue;
+
+    const title = entry.data.label?.trim();
+    const sortDate = entry.data.sortDate;
+    if (!title) {
+      console.warn(`[catalog] omitted jukebox "${entry.id}" (missing label)`);
+      continue;
+    }
+    if (!sortDate) continue;
+
+    const listenLinks = parseListenLinks(entry.data.listenLinks, entry.id);
+    items.push({
+      id: entry.id,
+      title,
+      year: sortDate.getUTCFullYear(),
+      kind: entry.data.kind?.trim() || undefined,
+      url: pickPrimaryListenUrl(listenLinks),
+      jukeboxId: validStageIds.has(entry.id) ? entry.id : undefined,
+    });
+  }
+
+  return items.sort((a, b) => b.year - a.year || a.title.localeCompare(b.title));
 }

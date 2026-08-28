@@ -47,17 +47,21 @@ filename slug is the stable id (e.g. `nightmare.md` → `nightmare`).
   schedule rule matches)
 - `poster` (required), `sources` — paths to images/video under `public/`, always starting with
   `/` (see [Media assets](#media-assets))
-- `sortDate` — release date for the **Tracks** catalog (ISO date, e.g. `2025-06-01`). Required
-  for catalog listing; missing → track still works on stage but is omitted from Tracks panel
-- `blurb` — optional one-line hook in catalog and track info popover
+- `sortDate` — release date shown in **Track info** and used for **Discography** year (ISO
+  date, e.g. `2025-06-01`). Required for both panels; omit → track still works on stage but
+  is hidden from discography and track-info release line
+- `kind` — optional release type in discography (e.g. `single`, `ep`, `album`)
+- `inDiscography` — optional; set `false` to hide from discography while keeping `sortDate`
+  for track info
+- `themeId` — visual mood for this track on stage; ties the release to its theme pack (see
+  [Theme packs](#theme-packs-selection-only))
 - `listenLinks` — optional outbound links (`platform`: `bandcamp`, `spotify`, `youtube`,
-  `soundcloud`, or `tidal`; `url` must start with `https://`)
-- `credits` — optional list of `{ role, name }` rows (shown in track info popover)
-- `mentions` — optional thank-you line or short prose (track info popover)
+  `soundcloud`, or `tidal`; `url` must start with `https://`). Used in Track info; discography
+  title link uses Bandcamp first, then Spotify, then other platforms
 
 **Body:** Lyrics for that record (leave empty for instrumentals).
 
-**Do not break:** Do not rename the file slug (`nightmare`, `example-cyan`, etc.) unless a
+**Do not break:** Do not rename the file slug (`nightmare`, `infinite`, etc.) unless a
 developer updates every reference (releases, schedule, etc.).
 
 ---
@@ -70,18 +74,29 @@ developer updates every reference (releases, schedule, etc.).
 
 ---
 
-### Releases (discography)
+### Discography
 
-**Folder:** [`src/content/releases/`](../src/content/releases/)
+**Source:** Same files as jukebox — [`src/content/jukebox/`](../src/content/jukebox/). One
+Markdown file per release/track. No separate `releases/` folder.
 
-**Controls:** Release rows: `title`, `year` (both required), optional `kind`, `url`, `jukeboxId`.
+**What appears in the Discography panel:**
 
-**Tips:**
+- Every jukebox file with a `sortDate` (unless `inDiscography: false`)
+- **Title** ← `label`
+- **Year** ← year from `sortDate`
+- **Kind** ← optional `kind` (e.g. `single`, `ep`)
+- **Title link** ← first `listenLinks` URL (Bandcamp preferred, then Spotify, etc.)
+- **Play on V-Flip** ← automatic when the file is a valid stage entry (poster + optional video)
 
-- `jukeboxId` must match a jukebox filename slug to show “Play on stage”.
-- A row missing `title` or `year` **fails the build** and names the file — nothing disappears
-  silently. Fix the file and push again.
-- `url` must be a full address including `https://`.
+**Example EP without a stage clip:** use a jukebox file with `poster` only and no `sources`.
+
+---
+
+### Releases folder (deprecated)
+
+The folder [`src/content/releases/`](../src/content/releases/) is **no longer used** by the
+site. Edit jukebox files instead. You can delete old release files after migrating any data
+into the matching jukebox entry.
 
 ---
 
@@ -107,15 +122,14 @@ developer updates every reference (releases, schedule, etc.).
 
 **Controls:** Region titles, empty-state strings, jukebox/social labels, stage-button label,
 landing intro copy (`introLead`, `introName`), and optional **HUD icon overrides**
-(`jukeboxIcon`, `aboutIcon`, `lyricsIcon`, `discographyIcon`, `tourIcon`, `catalogIcon`,
-`nowPlayingIcon`).
+(`jukeboxIcon`, `aboutIcon`, `lyricsIcon`, `discographyIcon`, `tourIcon`, `trackInfoIcon`).
 
-**Tracks catalog chrome (optional):**
+**Track info panel chrome (optional):**
 
-- `catalogTitle` — Tracks panel title (default: Tracks)
-- `nowPlayingLabel` — accessible name for the track info control beside the jukebox
-- `emptyCatalog` — message when no catalog rows exist
-- `catalogIcon` / `nowPlayingIcon` — same token or emoji override rules as other HUD icons
+- `trackInfoTitle` — panel title (default: Track info)
+- `releasedLabel` — label before the release date (default: Released)
+- `emptyTrackLinks` — when a track has no `listenLinks`
+- `trackInfoIcon` — same token or emoji override rules as other HUD icons
 
 **Icon overrides (optional):**
 

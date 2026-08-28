@@ -1,0 +1,111 @@
+---
+import { getCollection } from 'astro:content';
+import { getBackgroundConfig } from '../lib/background';
+import { parseListenLinks } from '../lib/catalog-tracks';
+import type { UiChrome } from '../lib/stage';
+
+interface Props {
+  chrome: UiChrome;
+}
+
+const { chrome } = Astro.props;
+const { videos, defaultVideoId } = await getBackgroundConfig();
+const validIds = new Set(videos.map((entry) => entry.id));
+const raw = await getCollection('jukebox');
+const dateFmt = new Intl.DateTimeFormat('en-GB', {
+  day: 'numeric',
+  month: 'short',
+  year: 'numeric',
+});
+
+const tracks = raw
+  .filter((entry) => validIds.has(entry.id))
+  .map((entry) => ({
+    id: entry.id,
+    themeId: entry.data.themeId?.trim() ?? '',
+    sortDate: entry.data.sortDate,
+    listenLinks: parseListenLinks(entry.data.listenLinks, entry.id),
+  }));
+---
+
+<div class="track-info">
+  {
+    tracks.map((track) => (
+      <div
+        data-track-info-for={track.id}
+        data-theme-id={track.themeId}
+        hidden={track.id !== defaultVideoId}
+      >
+        {track.sortDate && (
+          <p class="track-info__released">
+            <span class="track-info__released-label">{chrome.releasedLabel}</span>
+            <time datetime={track.sortDate.toISOString().slice(0, 10)}>
+              {dateFmt.format(track.sortDate)}
+            </time>
+          </p>
+        )}
+        {track.listenLinks.length > 0 ? (
+          <ul class="track-info__links">
+            {track.listenLinks.map((link) => (
+              <li>
+                <a href={link.url} target="_blank" rel="noopener noreferrer">{link.label}</a>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p>{chrome.emptyTrackLinks}</p>
+        )}
+      </div>
+    ))
+  }
+</div>
+
+<style>
+  .track-info {
+    font-size: calc(0.9rem * var(--hud-scale));
+    color: var(--color-text);
+  }
+
+  .track-info [hidden] {
+    display: none;
+  }
+
+  .track-info__released {
+    margin: 0 0 0.65rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    align-items: baseline;
+  }
+
+  .track-info__released-label {
+    font-family: var(--font-display);
+    font-size: calc(0.7rem * var(--hud-scale));
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--color-accent-alt);
+  }
+
+  .track-info__links {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .track-info__links a {
+    color: var(--color-text);
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+  }
+
+  .track-info__links a:hover {
+    color: var(--color-accent-alt);
+  }
+
+  .track-info :global(p) {
+    margin: 0;
+  }
+</style>

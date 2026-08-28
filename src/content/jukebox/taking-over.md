@@ -1,15 +1,15 @@
 ---
 label: Taking Over
-sortDate: 2025-01-20
-blurb: One pulse at a time.
-listenLinks:
-  - platform: bandcamp
-    url: https://bandcamp.com
-  - platform: spotify
-    url: https://open.spotify.com
+sortDate: 2025-07-12
+kind: single
 themeId: acid-lime
 hasAudio: true
 poster: /images/posters/taking-over.jpg
+listenLinks:
+  - platform: bandcamp
+    url: https://valenceelectronica.bandcamp.com/track/taking-over
+  - platform: spotify
+    url: https://open.spotify.com/track/4uhZrCtmwCZOnLIOTDAQQK
 sources:
   - src: /videos/taking-over.mp4
     type: video/mp4

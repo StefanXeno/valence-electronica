@@ -3,7 +3,7 @@ aboutTitle: About me
 lyricsTitle: Lyrics
 discographyTitle: Discography
 tourTitle: Tour
-stageButtonLabel: Play on stage
+stageButtonLabel: Play on V-Flip
 emptyLyrics: Lyrics not available
 emptyReleases: No releases yet
 emptyShows: No upcoming dates
@@ -13,9 +13,8 @@ comingSoon: coming soon
 ticketLabel: Tickets
 introLead: "Hi I'm"
 introName: Valence
-catalogTitle: Tracks
-catalogIcon: catalog
-nowPlayingLabel: Track info
-nowPlayingIcon: info
-emptyCatalog: No tracks yet
+trackInfoTitle: Track info
+trackInfoIcon: info
+releasedLabel: Released
+emptyTrackLinks: No streaming links yet
 ---

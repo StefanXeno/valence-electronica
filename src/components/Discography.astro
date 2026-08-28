@@ -1,6 +1,7 @@
 ---
+import { getDiscographyFromJukebox } from '../lib/catalog-tracks';
 import { getValidJukeboxEntries } from '../lib/background';
-import { getValidReleases, type UiChrome } from '../lib/stage';
+import type { UiChrome } from '../lib/stage';
 
 interface Props {
   chrome: UiChrome;
@@ -8,8 +9,9 @@ interface Props {
 }
 
 const { chrome, defaultId } = Astro.props;
-const [releases, videos] = await Promise.all([getValidReleases(), getValidJukeboxEntries()]);
+const videos = await getValidJukeboxEntries();
 const validIds = new Set(videos.map((entry) => entry.id));
+const releases = await getDiscographyFromJukebox(validIds);
 ---
 
 {
@@ -18,7 +20,7 @@ const validIds = new Set(videos.map((entry) => entry.id));
   ) : (
     <ul class="discog">
       {releases.map((release) => {
-        const bound = release.jukeboxId && validIds.has(release.jukeboxId) ? release.jukeboxId : undefined;
+        const bound = release.jukeboxId;
         return (
           <li>
             <div class="discog__meta">

@@ -1,7 +1,4 @@
 ---
 ---
 
-EXAMPLE PLACEHOLDER — replace with a real short bio.
-
-Valence is an electronic music project from Augsburg, Germany. This page is a
-stage: pick a record, read a little, then go listen.
+Valence is indie-electronic hybrid project of Miguel Clemente, a 26 year old portuguese/german producer & vocalist based in Berlin. Focused on cinematic sound design and atmospheric soundscapes, his music bridges the gap between experimental production and classical melodic craft.

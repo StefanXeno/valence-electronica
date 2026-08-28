@@ -9,7 +9,7 @@ import {
   type StageSchedule,
 } from './stage-schedule';
 
-const CATALOG = new Set(['nightmare', 'example-cyan', 'aurora']);
+const CATALOG = new Set(['nightmare', 'taking-over', 'infinite', 'show-me-how', 'aurora']);
 const FALLBACK = 'nightmare';
 
 function schedule(...rules: ScheduleRule[]): StageSchedule {
@@ -95,7 +95,7 @@ describe('resolveScheduledDefault', () => {
   describe('precedence', () => {
     const all = schedule(
       { type: 'weekday', days: [1, 2, 3, 4, 5, 6, 7], jukeboxId: 'aurora' },
-      { type: 'range', from: '2026-12-24', to: '2026-12-26', jukeboxId: 'example-cyan' },
+      { type: 'range', from: '2026-12-24', to: '2026-12-26', jukeboxId: 'taking-over' },
       { type: 'date', on: '12-25', jukeboxId: 'nightmare' },
     );
 
@@ -107,7 +107,7 @@ describe('resolveScheduledDefault', () => {
 
     it('prefers a range rule over weekday', () => {
       expect(resolveScheduledDefault(all, onDate(2026, 12, 24), CATALOG, FALLBACK)).toBe(
-        'example-cyan',
+        'taking-over',
       );
     });
 
@@ -127,7 +127,7 @@ describe('resolveScheduledDefault', () => {
   it('uses the first matching rule when several are equally specific', () => {
     const rules = schedule(
       { type: 'date', on: '10-31', jukeboxId: 'aurora' },
-      { type: 'date', on: '10-31', jukeboxId: 'example-cyan' },
+      { type: 'date', on: '10-31', jukeboxId: 'infinite' },
     );
     expect(resolveScheduledDefault(rules, onDate(2026, 10, 31), CATALOG, FALLBACK)).toBe('aurora');
   });
@@ -139,7 +139,7 @@ describe('validateStageSchedule', () => {
 
   it('accepts the shipped schedule against its own catalog', () => {
     expect(() =>
-      validateStageSchedule(loadStageSchedule(), new Set(['nightmare', 'example-cyan'])),
+      validateStageSchedule(loadStageSchedule(), new Set(['nightmare', 'infinite', 'taking-over', 'show-me-how'])),
     ).not.toThrow();
   });
 

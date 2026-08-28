@@ -9,18 +9,18 @@
     {
       "type": "date",
       "on": "2027-06-01",
-      "jukeboxId": "example-cyan"
+      "jukeboxId": "infinite"
     },
     {
       "type": "range",
       "from": "2026-12-24",
       "to": "2026-12-26",
-      "jukeboxId": "example-cyan"
+      "jukeboxId": "taking-over"
     },
     {
       "type": "weekday",
       "days": [5],
-      "jukeboxId": "example-cyan"
+      "jukeboxId": "show-me-how"
     }
   ]
 }

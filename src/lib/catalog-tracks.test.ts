@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   parseCredits,
   parseListenLinks,
+  pickPrimaryListenUrl,
   sortCatalogTracks,
   type CatalogTrack,
 } from './catalog-tracks';
@@ -49,6 +50,17 @@ describe('parseListenLinks', () => {
     expect(links).toHaveLength(1);
     expect(links[0].platform).toBe('bandcamp');
     expect(links[0].label).toBe('Bandcamp');
+  });
+});
+
+describe('pickPrimaryListenUrl', () => {
+  it('prefers bandcamp then spotify', () => {
+    const url = pickPrimaryListenUrl([
+      { platform: 'youtube', url: 'https://youtube.com/x', label: 'YouTube' },
+      { platform: 'spotify', url: 'https://spotify.com/x', label: 'Spotify' },
+      { platform: 'bandcamp', url: 'https://bandcamp.com/x', label: 'Bandcamp' },
+    ]);
+    expect(url).toBe('https://bandcamp.com/x');
   });
 });
 

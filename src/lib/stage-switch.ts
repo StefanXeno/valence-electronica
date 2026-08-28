@@ -94,6 +94,10 @@ export function syncStageUi(activeId: string) {
     node.hidden = node.dataset.lyricsFor !== activeId;
   });
 
+  document.querySelectorAll<HTMLElement>('[data-track-info-for]').forEach((node) => {
+    node.hidden = node.dataset.trackInfoFor !== activeId;
+  });
+
   document.querySelectorAll<HTMLButtonElement>('[data-stage-button]').forEach((button) => {
     const on = button.dataset.stageButton === activeId;
     button.setAttribute('aria-pressed', on ? 'true' : 'false');

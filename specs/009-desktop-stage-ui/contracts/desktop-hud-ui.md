@@ -19,7 +19,7 @@ Chrome scale: `--hud-scale: 1.5` (unchanged unless plan tasks tune dock spacing)
 | Center | Atmosphere only. No panel bodies, labels, or lists in the middle. |
 | Top-left | Identity: artist name + tagline from `site.json`. Compact; tagline single line (`nowrap`). |
 | Top-right | Social channels: equal-sized brand icons (~2.5rem × `--hud-scale`). Labels off at rest; platform name via `aria-label`. |
-| Bottom dock | Single horizontal rail above footer. **Left cluster:** jukebox icon trigger, now-playing info (when catalog exists), mute (when visible), side by side. **Right segment:** About (if content exists), Lyrics, Tracks, Discography, Tour — icon triggers in a **horizontal row**, not a vertical stack. |
+| Bottom dock | Single horizontal rail above footer. **Left cluster:** jukebox icon trigger + mute (when visible), side by side. **Right segment:** About (if content exists), Lyrics, Track info, Discography, Tour — icon triggers in a **horizontal row**, not a vertical stack. |
 | Mute | In the **left dock cluster**, immediately beside the jukebox when the active entry has looping video + audio. Same mute contract as `002`. Must not cover footer cluster. |
 | Footer | **Bottom center:** `© {year} {artist}` then Impressum and Datenschutzerklärung. Transparent background; no bar. Legal overlay behavior unchanged from `002`. Identity block and copyright line MAY use `glitch-hit` when glitch is enabled. |
 
@@ -39,10 +39,9 @@ for panels; jukebox panel padding separate).
 | Control | At rest | Label source |
 |---------|---------|--------------|
 | Jukebox | Icon only (vinyl token default) | `chrome.jukeboxLabel` |
-| Now-playing info | Icon only | `chrome.nowPlayingLabel` |
 | About | Icon only (if About exists) | `chrome.aboutTitle` |
 | Lyrics | Icon only | `chrome.lyricsTitle` |
-| Tracks catalog | Icon only | `chrome.catalogTitle` |
+| Track info | Icon only | `chrome.trackInfoTitle` |
 | Discography | Icon only | `chrome.discographyTitle` |
 | Tour | Icon only | `chrome.tourTitle` |
 | Socials | Platform brand icon | channel `label` / `aria-label` |
@@ -170,12 +169,12 @@ hover uses standard `GlitchPress` one-shot pattern when closed.
 Any future **layout or HUD composition change** MUST update this contract and the feature
 spec (`009` or successor) before implementation — not CSS-only drive-by edits.
 
-## Cross-reference: track catalog (010)
+## Cross-reference: track info (010)
 
-Tracks panel and now-playing info control are specified in
-[`specs/010-track-catalog/contracts/track-catalog-ui.md`](../../010-track-catalog/contracts/track-catalog-ui.md).
-Dock left cluster order: jukebox → now-playing info → mute. Right segment adds Tracks after
-Lyrics.
+Per-track release date and streaming links live in jukebox frontmatter (`sortDate`,
+`listenLinks`, `themeId`). The **Track info** on-demand panel (same `<details>` pattern as
+Lyrics) shows data for the active stage track. Full-site track browse list is deferred.
+See [`specs/010-track-catalog/contracts/track-catalog-content.md`](../../010-track-catalog/contracts/track-catalog-content.md).
 
 ## Out of scope
 

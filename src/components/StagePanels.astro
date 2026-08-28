@@ -3,7 +3,7 @@ import AboutPanel from './AboutPanel.astro';
 import LyricsPanel from './LyricsPanel.astro';
 import Discography from './Discography.astro';
 import TourDates from './TourDates.astro';
-import TrackCatalog from './TrackCatalog.astro';
+import TrackInfoPanel from './TrackInfoPanel.astro';
 import HudIcon from './HudIcon.astro';
 import { getBackgroundConfig } from '../lib/background';
 import { getAboutEntry, getChrome } from '../lib/stage';
@@ -28,10 +28,10 @@ const panels = [
     body: 'lyrics' as const,
   },
   {
-    title: chrome.catalogTitle,
-    icon: chrome.catalogIcon,
-    emoji: chrome.catalogIconEmoji,
-    body: 'catalog' as const,
+    title: chrome.trackInfoTitle,
+    icon: chrome.trackInfoIcon,
+    emoji: chrome.trackInfoIconEmoji,
+    body: 'trackInfo' as const,
   },
   {
     title: chrome.discographyTitle,
@@ -64,7 +64,7 @@ const panels = [
         <div class="stage-panel__body">
           {panel.body === 'about' && <AboutPanel />}
           {panel.body === 'lyrics' && <LyricsPanel chrome={chrome} />}
-          {panel.body === 'catalog' && <TrackCatalog chrome={chrome} />}
+          {panel.body === 'trackInfo' && <TrackInfoPanel chrome={chrome} />}
           {panel.body === 'discography' && (
             <Discography chrome={chrome} defaultId={defaultVideoId} />
           )}
