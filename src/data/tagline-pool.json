@@ -76,6 +76,60 @@
           "to": "04:25"
         }
       ]
+    },
+    {
+      "text": "What the dog doin?"
+    },
+    {
+      "text": "TGIF",
+      "rules": [
+        {
+          "type": "weekday",
+          "days": [5]
+        }
+      ]
+    },
+    {
+      "text": "A fu**ing nightmare, a motherfu**ing nightmare!"
+    },
+    {
+      "text": "I feel like taking over..."
+    },
+    {
+      "text": "Also try playing Minecraft"
+    },
+    {
+      "text": "Han shot first",
+      "rules": [
+        {
+          "type": "date",
+          "on": "05-04"
+        }
+      ]
+    },
+    {
+      "text": "May the force be with you",
+      "rules": [
+        {
+          "type": "date",
+          "on": "05-04"
+        }
+      ]
+    },
+    {
+      "text": "Nice to meet you"
+    },
+    {
+      "text": "Just Do it!"
+    },
+    {
+      "text": "Noot Noot!🐧"
+    },
+    {
+      "text": "Music by Valence"
+    },
+    {
+      "text": "Made by StefanXeno"
     }
   ]
 }

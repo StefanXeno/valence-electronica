@@ -1,7 +1,7 @@
 ---
 label: Show Me How
 sortDate: 2026-02-26
-kind: single
+kind: Single
 themeId: electric-cyan
 hasAudio: false
 poster: /images/posters/show-me-how.jpg

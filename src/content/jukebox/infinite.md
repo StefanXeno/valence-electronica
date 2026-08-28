@@ -1,7 +1,7 @@
 ---
 label: Infinite
 sortDate: 2017-02-15
-kind: single
+kind: Single
 themeId: steel-slate
 hasAudio: true
 poster: /images/posters/infinite.jpg

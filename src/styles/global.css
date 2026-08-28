@@ -13,6 +13,7 @@
   --hud-inset: calc(0.75rem * var(--hud-scale));
   --hud-footer: calc(2.4rem * var(--hud-scale));
   --hud-dock-bottom: calc(var(--hud-footer) + 0.2rem);
+  --tagline-max-width: 30rem;
 }
 
 *,
@@ -99,7 +100,7 @@ a {
 .stage__identity {
   top: var(--hud-inset);
   left: var(--hud-inset);
-  max-width: min(calc(16rem * var(--hud-scale)), calc(100vw - 10rem));
+  max-width: min(var(--tagline-max-width), calc(100vw - calc(6.5rem * var(--hud-scale))));
 }
 
 .stage__socials {

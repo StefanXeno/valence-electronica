@@ -1,7 +1,7 @@
 ---
 label: Taking Over
 sortDate: 2025-07-12
-kind: single
+kind: Single
 themeId: acid-lime
 hasAudio: true
 poster: /images/posters/taking-over.jpg
