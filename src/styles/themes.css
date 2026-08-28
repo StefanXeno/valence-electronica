@@ -98,16 +98,16 @@
   --bg-scrim: rgb(2 10 14 / 70%);
 }
 
-/* Sampled from Show Me How glitch loop poster */
+/* Sampled from Show Me How glitch loop video */
 [data-theme='electric-cyan'] {
-  --color-bg: #0a121c;
-  --color-surface: rgb(16 28 40 / 82%);
-  --color-border: #1e4560;
-  --color-text: #e8f4fa;
-  --color-text-muted: #7aa3b8;
-  --color-accent: #28c5f6;
-  --color-accent-alt: #61c0f0;
-  --bg-scrim: rgb(6 12 18 / 72%);
+  --color-bg: #1e2a3e;
+  --color-surface: rgb(30 42 58 / 82%);
+  --color-border: #2d4f70;
+  --color-text: #eef8fc;
+  --color-text-muted: #6a90a8;
+  --color-accent: #3ce0ff;
+  --color-accent-alt: #6ae8ff;
+  --bg-scrim: rgb(18 28 42 / 72%);
 }
 
 /* Sampled from Infinite loop video (muted steel-slate base) */
