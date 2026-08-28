@@ -60,8 +60,7 @@ const {
     </svg>
   </button>
 
-  <label class="volume-control__slider-wrap" data-volume-wrap for="volume-slider">
-    <span class="visually-hidden">{volumeSliderTooltip}</span>
+  <div class="volume-control__slider-wrap" data-volume-wrap>
     <input
       id="volume-slider"
       class="volume-control__slider"
@@ -73,9 +72,10 @@ const {
       max="1"
       step="0.01"
       value="0.7"
+      aria-label={volumeSliderTooltip}
       inert
     />
-  </label>
+  </div>
 </div>
 
 <script>
@@ -146,7 +146,6 @@ const {
       const label = muted ? unmuteTooltip : muteTooltip;
       button.setAttribute('aria-label', label);
       button.dataset.hudLabel = label;
-      sliderWrap.toggleAttribute('inert', muted);
       slider.toggleAttribute('inert', muted);
       const video = getVideo();
       if (!muted && video) slider.value = String(video.volume);

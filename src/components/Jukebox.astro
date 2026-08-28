@@ -37,14 +37,14 @@ const showMute = videos.some((entry) => entry.hasAudio);
         <div class="jukebox__drawer-inner">
           <div class="jukebox__panel">
             <header class="jukebox__header">
-              <p
+              <h2
                 class="jukebox__title"
                 data-hud-label={chrome.jukeboxPanelTooltip}
                 data-hud-label-anchor="above"
-                tabindex="0"
+                title={chrome.jukeboxPanelTooltip}
               >
                 {chrome.jukeboxPanelTitle}
-              </p>
+              </h2>
             </header>
 
             <section class="jukebox__section jukebox__section--list" aria-label={chrome.jukeboxLabel}>
@@ -344,11 +344,6 @@ const showMute = videos.some((entry) => entry.hasAudio);
     text-overflow: ellipsis;
     color: var(--color-text);
     cursor: help;
-    outline: none;
-  }
-
-  .jukebox__title:focus-visible {
-    color: var(--color-accent-alt);
   }
 
   .jukebox__panel {
