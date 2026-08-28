@@ -20,7 +20,7 @@ Chrome scale: `--hud-scale: 1.5` (unchanged unless plan tasks tune dock spacing)
 | Center | Atmosphere only. No panel bodies, labels, or lists in the middle. |
 | Top-left | Identity: artist name + tagline from `site.json`. Compact; tagline single line (`nowrap`). |
 | Top-right | Social channels: equal-sized brand icons (~2.5rem × `--hud-scale`). Labels off at rest; platform name via `aria-label`. |
-| Bottom dock | Single horizontal rail above footer. **Left cluster:** V-Flip shell (vinyl + mute when eligible). **Right segment:** About (if content exists), Discography, Tour — icon triggers in a **horizontal row**, not a vertical stack. |
+| Bottom dock | Single horizontal rail above footer. **Left cluster:** V-Flip shell (toolbar: vinyl, shuffle, loop, mute when eligible). **Right segment:** About (if content exists), Discography, Tour — icon triggers in a **horizontal row**, not a vertical stack. |
 | Mute | **Inside the V-Flip shell** when the active entry has looping video + audio. Same mute contract as `002`. Must not cover footer cluster. |
 | Footer | **Bottom center:** `© {year} {artist}` then Impressum and Datenschutzerklärung. Transparent background; no bar. Legal overlay behavior unchanged from `002`. Identity block and copyright line MAY use `glitch-hit` when glitch is enabled. |
 
@@ -29,8 +29,8 @@ centered sheet.
 
 | Panel | Open width (scaled) | Notes |
 |-------|---------------------|-------|
-| On-demand (About, Lyrics, Discography, Tour) | `min(18rem × --hud-scale, viewport − insets)` | Wide enough for long titles (e.g. “Discography”) |
-| Jukebox list | `min(22rem × --hud-scale, viewport − insets)` | Open V-Flip now-playing player (track info, lyrics, list). See `011` contract. |
+| On-demand (About, Discography, Tour) | `min(18rem × --hud-scale, viewport − insets)` | Wide enough for long titles (e.g. “Discography”) |
+| Jukebox (V-Flip) | `min(22rem × --hud-scale, viewport − insets)` | Open drawer: panel title + track list with inline info. See `011` contract. |
 
 Open headers use even inset `--stage-panel-inset` / jukebox padding (`0.65rem × --hud-scale`
 for panels; jukebox panel padding separate).
@@ -81,6 +81,7 @@ the icon** in the summary row (not as a separate heading row below).
 |----------|------|
 | Layout | Icon in fixed-size cell + title beside it (`flex`, start-aligned) |
 | Title size | `18px × --hud-scale` — slightly smaller than the `22px` icon glyph |
+| Open accent | When panel is open, title label uses `--color-accent-alt` with matching text-shadow; icon gets parallel drop-shadow (same treatment for jukebox panel title and on-demand panels) |
 | Jukebox vinyl | Icon stays in a fixed `var(--control-size)` anchor cell; box expands to the right and upward without moving the vinyl |
 | Padding | Even inset around open header row (panels: `--stage-panel-inset`) |
 
@@ -116,13 +117,13 @@ Close waits for morph duration (~`280ms`) before clearing `open`.
 
 Instant open/close; no phased or glitch morph animation.
 
-## Jukebox (unchanged logic, new chrome)
+## Jukebox (V-Flip — see `011` for full contract)
 
 | Action | Result |
 |--------|--------|
-| Idle | Vinyl icon only in fixed anchor cell; song list hidden |
-| Open | Inline `jukeboxLabel` beside vinyl; list below header in panel body |
-| Select entry | Same as `stage-ui.md` jukebox table |
+| Idle | Toolbar: vinyl + shuffle + loop + mute (when eligible); drawer hidden |
+| Open | Drawer: panel title + track list; same toolbar at bottom |
+| Select entry | Same as `stage-ui.md` jukebox table; inline info on selected row |
 | Schedule / default | Unchanged (`007`) |
 
 ## On-demand panels (unchanged logic, new chrome)
@@ -130,8 +131,9 @@ Instant open/close; no phased or glitch morph animation.
 | Region | Empty / hide rules |
 |--------|-------------------|
 | About | Hidden if no body (unchanged) |
-| Lyrics | Always shown; empty state unchanged |
 | Discography / Tour | Always shown; empty states unchanged |
+
+Lyrics and Track info are **not** right-dock panels (see `011`).
 
 Exclusive-open: unchanged from `stage-ui.md`.
 
@@ -158,7 +160,7 @@ hover uses standard `GlitchPress` one-shot pattern when closed.
 
 ## Accessibility
 
-- Keyboard order: identity → socials → jukebox → mute (when visible) → on-demand row → footer.
+- Keyboard order: identity → socials → jukebox (vinyl → shuffle → loop → mute when visible) → on-demand row → footer.
 - Sufficient contrast over atmosphere (existing scrim tokens).
 - Label reveal is decorative; activation MUST NOT depend on seeing the floating label.
 - Open inline titles supplement visually hidden accessible names on summaries.
@@ -171,9 +173,10 @@ spec (`009` or successor) before implementation — not CSS-only drive-by edits.
 ## Cross-reference: track info (010)
 
 Per-track release date and streaming links live in jukebox frontmatter (`sortDate`,
-`listenLinks`, `themeId`). The **Track info** on-demand panel (same `<details>` pattern as
-Lyrics) shows data for the active stage track. Full-site track browse list is deferred.
-See [`specs/010-track-catalog/contracts/track-catalog-content.md`](../../010-track-catalog/contracts/track-catalog-content.md).
+`listenLinks`, `themeId`). On desktop, track info appears **inline on the selected V-Flip
+list row** (not a separate dock panel). See
+[`specs/011-vflip-now-playing/contracts/vflip-player-ui.md`](../../011-vflip-now-playing/contracts/vflip-player-ui.md)
+and [`specs/010-track-catalog/contracts/track-catalog-content.md`](../../010-track-catalog/contracts/track-catalog-content.md).
 
 ## Out of scope
 

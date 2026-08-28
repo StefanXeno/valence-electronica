@@ -1,6 +1,6 @@
 # Contract: V-Flip playback (shuffle, loop, handoff)
 
-**Date**: 2026-08-28 | **Plan**: [../plan.md](../plan.md) | **Spec**: [../spec.md](../spec.md)
+**Date**: 2026-08-28 (updated 2026-08-28) | **Plan**: [../plan.md](../plan.md) | **Spec**: [../spec.md](../spec.md)
 
 Client-only. No network, no storage. Defaults from chrome (see
 [data-model.md](../data-model.md)).
@@ -10,10 +10,19 @@ Client-only. No network, no storage. Defaults from chrome (see
 | Loop | Shuffle | At dwell / advance point |
 | ---- | ------- | ------------------------ |
 | On | * | Stay; visual bed may keep looping. **No hop.** |
-| Off | On | Hop to a **different** random catalog id. Crossfade. |
+| Off | On | Hop to a **different** random catalog id from the **eligible pool**. Crossfade. |
 | Off | Off | Stay. **No hop.** (No 45s visual hop either.) |
 
-Hop also requires: scripting, ≥2 jukebox entries, intro not showing.
+Hop also requires: scripting, ≥2 entries in eligible pool, intro not showing.
+
+## Eligible pool (shuffle hop target)
+
+| Visitor audio | Pool |
+| ------------- | ---- |
+| Muted (or volume 0) | All catalog ids |
+| Unmuted | Only ids where `packAllowsMute(pack, entry.hasAudio, playsVideo)` is true |
+
+Manual picks are **not** filtered — visitor may select a silent track while unmuted.
 
 ## Intro gate
 
@@ -44,29 +53,38 @@ Clear the clock when:
 
 ## Hop selection
 
-`nextId = random choice from ids.filter(id => id !== activeId)`.
+`nextId = random choice from ids.filter(id => id !== activeId && isAllowed(id))`.
 
-If the filtered list is empty, do not hop.
+`isAllowed` applies the eligible-pool rules above.
+
+If no candidates, do not hop.
 
 ## Crossfade (motion allowed)
 
-Duration: **700ms**. Easing: `cubic-bezier(0.4, 0, 0.2, 1)`.
+Handoff mode from **source and destination theme packs** (`packAllowsHudGlitch`):
+
+| Transition | `data-stage-crossfade` | Picture | Theme tokens | Duration |
+| ---------- | ---------------------- | ------- | ------------ | -------- |
+| Non-glitch ↔ non-glitch | `smooth` | Opacity ease | Registered `@property` colors ease | **1000ms** `cubic-bezier(0.45, 0, 0.55, 1)` |
+| Any glitch pack involved | `glitch` | Opacity **steps(4)** | Color tokens **steps(4)** + atmosphere glitch keyframes | **720ms** |
 
 | Channel | Behavior |
 | ------- | -------- |
-| Picture | Incoming video layer opacity 0 → 1 over outgoing |
-| Theme tokens | `data-theme` / `data-hud-glitch` update at fade start; `html` color/surface tokens transition 700ms while `data-stage-crossfade` is set |
-| Audio | Preserve `muted` + volume from outgoing. Never unmute as a side effect of hop. If unmuted, mute outgoing at fade start so two soundtracks do not overlap |
-| Reduced motion | Instant swap; no 700ms fade; no `data-stage-crossfade` motion |
+| Picture | Incoming video layer opacity 0 → 1 over outgoing (duration/easing per mode) |
+| Theme tokens | `data-theme` updates at fade start; `data-hud-glitch` updates immediately unless **leaving** glitch (then HUD glitch clears at end of handoff) |
+| Atmosphere (glitch mode) | Brief `stage-theme-handoff-glitch` filter/skew on `.atmosphere` |
+| Audio | Preserve `muted` + volume from outgoing. Never unmute as side effect of hop. Mute outgoing at fade start when needed |
+| Reduced motion | Instant swap; no crossfade flag; no motion |
 
-Manual picks that change id use the **same** handoff (smooth, not a hard cut), so
-list clicks match shuffle hops.
+Manual picks that change id use the **same** handoff (same mode resolution), so list
+clicks match shuffle hops.
 
 ## Mute / volume
 
 Unchanged rules from `002` / `005` (`hasAudio`, pack `audioEligible`, playing vs
-fallback, reduced motion). Control is inside V-Flip (UI contract). Hop does not
-reset volume or muted flag.
+fallback, reduced motion). Control is inside V-Flip (UI contract). Mute **slot**
+hides when active track is not audio-eligible. Hop does not reset volume or muted
+flag.
 
 ## Atmosphere `loop` attribute
 
@@ -81,5 +99,6 @@ clicks.
 
 ## No-JS
 
-Timer, toggles, and hops do not run. SSR shows load-time track lyrics/info inside
-open V-Flip. Authored `<video loop>` may still loop in the browser’s native player.
+Timer, toggles, and hops do not run. SSR shows load-time track list + inline info
+inside open V-Flip. Authored `<video loop>` may still loop in the browser’s native
+player.

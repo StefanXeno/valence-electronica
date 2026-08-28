@@ -1,6 +1,6 @@
 # Data Model: V-Flip Now Playing
 
-**Date**: 2026-08-28 | **Plan**: [plan.md](./plan.md) | **Spec**: [spec.md](./spec.md)
+**Date**: 2026-08-28 (updated 2026-08-28) | **Plan**: [plan.md](./plan.md) | **Spec**: [spec.md](./spec.md)
 
 No new content collections. Extends UI chrome and visit-only playback state.
 Jukebox frontmatter fields from `004` / `010` are unchanged — **no** `durationSeconds`.
@@ -22,13 +22,25 @@ Used only when shuffle is on and loop is off:
 
 Atmosphere `<video loop>` stays on for visual beds (see [research.md](./research.md) R6).
 
+### Shuffle eligible pool (client)
+
+| Visitor audio | Candidate ids for auto-hop |
+| ------------- | -------------------------- |
+| Muted | All catalog ids |
+| Unmuted | Ids where pack allows mute playback (`hasAudio` + `audioEligible` + playing video) |
+
+Manual selection is never filtered by this pool.
+
 ## Entity: UiChrome (extended)
 
 File: `src/content/ui/chrome.md`
 
 | Field | Type | Required | Default | Description |
 | ----- | ---- | -------- | ------- | ----------- |
-| `shuffleLabel` | string | yes (fallback in code) | `Shuffle` | Accessible name + optional visible hint |
+| `jukeboxPanelTitle` | string | yes (fallback) | `V-Flip aka. Jukebox` | Open drawer heading |
+| `jukeboxPanelTooltip` | string | no | — | Optional hover on panel title |
+| `listenOnLabel` | string | yes | `Listen On` | Prefix before platform icons in inline info |
+| `shuffleLabel` | string | yes (fallback in code) | `Shuffle` | Accessible name |
 | `loopLabel` | string | yes | `Loop` | Accessible name |
 | `shuffleIcon` | string | no | token `shuffle` | HUD token or emoji |
 | `loopIcon` | string | no | token `loop` | HUD token or emoji |
@@ -38,16 +50,13 @@ File: `src/content/ui/chrome.md`
 | `muteTooltip` | string | yes | `Mute` | Mute button tooltip when sound is on |
 | `volumeSliderTooltip` | string | yes | `Drag to adjust volume` | Volume slider tooltip when visible |
 
-Existing `lyricsTitle`, `trackInfoTitle`, `releasedLabel`, `emptyLyrics`,
-`emptyTrackLinks` remain; they become **in-player section copy**, not dock titles.
-`jukeboxLabel` remains the collapsed vinyl accessible name (“V-Flip”), **not** the
-open header track title.
+Existing `releasedLabel`, `emptyTrackLinks`, `jukeboxLabel` (vinyl accessible name),
+`lyricsTitle`, `trackInfoTitle`, `emptyLyrics` remain in chrome; lyrics titles are
+not used in open V-Flip v1.
 
 ## Entity: HudIconToken (extended)
 
 Add: `shuffle`, `loop`.
-
-Existing tokens unchanged. `lyrics` / `info` may remain for unused chrome fields.
 
 ## Entity: PlaybackMode (visit-only, not persisted)
 
@@ -72,7 +81,7 @@ video loadedmetadata ──► store duration; if shuffle && !loop, restart cloc
 shuffle toggle ──► set flag; if now off, clear timer; if now on and loop off, restart clock
 loop toggle    ──► set flag; if now on, clear timer; if now off and shuffle on, restart clock
 manual pick    ──► applyStageEntry; restart clock if shuffle && !loop
-advance fire   ──► if shuffle && !loop && ≥2 ids ► pick other id ► crossfade
+advance fire   ──► if shuffle && !loop && ≥2 eligible ids ► pick other id ► crossfade
                    else ignore
 ```
 
@@ -83,15 +92,15 @@ advance fire   ──► if shuffle && !loop && ≥2 ids ► pick other id ► c
 | Current video | Visible atmosphere |
 | Next video | Incoming hop target; opacity 0 until crossfade |
 
-Not content; implementation detail constrained by [contracts/vflip-playback.md](./contracts/vflip-playback.md).
+Handoff mode: `html[data-stage-crossfade="smooth"|"glitch"]` per [contracts/vflip-playback.md](./contracts/vflip-playback.md).
 
 ## Relationships
 
 ```text
-UiChrome ──► PlaybackMode defaults + shuffle/loop labels
+UiChrome ──► PlaybackMode defaults + labels + panel title
 JukeboxEntry.hasAudio + video.duration ──► dwell classifier
-PlaybackMode + dwell ──► hop / stay / repeat
-Active id ──► lyrics nodes, track-info nodes, list aria-pressed, header title
+PlaybackMode + dwell + eligible pool ──► hop / stay / repeat
+Active id ──► track-info nodes, list aria-pressed, mute slot visibility
 ```
 
 ## Validation rules

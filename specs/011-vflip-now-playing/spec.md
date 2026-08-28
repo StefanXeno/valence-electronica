@@ -60,8 +60,8 @@ icons. The stage also **loops one clip forever** with no visitor control.
 
 | State | Treatment |
 | ----- | --------- |
-| V-Flip collapsed | **One box**: vinyl + mute (when eligible). Unmute may expand **that same box** to reveal the volume slider. No sibling mute on the dock. Shuffle/loop stay out of the collapsed box so it does not become a toolbar. |
-| V-Flip open | One peripheral player: **active track name**, **track info**, **lyrics**, **mute/volume**, **shuffle toggle**, **loop toggle**, and the **song list**. |
+| V-Flip collapsed | **One box**: vinyl + **shuffle** + **loop** + mute (when the active track is audio-eligible). Unmute expands **that same box** to reveal the volume slider to the right of the mute icon. No sibling mute on the dock. |
+| V-Flip open | **Same toolbar** at the bottom (vinyl, shuffle, loop, mute). Drawer above shows **panel title** (`jukeboxPanelTitle`) + **track list**. **Track info** (release date, Listen On links) is **embedded in the selected track row**, not a separate header title or dock icon. **Lyrics are not shown** in the open player (lyrics remain in content only; no Lyrics dock icon). |
 | Right dock | About (if content exists), Discography, Tour only. Center stage stays free. |
 | Playback | See loop/shuffle matrix below. Handoffs are **smooth** (no hard cut). |
 
@@ -81,71 +81,64 @@ internally if content is long.
 
 ### User Story 1 - Open V-Flip and see what is playing (Priority: P1)
 
-A visitor on a typical laptop opens V-Flip. They immediately see the **name of the
-active track** and its **track info** (when that info exists: release date and
-outbound listen links). They do not have to hunt a second HUD icon for “Track info.”
+A visitor on a typical laptop opens V-Flip. They see the **panel title** and a **track
+list**. The **selected** row shows that track’s **info** inline (release date and
+outbound listen links when present). They do not hunt a separate Track info HUD icon.
 
-**Why this priority**: Track identity is the point of treating V-Flip as a player,
-not only a switcher.
+**Why this priority**: Track identity and links belong with the player list, not a
+second dock control.
 
-**Independent Test**: Load the landing, open V-Flip, confirm the active song title
-and its info match the current stage track. Close V-Flip; confirm the vinyl rest
-state returns and the center stays free.
+**Independent Test**: Load the landing, open V-Flip, confirm the panel title, confirm
+the active row shows date/links, pick another row and confirm info follows. Close
+V-Flip; vinyl rest state returns and the center stays free.
 
 **Acceptance Scenarios**:
 
 1. **Given** a stage track is active, **When** the visitor opens V-Flip, **Then** the
-   active track’s name is visible inside V-Flip (not only the chrome label “V-Flip”).
+   panel shows `jukeboxPanelTitle` (not a duplicate “V-FLIP” section heading) and the
+   active track row is visually selected.
 2. **Given** the active track has a release date and/or listen links in content,
-   **When** the visitor opens V-Flip, **Then** that track info is readable in V-Flip
-   without opening another HUD control.
+   **When** the visitor opens V-Flip, **Then** that info appears **inside the active
+   track row** without opening another HUD control.
 3. **Given** the active track has no listen links, **When** the visitor opens V-Flip,
-   **Then** no dead or placeholder platform buttons appear (empty-link copy from
-   chrome may show, or the links block is omitted — same honesty as today’s Track
-   info).
+   **Then** no dead platform buttons appear (empty-link copy from chrome may show).
 4. **Given** V-Flip is closed, **When** the visitor scans the right dock, **Then**
    there is no separate Track info icon.
 
 ---
 
-### User Story 2 - Read lyrics inside V-Flip (Priority: P1)
+### User Story 2 - Lyrics in V-Flip (Priority: deferred / out of v1 scope)
 
-A visitor opens V-Flip to follow along. Lyrics for the **active** track appear in
-V-Flip. If the track has no lyrics, they see the existing empty-lyrics message.
-They do not open a separate Lyrics icon on the right.
+Lyrics **do not** appear inside the open V-Flip drawer in the shipped build. The
+**Lyrics** right-dock icon is removed. Lyrics body remains in jukebox markdown for
+future use or other surfaces; this feature does **not** mount a lyrics block in V-Flip.
 
-**Why this priority**: Lyrics are the other half of “what is this song”; folding
-them into V-Flip is the requested UI change.
+**Why deferred**: Owner chose a list + inline track-info layout without a lyrics
+section in the open player.
 
-**Independent Test**: Open V-Flip on a track with lyrics; confirm the words match
-that track. Switch to a track with empty lyrics; confirm the empty message. Confirm
-the right dock has no Lyrics icon.
+**Independent Test**: Open V-Flip — no lyrics block. Right dock — no Lyrics icon.
+Lyrics files in `src/content/jukebox/` unchanged.
 
 **Acceptance Scenarios**:
 
-1. **Given** the active track has lyrics in content, **When** the visitor opens
-   V-Flip, **Then** those lyrics are readable inside V-Flip.
-2. **Given** the active track has no lyrics, **When** the visitor opens V-Flip,
-   **Then** the existing empty-lyrics message is shown (not a blank hole).
-3. **Given** lyrics are longer than the open panel, **When** the visitor scrolls,
-   **Then** scrolling happens inside V-Flip; the center stage is not covered by a
-   full-page sheet.
-4. **Given** V-Flip is closed, **When** the visitor scans the right dock, **Then**
+1. **Given** V-Flip is open, **When** the visitor scrolls the panel, **Then** there is
+   no lyrics section (track list + inline info only).
+2. **Given** V-Flip is closed, **When** the visitor scans the right dock, **Then**
    there is no separate Lyrics icon.
 
 ---
 
 ### User Story 3 - Mute and volume live in the V-Flip box (Priority: P1)
 
-A visitor can mute, unmute, and set volume as part of V-Flip. When the player is
-open, mute/volume sit **inside** it. When V-Flip is **collapsed**, mute/volume
-share the **same box** as the vinyl — one chrome shell, not a second control
-beside it. Unmute may widen that same box to show the volume slider. Mute still
-follows existing rules: hidden when the active clip has no audio, video is not
-playing, or reduced motion / fallback is in effect.
+A visitor can mute, unmute, and set volume as part of V-Flip. **Shuffle** and **loop**
+sit in the **same toolbar** as the vinyl control (visible collapsed and open).
+When the player is open, the drawer sits **above** that toolbar. Mute follows existing
+rules: hidden when the **active** track has no audio, video is not playing, or
+reduced motion / fallback is in effect. Unmute expands the **same box** with the
+volume slider inside the pill (symmetric inset with the vinyl icon).
 
-**Why this priority**: Owner-required collapsed composition; audio belongs with
-the player without an extra dock icon.
+**Why this priority**: Owner-required collapsed composition; audio and transport
+belong in one player shell without extra dock icons.
 
 **Independent Test**: With an audio-eligible clip, confirm collapsed V-Flip is a
 single box containing vinyl + mute; unmute and confirm the slider appears in that
@@ -178,22 +171,22 @@ and confirm mute disappears while vinyl remains.
 
 ### User Story 4 - Switching songs updates the player (Priority: P2)
 
-A visitor picks another song in the V-Flip list. The displayed track name, track
-info, lyrics, atmosphere, theme, and mute visibility all follow the new active
-entry without a full page reload. Unmute preference in the session still survives
-a switch to another audio-eligible clip (existing jukebox rule).
+A visitor picks another song in the V-Flip list. The displayed track row, inline
+track info, atmosphere, theme, and mute visibility all follow the new active entry
+without a full page reload. Unmute preference in the session still survives a switch
+to another audio-eligible clip (existing jukebox rule).
 
 **Why this priority**: Proves V-Flip is one player, not three stale panels glued
 together.
 
-**Independent Test**: Open V-Flip, select a different entry, confirm name / info /
-lyrics / mute visibility match the new entry and the stage atmosphere changed.
+**Independent Test**: Open V-Flip, select a different entry, confirm list selection,
+inline info, and mute visibility match the new entry and the stage atmosphere changed.
 
 **Acceptance Scenarios**:
 
 1. **Given** V-Flip is open on track A, **When** the visitor selects track B,
-   **Then** the name, info, and lyrics inside V-Flip update to track B before the
-   next interaction.
+   **Then** the list selection and inline track info inside V-Flip update to track B
+   before the next interaction.
 2. **Given** track A has audio and track B does not, **When** the visitor selects
    B, **Then** mute hides and the atmosphere follows B’s clip (poster or loop as
    configured).
@@ -202,8 +195,8 @@ lyrics / mute visibility match the new entry and the stage atmosphere changed.
    session rule).
 4. **Given** the visitor reloads the page, **When** the landing loads, **Then** the
    scheduled or static default track is active; V-Flip still shows that track’s
-   name, info, and lyrics when opened (no memory of the last manual pick).
-   Shuffle and loop return to their load-time defaults (not the previous visit).
+   inline info when opened (no memory of the last manual pick). Shuffle and loop
+   return to their load-time defaults (not the previous visit).
 
 ---
 
@@ -227,10 +220,13 @@ visible and keyboard-reachable.
 **Acceptance Scenarios**:
 
 1. **Given** V-Flip is open, **When** the visitor looks at player controls,
-   **Then** a shuffle control is present and shows whether shuffle is on or off.
+   **Then** shuffle and loop are in the **bottom toolbar** (same row as vinyl) and
+   show whether each is on or off.
 2. **Given** shuffle is on, loop is off, and at least two entries exist, **When**
    the current item reaches its advance point, **Then** a different random entry
    becomes active (never the same entry twice in a row) with a smooth handoff.
+   **When** sound is unmuted, hops MUST only target entries with playable audio
+   (`hasAudio` true and theme pack allows audio).
 3. **Given** shuffle is **off**, **When** the current item reaches its advance
    point, **Then** the stage does **not** change track or theme by itself.
 4. **Given** the visitor turns shuffle off while a hop was pending, **When** the
@@ -262,7 +258,7 @@ on — next advance point hops.
 **Acceptance Scenarios**:
 
 1. **Given** V-Flip is open, **When** the visitor looks at player controls,
-   **Then** a loop control is present and shows whether loop is on or off.
+   **Then** a loop control is in the bottom toolbar and shows whether loop is on or off.
 2. **Given** loop is on, **When** the current item reaches what would be an
    advance point, **Then** that same track continues (repeats); theme does not
    change.
@@ -300,8 +296,8 @@ center stays free.
    activates it, **Then** the stage switches and V-Flip’s now-playing content
    matches that entry.
 3. **Given** the intro overlay is showing, **When** the visitor has not dismissed
-   it, **Then** V-Flip (including mute, lyrics, and track info) stays hidden as
-   today’s chrome does.
+   it, **Then** V-Flip (including mute and track list) stays hidden as today’s
+   chrome does.
 4. **Given** a typical laptop viewport with V-Flip closed, **When** the visitor
    looks at the center third of the page, **Then** it is still free of persistent
    player text.
@@ -310,27 +306,33 @@ center stays free.
 
 ### Edge Cases
 
-- **Very long track names**: Truncate with ellipsis in the V-Flip header; full
+- **Very long track names**: Truncate with ellipsis on the **list row** label; full
   name remains available to assistive tech.
-- **Very long lyrics or many listen links**: Content scrolls inside V-Flip; no
-  horizontal overflow on a typical laptop; 320px width stays loadable (phone
-  polish remains IDEA-013).
-- **Single jukebox entry**: V-Flip still opens; name, info, lyrics, and mute
-  rules still apply; the list may show one item; shuffle on does not bounce to
-  an empty pick.
+- **Many listen links**: Inline info scrolls/wraps inside the selected row; no
+  horizontal overflow on a typical laptop; 320px width stays loadable (phone polish
+  remains IDEA-013).
+- **Single jukebox entry**: V-Flip still opens; inline info and mute rules still
+  apply; the list may show one item; shuffle on does not bounce to an empty pick.
 - **Track info missing release date**: Omit the date line; do not invent a date.
 - **Jukebox entry without catalog-style info**: Name falls back to the jukebox
   label; listen-link and date blocks omit empty chrome.
-- **No scripting**: Opening V-Flip still reveals lyrics and track info for the
-  load-time track. Shuffle/loop toggles and in-session hops do not run; the
-  authored clip may still loop as published until a full reload.
+- **No scripting**: Opening V-Flip still reveals inline track info for the load-time
+  track. Shuffle/loop toggles and in-session hops do not run; the authored clip may
+  still loop as published until a full reload.
 - **Reduced motion**: Mute hide rules unchanged; V-Flip open/close does not
   require travel animation; shuffle hops (when allowed) use a non-motion-heavy
   handoff.
-- **Glitch theme**: Mute, vinyl, and V-Flip open/close keep existing glitch
-  treatments; the full control hit area stays clickable (rule from `009`).
-  Shuffle/loop controls follow the same HUD glitch family as other player
-  buttons. Auto-advance handoff stays **smooth**, not a glitch smash.
+- **Glitch theme**: Mute, vinyl, shuffle, loop, and V-Flip open/close keep existing
+  glitch treatments; the full control hit area stays clickable (rule from `009`).
+  When **shuffle and/or loop are on** (`aria-pressed="true"`) on a glitch-capable
+  theme (e.g. Nightmare), those toggles run **continuous** HUD glitch until turned
+  off or the theme no longer supports glitch. Auto-advance **theme handoff** uses
+  the dual-mode crossfade (smooth vs glitch) — not the panel morph smash.
+- **Theme handoff (non-glitch ↔ non-glitch)**: ~**1000ms** ease on picture + color
+  tokens (`data-stage-crossfade="smooth"`).
+- **Theme handoff (Nightmare involved)**: ~**720ms** stepped crossfade + brief
+  atmosphere glitch pulse (`data-stage-crossfade="glitch"`). Leaving Nightmare
+  keeps HUD glitch active until the handoff completes, then clears it.
 - **Legal overlay open**: Mute and V-Flip may sit under the overlay as today;
   they are not required to stay usable through the overlay. An allowed shuffle
   hop MAY continue under the overlay.
@@ -351,12 +353,14 @@ center stays free.
 
 ### Functional Requirements
 
-- **FR-001**: When V-Flip is open, it MUST display the **active track name**
-  (catalog title when the entry is a known track, otherwise the jukebox label).
-- **FR-002**: When V-Flip is open, it MUST display **track info** for the active
-  entry: release date when present, and outbound listen links when present.
-- **FR-003**: When V-Flip is open, it MUST display **lyrics** for the active
-  entry, or the existing empty-lyrics message when the body is empty.
+- **FR-001**: When V-Flip is open, it MUST display the **panel title**
+  (`jukeboxPanelTitle`) and a **track list**. The active track row MUST show the
+  track **label** as the selectable control.
+- **FR-002**: When V-Flip is open, the **selected** track row MUST display **track
+  info**: release date when present, and outbound listen links when present
+  (`listenOnLabel` + platform icons on one horizontal line).
+- **FR-003**: Lyrics MUST NOT appear inside the open V-Flip drawer in v1. Lyrics
+  content files remain unchanged; there is no Lyrics dock icon.
 - **FR-004**: Mute/volume MUST live **inside V-Flip**. When collapsed, they MUST
   share the **same box** as the vinyl (one chrome shell). When open, they MUST
   sit in the open player. Unmute MAY expand that same collapsed box to show the
@@ -373,21 +377,20 @@ center stays free.
 - **FR-005**: Lyrics and Track info MUST NOT remain as separate right-dock HUD
   icons. About, Discography, and Tour stay as on-demand right-dock controls.
 - **FR-006**: V-Flip MUST still list selectable stage tracks; choosing an entry
-  MUST update atmosphere, theme, lyrics, track name, track info, and mute
+  MUST update atmosphere, theme, list selection, inline track info, and mute
   visibility without a full page reload when scripting is available.
 - **FR-007**: Open V-Flip MUST remain **peripheral**: panel body does not occupy
   the center stage; long content scrolls inside the player.
-- **FR-008**: At rest, V-Flip MUST stay compact: **one box** with vinyl plus
-  mute/volume when eligible. Track name, lyrics, and track info MUST NOT stay
-  on screen when V-Flip is closed.
-- **FR-009**: Visitor-facing strings (empty lyrics, empty links, released label,
-  V-Flip name, shuffle and loop names, mute/volume tooltips, section headings if
-  shown) MUST remain editable in UI chrome / content files without layout code
-  changes.
+- **FR-008**: At rest, V-Flip MUST stay one box: **toolbar** with vinyl, shuffle,
+  loop, and mute (when eligible). Track info MUST NOT stay on screen when V-Flip is
+  closed. Open drawer content MUST NOT persist when closed.
+- **FR-009**: Visitor-facing strings (empty links, released label, panel title,
+  shuffle and loop names, mute/volume tooltips, listen-on label) MUST remain editable
+  in UI chrome / content files without layout code changes.
 - **FR-010**: Lyrics body and track metadata MUST continue to live in existing
   jukebox/track content files (one place per field). This feature MUST NOT
   introduce a second copy of lyrics or listen links.
-- **FR-011**: Keyboard users MUST be able to open V-Flip, read lyrics and info,
+- **FR-011**: Keyboard users MUST be able to open V-Flip, read inline track info,
   operate mute, toggle shuffle, toggle loop, and select another track without a
   pointer.
 - **FR-012**: This feature MUST NOT redesign mobile/small-screen HUD composition
@@ -395,15 +398,15 @@ center stays free.
 - **FR-013**: This feature MUST NOT add third-party embeds, autoplay widgets,
   analytics, or cookies.
 - **FR-014**: Artist-facing documentation MUST be updated if the artist-visible
-  HUD surfaces change (lyrics and track info are no longer separate buttons;
-  shuffle and loop are new V-Flip controls).
+  HUD surfaces change (track info is inline in V-Flip, not a separate button;
+  shuffle and loop are V-Flip toolbar controls).
 - **FR-015**: Exclusive-open among **on-demand stage panels** (`004`) MUST be
   preserved when scripting is available. This feature MUST NOT require V-Flip and
   on-demand panels to close each other; both **may** be open at once.
 - **FR-016**: Legal footer, socials, identity, intro overlay, discography stage
   button, and scheduled default resolution MUST keep their existing behavior
-  except where this spec relocates lyrics, track info, and mute into V-Flip, and
-  except where shuffle (when enabled) replaces infinite single-clip looping.
+  except where this spec relocates track info and mute into V-Flip, adds toolbar
+  shuffle/loop, and where shuffle (when enabled) replaces infinite single-clip looping.
 - **FR-017**: V-Flip MUST expose a **shuffle toggle**. Its on/off state MUST be
   obvious. When shuffle is **off**, the stage MUST NOT auto-advance to another
   entry.
@@ -412,8 +415,10 @@ center stays free.
   MUST NOT auto-advance to another entry (loop wins over shuffle).
 - **FR-019**: Shuffle-advance MUST run only when **all** of these are true:
   scripting is available, shuffle is on, loop is off, and at least two jukebox
-  entries exist. The next entry MUST be a different random pick (no immediate
-  repeat).
+  entries exist in the **eligible pool**. The eligible pool is all entries when
+  muted; when **unmuted**, only entries with playable audio (`hasAudio` + pack
+  `audioEligible` + playing video). The next entry MUST be a different random pick
+  from that pool (no immediate repeat).
 - **FR-020**: If a shuffle-advance is allowed and the current entry **has audio**
   (`hasAudio`) and atmosphere video is **playing** with a known duration, the
   advance point MUST be **one full atmosphere video file duration** after that
@@ -423,31 +428,39 @@ center stays free.
   audio** (`hasAudio` false), the advance point MUST be **45 seconds** after that
   item became active (clock starts after intro is dismissed).
 - **FR-022**: An allowed shuffle handoff MUST change atmosphere and bound theme
-  **smoothly** (no hard cut of picture or sound). Reduced motion MAY use a
-  simpler fade or instant theme swap.
+  **smoothly** (no hard cut of picture or sound). **Non-glitch ↔ non-glitch**:
+  ~1000ms ease (`data-stage-crossfade="smooth"`). **Any handoff involving a
+  glitch-capable theme pack** (e.g. Nightmare): ~720ms stepped crossfade +
+  atmosphere glitch pulse (`data-stage-crossfade="glitch"`). Reduced motion MAY use
+  instant swap.
 - **FR-023**: A manual pick (V-Flip list or discography stage button) MUST
   start that entry immediately and reset its advance clock. Shuffle and loop
   toggle states MUST NOT reset on a manual pick.
 - **FR-024**: Shuffle MUST NOT start background audio by itself. Mute/unmute
   preference for the visit MUST survive a shuffle hop the same way it survives
   a manual jukebox pick.
-- **FR-025**: Shuffle and loop MUST be reachable from the **open** V-Flip
-  player. They MUST NOT appear as extra right-dock icons. They SHOULD NOT
-  crowd the collapsed vinyl+mute box (collapsed stays compact).
+- **FR-025**: Shuffle and loop MUST live in the **V-Flip toolbar** (visible
+  collapsed and open). They MUST NOT appear as extra right-dock icons.
 - **FR-026**: Shuffle and loop states are **for this visit only**. Reload
   returns to load-time defaults. Defaults MUST be editable in chrome/content
   (not hard-coded labels only — the starting on/off MAY be content-defined).
 - **FR-027**: Artist-facing docs MUST mention shuffle, loop, and that shuffle
   timing for songs follows **stage video file length** (and 45s for no-audio
   entries).
+- **FR-028**: When the active theme pack enables HUD glitch and shuffle and/or
+  loop is **on**, those toggle buttons MUST run **continuous** glitch animation
+  until turned off or the theme changes to a non-glitch pack.
+- **FR-029**: Open on-demand stage panels (About, Discography, Tour) MUST show
+  the **panel title label** in the open summary row with the same accent color and
+  glow as the adjacent icon (not plain default text while the icon is highlighted).
 
 ### Key Entities
 
-- **V-Flip (jukebox)**: The landing player control. Closed: one box (vinyl +
-  mute/volume when eligible). Open: now-playing surface (name, info, lyrics,
-  mute/volume, shuffle, loop) plus the track list.
-- **Active track**: The jukebox entry currently driving atmosphere, theme,
-  lyrics, track info, mute eligibility, and the advance clock.
+- **V-Flip (jukebox)**: The landing player control. Closed/open: one shell with
+  bottom **toolbar** (vinyl, shuffle, loop, mute when eligible). Open: drawer
+  above toolbar with panel title + track list (inline info on selected row).
+- **Active track**: The jukebox entry currently driving atmosphere, theme, inline
+  track info, mute eligibility, and the advance clock.
 - **Track info**: Release date and optional outbound listen links already
   maintained in track/jukebox content (`010`).
 - **Mute/volume control**: Visitor control for background audio; lives inside
@@ -463,8 +476,8 @@ center stays free.
 ### Measurable Outcomes
 
 - **SC-001**: On a typical laptop, a visitor can open V-Flip once and see the
-  active track name, lyrics (or empty message), and mute (when eligible) without
-  using any other HUD icon — 100% of those three in a single open action.
+  panel title, active track row with inline info, and mute/shuffle/loop in the
+  toolbar (when eligible) — without using any other HUD icon.
 - **SC-002**: After this change, 0 Lyrics icons and 0 Track info icons remain in
   the right dock in manual review.
 - **SC-003**: With an audio-eligible clip, a first-time visitor can mute or
@@ -473,14 +486,14 @@ center stays free.
 - **SC-003a**: In manual review, hover/focus on the mute button and on the
   visible volume slider each shows a readable tooltip that matches the chrome
   strings (button action hint; slider “drag to adjust” hint).
-- **SC-004**: After selecting another jukebox entry, name, lyrics, and track
-  info inside V-Flip match the new entry before the visitor’s next action (no
+- **SC-004**: After selecting another jukebox entry, inline track info and list
+  selection inside V-Flip match the new entry before the visitor’s next action (no
   stale previous-track copy).
 - **SC-005**: On a 1280×800 viewport with V-Flip closed, the center third of the
   page still has no persistent player text (same spirit as `009` SC-001).
-- **SC-006**: Keyboard-only visitors can complete: open V-Flip → read lyrics →
-  toggle mute (when shown) → toggle shuffle → toggle loop → pick another track
-  → close V-Flip.
+- **SC-006**: Keyboard-only visitors can complete: open V-Flip → read inline track
+  info → toggle mute (when shown) → toggle shuffle → toggle loop → pick another
+  track → close V-Flip.
 - **SC-007**: No new third-party embeds or tracking are introduced.
 - **SC-008**: With shuffle **on** and loop **off**, a no-song endless theme
   advances within **45 ± 2 seconds** of that item becoming active (after intro).
@@ -499,19 +512,20 @@ center stays free.
 
 - “V-Flip” is the visitor-facing name of the jukebox (`jukeboxLabel` in chrome);
   this feature does not rename it.
-- Collapsed V-Flip stays compact (vinyl + mute/volume in one box). The track
-  name is shown when V-Flip is **open**, not as a permanent ticker beside the
-  vinyl.
-- Mute/volume is **inside the V-Flip box**, not a second dock control. There is
-  one mute/volume instance, visible in both collapsed and open states.
-- Removing Lyrics and Track info from the right dock is intentional; those
-  surfaces are not kept as duplicates.
+- Collapsed V-Flip is one box with **toolbar**: vinyl, shuffle, loop, mute (when
+  eligible). The track name is on each **list row** when open, not as a permanent
+  header title beside the vinyl.
+- Mute/volume is **inside the V-Flip box**, not a second dock control. The mute
+  **slot hides entirely** when the active track has no playable audio (not only on
+  fallback).
+- **Lyrics in open V-Flip** are out of v1 scope; removing the Lyrics dock icon
+  is intentional.
 - Internal open-panel layout (one scroll column vs. labeled sections vs. tabs)
   is chosen at plan time; all required content MUST be reachable without a
   second HUD icon.
-- Open V-Flip MAY grow wider than today’s list-only panel so lyrics and info
-  are readable; it MUST still attach to the dock edge and leave the center
-  free.
+- Open V-Flip MAY grow wider than today’s list-only panel so inline track info
+  and the list are readable; it MUST still attach to the dock edge and leave the
+  center free.
 - Desktop / typical laptop is the visual target; phone composition stays
   IDEA-013.
 - No new content types: lyrics, dates, and listen links already exist.
@@ -546,8 +560,7 @@ center stays free.
 ## Dependencies
 
 - `002-themed-background-video` — atmosphere, mute show/hide, legal overlay.
-- `004-landing-content-layout` — jukebox switch, lyrics following active entry,
-  exclusive-open, discography stage button.
+- `004-landing-content-layout` — jukebox switch, exclusive-open, discography stage button.
 - `005-theme-packs` — audio-eligible / glitch gates.
 - `007-scheduled-stage-default` — which track is active on load.
 - `009-desktop-stage-ui` — icon-first rest state, dock, label reveal, glitch

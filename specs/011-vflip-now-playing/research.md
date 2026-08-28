@@ -18,33 +18,34 @@ All Technical Context items for this feature were resolved as follows.
   - Merge mute into the vinyl button — cannot unmute without opening V-Flip (rejected;
     SC-003).
 
-## R2: Open player layout (single scroll column)
+## R2: Open player layout (toolbar + inline track info)
 
-- **Decision**: Open V-Flip is a **now-playing column**, not tabs:
+- **Decision**: Open V-Flip is **drawer above toolbar**, not a separate header title:
 
-  1. **Header** — vinyl (fixed anchor cell) + **active track name** (not chrome
-     `jukeboxLabel`) + mute/volume.
-  2. **Transport** — shuffle toggle + loop toggle (icon buttons, `aria-pressed`).
-  3. **Body** (one scroll): track info (active entry) → lyrics (active entry) → song
-     list.
+  1. **Toolbar** (always visible, collapsed and open) — vinyl → shuffle → loop →
+     mute (when eligible). Shuffle/loop are not open-only.
+  2. **Drawer** (open only) — panel title (`jukeboxPanelTitle`) + scrollable track
+     list. **Track info** (date, Listen On) is **embedded in the selected row** via
+     `TrackInfoPanel` nodes (`[data-track-info-for]`).
+  3. **No lyrics block** in the drawer (v1). Lyrics markdown stays in content;
+     Lyrics dock icon removed.
 
-  Open width: `min(22rem × --hud-scale, viewport − dock insets)` so lyrics/info are
-  readable; still peripheral. Section headings use existing `trackInfoTitle` /
-  `lyricsTitle` chrome strings.
-- **Rationale**: Spec left stacking to plan. One column is YAGNI, keyboard-simple, and
-  reuses `[data-lyrics-for]` / `[data-track-info-for]` hide/show from `stage-switch.ts`.
+  Open width: `min(22rem × --hud-scale, viewport − dock insets)`.
+- **Rationale**: Shipped layout prioritizes compact toolbar + scannable list; inline
+  info avoids a third scroll section. YAGNI on in-drawer lyrics for v1.
 - **Alternatives considered**:
-  - Tabs (Info / Lyrics / List) — extra click to reach lyrics (rejected for P1).
-  - Keep 13rem list width — too tight for lyrics (rejected).
+  - Header active track name + separate info/lyrics sections (original plan) —
+    replaced by list-row labels + inline info.
+  - Tabs (Info / Lyrics / List) — extra click (rejected).
 
 ## R3: Remove Lyrics and Track info HUD icons
 
 - **Decision**: Delete those two `<details>` from `StagePanels.astro`. Right dock:
-  About (if any), Discography, Tour. Move `LyricsPanel` + `TrackInfoPanel` bodies into
-  `Jukebox.astro`. Keep chrome keys `lyricsTitle` / `trackInfoTitle` as **section
-  headings** inside V-Flip (not dock labels). Optional `lyricsIcon` / `trackInfoIcon`
-  unused on the dock; may remain in chrome for heading decoration (YAGNI: headings are
-  text-only unless polish wants icons).
+  About (if any), Discography, Tour. Mount **track info nodes inside list rows** in
+  `Jukebox.astro` via `TrackInfoPanel.astro`. **Do not** mount `LyricsPanel` in
+  V-Flip. Chrome keys `lyricsTitle` / `trackInfoTitle` remain for other surfaces /
+  future use; `jukeboxPanelTitle`, `jukeboxPanelTooltip`, `listenOnLabel` added for
+  the open drawer.
 - **Rationale**: FR-005. `010` now-playing **popover** / Tracks panel (if present) is
   not restyled here; only the **Track info dock icon** is removed. Discography stays.
 - **Alternatives considered**: Keep dock icons as duplicates (rejected; spec).
@@ -96,28 +97,43 @@ All Technical Context items for this feature were resolved as follows.
 - **Alternatives considered**: Set `video.loop = false` when visitor loop is off —
   breaks atmosphere for current assets (rejected).
 
-## R7: Smooth handoff (crossfade)
+## R7: Theme handoff (dual-mode crossfade)
 
 - **Decision**: Stack a second `<video data-bg-video-next>` in
-  `BackgroundAtmosphere.astro`. On allowed hop / manual pick that changes id:
-  1. Load next sources on the incoming layer; start playback (respect `keepMuted`).
-  2. Crossfade opacity **700ms** (`cubic-bezier(0.4, 0, 0.2, 1)` — same ease as `009`
-     panels). Outgoing muted immediately if incoming will play with sound, to avoid
-     double-audio.
-  3. Swap roles; `html[data-theme]` updates at fade **start** so chrome colors ease
-     with the picture. Add `color` / `background-color` / `border-color` /
-     `text-shadow` transitions on `html` (~700ms) **only when**
-     `data-stage-crossfade="true"` (set for the hop, then cleared).
-  4. `prefers-reduced-motion: reduce`: skip video crossfade; instant source swap +
-     instant theme (existing fallback path).
-  5. Glitch HUD stays for controls; hop itself is this smooth fade (spec: not a
-     glitch smash).
-- **Rationale**: Single-element `src` swap is a hard cut (fails FR-022). Dual layer is
-  first-party, no extra deps. 700ms reads as a player change without feeling sluggish.
+  `BackgroundAtmosphere.astro`. On allowed hop / manual pick that changes id,
+  `resolveThemeHandoff()` picks mode from source/destination packs:
+
+  | Mode | When | Picture + tokens | Duration |
+  | ---- | ---- | ---------------- | -------- |
+  | `smooth` | Non-glitch ↔ non-glitch | Opacity + color ease | **1000ms** `cubic-bezier(0.45, 0, 0.55, 1)` |
+  | `glitch` | Any glitch-capable pack involved | Opacity **steps(4)** + atmosphere glitch keyframes | **720ms** |
+
+  1. Load next sources on incoming layer; start playback (respect mute).
+  2. Set `html[data-stage-crossfade]` to `smooth` or `glitch`; outgoing muted when
+     needed to avoid double-audio.
+  3. `html[data-theme]` at fade start; `data-hud-glitch` clears immediately on enter
+     glitch, **delayed until handoff end** when leaving glitch.
+  4. `prefers-reduced-motion: reduce`: instant swap.
+  5. Panel morph smash is **not** used for hops.
+- **Rationale**: Single-element `src` swap is a hard cut. Dual layer is first-party.
+  Nightmare transitions need stepped/glitch feel; calm themes need longer ease.
 - **Alternatives considered**:
+  - Single 700ms for all hops — too uniform for Nightmare (rejected).
   - CSS-only theme fade, hard video cut — still a picture cut (rejected).
-  - Web Audio gain ramps — extra complexity; video.volume is enough (rejected).
-  - 300ms cut — too snappy for “music player” (rejected).
+
+## R14: Continuous glitch on active shuffle/loop toggles
+
+- **Decision**: When HUD glitch is active and shuffle and/or loop is `aria-pressed="true"`,
+  run `createContinuousGlitch` on those buttons until toggled off or theme leaves glitch
+  pack (`initPlaybackToggleGlitch` in `stage-switch.ts`). `GlitchPress` skips one-shot
+  hover glitch on these live toggles.
+- **Rationale**: Owner polish — “on” state reads alive on Nightmare without smashing hops.
+
+## R15: Audio-aware shuffle pool when unmuted
+
+- **Decision**: `shuffleCandidateIds()` filters to audio-eligible entries when visitor is
+  unmuted; muted visits shuffle across full catalog. Manual picks are never filtered.
+- **Rationale**: Unmuted shuffle should not land on silent tracks unexpectedly.
 
 ## R8: Shuffle pick
 
