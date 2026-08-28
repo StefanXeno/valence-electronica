@@ -107,7 +107,7 @@
 - [x] T026 [P] [US4] Mark `?replay-intro` and `/dev/intro` as **development-only** in README **Landing intro** section per `specs/006-landing-intro/spec.md` FR-011 (FR-007)
 - [x] T027 [US4] Set `artist.location` to **Berlin** in `src/data/site.json` to match `src/content/about/me.md` (FR-008)
 - [x] T028 [US4] Run `npm run build` and confirm no recurring warning about missing `src/content/releases/` directory
-- [ ] T029 [US4] Manually walk quickstart scenarios 10–13 (docs, build hygiene)
+- [x] T029 [US4] Manually walk quickstart scenarios 10–13 (docs, build hygiene)
 
 **Checkpoint**: US4 complete — constitution VII satisfied for this change set
 
