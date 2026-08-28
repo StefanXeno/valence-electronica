@@ -41,3 +41,27 @@
   --color-accent-alt: #7dd3fc;
   --bg-scrim: rgb(2 10 14 / 70%);
 }
+
+/* Sampled from Show ME How glitch loop poster */
+[data-theme='electric-cyan'] {
+  --color-bg: #0a121c;
+  --color-surface: rgb(16 28 40 / 82%);
+  --color-border: #1e4560;
+  --color-text: #e8f4fa;
+  --color-text-muted: #7aa3b8;
+  --color-accent: #28c5f6;
+  --color-accent-alt: #61c0f0;
+  --bg-scrim: rgb(6 12 18 / 72%);
+}
+
+/* Sampled from Taking Over loop poster */
+[data-theme='acid-lime'] {
+  --color-bg: #0a0c04;
+  --color-surface: rgb(20 24 8 / 82%);
+  --color-border: #3a4a12;
+  --color-text: #f2f2ec;
+  --color-text-muted: #a8b080;
+  --color-accent: #a4c011;
+  --color-accent-alt: #d4dc88;
+  --bg-scrim: rgb(8 10 2 / 72%);
+}

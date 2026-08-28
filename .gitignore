@@ -21,5 +21,8 @@ Thumbs.db
 *.tmp
 *.swp
 
+# local drop-zone for oversized source assets (never ship)
+tmp/
+
 # local-only idea backlog (not for the remote)
 docs/ideas.md

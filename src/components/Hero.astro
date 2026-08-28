@@ -1,11 +1,27 @@
 ---
 import site from '../data/site.json';
+import { withBase } from '../lib/url';
 
 const { name, tagline } = site.artist;
+const wordmarkSrc = withBase('/images/brand/valence-wordmark.webp');
+const wordmarkFallback = withBase('/images/brand/valence-wordmark.png');
 ---
 
 <section class="identity" aria-label={name}>
-  <h1 class="glitch-hit">{name}</h1>
+  <h1 class="identity__name glitch-hit">
+    <picture>
+      <source srcset={wordmarkSrc} type="image/webp" />
+      <img
+        class="identity__wordmark"
+        src={wordmarkFallback}
+        alt={name}
+        width="960"
+        height="362"
+        decoding="async"
+        fetchpriority="high"
+      />
+    </picture>
+  </h1>
   <p class="tagline glitch-hit">{tagline.replace(' for ', ' for\u00A0')}</p>
 </section>
 
@@ -14,15 +30,19 @@ const { name, tagline } = site.artist;
     text-shadow: 0 1px 16px var(--bg-scrim);
   }
 
-  h1 {
+  .identity__name {
     margin: 0;
-    font-size: clamp(calc(1.35rem * var(--hud-scale)), 6.75vw, calc(2rem * var(--hud-scale)));
-    font-weight: 700;
-    color: var(--color-text);
+    line-height: 0;
+  }
+
+  .identity__wordmark {
+    display: block;
+    width: min(calc(14rem * var(--hud-scale)), 72vw);
+    height: auto;
   }
 
   .tagline {
-    margin: 0.2em 0 0;
+    margin: 0.35em 0 0;
     font-family: var(--font-display);
     font-size: clamp(calc(0.75rem * var(--hud-scale)), 3.6vw, calc(0.95rem * var(--hud-scale)));
     color: var(--color-accent-alt);

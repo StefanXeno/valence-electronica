@@ -4,7 +4,12 @@
  * with `[data-theme='…']` blocks in that file.
  */
 
-export type ThemePackId = 'default' | 'nightmare-crimson' | 'cyan-pulse';
+export type ThemePackId =
+  | 'default'
+  | 'nightmare-crimson'
+  | 'cyan-pulse'
+  | 'electric-cyan'
+  | 'acid-lime';
 
 export interface ThemePackCapabilities {
   loopingVideo: boolean;
@@ -18,7 +23,13 @@ export interface ThemePack {
 }
 
 /** Ids with a CSS token block in `themes.css` (`default` includes `:root`). */
-export const PACK_CSS_THEME_IDS = ['default', 'nightmare-crimson', 'cyan-pulse'] as const;
+export const PACK_CSS_THEME_IDS = [
+  'default',
+  'nightmare-crimson',
+  'cyan-pulse',
+  'electric-cyan',
+  'acid-lime',
+] as const;
 
 export const THEME_PACKS: Record<ThemePackId, ThemePack> = {
   default: {
@@ -32,6 +43,14 @@ export const THEME_PACKS: Record<ThemePackId, ThemePack> = {
   'cyan-pulse': {
     id: 'cyan-pulse',
     capabilities: { loopingVideo: false, audioEligible: false, hudGlitch: false },
+  },
+  'electric-cyan': {
+    id: 'electric-cyan',
+    capabilities: { loopingVideo: true, audioEligible: true, hudGlitch: false },
+  },
+  'acid-lime': {
+    id: 'acid-lime',
+    capabilities: { loopingVideo: true, audioEligible: true, hudGlitch: false },
   },
 };
 

@@ -22,11 +22,10 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : un
 const defaultVideo = await getDefaultVideo();
 const themeAttrs = applyThemeAttributes(resolveThemePack(defaultVideo.themeId));
 
-// Link previews need an absolute raster URL; scrapers reject SVG posters.
-const shareImage =
-  Astro.site && /\.(jpe?g|png|webp)$/i.test(defaultVideo.poster)
-    ? new URL(withBase(defaultVideo.poster), Astro.site).href
-    : undefined;
+// Dedicated brand OG image — stable for link previews regardless of active stage.
+const shareImage = Astro.site
+  ? new URL(withBase('/images/brand/og-image.jpg'), Astro.site).href
+  : undefined;
 
 // The pre-release preview shares an origin with the live site, so it must never
 // be indexed as duplicate content regardless of the seo.indexable switch.
@@ -54,7 +53,9 @@ const indexable = site.seo.indexable && !isPreview;
     <meta name="twitter:description" content={description} />
     {shareImage && <meta name="twitter:image" content={shareImage} />}
     {canonical && <link rel="canonical" href={canonical} />}
-    <link rel="icon" type="image/svg+xml" href={withBase('/favicon.svg')} />
+    <link rel="icon" type="image/png" sizes="32x32" href={withBase('/images/brand/favicon-32.png')} />
+    <link rel="icon" type="image/png" sizes="64x64" href={withBase('/images/brand/favicon-64.png')} />
+    <link rel="apple-touch-icon" sizes="180x180" href={withBase('/images/brand/favicon-180.png')} />
     <meta name="generator" content={Astro.generator} />
   </head>
   <body>

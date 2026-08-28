@@ -176,6 +176,8 @@ matching registry and CSS in the codebase — do not invent new ids.
 | `default` | Neutral fallback |
 | `nightmare-crimson` | Red / horror loop (video + audio + HUD glitch) |
 | `cyan-pulse` | Cyan still / pulse (no video loop) |
+| `electric-cyan` | Teal glitch loop (video + audio) |
+| `acid-lime` | Lime / acid loop (video + audio) |
 
 **Developer only:** Creating or editing theme packs (`src/lib/theme-packs.ts`,
 `src/styles/themes.css`). Ask the developer for a new visual mood.
