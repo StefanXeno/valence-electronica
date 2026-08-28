@@ -32,6 +32,17 @@ export interface UiChrome {
   trackInfoIconEmoji?: string;
   releasedLabel: string;
   emptyTrackLinks: string;
+  shuffleLabel: string;
+  loopLabel: string;
+  shuffleIcon: HudIconToken;
+  shuffleIconEmoji?: string;
+  loopIcon: HudIconToken;
+  loopIconEmoji?: string;
+  shuffleDefault: boolean;
+  loopDefault: boolean;
+  unmuteTooltip: string;
+  muteTooltip: string;
+  volumeSliderTooltip: string;
 }
 
 const CHROME_FALLBACK: UiChrome = {
@@ -58,6 +69,15 @@ const CHROME_FALLBACK: UiChrome = {
   trackInfoIcon: 'info',
   releasedLabel: 'Released',
   emptyTrackLinks: 'No streaming links yet',
+  shuffleLabel: 'Shuffle',
+  loopLabel: 'Loop',
+  shuffleIcon: 'shuffle',
+  loopIcon: 'loop',
+  shuffleDefault: true,
+  loopDefault: false,
+  unmuteTooltip: 'Unmute',
+  muteTooltip: 'Mute',
+  volumeSliderTooltip: 'Drag to adjust volume',
 };
 
 export interface ReleaseItem {
@@ -105,6 +125,8 @@ export async function getChrome(): Promise<UiChrome> {
       const discography = resolveHudIcon(entry.data.discographyIcon, 'discography');
       const tour = resolveHudIcon(entry.data.tourIcon, 'tour');
       const trackInfo = resolveHudIcon(entry.data.trackInfoIcon, 'info');
+      const shuffle = resolveHudIcon(entry.data.shuffleIcon, 'shuffle');
+      const loop = resolveHudIcon(entry.data.loopIcon, 'loop');
       return {
         jukeboxIcon: jukebox.token,
         jukeboxIconEmoji: jukebox.emoji,
@@ -118,11 +140,23 @@ export async function getChrome(): Promise<UiChrome> {
         tourIconEmoji: tour.emoji,
         trackInfoIcon: trackInfo.token,
         trackInfoIconEmoji: trackInfo.emoji,
+        shuffleIcon: shuffle.token,
+        shuffleIconEmoji: shuffle.emoji,
+        loopIcon: loop.token,
+        loopIconEmoji: loop.emoji,
       };
     })(),
     trackInfoTitle: entry.data.trackInfoTitle?.trim() || CHROME_FALLBACK.trackInfoTitle,
     releasedLabel: entry.data.releasedLabel?.trim() || CHROME_FALLBACK.releasedLabel,
     emptyTrackLinks: entry.data.emptyTrackLinks?.trim() || CHROME_FALLBACK.emptyTrackLinks,
+    shuffleLabel: entry.data.shuffleLabel?.trim() || CHROME_FALLBACK.shuffleLabel,
+    loopLabel: entry.data.loopLabel?.trim() || CHROME_FALLBACK.loopLabel,
+    shuffleDefault: entry.data.shuffleDefault ?? CHROME_FALLBACK.shuffleDefault,
+    loopDefault: entry.data.loopDefault ?? CHROME_FALLBACK.loopDefault,
+    unmuteTooltip: entry.data.unmuteTooltip?.trim() || CHROME_FALLBACK.unmuteTooltip,
+    muteTooltip: entry.data.muteTooltip?.trim() || CHROME_FALLBACK.muteTooltip,
+    volumeSliderTooltip:
+      entry.data.volumeSliderTooltip?.trim() || CHROME_FALLBACK.volumeSliderTooltip,
   };
 }
 

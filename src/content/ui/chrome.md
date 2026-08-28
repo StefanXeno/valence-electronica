@@ -17,4 +17,13 @@ trackInfoTitle: Track info
 trackInfoIcon: info
 releasedLabel: Released
 emptyTrackLinks: No streaming links yet
+shuffleLabel: Shuffle
+loopLabel: Loop
+shuffleIcon: shuffle
+loopIcon: loop
+shuffleDefault: true
+loopDefault: false
+unmuteTooltip: Unmute
+muteTooltip: Mute
+volumeSliderTooltip: Drag to adjust volume
 ---

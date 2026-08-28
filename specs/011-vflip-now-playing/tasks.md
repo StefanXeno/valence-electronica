@@ -20,7 +20,7 @@ Foundational schema/lib/atmosphere shell blocks all stories.
 
 **Purpose**: Align implementer with contracts before code changes
 
-- [ ] T001 Review `specs/011-vflip-now-playing/contracts/vflip-player-ui.md` and `specs/011-vflip-now-playing/contracts/vflip-playback.md` against current `src/components/Jukebox.astro`, `src/components/StageDock.astro`, `src/components/StagePanels.astro`, and `src/components/MuteControl.astro`
+- [X] T001 Review `specs/011-vflip-now-playing/contracts/vflip-player-ui.md` and `specs/011-vflip-now-playing/contracts/vflip-playback.md` against current `src/components/Jukebox.astro`, `src/components/StageDock.astro`, `src/components/StagePanels.astro`, and `src/components/MuteControl.astro`
 
 ---
 
@@ -30,16 +30,16 @@ Foundational schema/lib/atmosphere shell blocks all stories.
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T002 Extend `ui` collection schema in `src/content.config.ts` with `shuffleLabel`, `loopLabel`, `shuffleIcon`, `loopIcon`, `shuffleDefault`, `loopDefault` per `specs/011-vflip-now-playing/data-model.md`
-- [ ] T003 [P] Extend `ui` collection schema in `src/content.config.ts` with `unmuteTooltip`, `muteTooltip`, `volumeSliderTooltip` (can land with T002 in one schema edit)
-- [ ] T004 Extend `HudIconToken` and `KNOWN` in `src/lib/hud-icons.ts` with `shuffle` and `loop` tokens
-- [ ] T005 [P] Add SVG paths for `shuffle` and `loop` tokens in `src/components/HudIcon.astro`
-- [ ] T006 Extend `UiChrome` interface and `getChrome()` in `src/lib/stage.ts` for shuffle/loop labels, icons, and boolean defaults (fallback shuffle on / loop off)
-- [ ] T007 [P] Add shuffle/loop chrome fields to `src/content/ui/chrome.md` (`shuffleLabel`, `loopLabel`, icons, `shuffleDefault: true`, `loopDefault: false`)
-- [ ] T008 Create `src/lib/playback.ts` — `dwellSeconds(entry, videoDurationSec?)`, `pickOtherId(ids, current)`, PlaybackMode state API (get/set shuffle/loop), intro-gated timer start/clear/restart, video `loadedmetadata` hook per `specs/011-vflip-now-playing/contracts/vflip-playback.md`
-- [ ] T009 [P] Add `src/lib/playback.test.ts` — dwell: `hasAudio` + known duration → duration; `hasAudio` + no duration → 45; `!hasAudio` → 45; `pickOtherId` never returns current; empty filter stays undefined
-- [ ] T010 Pass `hasAudio` through stage catalog JSON in `src/components/Jukebox.astro` / `src/lib/stage-switch.ts` `StageCatalogEntry` type; wire atmosphere video duration into playback on `loadedmetadata`
-- [ ] T011 Add incoming video layer (`data-bg-video-next`) to `src/components/BackgroundAtmosphere.astro` and CSS opacity stacking so crossfade can run later (idle layer unloaded/paused)
+- [X] T002 Extend `ui` collection schema in `src/content.config.ts` with `shuffleLabel`, `loopLabel`, `shuffleIcon`, `loopIcon`, `shuffleDefault`, `loopDefault` per `specs/011-vflip-now-playing/data-model.md`
+- [X] T003 [P] Extend `ui` collection schema in `src/content.config.ts` with `unmuteTooltip`, `muteTooltip`, `volumeSliderTooltip` (can land with T002 in one schema edit)
+- [X] T004 Extend `HudIconToken` and `KNOWN` in `src/lib/hud-icons.ts` with `shuffle` and `loop` tokens
+- [X] T005 [P] Add SVG paths for `shuffle` and `loop` tokens in `src/components/HudIcon.astro`
+- [X] T006 Extend `UiChrome` interface and `getChrome()` in `src/lib/stage.ts` for shuffle/loop labels, icons, and boolean defaults (fallback shuffle on / loop off)
+- [X] T007 [P] Add shuffle/loop chrome fields to `src/content/ui/chrome.md` (`shuffleLabel`, `loopLabel`, icons, `shuffleDefault: true`, `loopDefault: false`)
+- [X] T008 Create `src/lib/playback.ts` — `dwellSeconds(entry, videoDurationSec?)`, `pickOtherId(ids, current)`, PlaybackMode state API (get/set shuffle/loop), intro-gated timer start/clear/restart, video `loadedmetadata` hook per `specs/011-vflip-now-playing/contracts/vflip-playback.md`
+- [X] T009 [P] Add `src/lib/playback.test.ts` — dwell: `hasAudio` + known duration → duration; `hasAudio` + no duration → 45; `!hasAudio` → 45; `pickOtherId` never returns current; empty filter stays undefined
+- [X] T010 Pass `hasAudio` through stage catalog JSON in `src/components/Jukebox.astro` / `src/lib/stage-switch.ts` `StageCatalogEntry` type; wire atmosphere video duration into playback on `loadedmetadata`
+- [X] T011 Add incoming video layer (`data-bg-video-next`) to `src/components/BackgroundAtmosphere.astro` and CSS opacity stacking so crossfade can run later (idle layer unloaded/paused)
 
 **Checkpoint**: `npm run check` and `npm test` pass; dual video exists; playback helpers green; chrome fields resolve
 
@@ -53,11 +53,11 @@ Foundational schema/lib/atmosphere shell blocks all stories.
 
 ### Implementation for User Story 1
 
-- [ ] T012 [US1] Widen open jukebox shell CSS in `src/components/Jukebox.astro` to `min(22rem × --hud-scale, …)` and taller scroll body per `specs/011-vflip-now-playing/contracts/vflip-player-ui.md`
-- [ ] T013 [US1] Add open-header `[data-now-playing-title]` in `src/components/Jukebox.astro` showing active track `label` (ellipsis); keep vinyl accessible name as `jukeboxLabel`
-- [ ] T014 [US1] Mount `TrackInfoPanel` inside open jukebox body in `src/components/Jukebox.astro` (section heading from `trackInfoTitle`); sync still via `[data-track-info-for]`
-- [ ] T015 [US1] Remove Track info panel entry from `src/components/StagePanels.astro` right-dock list
-- [ ] T016 [US1] Update `syncStageUi` / active-id path in `src/lib/stage-switch.ts` so `[data-now-playing-title]` text updates on stage select
+- [X] T012 [US1] Widen open jukebox shell CSS in `src/components/Jukebox.astro` to `min(22rem × --hud-scale, …)` and taller scroll body per `specs/011-vflip-now-playing/contracts/vflip-player-ui.md`
+- [X] T013 [US1] Add open-header `[data-now-playing-title]` in `src/components/Jukebox.astro` showing active track `label` (ellipsis); keep vinyl accessible name as `jukeboxLabel`
+- [X] T014 [US1] Mount `TrackInfoPanel` inside open jukebox body in `src/components/Jukebox.astro` (section heading from `trackInfoTitle`); sync still via `[data-track-info-for]`
+- [X] T015 [US1] Remove Track info panel entry from `src/components/StagePanels.astro` right-dock list
+- [X] T016 [US1] Update `syncStageUi` / active-id path in `src/lib/stage-switch.ts` so `[data-now-playing-title]` text updates on stage select
 - [ ] T017 [US1] Manually walk quickstart.md Scenario 1 (name + info only; lyrics may still be dock until US2)
 
 **Checkpoint**: MVP — visitor opens V-Flip once and sees what is playing + track info
@@ -72,9 +72,9 @@ Foundational schema/lib/atmosphere shell blocks all stories.
 
 ### Implementation for User Story 2
 
-- [ ] T018 [US2] Mount `LyricsPanel` inside open jukebox body in `src/components/Jukebox.astro` (section heading from `lyricsTitle`; empty state unchanged)
-- [ ] T019 [US2] Remove Lyrics panel entry from `src/components/StagePanels.astro` (right dock: About → Discography → Tour only)
-- [ ] T020 [US2] Confirm body scroll order in `src/components/Jukebox.astro`: track info → lyrics → song list; long lyrics scroll inside player only
+- [X] T018 [US2] Mount `LyricsPanel` inside open jukebox body in `src/components/Jukebox.astro` (section heading from `lyricsTitle`; empty state unchanged)
+- [X] T019 [US2] Remove Lyrics panel entry from `src/components/StagePanels.astro` (right dock: About → Discography → Tour only)
+- [X] T020 [US2] Confirm body scroll order in `src/components/Jukebox.astro`: track info → lyrics → song list; long lyrics scroll inside player only
 - [ ] T021 [US2] Manually verify lyrics switch with jukebox options and empty-lyrics message; right dock has no Lyrics icon
 
 **Checkpoint**: Lyrics + info + list are one open player; right dock cleaned
@@ -89,12 +89,12 @@ Foundational schema/lib/atmosphere shell blocks all stories.
 
 ### Implementation for User Story 3
 
-- [ ] T022 [US3] Mount `MuteControl` inside `[data-jukebox]` in `src/components/Jukebox.astro` (collapsed cluster: vinyl + mute; open: header row with mute)
-- [ ] T023 [US3] Remove mute slot from `src/components/StageDock.astro` and stop passing mute sibling from `src/pages/index.astro`
-- [ ] T024 [US3] Adjust `src/components/MuteControl.astro` styles so muted/unmuted pill expands the **shared** jukebox shell (no second border circle; vinyl anchor does not jump)
-- [ ] T024a [US3] Add mute-button + volume-slider tooltips in `src/components/MuteControl.astro` via HUD label-reveal (`data-hud-label` / `data-hud-label-anchor="above"`); button label swaps mute/unmute from chrome; slider uses `volumeSliderTooltip`
-- [ ] T024b [P] [US3] Extend `src/content.config.ts`, `src/lib/stage.ts`, and `src/content/ui/chrome.md` with `unmuteTooltip`, `muteTooltip`, `volumeSliderTooltip` (defaults: Unmute / Mute / Drag to adjust volume)
-- [ ] T025 [US3] Update `src/styles/intro.css` if needed so intro still hides mute-inside-dock (stage-dock rules cover jukebox shell)
+- [X] T022 [US3] Mount `MuteControl` inside `[data-jukebox]` in `src/components/Jukebox.astro` (collapsed cluster: vinyl + mute; open: header row with mute)
+- [X] T023 [US3] Remove mute slot from `src/components/StageDock.astro` and stop passing mute sibling from `src/pages/index.astro`
+- [X] T024 [US3] Adjust `src/components/MuteControl.astro` styles so muted/unmuted pill expands the **shared** jukebox shell (no second border circle; vinyl anchor does not jump)
+- [X] T024a [US3] Add mute-button + volume-slider tooltips in `src/components/MuteControl.astro` via HUD label-reveal (`data-hud-label` / `data-hud-label-anchor="above"`); button label swaps mute/unmute from chrome; slider uses `volumeSliderTooltip`
+- [X] T024b [P] [US3] Extend `src/content.config.ts`, `src/lib/stage.ts`, and `src/content/ui/chrome.md` with `unmuteTooltip`, `muteTooltip`, `volumeSliderTooltip` (defaults: Unmute / Mute / Drag to adjust volume)
+- [X] T025 [US3] Update `src/styles/intro.css` if needed so intro still hides mute-inside-dock (stage-dock rules cover jukebox shell)
 - [ ] T026 [US3] Manually walk quickstart.md Scenario 2 (including tooltip checks); confirm mute hide rules (no audio / fallback / reduced motion) still apply
 
 **Checkpoint**: One V-Flip box owns vinyl + mute/volume
@@ -109,12 +109,12 @@ Foundational schema/lib/atmosphere shell blocks all stories.
 
 ### Implementation for User Story 5
 
-- [ ] T027 [US5] Add shuffle transport button in open `src/components/Jukebox.astro` (`aria-pressed`, chrome `shuffleLabel`/`shuffleIcon`, `glitch-hit` as appropriate)
-- [ ] T028 [US5] Wire shuffle toggle to `src/lib/playback.ts` from jukebox boot; initialize from `shuffleDefault`; clear/restart timer on toggle
-- [ ] T029 [US5] Implement intro-gated advance timer in `src/lib/playback.ts` / `src/lib/stage-switch.ts` — no fire while `data-intro-pending` or `data-intro-active`; start after clear when shuffle && !loop
-- [ ] T030 [US5] Implement hop path in `src/lib/stage-switch.ts` — on timer fire call `pickOtherId`, then crossfade `applyStageEntry` (700ms dual-video + `data-stage-crossfade` theme token transition per playback contract)
-- [ ] T031 [US5] Add `html[data-stage-crossfade]` color/surface/border transitions in `src/styles/themes.css` (or `global.css`); reduced-motion = instant swap
-- [ ] T032 [US5] Ensure hop preserves mute/volume and never auto-unmutes; restart clock after hop when shuffle still on
+- [X] T027 [US5] Add shuffle transport button in open `src/components/Jukebox.astro` (`aria-pressed`, chrome `shuffleLabel`/`shuffleIcon`, `glitch-hit` as appropriate)
+- [X] T028 [US5] Wire shuffle toggle to `src/lib/playback.ts` from jukebox boot; initialize from `shuffleDefault`; clear/restart timer on toggle
+- [X] T029 [US5] Implement intro-gated advance timer in `src/lib/playback.ts` / `src/lib/stage-switch.ts` — no fire while `data-intro-pending` or `data-intro-active`; start after clear when shuffle && !loop
+- [X] T030 [US5] Implement hop path in `src/lib/stage-switch.ts` — on timer fire call `pickOtherId`, then crossfade `applyStageEntry` (700ms dual-video + `data-stage-crossfade` theme token transition per playback contract)
+- [X] T031 [US5] Add `html[data-stage-crossfade]` color/surface/border transitions in `src/styles/themes.css` (or `global.css`); reduced-motion = instant swap
+- [X] T032 [US5] Ensure hop preserves mute/volume and never auto-unmutes; restart clock after hop when shuffle still on
 - [ ] T033 [US5] Manually walk quickstart.md Scenarios 3, 5, and 7 (hop timing follows active mp4 file length; note duration in devtools if needed)
 
 **Checkpoint**: Shuffle is optional radio; hops are smooth and intro-safe
@@ -129,9 +129,9 @@ Foundational schema/lib/atmosphere shell blocks all stories.
 
 ### Implementation for User Story 6
 
-- [ ] T034 [US6] Add loop transport button in open `src/components/Jukebox.astro` (`aria-pressed`, chrome `loopLabel`/`loopIcon`)
-- [ ] T035 [US6] Wire loop toggle to `src/lib/playback.ts`; on → clear timer; off + shuffle on → restart clock; do **not** flip HTML `video.loop` attribute
-- [ ] T036 [US6] Confirm manual pick / discography stage button resets advance clock but does **not** reset shuffle/loop flags in `src/lib/stage-switch.ts`
+- [X] T034 [US6] Add loop transport button in open `src/components/Jukebox.astro` (`aria-pressed`, chrome `loopLabel`/`loopIcon`)
+- [X] T035 [US6] Wire loop toggle to `src/lib/playback.ts`; on → clear timer; off + shuffle on → restart clock; do **not** flip HTML `video.loop` attribute
+- [X] T036 [US6] Confirm manual pick / discography stage button resets advance clock but does **not** reset shuffle/loop flags in `src/lib/stage-switch.ts`
 - [ ] T037 [US6] Manually walk quickstart.md Scenario 4 (and Scenario 6 toggles-survive-pick)
 
 **Checkpoint**: Loop pins track; shuffle only hops when loop is off
@@ -146,8 +146,8 @@ Foundational schema/lib/atmosphere shell blocks all stories.
 
 ### Implementation for User Story 4
 
-- [ ] T038 [US4] Use the same crossfade handoff for manual jukebox/discography picks that change id in `src/lib/stage-switch.ts` (not hard cut)
-- [ ] T039 [US4] Verify `syncStageUi` updates title, `[data-lyrics-for]`, `[data-track-info-for]`, list `aria-pressed`, mute visibility on every select/hop
+- [X] T038 [US4] Use the same crossfade handoff for manual jukebox/discography picks that change id in `src/lib/stage-switch.ts` (not hard cut)
+- [X] T039 [US4] Verify `syncStageUi` updates title, `[data-lyrics-for]`, `[data-track-info-for]`, list `aria-pressed`, mute visibility on every select/hop
 - [ ] T040 [US4] Manually confirm unmute preference survives audio→audio switch and mute hides on no-audio target; reload restores scheduled/static default + chrome shuffle/loop defaults
 
 **Checkpoint**: One player, no stale panels after switch
@@ -162,7 +162,7 @@ Foundational schema/lib/atmosphere shell blocks all stories.
 
 ### Implementation for User Story 7
 
-- [ ] T041 [US7] Confirm on-demand panel exclusive-open among About/Discography/Tour is unchanged; V-Flip **may stay open** while a panel is open (owner Q3:C — no new mutual-close rule)
+- [X] T041 [US7] Confirm on-demand panel exclusive-open among About/Discography/Tour is unchanged; V-Flip **may stay open** while a panel is open (owner Q3:C — no new mutual-close rule)
 - [ ] T042 [US7] Keyboard pass per UI contract — vinyl → mute → shuffle → loop → links → list → right dock → footer
 - [ ] T043 [US7] Manually walk quickstart.md Scenario 11 (regression) and Scenario 9 (keyboard); fix any dock/footer overlap from wider open player
 
@@ -174,10 +174,10 @@ Foundational schema/lib/atmosphere shell blocks all stories.
 
 **Purpose**: Docs, contract amendments, full validation
 
-- [ ] T044 [P] Update `docs/artist-guide.md` — lyrics/track info live in V-Flip; shuffle/loop controls; shuffle timing follows stage video file length (45s no-audio); chrome keys; Track info is not a separate HUD button
-- [ ] T045 [P] Amend `specs/009-desktop-stage-ui/contracts/desktop-hud-ui.md` — left cluster is jukebox shell containing mute; point to `011` player UI contract
-- [ ] T046 [P] Amend `specs/010-track-catalog/contracts/track-catalog-ui.md` — Track info / now-playing placement superseded by in-V-Flip display on desktop
-- [ ] T047 Run `npm run check`, `npm run build`, and `npm test`; fix regressions
+- [X] T044 [P] Update `docs/artist-guide.md` — lyrics/track info live in V-Flip; shuffle/loop controls; shuffle timing follows stage video file length (45s no-audio); chrome keys; Track info is not a separate HUD button
+- [X] T045 [P] Amend `specs/009-desktop-stage-ui/contracts/desktop-hud-ui.md` — left cluster is jukebox shell containing mute; point to `011` player UI contract
+- [X] T046 [P] Amend `specs/010-track-catalog/contracts/track-catalog-ui.md` — Track info / now-playing placement superseded by in-V-Flip display on desktop
+- [X] T047 Run `npm run check`, `npm run build`, and `npm test`; fix regressions
 - [ ] T048 Manually complete remaining `specs/011-vflip-now-playing/quickstart.md` scenarios (8 reduced motion, 10 content-only labels, 12–13 docs/build)
 
 ---

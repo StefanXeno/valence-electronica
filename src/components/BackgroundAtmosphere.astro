@@ -28,7 +28,7 @@ const showMute = packAllowsMute(pack, video.hasAudio, useVideo);
   data-has-audio={showMute ? 'true' : 'false'}
 >
   <video
-    class="atmosphere__video"
+    class="atmosphere__video atmosphere__video--current"
     data-bg-video
     autoplay
     muted
@@ -39,6 +39,15 @@ const showMute = packAllowsMute(pack, video.hasAudio, useVideo);
   >
     {sources.map((source) => <source src={source.src} type={source.type} />)}
   </video>
+  <video
+    class="atmosphere__video atmosphere__video--next"
+    data-bg-video-next
+    muted
+    loop
+    playsinline
+    preload="none"
+    aria-hidden="true"
+  ></video>
   <img class="atmosphere__poster" data-bg-poster src={posterSrc} alt="" decoding="async" />
   <div class="atmosphere__scrim" aria-hidden="true"></div>
 </div>
@@ -106,6 +115,20 @@ const showMute = packAllowsMute(pack, video.hasAudio, useVideo);
     width: 100%;
     height: 100%;
     object-fit: cover;
+  }
+
+  .atmosphere__video--next {
+    opacity: 0;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  .atmosphere__video--next.atmosphere__video--active {
+    z-index: 2;
+  }
+
+  .atmosphere__video--current {
+    z-index: 1;
   }
 
   .atmosphere__poster {

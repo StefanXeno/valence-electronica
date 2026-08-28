@@ -1,14 +1,36 @@
 ---
+interface Props {
+  unmuteTooltip?: string;
+  muteTooltip?: string;
+  volumeSliderTooltip?: string;
+  inJukebox?: boolean;
+}
+
+const {
+  unmuteTooltip = 'Unmute',
+  muteTooltip = 'Mute',
+  volumeSliderTooltip = 'Drag to adjust volume',
+  inJukebox = false,
+} = Astro.props;
 ---
 
-<div class="volume-control" data-volume-control data-sound="off" hidden>
+<div
+  class:list={['volume-control', { 'volume-control--in-jukebox': inJukebox }]}
+  data-volume-control
+  data-sound="off"
+  data-unmute-tooltip={unmuteTooltip}
+  data-mute-tooltip={muteTooltip}
+  hidden
+>
   <button
     type="button"
     class="volume-control__toggle glitch-hit"
     data-mute-control
     data-glitch-live
+    data-hud-label={unmuteTooltip}
+    data-hud-label-anchor="above"
     aria-pressed="true"
-    aria-label="Unmute background audio"
+    aria-label={unmuteTooltip}
   >
     <svg
       class="volume-control__icon volume-control__icon--muted"
@@ -43,12 +65,14 @@
     <input
       class="volume-control__slider"
       data-volume-slider
+      data-hud-label={volumeSliderTooltip}
+      data-hud-label-anchor="above"
       type="range"
       min="0"
       max="1"
       step="0.01"
       value="0.7"
-      aria-label="Background audio volume"
+      aria-label={volumeSliderTooltip}
     />
   </label>
 </div>
@@ -64,6 +88,9 @@
     const sliderWrap = control?.querySelector<HTMLElement>('[data-volume-wrap]');
     const slider = control?.querySelector<HTMLInputElement>('[data-volume-slider]');
     if (!root || !video || !control || !button || !sliderWrap || !slider) return;
+
+    const unmuteTooltip = control.dataset.unmuteTooltip ?? 'Unmute';
+    const muteTooltip = control.dataset.muteTooltip ?? 'Mute';
 
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
     let lastVolume = Number(slider.value) || 0.7;
@@ -102,7 +129,9 @@
     const applySoundUi = (muted: boolean) => {
       control.dataset.sound = muted ? 'off' : 'on';
       button.setAttribute('aria-pressed', muted ? 'true' : 'false');
-      button.setAttribute('aria-label', muted ? 'Unmute background audio' : 'Mute background audio');
+      const label = muted ? unmuteTooltip : muteTooltip;
+      button.setAttribute('aria-label', label);
+      button.dataset.hudLabel = label;
       sliderWrap.toggleAttribute('inert', muted);
       if (!muted) slider.value = String(video.volume);
     };
@@ -209,6 +238,18 @@
     background: var(--color-surface);
     color: var(--color-text);
     box-sizing: border-box;
+  }
+
+  .volume-control--in-jukebox {
+    border: 0;
+    background: transparent;
+    min-width: calc(2.4rem * var(--hud-scale));
+    height: calc(2.4rem * var(--hud-scale));
+  }
+
+  .volume-control--in-jukebox[data-sound='on'] {
+    min-width: auto;
+    height: var(--control-size);
   }
 
   /* Nightmare: stepped shell so the glitch morph owns the shape change */

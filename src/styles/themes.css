@@ -65,3 +65,18 @@
   --color-accent-alt: #d4dc88;
   --bg-scrim: rgb(8 10 2 / 72%);
 }
+
+html[data-stage-crossfade='true'] {
+  transition:
+    background-color 700ms cubic-bezier(0.4, 0, 0.2, 1),
+    color 700ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+html[data-stage-crossfade='true'] .jukebox,
+html[data-stage-crossfade='true'] .stage-panel,
+html[data-stage-crossfade='true'] .volume-control:not(.volume-control--in-jukebox) {
+  transition:
+    background-color 700ms cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 700ms cubic-bezier(0.4, 0, 0.2, 1),
+    color 700ms cubic-bezier(0.4, 0, 0.2, 1);
+}

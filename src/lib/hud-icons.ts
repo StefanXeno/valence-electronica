@@ -5,7 +5,9 @@ export type HudIconToken =
   | 'discography'
   | 'tour'
   | 'catalog'
-  | 'info';
+  | 'info'
+  | 'shuffle'
+  | 'loop';
 
 const KNOWN: HudIconToken[] = [
   'jukebox',
@@ -15,6 +17,8 @@ const KNOWN: HudIconToken[] = [
   'tour',
   'catalog',
   'info',
+  'shuffle',
+  'loop',
 ];
 
 /** True when the chrome value is an emoji override rather than a token id. */

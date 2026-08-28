@@ -4,8 +4,9 @@
 
 **Supersedes for desktop**: layout rows in
 [`specs/004-landing-content-layout/contracts/stage-ui.md`](../../004-landing-content-layout/contracts/stage-ui.md).
-All non-layout behavior in `stage-ui.md` (jukebox switch, discography, tour, exclusive-open,
-glitch enable gate) remains authoritative unless amended below.
+**Amended by** [`specs/011-vflip-now-playing/contracts/vflip-player-ui.md`](../../011-vflip-now-playing/contracts/vflip-player-ui.md)
+for left-cluster jukebox shell (mute inside V-Flip), open player anatomy, and right-dock
+icons (About, Discography, Tour only — no Lyrics / Track info dock icons).
 
 **Visual target**: typical laptop (~1280px+). Phone polish is IDEA-013; page MUST still load
 at 320px.
@@ -19,8 +20,8 @@ Chrome scale: `--hud-scale: 1.5` (unchanged unless plan tasks tune dock spacing)
 | Center | Atmosphere only. No panel bodies, labels, or lists in the middle. |
 | Top-left | Identity: artist name + tagline from `site.json`. Compact; tagline single line (`nowrap`). |
 | Top-right | Social channels: equal-sized brand icons (~2.5rem × `--hud-scale`). Labels off at rest; platform name via `aria-label`. |
-| Bottom dock | Single horizontal rail above footer. **Left cluster:** jukebox icon trigger + mute (when visible), side by side. **Right segment:** About (if content exists), Lyrics, Track info, Discography, Tour — icon triggers in a **horizontal row**, not a vertical stack. |
-| Mute | In the **left dock cluster**, immediately beside the jukebox when the active entry has looping video + audio. Same mute contract as `002`. Must not cover footer cluster. |
+| Bottom dock | Single horizontal rail above footer. **Left cluster:** V-Flip shell (vinyl + mute when eligible). **Right segment:** About (if content exists), Discography, Tour — icon triggers in a **horizontal row**, not a vertical stack. |
+| Mute | **Inside the V-Flip shell** when the active entry has looping video + audio. Same mute contract as `002`. Must not cover footer cluster. |
 | Footer | **Bottom center:** `© {year} {artist}` then Impressum and Datenschutzerklärung. Transparent background; no bar. Legal overlay behavior unchanged from `002`. Identity block and copyright line MAY use `glitch-hit` when glitch is enabled. |
 
 On-demand and jukebox **panel bodies** expand from the dock edge, scroll internally, never as a
@@ -29,7 +30,7 @@ centered sheet.
 | Panel | Open width (scaled) | Notes |
 |-------|---------------------|-------|
 | On-demand (About, Lyrics, Discography, Tour) | `min(18rem × --hud-scale, viewport − insets)` | Wide enough for long titles (e.g. “Discography”) |
-| Jukebox list | `min(13rem × --hud-scale, viewport − insets)` | Vinyl anchor fixed (see Jukebox) |
+| Jukebox list | `min(22rem × --hud-scale, viewport − insets)` | Open V-Flip now-playing player (track info, lyrics, list). See `011` contract. |
 
 Open headers use even inset `--stage-panel-inset` / jukebox padding (`0.65rem × --hud-scale`
 for panels; jukebox panel padding separate).
@@ -38,10 +39,8 @@ for panels; jukebox panel padding separate).
 
 | Control | At rest | Label source |
 |---------|---------|--------------|
-| Jukebox | Icon only (vinyl token default) | `chrome.jukeboxLabel` |
+| Jukebox (V-Flip) | Icon only (vinyl token default) when collapsed | `chrome.jukeboxLabel` |
 | About | Icon only (if About exists) | `chrome.aboutTitle` |
-| Lyrics | Icon only | `chrome.lyricsTitle` |
-| Track info | Icon only | `chrome.trackInfoTitle` |
 | Discography | Icon only | `chrome.discographyTitle` |
 | Tour | Icon only | `chrome.tourTitle` |
 | Socials | Platform brand icon | channel `label` / `aria-label` |

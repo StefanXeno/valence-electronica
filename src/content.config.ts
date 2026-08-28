@@ -124,6 +124,15 @@ const ui = defineCollection({
     trackInfoIcon: z.string().optional(),
     releasedLabel: z.string().optional(),
     emptyTrackLinks: z.string().optional(),
+    shuffleLabel: z.string().optional(),
+    loopLabel: z.string().optional(),
+    shuffleIcon: z.string().optional(),
+    loopIcon: z.string().optional(),
+    shuffleDefault: z.boolean().optional(),
+    loopDefault: z.boolean().optional(),
+    unmuteTooltip: z.string().optional(),
+    muteTooltip: z.string().optional(),
+    volumeSliderTooltip: z.string().optional(),
   }),
 });
 

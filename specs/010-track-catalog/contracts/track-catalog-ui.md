@@ -5,6 +5,10 @@
 Extends `specs/009-desktop-stage-ui/contracts/desktop-hud-ui.md` dock row. Jukebox,
 mute, exclusive-open, glitch, and label-reveal rules unchanged unless noted below.
 
+**Desktop supersession (`011`):** Track info and now-playing metadata live **inside open
+V-Flip** — not as a separate dock icon or left-cluster popover. See
+[`specs/011-vflip-now-playing/contracts/vflip-player-ui.md`](../../011-vflip-now-playing/contracts/vflip-player-ui.md).
+
 ## Dock layout (additions)
 
 | Zone | Contract |

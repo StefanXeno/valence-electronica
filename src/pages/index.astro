@@ -3,15 +3,12 @@ import Base from '../layouts/Base.astro';
 import Hero from '../components/Hero.astro';
 import Channels from '../components/Channels.astro';
 import Jukebox from '../components/Jukebox.astro';
-import MuteControl from '../components/MuteControl.astro';
 import StagePanels from '../components/StagePanels.astro';
 import StageDock from '../components/StageDock.astro';
 import LandingIntro from '../components/LandingIntro.astro';
-import { getValidJukeboxEntries } from '../lib/background';
 import { getChrome } from '../lib/stage';
 
-const [chrome, videos] = await Promise.all([getChrome(), getValidJukeboxEntries()]);
-const showMute = videos.some((entry) => entry.hasAudio);
+const chrome = await getChrome();
 ---
 
 <Base>
@@ -25,7 +22,6 @@ const showMute = videos.some((entry) => entry.hasAudio);
     </div>
     <StageDock>
       <Jukebox slot="jukebox" />
-      {showMute && <MuteControl slot="mute" />}
       <StagePanels slot="panels" />
     </StageDock>
   </div>

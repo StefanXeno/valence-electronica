@@ -122,30 +122,43 @@ into the matching jukebox entry.
 
 **Controls:** Region titles, empty-state strings, jukebox/social labels, stage-button label,
 landing intro copy (`introLead`, `introName`), and optional **HUD icon overrides**
-(`jukeboxIcon`, `aboutIcon`, `lyricsIcon`, `discographyIcon`, `tourIcon`, `trackInfoIcon`).
+(`jukeboxIcon`, `aboutIcon`, `lyricsIcon`, `discographyIcon`, `tourIcon`, `trackInfoIcon`,
+`shuffleIcon`, `loopIcon`).
 
-**Track info panel chrome (optional):**
+**V-Flip player chrome (optional):**
 
-- `trackInfoTitle` — panel title (default: Track info)
+- `shuffleLabel` / `loopLabel` — transport toggle labels (default: Shuffle / Loop)
+- `shuffleDefault` — `true` (default) or `false` for load-time shuffle
+- `loopDefault` — `false` (default) or `true` for load-time loop
+- `unmuteTooltip` / `muteTooltip` — mute button hint when collapsed or open
+- `volumeSliderTooltip` — hint on the volume slider (default: Drag to adjust volume)
+
+**Track info in V-Flip (optional):**
+
+- `trackInfoTitle` — section heading inside open V-Flip (default: Track info)
 - `releasedLabel` — label before the release date (default: Released)
 - `emptyTrackLinks` — when a track has no `listenLinks`
-- `trackInfoIcon` — same token or emoji override rules as other HUD icons
+- `lyricsTitle` / `emptyLyrics` — lyrics section heading and empty copy inside V-Flip
 
 **Icon overrides (optional):**
 
 - Leave an `*Icon` field out to use the default pictogram for that control.
 - Set a **token** to pick a built-in icon: `jukebox`, `about`, `lyrics`, `discography`,
-  `tour`, `catalog`, or `info`.
+  `tour`, `catalog`, `info`, `shuffle`, or `loop`.
 - Set a **single emoji** (e.g. `lyricsIcon: "🎤"`) to show that character instead of the
   default pictogram.
 
-**Do not break:** Region title fields (`aboutTitle`, `lyricsTitle`, etc.) still control the
-readable label on hover/focus (when closed), the inline title when a panel is open, and for
-accessibility — icons are visual only.
+**Do not break:** Region title fields still control readable labels and accessibility.
+Lyrics and track info appear **inside open V-Flip**, not as separate right-dock icons.
+
+**Shuffle timing:** When shuffle is on and loop is off, the stage advances after **one full
+atmosphere video file length** for audio entries (`hasAudio: true`). Entries with no audio
+advance after **45 seconds**. Today’s short loop-bed mp4s hop on file length until you ship
+longer stage videos.
 
 **Label reveal (visitor-facing):** Dock icons show a floating label **above** the control on
-hover/focus. Social icons show the label **below**. Labels do not slide to screen center.
-When a panel is open, the title appears beside the icon instead.
+hover/focus. Mute/volume inside V-Flip uses the same floater for tooltips. Social icons show
+the label **below**.
 
 ---
 
