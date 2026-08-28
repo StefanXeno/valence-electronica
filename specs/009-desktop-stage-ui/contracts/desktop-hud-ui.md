@@ -1,6 +1,6 @@
 # Contract: Desktop HUD UI (visitor-facing)
 
-**Date**: 2026-08-28 | **Plan**: [../plan.md](../plan.md) | **Spec**: [../spec.md](../spec.md)
+**Date**: 2026-08-28 (as-built sync 2026-08-28) | **Plan**: [../plan.md](../plan.md) | **Spec**: [../spec.md](../spec.md)
 
 **Supersedes for desktop**: layout rows in
 [`specs/004-landing-content-layout/contracts/stage-ui.md`](../../004-landing-content-layout/contracts/stage-ui.md).
@@ -17,14 +17,22 @@ Chrome scale: `--hud-scale: 1.5` (unchanged unless plan tasks tune dock spacing)
 | Zone | Contract |
 |------|----------|
 | Center | Atmosphere only. No panel bodies, labels, or lists in the middle. |
-| Top-left | Identity: artist name + tagline from `site.json`. Compact; not a hero block. |
+| Top-left | Identity: artist name + tagline from `site.json`. Compact; tagline single line (`nowrap`). |
 | Top-right | Social channels: equal-sized brand icons (~2.5rem × `--hud-scale`). Labels off at rest; platform name via `aria-label`. |
-| Bottom dock | Single horizontal rail above footer. **Left segment:** jukebox icon trigger. **Right segment:** About (if content exists), Lyrics, Discography, Tour — icon triggers in a **horizontal row**, not a vertical stack. |
-| Mute | Bottom-right, trailing the dock when active entry has looping video + audio. Same mute contract as `002`. Must not cover footer cluster. |
-| Footer | **Bottom center:** `© {year} {artist}` then Impressum and Datenschutzerklärung. Transparent background; no bar. Legal overlay behavior unchanged from `002`. |
+| Bottom dock | Single horizontal rail above footer. **Left cluster:** jukebox icon trigger + mute (when visible), side by side. **Right segment:** About (if content exists), Lyrics, Discography, Tour — icon triggers in a **horizontal row**, not a vertical stack. |
+| Mute | In the **left dock cluster**, immediately beside the jukebox when the active entry has looping video + audio. Same mute contract as `002`. Must not cover footer cluster. |
+| Footer | **Bottom center:** `© {year} {artist}` then Impressum and Datenschutzerklärung. Transparent background; no bar. Legal overlay behavior unchanged from `002`. Identity block and copyright line MAY use `glitch-hit` when glitch is enabled. |
 
-On-demand and jukebox **panel bodies** expand from the dock edge (max ~20–28rem scaled),
-scroll internally, never as a centered sheet.
+On-demand and jukebox **panel bodies** expand from the dock edge, scroll internally, never as a
+centered sheet.
+
+| Panel | Open width (scaled) | Notes |
+|-------|---------------------|-------|
+| On-demand (About, Lyrics, Discography, Tour) | `min(18rem × --hud-scale, viewport − insets)` | Wide enough for long titles (e.g. “Discography”) |
+| Jukebox list | `min(13rem × --hud-scale, viewport − insets)` | Vinyl anchor fixed (see Jukebox) |
+
+Open headers use even inset `--stage-panel-inset` / jukebox padding (`0.65rem × --hud-scale`
+for panels; jukebox panel padding separate).
 
 ## Icon-first controls (at rest)
 
@@ -37,29 +45,83 @@ scroll internally, never as a centered sheet.
 | Tour | Icon only | `chrome.tourTitle` |
 | Socials | Platform brand icon | channel `label` / `aria-label` |
 
-Full text titles MUST NOT show on closed triggers. Accessible names MUST remain available
+Full text titles MUST NOT show on **closed** triggers. Accessible names MUST remain available
 to assistive tech (visually hidden text or `aria-label`).
 
 Optional icon override via `chrome.*Icon` — see [data-model.md](../data-model.md).
 
 ## Label reveal
 
+Floating `#hud-label-reveal` managed by `label-reveal.ts`. Labels do **not** travel toward
+viewport center; they anchor adjacent to the control.
+
+| Control group | Anchor | Position |
+|---------------|--------|----------|
+| Dock icons (jukebox, on-demand summaries) | `data-hud-label-anchor="above"` | Horizontally centered on control; above trigger (`6px` gap) |
+| Social links | `data-hud-label-anchor="below"` | Horizontally centered on control; below icon (`6px` gap) |
+
 | Input | Behavior |
 |-------|----------|
-| Pointer hover on HUD icon control | Floating label appears; animates toward viewport horizontal center when motion allowed |
+| Pointer hover on **closed** HUD icon control | Floating label appears at anchored position |
 | Keyboard-visible focus | Same as hover |
-| `prefers-reduced-motion: reduce` | Label appears near control (fade); no center travel |
+| Parent `<details>` open | Label reveal **suppressed** (inline open header shows title) |
+| `prefers-reduced-motion: reduce` | Same anchored position; no travel animation |
 | Pointer leave / blur | Label removed |
-| No scripting | Native disclosure still works; label reveal MAY degrade to `title` tooltip or visually hidden text only |
+| Panel opens while label visible | Label hidden immediately |
+| No scripting | Native disclosure still works; degradation to visually hidden / `aria-label` only |
 
 Label text MUST reflect chrome content after rebuild without code changes.
+
+## Open panel headers
+
+When jukebox or an on-demand panel is **open**, the readable title appears **inline next to
+the icon** in the summary row (not as a separate heading row below).
+
+| Property | Rule |
+|----------|------|
+| Layout | Icon in fixed-size cell + title beside it (`flex`, start-aligned) |
+| Title size | `18px × --hud-scale` — slightly smaller than the `22px` icon glyph |
+| Jukebox vinyl | Icon stays in a fixed `var(--control-size)` anchor cell; box expands to the right and upward without moving the vinyl |
+| Padding | Even inset around open header row (panels: `--stage-panel-inset`) |
+
+## Panel open / close motion
+
+Motion differs by theme pack glitch capability (`data-hud-glitch`).
+
+### Default theme (`data-hud-glitch="false"`, motion allowed)
+
+Two-phase eased animation (`280ms` per phase, `cubic-bezier(0.4, 0, 0.2, 1)`). Open is the
+**reverse** of close:
+
+| Phase | Open | Close |
+|-------|------|-------|
+| 1 | Shell expands (`width`, `border-radius`); body stays collapsed (`is-panel-opening`) | Body collapses (`is-panel-closing`) |
+| 2 | Body expands after phase 1 | `open` cleared; shell shrinks to icon |
+
+Implemented in `src/lib/panel-motion.ts`. Jukebox vinyl cell does not animate position during
+shell transition.
+
+### Glitch theme (`data-hud-glitch="true"`, motion allowed)
+
+Unchanged morph glitch on open/close (jukebox + on-demand panels):
+
+| Target | Hover (closed) | Open / close |
+|--------|----------------|--------------|
+| Jukebox vinyl toggle | Continuous glitch (`data-glitch-live`) | Morph glitch on `<details>` (`data-jukebox`) |
+| On-demand summary | One-shot hover glitch via `GlitchPress` (same pattern as social links) | Morph glitch on `<details>` (`data-stage-panel`) |
+
+Close waits for morph duration (~`280ms`) before clearing `open`.
+
+### Reduced motion
+
+Instant open/close; no phased or glitch morph animation.
 
 ## Jukebox (unchanged logic, new chrome)
 
 | Action | Result |
 |--------|--------|
-| Idle | Icon trigger only; song list hidden |
-| Open | List at dock left segment; morph animation like mute |
+| Idle | Vinyl icon only in fixed anchor cell; song list hidden |
+| Open | Inline `jukeboxLabel` beside vinyl; list below header in panel body |
 | Select entry | Same as `stage-ui.md` jukebox table |
 | Schedule / default | Unchanged (`007`) |
 
@@ -73,24 +135,33 @@ Label text MUST reflect chrome content after rebuild without code changes.
 
 Exclusive-open: unchanged from `stage-ui.md`.
 
+Markup: `data-stage-panel` on `<details>`; `glitch-hit` on `<summary>` only.
+
 ## Glitch (`data-hud-glitch` only)
 
-When `data-hud-glitch` is not `true`, no glitch on HUD (unchanged).
+When `data-hud-glitch` is not `true`, no glitch on HUD (unchanged). Panel motion uses smooth
+CSS transitions (see above).
 
 | Target | Treatment |
 |--------|-----------|
-| Socials, legal, mute | Unchanged from `003` / `004` |
-| Jukebox trigger + options | Unchanged treatments |
-| **Dock panel triggers (`<details>` summary)** | Hover + click glitch use **live-safe** keyframes (no `clip-path` on hit target) |
+| Socials, legal, footer copyright | One-shot hover/focus/press via `GlitchPress` |
+| Mute | Continuous hover when muted; morph on toggle (`data-glitch-live`) |
+| Jukebox vinyl toggle | Continuous hover when collapsed (`data-glitch-live`); morph on open/close |
+| Jukebox option buttons | One-shot while list open |
+| On-demand summary (closed) | One-shot hover/focus via `GlitchPress` on `.glitch-hit` summary |
+| On-demand + jukebox open/close morph | Live-safe keyframes on `[data-stage-panel]` / `[data-jukebox].is-glitching` (no `clip-path` dead zones) |
 | **Hit target during glitch** | Full summary/trigger bounding box MUST remain clickable and keyboard-activatable (FR-008) |
+| Open panel summary hover | No floating label; no hover glitch on open panel body |
 
-Amendment to `003`: dock `<details>` summaries are live-safe glitch targets like jukebox/mute.
+Amendment to `003`: dock panel summaries use live-safe morph on the panel shell; summary
+hover uses standard `GlitchPress` one-shot pattern when closed.
 
 ## Accessibility
 
-- All dock icons keyboard reachable in logical order: jukebox → on-demand row → mute → footer.
+- Keyboard order: identity → socials → jukebox → mute (when visible) → on-demand row → footer.
 - Sufficient contrast over atmosphere (existing scrim tokens).
 - Label reveal is decorative; activation MUST NOT depend on seeing the floating label.
+- Open inline titles supplement visually hidden accessible names on summaries.
 
 ## Spec maintenance rule
 

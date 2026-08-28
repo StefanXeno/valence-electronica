@@ -32,14 +32,15 @@ const catalog = videos.map((entry) => ({
         data-glitch-live
         data-hud-label={chrome.jukeboxLabel}
         data-hud-label-anchor="above"
-        title={chrome.jukeboxLabel}
         aria-label={chrome.jukeboxLabel}
       >
-        <HudIcon token={chrome.jukeboxIcon} emoji={chrome.jukeboxIconEmoji} />
+        <span class="jukebox__vinyl">
+          <HudIcon token={chrome.jukeboxIcon} emoji={chrome.jukeboxIconEmoji} />
+        </span>
+        <span class="jukebox__label">{chrome.jukeboxLabel}</span>
       </summary>
       <div class="jukebox__panel">
-        <p class="jukebox__heading" id="jukebox-heading">{chrome.jukeboxLabel}</p>
-        <div class="jukebox__list" role="group" aria-labelledby="jukebox-heading">
+        <div class="jukebox__list" role="group" aria-label={chrome.jukeboxLabel}>
           {videos.map((entry) => (
             <button
               type="button"
@@ -58,6 +59,7 @@ const catalog = videos.map((entry) => ({
 
 <script>
   import { createContinuousGlitch, isGlitchThemeActive, playElementGlitch } from '../lib/glitch';
+  import { panelCloseDelayMs, runSmoothPanelOpen, shouldSmoothPanelOpen } from '../lib/panel-motion';
   import { initStageSwitch, type StageCatalogEntry } from '../lib/stage-switch';
   import type { StageSchedule } from '../lib/stage-schedule';
 
@@ -107,13 +109,27 @@ const catalog = videos.map((entry) => ({
     });
 
     toggle.addEventListener('click', (event) => {
-      if (!root.open) return;
+      if (!root.open) {
+        if (!shouldSmoothPanelOpen(reduceMotion.matches)) return;
+        event.preventDefault();
+        root.open = true;
+        runSmoothPanelOpen(root, reduceMotion.matches);
+        return;
+      }
+
       event.preventDefault();
       if (root.classList.contains('is-glitching')) return;
-      playMorph('out');
+
+      if (isGlitchThemeActive()) {
+        playMorph('out');
+      } else if (!reduceMotion.matches) {
+        root.classList.add('is-panel-closing');
+      }
+
       window.setTimeout(() => {
         root.open = false;
-      }, reduceMotion.matches || !isGlitchThemeActive() ? 0 : 280);
+        root.classList.remove('is-panel-closing');
+      }, panelCloseDelayMs(reduceMotion.matches));
     });
 
     root.addEventListener('toggle', () => {
@@ -142,10 +158,45 @@ const catalog = videos.map((entry) => ({
     background: var(--color-surface);
     color: var(--color-text);
     text-shadow: 0 1px 12px var(--bg-scrim);
+  }
+
+  html[data-hud-glitch='true'] .jukebox {
     transition:
-      padding 160ms steps(2, end),
       width 160ms steps(2, end),
       border-radius 160ms steps(2, end);
+  }
+
+  html:not([data-hud-glitch='true']) .jukebox {
+    transition:
+      width 280ms cubic-bezier(0.4, 0, 0.2, 1),
+      border-radius 280ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  html:not([data-hud-glitch='true']) .jukebox__panel {
+    transition:
+      max-height 280ms cubic-bezier(0.4, 0, 0.2, 1),
+      opacity 220ms cubic-bezier(0.4, 0, 0.2, 1),
+      width 280ms cubic-bezier(0.4, 0, 0.2, 1),
+      max-width 280ms cubic-bezier(0.4, 0, 0.2, 1),
+      padding 280ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  html:not([data-hud-glitch='true']) .jukebox__label {
+    transition: opacity 220ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  html:not([data-hud-glitch='true']) .jukebox.is-panel-closing .jukebox__panel,
+  html:not([data-hud-glitch='true']) .jukebox.is-panel-opening .jukebox__panel {
+    width: 0;
+    max-width: 0;
+    max-height: 0;
+    opacity: 0;
+    padding: 0;
+    pointer-events: none;
+  }
+
+  html[data-hud-glitch='true'] .jukebox.is-glitching .jukebox__panel {
+    transition: none;
   }
 
   .jukebox[open] {
@@ -153,17 +204,18 @@ const catalog = videos.map((entry) => ({
     max-width: min(calc(13rem * var(--hud-scale)), calc(100vw - 2 * var(--hud-inset, 0.75rem)));
     align-items: stretch;
     border-radius: calc(0.85rem * var(--hud-scale));
-    padding: calc(0.35rem * var(--hud-scale));
     overflow-x: clip;
   }
 
   .jukebox__toggle {
     position: relative;
-    display: inline-grid;
-    place-items: center;
+    display: flex;
+    align-items: center;
     flex: 0 0 auto;
     width: var(--control-size);
     height: var(--control-size);
+    min-width: var(--control-size);
+    min-height: var(--control-size);
     margin: 0;
     padding: 0;
     border: 0;
@@ -172,6 +224,15 @@ const catalog = videos.map((entry) => ({
     color: inherit;
     cursor: pointer;
     list-style: none;
+    box-sizing: border-box;
+  }
+
+  .jukebox__vinyl {
+    flex: 0 0 var(--control-size);
+    display: grid;
+    place-items: center;
+    width: var(--control-size);
+    height: var(--control-size);
   }
 
   .jukebox__toggle::marker {
@@ -179,9 +240,30 @@ const catalog = videos.map((entry) => ({
   }
 
   .jukebox[open] .jukebox__toggle {
-    width: calc(2.4rem * var(--hud-scale));
-    height: calc(2.4rem * var(--hud-scale));
-    align-self: flex-start;
+    width: 100%;
+    min-width: 0;
+    border-radius: 0;
+    align-self: stretch;
+  }
+
+  .jukebox__label {
+    display: none;
+    flex: 1 1 auto;
+    min-width: 0;
+    padding-right: calc(0.65rem * var(--hud-scale));
+    font-family: var(--font-display);
+    font-size: calc(18px * var(--hud-scale));
+    line-height: 1;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: inherit;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .jukebox[open] .jukebox__label {
+    display: block;
   }
 
   .jukebox__toggle::-webkit-details-marker {
@@ -210,22 +292,8 @@ const catalog = videos.map((entry) => ({
     overflow-x: hidden;
     overflow-y: auto;
     pointer-events: auto;
-    padding: 0.35rem 0.15rem 0.35rem;
+    padding: calc(0.35rem * var(--hud-scale)) calc(0.35rem * var(--hud-scale)) 0;
     box-sizing: border-box;
-  }
-
-  .jukebox__heading {
-    display: none;
-    margin: 0 0 0.35rem;
-    font-family: var(--font-display);
-    font-size: calc(0.65rem * var(--hud-scale));
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--color-text-muted);
-  }
-
-  .jukebox[open] .jukebox__heading {
-    display: block;
   }
 
   .jukebox__list {
@@ -322,8 +390,10 @@ const catalog = videos.map((entry) => ({
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .jukebox {
-      transition: none;
+    .jukebox,
+    .jukebox__panel,
+    .jukebox__toggle {
+      transition: none !important;
     }
 
     .jukebox.is-glitching,

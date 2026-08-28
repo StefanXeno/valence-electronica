@@ -31,7 +31,7 @@
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
 - [x] T004 [P] Create `src/components/HudIcon.astro` — map known tokens to inline SVG; render emoji when chrome value is a non-ASCII grapheme override
-- [x] T005 Create `src/components/StageDock.astro` with root `class="stage-dock"` — bottom horizontal dock with left segment (jukebox slot) and right segment (on-demand row + mute trail) per `specs/009-desktop-stage-ui/contracts/desktop-hud-ui.md`
+- [x] T005 Create `src/components/StageDock.astro` with root `class="stage-dock"` — bottom horizontal dock with left cluster (jukebox + mute slots) and right segment (on-demand row) per `specs/009-desktop-stage-ui/contracts/desktop-hud-ui.md`
 - [x] T006 Refactor stage layout in `src/styles/global.css` — three-band shell (top identity/socials, bottom dock, footer band); remove bottom-right vertical panel stack positioning; keep 320px no horizontal scroll
 - [x] T007 Refactor `src/pages/index.astro` to compose `StageDock`, mount jukebox/panels/mute inside dock slots, and keep `LandingIntro` unchanged
 - [x] T008 [P] Update intro hide selectors in `src/styles/intro.css` if stage slot class names or structure change in T007
@@ -60,13 +60,13 @@
 
 ## Phase 4: User Story 2 - Icon-first controls reveal labels on demand (Priority: P1)
 
-**Goal**: Floating label slides toward viewport center on hover and keyboard-visible focus; reduced-motion fade-only path
+**Goal**: Floating label anchored above dock / below socials on hover and keyboard-visible focus; suppressed when panel open; reduced-motion path
 
-**Independent Test**: quickstart.md §2 — hover/focus each dock icon and social; label animates toward center; chrome edit reflects without code change
+**Independent Test**: quickstart.md §2 — hover/focus each closed dock icon and social; anchored label; no floater when panel open; chrome edit reflects without code change
 
 ### Implementation for User Story 2
 
-- [x] T014 [P] [US2] Create `src/lib/label-reveal.ts` — mount lifecycle, position floater at control center, animate `translateX` toward viewport horizontal center, teardown on leave/blur; reduced-motion branch (fade near control)
+- [x] T014 [P] [US2] Create `src/lib/label-reveal.ts` — floater lifecycle, anchor above/below via `data-hud-label-anchor`, suppress when parent `<details open>`, teardown on leave/blur
 - [x] T015 [US2] Add `#hud-label-reveal` mount point in `src/layouts/Base.astro` and initialize `label-reveal.ts` on landing pages only
 - [x] T016 [US2] Add `data-hud-label` hooks and label text to dock triggers in `src/components/StagePanels.astro`, `src/components/Jukebox.astro`, and social links in `src/components/Channels.astro`
 - [x] T017 [US2] Add floater styles in `src/styles/global.css` (z-index above dock, readable contrast, motion via `@media (prefers-reduced-motion)`)
@@ -100,8 +100,8 @@
 
 ### Implementation for User Story 4
 
-- [x] T022 [US4] Add `data-glitch-live` to on-demand `<details>` summaries in `src/components/StagePanels.astro` (and jukebox trigger if not already live-safe)
-- [x] T023 [US4] Extend live-safe selector block in `src/styles/glitch.css` so `.stage-dock details.glitch-hit.is-glitching` (and hover) use `ui-glitch-live-*` keyframes; confirm summary keeps `pointer-events: auto`
+- [x] T022 [US4] Wire `glitch-hit` on on-demand `<summary>` and live-safe morph on `[data-stage-panel]` in `src/components/StagePanels.astro`; jukebox toggle keeps `data-glitch-live`
+- [x] T023 [US4] Extend live-safe selectors in `src/styles/glitch.css` for `[data-stage-panel].is-glitching` and summary `.glitch-hit` hover; confirm `pointer-events: auto`
 - [x] T024 [US4] Manually walk quickstart.md §4 — zero failed activations during active glitch (SC-004)
 
 **Checkpoint**: FR-008 satisfied on all dock HUD triggers
@@ -218,3 +218,20 @@ Task T010: "Refactor Jukebox.astro icon-first trigger"
 - Mobile HUD polish remains IDEA-013 — do not scope creep.
 - Track info / streaming links remain IDEA-021 — do not add in this feature.
 - No new npm dependencies (no Font Awesome).
+
+---
+
+## Phase 9: Post-implementation polish (owner feedback — as-built sync 2026-08-28)
+
+**Purpose**: Document polish delivered after initial Phase 8 merge; specs updated to match.
+
+- [x] T034 [P] Move mute into left dock cluster beside jukebox (`StageDock.astro`, `index.astro`)
+- [x] T035 [P] Change label reveal to anchored above/below (not center slide) — `label-reveal.ts`, `data-hud-label-anchor`
+- [x] T036 [US2] Inline open headers — icon + title in summary; suppress floater when open (`StagePanels.astro`, `Jukebox.astro`)
+- [x] T037 [US1] Widen on-demand open panels to `18rem`; even `--stage-panel-inset` padding
+- [x] T038 [US4] Fix dock panel hover glitch — `glitch-hit` on summary; `GlitchPress` morph ownership split
+- [x] T039 [P] Add `src/lib/panel-motion.ts` — default-theme two-phase open/close; glitch morph preserved
+- [x] T040 [US1] Anchor jukebox vinyl in fixed cell (`jukebox__vinyl`) so open/close does not jump icon
+- [x] T041 [P] Sync specs: `spec.md`, `plan.md`, `research.md`, `data-model.md`, `quickstart.md`, `desktop-hud-ui.md`, `004/stage-ui.md`, `003/glitch-ui.md`, `artist-guide.md`
+
+**Checkpoint**: All spec artifacts match as-built code; quickstart §2, §4, §5, and new §5 (default motion) pass manual review.

@@ -27,7 +27,7 @@ Chrome scale: `--hud-scale: 1.5`.
 | Jukebox | Persistent compact chrome. Bottom-left *(004 as-built)*. **Desktop `009`:** dock left segment — icon-only trigger; list at dock edge. **Collapsed vinyl-record control** at rest (same family as mute). Song list only while open (`<details>`). Always present, including with one entry. Accessible name from chrome `jukeboxLabel` (shipped: `V-Flip`). |
 | On-demand | About, Lyrics, Discography, Tour. Bottom-right vertical cluster *(004 as-built)*. **Desktop `009`:** horizontal icon row in dock right segment. Closed on load. |
 | Legal footer | Transparent, bottom-left cluster *(004 as-built)*. **Desktop `009`:** bottom-center cluster. `© {year} Valence` then Impressum / Datenschutzerklärung. No bar. Overlay from `002` unchanged. |
-| Mute | Existing `002` control, bottom-right **below** the on-demand cluster *(004)* / dock trailing edge *(009 desktop)*; not covered by panels; hidden when the active entry has no looping video with audio. |
+| Mute | Existing `002` control, in the **left dock cluster beside jukebox** *(009 desktop)* when visible; not covered by panels; hidden when the active entry has no looping video with audio. |
 | Landing intro | Feature `006` portal overlay on `/` only — not part of persistent HUD chrome. |
 
 On-demand panels expand along the edge (~20–28rem max scaled), scroll internally if
@@ -37,8 +37,8 @@ long, never as a centered opaque sheet.
 
 | Action | Result |
 |--------|--------|
-| Idle | Vinyl icon only; list hidden. |
-| Open / close | Morph like mute; list appears along the bottom-left edge. |
+| Idle | Vinyl icon only in fixed anchor cell; list hidden. Inline title beside icon when open. |
+| Open / close | **Glitch theme:** morph glitch. **Default theme:** smooth two-phase ease (shell/body; open reverses close). List appears along the bottom-left edge. |
 | Load / reload | SSR / no-JS: static `default: true` entry. With JS: feature `007` schedule may select today’s entry on boot. Visitor picks are **not** remembered. |
 | Select another entry | Active id, atmosphere media, `data-theme`, `data-hud-glitch`, lyrics, and mute visibility update **without** full document reload. |
 | Pack `loopingVideo` + video sources | Looping `<video>` plays (muted until unmute). Mute control shown when pack also allows audio and entry `hasAudio`. |
@@ -58,7 +58,7 @@ When `data-hud-glitch` is not `true`, no glitch animations (including leftover c
 | Jukebox collapsed vinyl | Continuous hover glitch. |
 | Jukebox expand / collapse | Morph like mute. |
 | Jukebox option buttons (list open) | `glitch-hit`. |
-| On-demand `<details>` | Whole box is the hit. **Closed:** hover glitch. **Open:** no hover. **Click summary:** glitch the box. Body clicks inside an open panel do not glitch. |
+| On-demand `<details>` | **Closed:** one-shot hover glitch on summary (`glitch-hit`). **Open:** inline title beside icon; no floating label; no hover glitch on body. **Click summary:** morph glitch on panel shell (glitch theme) or phased close (default theme). Body clicks inside an open panel do not glitch. |
 
 Deep per-theme type/motion packs (IDEA-002) stay out of scope.
 

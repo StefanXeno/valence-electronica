@@ -12,72 +12,65 @@ const [chrome, about, { defaultVideoId }] = await Promise.all([
   getAboutEntry(),
   getBackgroundConfig(),
 ]);
+
+const panels = [
+  about && {
+    title: chrome.aboutTitle,
+    icon: chrome.aboutIcon,
+    emoji: chrome.aboutIconEmoji,
+    body: 'about' as const,
+  },
+  {
+    title: chrome.lyricsTitle,
+    icon: chrome.lyricsIcon,
+    emoji: chrome.lyricsIconEmoji,
+    body: 'lyrics' as const,
+  },
+  {
+    title: chrome.discographyTitle,
+    icon: chrome.discographyIcon,
+    emoji: chrome.discographyIconEmoji,
+    body: 'discography' as const,
+  },
+  {
+    title: chrome.tourTitle,
+    icon: chrome.tourIcon,
+    emoji: chrome.tourIconEmoji,
+    body: 'tour' as const,
+  },
+].filter((panel): panel is NonNullable<typeof panel> => Boolean(panel));
 ---
 
 <div class="stage-panels" data-stage-panels>
   {
-    about && (
-      <details class="stage-panel glitch-hit" data-glitch-live>
+    panels.map((panel) => (
+      <details class="stage-panel" data-stage-panel>
         <summary
-          data-hud-label={chrome.aboutTitle}
+          class="stage-panel__summary glitch-hit"
+          data-hud-label={panel.title}
           data-hud-label-anchor="above"
-          title={chrome.aboutTitle}
         >
-          <span class="visually-hidden">{chrome.aboutTitle}</span>
-          <HudIcon token={chrome.aboutIcon} emoji={chrome.aboutIconEmoji} />
+          <span class="visually-hidden">{panel.title}</span>
+          <HudIcon token={panel.icon} emoji={panel.emoji} />
+          <span class="stage-panel__label">{panel.title}</span>
         </summary>
-        <p class="stage-panel__title">{chrome.aboutTitle}</p>
         <div class="stage-panel__body">
-          <AboutPanel />
+          {panel.body === 'about' && <AboutPanel />}
+          {panel.body === 'lyrics' && <LyricsPanel chrome={chrome} />}
+          {panel.body === 'discography' && (
+            <Discography chrome={chrome} defaultId={defaultVideoId} />
+          )}
+          {panel.body === 'tour' && <TourDates chrome={chrome} />}
         </div>
       </details>
-    )
+    ))
   }
-  <details class="stage-panel glitch-hit" data-glitch-live>
-    <summary
-      data-hud-label={chrome.lyricsTitle}
-      data-hud-label-anchor="above"
-      title={chrome.lyricsTitle}
-    >
-      <span class="visually-hidden">{chrome.lyricsTitle}</span>
-      <HudIcon token={chrome.lyricsIcon} emoji={chrome.lyricsIconEmoji} />
-    </summary>
-    <p class="stage-panel__title">{chrome.lyricsTitle}</p>
-    <div class="stage-panel__body">
-      <LyricsPanel chrome={chrome} />
-    </div>
-  </details>
-  <details class="stage-panel glitch-hit" data-glitch-live>
-    <summary
-      data-hud-label={chrome.discographyTitle}
-      data-hud-label-anchor="above"
-      title={chrome.discographyTitle}
-    >
-      <span class="visually-hidden">{chrome.discographyTitle}</span>
-      <HudIcon token={chrome.discographyIcon} emoji={chrome.discographyIconEmoji} />
-    </summary>
-    <p class="stage-panel__title">{chrome.discographyTitle}</p>
-    <div class="stage-panel__body">
-      <Discography chrome={chrome} defaultId={defaultVideoId} />
-    </div>
-  </details>
-  <details class="stage-panel glitch-hit" data-glitch-live>
-    <summary
-      data-hud-label={chrome.tourTitle}
-      data-hud-label-anchor="above"
-      title={chrome.tourTitle}
-    >
-      <span class="visually-hidden">{chrome.tourTitle}</span>
-      <HudIcon token={chrome.tourIcon} emoji={chrome.tourIconEmoji} />
-    </summary>
-    <p class="stage-panel__title">{chrome.tourTitle}</p>
-    <div class="stage-panel__body">
-      <TourDates chrome={chrome} />
-    </div>
-  </details>
 </div>
 
 <script>
+  import { isGlitchThemeActive, playElementGlitch } from '../lib/glitch';
+  import { panelCloseDelayMs, runSmoothPanelOpen, shouldSmoothPanelOpen } from '../lib/panel-motion';
+
   function initExclusivePanels() {
     const cluster = document.querySelector('[data-stage-panels]');
     if (!cluster) return;
@@ -95,7 +88,59 @@ const [chrome, about, { defaultVideoId }] = await Promise.all([
     );
   }
 
-  initExclusivePanels();
+  function initStagePanelGlitch(panel: HTMLDetailsElement) {
+    const summary = panel.querySelector('summary');
+    if (!summary) return;
+
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let morphTimer: number | undefined;
+
+    const playMorph = (direction: 'in' | 'out') => {
+      if (reduceMotion.matches || !isGlitchThemeActive()) return;
+      panel.dataset.glitch = direction;
+      window.clearTimeout(morphTimer);
+      const dur = playElementGlitch(panel, 'is-glitching');
+      morphTimer = window.setTimeout(() => {
+        panel.classList.remove('is-glitching');
+        delete panel.dataset.glitch;
+      }, dur + 80);
+    };
+
+    summary.addEventListener('click', (event) => {
+      if (!panel.open) {
+        if (!shouldSmoothPanelOpen(reduceMotion.matches)) return;
+        event.preventDefault();
+        panel.open = true;
+        runSmoothPanelOpen(panel, reduceMotion.matches);
+        return;
+      }
+
+      event.preventDefault();
+      if (panel.classList.contains('is-glitching')) return;
+
+      if (isGlitchThemeActive()) {
+        playMorph('out');
+      } else if (!reduceMotion.matches) {
+        panel.classList.add('is-panel-closing');
+      }
+
+      window.setTimeout(() => {
+        panel.open = false;
+        panel.classList.remove('is-panel-closing');
+      }, panelCloseDelayMs(reduceMotion.matches));
+    });
+
+    panel.addEventListener('toggle', () => {
+      if (panel.open) playMorph('in');
+    });
+  }
+
+  function bootStagePanels() {
+    initExclusivePanels();
+    document.querySelectorAll<HTMLDetailsElement>('[data-stage-panel]').forEach(initStagePanelGlitch);
+  }
+
+  bootStagePanels();
 </script>
 
 <style>
@@ -109,6 +154,8 @@ const [chrome, about, { defaultVideoId }] = await Promise.all([
   }
 
   .stage-panel {
+    --stage-panel-inset: calc(0.65rem * var(--hud-scale));
+
     position: relative;
     overflow: visible;
     margin: 0;
@@ -117,67 +164,183 @@ const [chrome, about, { defaultVideoId }] = await Promise.all([
     border-radius: 999px;
     background: color-mix(in srgb, var(--color-surface) 90%, transparent);
     backdrop-filter: blur(8px);
+    box-sizing: border-box;
+  }
+
+  html[data-hud-glitch='true'] .stage-panel {
+    transition:
+      width 160ms steps(2, end),
+      border-radius 160ms steps(2, end);
+  }
+
+  html:not([data-hud-glitch='true']) .stage-panel {
+    transition:
+      width 280ms cubic-bezier(0.4, 0, 0.2, 1),
+      border-radius 280ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  html:not([data-hud-glitch='true']) .stage-panel__summary {
+    transition: padding 280ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  html:not([data-hud-glitch='true']) .stage-panel__body {
+    transition:
+      max-height 280ms cubic-bezier(0.4, 0, 0.2, 1),
+      opacity 220ms cubic-bezier(0.4, 0, 0.2, 1),
+      padding 280ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  html:not([data-hud-glitch='true']) .stage-panel.is-panel-closing .stage-panel__body,
+  html:not([data-hud-glitch='true']) .stage-panel.is-panel-opening .stage-panel__body {
+    max-height: 0;
+    opacity: 0;
+    pointer-events: none;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
+  html[data-hud-glitch='true'] .stage-panel.is-glitching .stage-panel__body {
+    transition: none;
   }
 
   .stage-panel[open] {
     border-radius: calc(0.85rem * var(--hud-scale));
-    width: min(calc(14rem * var(--hud-scale)), calc(100vw - 2 * var(--hud-inset)));
-    max-width: min(calc(14rem * var(--hud-scale)), calc(100vw - 2 * var(--hud-inset)));
+    width: min(calc(18rem * var(--hud-scale)), calc(100vw - 2 * var(--hud-inset)));
+    max-width: min(calc(18rem * var(--hud-scale)), calc(100vw - 2 * var(--hud-inset)));
   }
 
-  summary {
-    display: inline-grid;
-    place-items: center;
+  .stage-panel__summary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: calc(0.5rem * var(--hud-scale));
     width: var(--control-size);
     height: var(--control-size);
+    min-width: var(--control-size);
+    min-height: var(--control-size);
     cursor: pointer;
     padding: 0;
     margin: 0;
     color: var(--color-text);
     list-style: none;
+    box-sizing: border-box;
+    border-radius: inherit;
   }
 
-  summary::marker {
+  .stage-panel[open] .stage-panel__summary {
+    justify-content: flex-start;
+    width: 100%;
+    min-width: 0;
+    height: auto;
+    min-height: var(--control-size);
+    padding: var(--stage-panel-inset);
+  }
+
+  .stage-panel__summary::marker {
     content: '';
   }
 
-  summary::-webkit-details-marker {
+  .stage-panel__summary::-webkit-details-marker {
     display: none;
   }
 
-  summary:hover {
+  .stage-panel__summary:hover {
     color: var(--color-accent-alt);
   }
 
-  .stage-panel__title {
+  .stage-panel__label {
     display: none;
-    margin: 0;
-    padding: 0 0.75em 0.35em;
     font-family: var(--font-display);
-    font-size: calc(0.65rem * var(--hud-scale));
-    letter-spacing: 0.12em;
+    font-size: calc(18px * var(--hud-scale));
+    line-height: 1;
+    letter-spacing: 0.04em;
     text-transform: uppercase;
-    color: var(--color-text-muted);
+    color: var(--color-text);
+    white-space: nowrap;
+    min-width: 0;
   }
 
-  .stage-panel[open] .stage-panel__title {
+  .stage-panel[open] .stage-panel__label {
     display: block;
   }
 
   .stage-panel__body {
-    padding: 0 0.75em 0.75em;
-    max-height: min(30svh, calc(11rem * var(--hud-scale)));
-    overflow: auto;
+    width: 100%;
+    max-width: 100%;
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    pointer-events: none;
+    padding: 0 var(--stage-panel-inset);
+    box-sizing: border-box;
     font-size: calc(0.9rem * var(--hud-scale));
     color: var(--color-text);
   }
 
-  .stage-panel:not([open]) .stage-panel__body,
-  .stage-panel:not([open]) .stage-panel__title {
-    display: none;
+  .stage-panel[open] .stage-panel__body {
+    max-height: min(30svh, calc(11rem * var(--hud-scale)));
+    opacity: 1;
+    overflow: auto;
+    pointer-events: auto;
+    padding: 0 var(--stage-panel-inset) var(--stage-panel-inset);
+  }
+
+  .stage-panel.is-glitching[data-glitch='in'] .stage-panel__body {
+    animation: stage-panel-body-in var(--g-dur, 560ms) both;
+  }
+
+  .stage-panel.is-glitching[data-glitch='out'] .stage-panel__body {
+    animation: stage-panel-body-out 520ms both;
+  }
+
+  @keyframes stage-panel-body-in {
+    0% {
+      max-height: 0;
+      opacity: 0;
+      animation-timing-function: steps(1, end);
+    }
+    35% {
+      max-height: min(30svh, calc(11rem * var(--hud-scale)));
+      opacity: 1;
+      animation-timing-function: steps(1, end);
+    }
+    100% {
+      max-height: min(30svh, calc(11rem * var(--hud-scale)));
+      opacity: 1;
+    }
+  }
+
+  @keyframes stage-panel-body-out {
+    0% {
+      max-height: min(30svh, calc(11rem * var(--hud-scale)));
+      opacity: 1;
+      animation-timing-function: steps(1, end);
+    }
+    55% {
+      max-height: var(--control-size);
+      opacity: 0.4;
+      animation-timing-function: steps(1, end);
+    }
+    100% {
+      max-height: 0;
+      opacity: 0;
+    }
   }
 
   .stage-panel__body :global(p) {
     margin: 0;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .stage-panel,
+    .stage-panel__summary,
+    .stage-panel__body {
+      transition: none !important;
+    }
+
+    .stage-panel.is-glitching,
+    .stage-panel.is-glitching .stage-panel__body {
+      animation: none !important;
+    }
   }
 </style>

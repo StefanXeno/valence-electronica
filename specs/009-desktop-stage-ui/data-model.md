@@ -1,6 +1,6 @@
 # Data Model: Desktop Stage UI Redesign
 
-**Date**: 2026-08-28 | **Plan**: [plan.md](./plan.md) | **Spec**: [spec.md](./spec.md)
+**Date**: 2026-08-28 (as-built sync 2026-08-28) | **Plan**: [plan.md](./plan.md) | **Spec**: [spec.md](./spec.md)
 
 This feature adds **presentation-layer** entities only. Jukebox entries, releases, shows,
 About, and `site.json` channels are unchanged from feature `004`.
@@ -13,7 +13,7 @@ Extended frontmatter on the existing single-file collection.
 
 | Field | Type | Required | Purpose |
 |-------|------|----------|---------|
-| `aboutTitle` | string | yes (existing) | Label for About control + a11y name |
+| `aboutTitle` | string | yes (existing) | Label for About control + a11y name + open inline title |
 | `lyricsTitle` | string | yes (existing) | Label for Lyrics control |
 | `discographyTitle` | string | yes (existing) | Label for Discography control |
 | `tourTitle` | string | yes (existing) | Label for Tour control |
@@ -46,9 +46,8 @@ Fixed desktop zones defined in CSS; not artist-editable.
 |------|------|----------------|
 | `top-left` | Identity | `site.json` → `artist.name`, `artist.tagline` |
 | `top-right` | Socials | `site.json` → `channels[]` |
-| `dock-left` | Jukebox trigger | Jukebox collection + `chrome.jukeboxLabel` / `jukeboxIcon` |
+| `dock-left` | Jukebox + mute cluster | Jukebox collection + `chrome.jukeboxLabel` / `jukeboxIcon`; mute from `002` |
 | `dock-right` | On-demand triggers | `chrome.*Title` / `*Icon` + panel collections |
-| `dock-trail` | Mute | Feature `002` (visibility rules unchanged) |
 | `footer-center` | Legal cluster | `site.json` artist name + `legal` collection |
 | `center` | Atmosphere only | Jukebox-driven media/theme |
 
@@ -61,18 +60,22 @@ Not persisted. Built from chrome + collections at SSR.
 | Attribute | Source | Notes |
 |-----------|--------|-------|
 | `icon` | chrome token/emoji or channel brand SVG | Visible at rest |
-| `label` | chrome title or channel name | Hidden at rest; revealed on hover/focus |
+| `label` | chrome title or channel name | Hidden at rest; revealed on hover/focus when closed |
 | `action` | open panel / toggle jukebox / external link | Unchanged behavior from `004` |
 | `data-hud-label` | DOM hook for label-reveal JS | Developer-owned |
+| `data-hud-label-anchor` | `above` (dock) or `below` (socials) | Developer-owned |
 
 **State transitions**:
 
 | State | Trigger | Result |
 |-------|---------|--------|
 | `rest` | default | Icon only; no floating label |
-| `label-visible` | hover / keyboard focus | Floater shows label animating toward center |
-| `panel-open` | activate on-demand / jukebox | Panel body visible at dock edge; trigger may stay icon-only |
-| `glitch-active` | glitch-enabled theme + hover/press | Live-safe animation; hit box unchanged |
+| `label-visible` | hover / keyboard focus (closed only) | Floater shows label anchored above/below control |
+| `panel-open` | activate on-demand / jukebox | Inline title beside icon; body visible; floater suppressed |
+| `panel-opening` | default-theme open phase 1 | Shell expanded; body collapsed (`is-panel-opening`) |
+| `panel-closing` | default-theme close phase 1 | Body collapsed (`is-panel-closing`) |
+| `glitch-morph` | glitch theme open/close | Live-safe morph on panel shell |
+| `glitch-hover` | glitch theme + closed summary hover | One-shot via `GlitchPress` |
 
 ---
 
@@ -83,10 +86,27 @@ Ephemeral `#hud-label-reveal` element managed by `label-reveal.ts`.
 | Property | Rule |
 |----------|------|
 | Text | Copy of active control’s `label` |
-| Position start | Control bounding box center |
-| Position end | Same `y`, `x` = viewport horizontal center |
-| Motion | CSS transform when motion allowed; fade-only when reduced |
+| Horizontal position | Center of control bounding box (`left` + `translateX(-50%)`) |
+| Vertical position | Above control (`anchor=above`) or below (`anchor=below`), `6px` gap |
+| Motion | Opacity fade when motion allowed; no center travel |
+| Suppression | Skip when parent `<details open>`; hide on panel toggle |
 | Lifetime | Removed on pointer leave / blur |
+
+---
+
+### Panel motion (runtime, default theme)
+
+Managed by `src/lib/panel-motion.ts` when `data-hud-glitch="false"`.
+
+| Constant | Value | Purpose |
+|----------|-------|---------|
+| `SMOOTH_PANEL_PHASE_MS` | 280 | Duration per open/close phase |
+| `GLITCH_PANEL_CLOSE_MS` | 280 | Close delay before clearing `open` on glitch theme |
+
+| Class | When | Effect |
+|-------|------|--------|
+| `is-panel-opening` | Default open phase 1 | Body stays collapsed while shell expands |
+| `is-panel-closing` | Default close phase 1 | Body collapses before `open` clears |
 
 ---
 
@@ -112,6 +132,7 @@ about/me    ──► About panel body (unchanged)
 releases/*  ──► Discography body (unchanged)
 shows/*     ──► Tour body (unchanged)
 legal/*     ──► Footer link labels (unchanged)
+panel-motion.ts ──► default-theme open/close sequencing
 ```
 
 ## Unchanged from `004`

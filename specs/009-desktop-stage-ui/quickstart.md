@@ -1,6 +1,6 @@
 # Quickstart: Desktop Stage UI Redesign
 
-**Date**: 2026-08-28 | **Plan**: [plan.md](./plan.md) | **Contract**: [contracts/desktop-hud-ui.md](./contracts/desktop-hud-ui.md)
+**Date**: 2026-08-28 (as-built sync 2026-08-28) | **Plan**: [plan.md](./plan.md) | **Contract**: [contracts/desktop-hud-ui.md](./contracts/desktop-hud-ui.md)
 
 Manual validation on a **typical laptop** viewport (~1280×800 or wider). Mobile is not the
 visual target (IDEA-013).
@@ -24,7 +24,8 @@ Use a desktop browser. For reduced-motion scenarios, enable OS “reduce motion�
    - Center third of viewport has **no persistent text titles** on HUD controls.
    - On-demand triggers are a **horizontal icon row** on the bottom dock (not a vertical
      text stack on the right).
-   - Left (jukebox) and right (four icons) feel comparably weighted.
+   - Left cluster (jukebox + mute when visible) and right (four icons) feel comparably weighted.
+   - Mute sits **beside** jukebox, not trailing the right segment.
 
 **Pass**: Center reads open; no labeled box stack dominating one corner.
 
@@ -32,14 +33,16 @@ Use a desktop browser. For reduced-motion scenarios, enable OS “reduce motion�
 
 ## 2. Icon label reveal (US2)
 
-With motion allowed, hover each dock icon and each active social icon:
+With motion allowed, hover each **closed** dock icon and each active social icon:
 
 1. Icon visible at rest; full title **not** permanently shown.
-2. On hover, floating label appears and **moves toward horizontal center**.
-3. Tab to each control with keyboard — label reveal fires on focus-visible.
-4. Edit `src/content/ui/chrome.md` `lyricsTitle`, rebuild, hover Lyrics — new text shows.
+2. On hover, floating label appears **above** dock icons or **below** social icons (centered
+   on the control — does **not** slide to viewport center).
+3. Tab to each closed control with keyboard — label reveal fires on focus-visible.
+4. Open jukebox or About — hover summary: **no** floating label; inline title beside icon.
+5. Edit `src/content/ui/chrome.md` `lyricsTitle`, rebuild, hover Lyrics (closed) — new text shows.
 
-With **reduced motion** enabled: label appears without center travel (fade near control).
+With **reduced motion** enabled: label appears at anchored position without travel animation.
 
 **Pass**: SC-002 + SC-006.
 
@@ -49,7 +52,7 @@ With **reduced motion** enabled: label appears without center travel (fade near 
 
 1. Confirm copyright + Impressum + Datenschutzerklärung are **centered** at bottom.
 2. Open Impressum — overlay opens, dismissible, no full reload.
-3. Footer does not overlap jukebox or mute at default scale.
+3. Footer does not overlap jukebox/mute cluster at default scale.
 
 **Pass**: SC-003.
 
@@ -59,35 +62,50 @@ With **reduced motion** enabled: label appears without center travel (fade near 
 
 Switch to Nightmare (or any `hudGlitch` pack):
 
-1. Hover a dock panel icon until glitch runs; **click multiple points** inside the trigger
-   box (including gaps between visual fragments) — panel toggles every time.
-2. Repeat on jukebox icon during glitch.
-3. Keyboard: focus trigger, press Enter during hover glitch — toggles.
+1. Hover a **closed** dock panel icon until glitch runs; **click multiple points** inside the
+   trigger box — panel toggles every time.
+2. Repeat on jukebox vinyl during glitch (continuous hover when collapsed).
+3. Open a panel — morph glitch on open; close — morph on close.
+4. Keyboard: focus closed trigger, press Enter during hover glitch — toggles.
 
 **Pass**: SC-004 (0 failed clicks in 5+ tries per control).
 
 ---
 
-## 5. Regression — `004` behaviors (US5)
+## 5. Default-theme panel motion
+
+On a pack **without** `hudGlitch` (default theme):
+
+1. Open About (or any on-demand panel) — shell expands first, then body (two smooth beats).
+2. Close — body collapses first, then shell shrinks (reverse of open).
+3. Open V-Flip — vinyl stays visually anchored while box expands.
+4. Enable reduced motion — open/close instant, no phases.
+
+**Pass**: motion matches [desktop-hud-ui.md](./contracts/desktop-hud-ui.md) Panel open/close section.
+
+---
+
+## 6. Regression — `004` behaviors (US5)
 
 Run on desktop after redesign:
 
 | # | Action | Expected |
 |---|--------|----------|
 | 1 | Open jukebox → pick Example Cyan | Theme/atmosphere/lyrics update; no full reload |
-| 2 | Open About | Bio visible in peripheral panel |
+| 2 | Open About | Bio visible in peripheral panel; inline title beside icon |
 | 3 | Open Lyrics → switch jukebox | Lyrics follow active entry |
 | 4 | Discography → stage button on bound row | Switches jukebox entry |
 | 5 | Tour | Upcoming EXAMPLE show or empty copy |
 | 6 | Social icon | Opens in new tab |
 | 7 | Open Lyrics, then Discography | Only one panel open (exclusive-open) |
 | 8 | Remove About body → rebuild | About icon hidden |
+| 9 | Open Discography | Full “Discography” title visible inline (18rem panel width) |
 
 **Pass**: SC-005.
 
 ---
 
-## 6. Mobile load smoke (FR-013 — not visual target)
+## 7. Mobile load smoke (FR-013 — not visual target)
 
 At **320px** width (IDEA-013 polish deferred):
 
@@ -99,7 +117,7 @@ At **320px** width (IDEA-013 polish deferred):
 
 ---
 
-## 7. Build gate
+## 8. Build gate
 
 ```bash
 npm run check
@@ -110,10 +128,9 @@ npm run build
 
 ---
 
-## 8. Artist guide (constitution VII)
+## 9. Artist guide (constitution VII)
 
-After implementation, confirm `docs/artist-guide.md` documents optional `*Icon` fields in
-`chrome.md` if shipped.
+Confirm `docs/artist-guide.md` documents optional `*Icon` fields in `chrome.md`.
 
 ---
 
@@ -133,7 +150,11 @@ Rebuild; Lyrics trigger shows emoji at rest. Revert after test.
 
 | Symptom | Check |
 |---------|--------|
-| Dead clicks during glitch | `data-glitch-live` / live-safe CSS on dock summaries |
-| Label stuck on screen | `label-reveal.ts` blur/leave handlers |
+| Dead clicks during glitch | live-safe CSS on `[data-stage-panel].is-glitching`; summary `glitch-hit` + `pointer-events: auto` |
+| No hover glitch on dock panels | `glitch-hit` on `<summary>`; `GlitchPress` not treating panel as morph-owned for hover |
+| Label stuck on screen | `label-reveal.ts` blur/leave + panel open suppression |
+| Label shows while panel open | `show()` skips when `details.open`; inline `.stage-panel__label` |
 | Footer not centered | `Footer.astro` positioning |
-| Vertical panel stack returned | `StagePanels` / dock CSS layout |
+| Vertical panel stack returned | `StagePanels` horizontal flex |
+| Vinyl jumps on V-Flip open | `jukebox__vinyl` fixed-size anchor cell |
+| Open/close feels asymmetric on default theme | `panel-motion.ts` + `is-panel-opening` / `is-panel-closing` |

@@ -33,6 +33,8 @@
 
 - Validation pass 1 (2026-08-28): All items pass. Design Direction table is advisory for
   owner review at plan time, not implementation prescription.
+- Implementation sync (2026-08-28): Label reveal uses anchored above/below positioning (not
+  center slide). See `contracts/desktop-hud-ui.md` for as-built authority.
 - No `[NEEDS CLARIFICATION]` markers; desktop-only scope, footer placement, glitch fix,
   and IDEA-021 deferral captured in Clarifications session.
 - Ready for `/speckit-plan` (or `/speckit-clarify` if owner wants to iterate on Design

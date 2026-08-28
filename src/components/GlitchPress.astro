@@ -11,13 +11,13 @@
   function isMorphOwned(el: Element): boolean {
     if (el.closest('[data-jukebox-option]')) return false;
     return (
-      el.matches('[data-mute-control], [data-volume-control], [data-jukebox-toggle], [data-glitch-live]') ||
+      el.matches('[data-mute-control], [data-volume-control], [data-jukebox-toggle], [data-stage-panel]') ||
       Boolean(el.closest('[data-volume-control], [data-jukebox]'))
     );
   }
 
   function isLiveToggle(el: Element): boolean {
-    return el.matches('[data-mute-control], [data-jukebox-toggle], [data-glitch-live]');
+    return el.matches('[data-mute-control], [data-jukebox-toggle]');
   }
 
   function isOpenStagePanel(el: Element): boolean {
@@ -116,12 +116,9 @@
         if (!(target instanceof Element)) return;
         const hit = target.closest('.glitch-hit');
         if (!(hit instanceof HTMLElement)) return;
-        // Mute morph owns the click — no stacked press glitch
+        // Morph-owned controls handle their own press / open-close glitch
         if (isMorphOwned(hit)) return;
-        if (hit.closest('[data-stage-panels]')) {
-          const summary = target.closest('summary');
-          if (!summary || !hit.contains(summary)) return;
-        }
+        if (isOpenStagePanel(hit)) return;
         runGlitch(hit, 'is-glitching');
       },
       true,

@@ -111,7 +111,12 @@ landing intro copy (`introLead`, `introName`), and optional **HUD icon overrides
   default pictogram.
 
 **Do not break:** Region title fields (`aboutTitle`, `lyricsTitle`, etc.) still control the
-readable label on hover/focus and for accessibility — icons are visual only.
+readable label on hover/focus (when closed), the inline title when a panel is open, and for
+accessibility — icons are visual only.
+
+**Label reveal (visitor-facing):** Dock icons show a floating label **above** the control on
+hover/focus. Social icons show the label **below**. Labels do not slide to screen center.
+When a panel is open, the title appears beside the icon instead.
 
 ---
 

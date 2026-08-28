@@ -25,13 +25,13 @@ MUST glitch (when motion allowed **and** `data-hud-glitch='true'`):
 4. Mute button (hover/focus/morph rules below)
 5. Jukebox collapsed vinyl toggle (`data-glitch-live`) — continuous hover while collapsed
 6. Jukebox option buttons (list open)
-7. On-demand stage panels (`StagePanels` `<details>`): whole box is the hit
+7. On-demand stage panel summaries (`StagePanels` `<summary class="glitch-hit">`): one-shot hover when **closed**; morph on `[data-stage-panel]` open/close
 
-**Amendment (feature `009`, desktop dock):** Dock panel summary triggers MUST use the
-**live-safe** glitch keyframe family (`ui-glitch-live-*`, `data-glitch-live` or equivalent)
-so `clip-path` fragmentation does not create dead pointer zones inside the control bounds.
-Visual split MAY occur; the full summary bounding box MUST stay clickable and keyboard-
-activatable (FR-008 in `009`).
+**Amendment (feature `009`, desktop dock):** Panel **shell** morph (`[data-stage-panel].is-glitching`,
+`[data-jukebox].is-glitching`) MUST use the **live-safe** keyframe family (`ui-glitch-live-*`)
+so `clip-path` fragmentation does not create dead pointer zones. Closed summary hover uses
+`GlitchPress` one-shot on `.glitch-hit` (same pattern as social links). Visual split MAY occur;
+the full summary bounding box MUST stay clickable and keyboard-activatable (FR-008 in `009`).
 
 MUST NOT glitch:
 
@@ -48,7 +48,7 @@ MUST NOT glitch:
 | Mute button | Continuous while pointer over button **and muted** | One-shot | Morph only (no stacked press) | Continuous ends on pointer-out or when audio plays |
 | Jukebox collapsed vinyl | Continuous while collapsed and pointer over toggle | One-shot | Morph on expand/collapse | Same continuous language as mute; not mute-gated |
 | Jukebox options | One-shot | One-shot | One-shot | Only while list open |
-| On-demand `<details>` | One-shot while **closed** | One-shot | Click summary glitches whole box | **Open:** no hover glitch |
+| On-demand summary | One-shot while **closed** | One-shot | Morph on shell open/close (glitch theme) | `glitch-hit` on `<summary>`; no hover when open |
 | Volume slider | None | None | None | Out of set |
 | Placeholder chip | None | None | None | Out of set |
 

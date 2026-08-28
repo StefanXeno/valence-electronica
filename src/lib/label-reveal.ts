@@ -52,6 +52,8 @@ export function initLabelReveal(): void {
   const show = (el: HTMLElement) => {
     const label = el.dataset.hudLabel?.trim();
     if (!label) return;
+    const panel = el.closest('details');
+    if (panel instanceof HTMLDetailsElement && panel.open) return;
     active = el;
     positionFloater(el, label);
   };
@@ -66,6 +68,12 @@ export function initLabelReveal(): void {
     });
     el.addEventListener('blur', () => {
       if (active === el) hide();
+    });
+  });
+
+  document.querySelectorAll('details').forEach((details) => {
+    details.addEventListener('toggle', () => {
+      if (details.open && active && details.contains(active)) hide();
     });
   });
 
