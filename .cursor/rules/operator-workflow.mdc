@@ -1,0 +1,30 @@
+---
+description: Pause for operator approval before browser testing or installing dependencies
+alwaysApply: true
+---
+
+# Operator workflow — testing and installs
+
+## Browser / visual testing
+
+Do not spin up browser automation, install browser tooling, or attempt visual verification on your own.
+
+If manual or browser-based testing would help (animations, layout, hover states, etc.):
+
+1. Stop implementation work.
+2. Tell the operator what you want to verify and why.
+3. Propose options (e.g. operator checks locally, shared dev server URL, screenshots) and wait for direction.
+
+Do not install Playwright, Puppeteer, Chromium, or similar tools to work around missing browser access.
+
+## Installing packages or tooling
+
+Do not run `npm install`, `npx … install`, `pip install`, or add new dev dependencies without explicit operator approval.
+
+If a dependency or global tool seems necessary:
+
+1. Stop work.
+2. Explain what you want to install, why, and any lighter alternatives.
+3. Wait for the operator to approve or choose an approach before proceeding.
+
+Routine project scripts already in `package.json` (e.g. `npm run dev`, `npm test`, `npm run build`) are fine when needed for the task — but adding new packages is not.
