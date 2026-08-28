@@ -9,6 +9,7 @@ export type ThemePackId =
   | 'nightmare-crimson'
   | 'cyan-pulse'
   | 'electric-cyan'
+  | 'steel-slate'
   | 'acid-lime';
 
 export interface ThemePackCapabilities {
@@ -28,6 +29,7 @@ export const PACK_CSS_THEME_IDS = [
   'nightmare-crimson',
   'cyan-pulse',
   'electric-cyan',
+  'steel-slate',
   'acid-lime',
 ] as const;
 
@@ -46,6 +48,10 @@ export const THEME_PACKS: Record<ThemePackId, ThemePack> = {
   },
   'electric-cyan': {
     id: 'electric-cyan',
+    capabilities: { loopingVideo: true, audioEligible: true, hudGlitch: false },
+  },
+  'steel-slate': {
+    id: 'steel-slate',
     capabilities: { loopingVideo: true, audioEligible: true, hudGlitch: false },
   },
   'acid-lime': {

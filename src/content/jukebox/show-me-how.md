@@ -6,6 +6,8 @@ themeId: electric-cyan
 hasAudio: false
 poster: /images/posters/show-me-how.jpg
 listenLinks:
+  - platform: youtube
+    url: https://www.youtube.com/watch?v=nF_mCIkz2Mk
   - platform: bandcamp
     url: https://valenceelectronica.bandcamp.com/album/show-me-how-remix-ep
   - platform: spotify

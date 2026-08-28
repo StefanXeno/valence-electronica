@@ -243,7 +243,8 @@ matching registry and CSS in the codebase — do not invent new ids.
 | `default` | Neutral fallback |
 | `nightmare-crimson` | Red / horror loop (video + audio + HUD glitch) |
 | `cyan-pulse` | Cyan still / pulse (no video loop) |
-| `electric-cyan` | Teal glitch loop (video + audio) |
+| `electric-cyan` | Teal glitch loop — Show Me How (video) |
+| `steel-slate` | Muted steel loop — Infinite (video + audio) |
 | `acid-lime` | Lime / acid loop (video + audio) |
 
 **Developer only:** Creating or editing theme packs (`src/lib/theme-packs.ts`,

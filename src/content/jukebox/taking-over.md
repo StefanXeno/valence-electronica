@@ -6,6 +6,8 @@ themeId: acid-lime
 hasAudio: true
 poster: /images/posters/taking-over.jpg
 listenLinks:
+  - platform: youtube
+    url: https://www.youtube.com/watch?v=UmnITfuu3h0
   - platform: bandcamp
     url: https://valenceelectronica.bandcamp.com/track/taking-over
   - platform: spotify

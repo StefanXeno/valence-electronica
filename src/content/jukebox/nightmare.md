@@ -8,6 +8,8 @@ hasAudio: true
 poster: /images/posters/nightmare.jpg
 default: true
 listenLinks:
+  - platform: youtube
+    url: https://www.youtube.com/watch?v=kQx_0MrphFM
   - platform: bandcamp
     url: https://valenceelectronica.bandcamp.com/track/nightmare
   - platform: spotify
