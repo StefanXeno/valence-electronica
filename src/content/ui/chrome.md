@@ -3,6 +3,7 @@ aboutTitle: About me
 discographyTitle: Discography
 tourTitle: Tour
 stageButtonLabel: Play on V-Flip
+currentlyPlayingLabel: Currently playing
 emptyReleases: No releases yet
 emptyShows: No upcoming dates
 jukeboxLabel: V-Flip

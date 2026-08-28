@@ -37,7 +37,10 @@ const panels = [
 <div class="stage-panels" data-stage-panels>
   {
     panels.map((panel) => (
-      <details class="stage-panel" data-stage-panel>
+      <details
+        class:list={['stage-panel', panel.body === 'discography' && 'stage-panel--discography']}
+        data-stage-panel
+      >
         <summary
           class="stage-panel__summary glitch-hit"
           data-hud-label={panel.title}
@@ -224,6 +227,11 @@ const panels = [
     border-radius: calc(0.85rem * var(--hud-scale));
     width: min(calc(18rem * var(--hud-scale)), calc(100vw - 2 * var(--hud-inset)));
     max-width: min(calc(18rem * var(--hud-scale)), calc(100vw - 2 * var(--hud-inset)));
+  }
+
+  .stage-panel--discography[open] {
+    width: min(calc(22rem * var(--hud-scale)), calc(100vw - 2 * var(--hud-inset)));
+    max-width: min(calc(22rem * var(--hud-scale)), calc(100vw - 2 * var(--hud-inset)));
   }
 
   .stage-panel__summary {

@@ -339,6 +339,21 @@ export function syncStageUi(activeId: string) {
   document.querySelectorAll<HTMLButtonElement>('[data-stage-button]').forEach((button) => {
     const on = button.dataset.stageButton === activeId;
     button.setAttribute('aria-pressed', on ? 'true' : 'false');
+    button.hidden = on;
+  });
+
+  document.querySelectorAll<HTMLElement>('[data-discog-playing]').forEach((node) => {
+    const on = node.dataset.discogPlaying === activeId;
+    node.hidden = !on;
+  });
+
+  document.querySelectorAll<HTMLElement>('[data-discog-item]').forEach((item) => {
+    const on = item.dataset.discogItem === activeId;
+    if (on) {
+      item.dataset.discogActive = 'true';
+    } else {
+      delete item.dataset.discogActive;
+    }
   });
 
   document.querySelectorAll<HTMLButtonElement>('[data-shuffle-toggle]').forEach((button) => {

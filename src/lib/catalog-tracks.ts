@@ -38,6 +38,7 @@ export interface DiscographyEntry {
   sortDate: Date;
   kind?: string;
   url?: string;
+  listenLinks: ListenLink[];
   /** Stage id when this release can be played on stage (same as id). */
   jukeboxId?: string;
 }
@@ -167,6 +168,7 @@ export function toDiscographyEntry(
     sortDate,
     kind: data.kind?.trim() || undefined,
     url: pickPrimaryListenUrl(listenLinks),
+    listenLinks,
     jukeboxId,
   };
 }

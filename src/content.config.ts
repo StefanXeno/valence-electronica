@@ -104,6 +104,7 @@ const ui = defineCollection({
     discographyTitle: z.string().optional(),
     tourTitle: z.string().optional(),
     stageButtonLabel: z.string().optional(),
+    currentlyPlayingLabel: z.string().optional(),
     emptyReleases: z.string().optional(),
     emptyShows: z.string().optional(),
     jukeboxLabel: z.string().optional(),

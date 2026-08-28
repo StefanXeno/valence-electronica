@@ -34,6 +34,7 @@ function row(
     title,
     year: date.getUTCFullYear(),
     sortDate: date,
+    listenLinks: [],
     ...extra,
   };
 }
