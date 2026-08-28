@@ -1,5 +1,5 @@
 ---
-import { getDiscographyFromJukebox } from '../lib/catalog-tracks';
+import { getMergedDiscography } from '../lib/catalog-tracks';
 import { getValidJukeboxEntries } from '../lib/background';
 import type { UiChrome } from '../lib/stage';
 
@@ -11,7 +11,7 @@ interface Props {
 const { chrome, defaultId } = Astro.props;
 const videos = await getValidJukeboxEntries();
 const validIds = new Set(videos.map((entry) => entry.id));
-const releases = await getDiscographyFromJukebox(validIds);
+const releases = await getMergedDiscography(validIds);
 ---
 
 {

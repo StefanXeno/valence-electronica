@@ -19,7 +19,7 @@ Discography in foundational; US1 adds catalog-only content; US2 validates jukebo
 
 **Purpose**: Align implementer with contracts before code changes
 
-- [ ] T001 Review `specs/014-discography-only-tracks/contracts/tracks-content.md` and `specs/014-discography-only-tracks/contracts/discography-merge.md` against current `src/content.config.ts`, `src/lib/catalog-tracks.ts`, and `src/components/Discography.astro`
+- [X] T001 Review `specs/014-discography-only-tracks/contracts/tracks-content.md` and `specs/014-discography-only-tracks/contracts/discography-merge.md` against current `src/content.config.ts`, `src/lib/catalog-tracks.ts`, and `src/components/Discography.astro`
 
 ---
 
@@ -29,11 +29,11 @@ Discography in foundational; US1 adds catalog-only content; US2 validates jukebo
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T002 Add `tracks` content collection to `src/content.config.ts` — required `label`, `sortDate`; optional `kind`, `listenLinks`, `blurb`, `credits`, `mentions`; reuse existing `listenLink` and `credit` Zod objects; export in `collections`
-- [ ] T003 Refactor `src/lib/catalog-tracks.ts` — add internal `sortDate` on `DiscographyEntry`; extract jukebox row builder; implement pure `mergeDiscographyEntries(...)` per merge contract; sort via shared `dateKey` (not full `CatalogTrack` mapping unless needed)
-- [ ] T004 Implement `getMergedDiscography(validStageIds)` in `src/lib/catalog-tracks.ts` — load `jukebox` + `tracks` collections; skip track ids present in jukebox; sort by UTC `sortDate` desc then title asc; replace or alias `getDiscographyFromJukebox` export
-- [ ] T005 [P] Extend `src/lib/catalog-tracks.test.ts` — cover tracks-only row, jukebox-wins dedup on matching id, combined sort by date/title, `inDiscography: false` exclusion via jukebox row builder inputs
-- [ ] T006 Update `src/components/Discography.astro` — import and call `getMergedDiscography(validIds)` instead of `getDiscographyFromJukebox`
+- [X] T002 Add `tracks` content collection to `src/content.config.ts` — required `label`, `sortDate`; optional `kind`, `listenLinks`, `blurb`, `credits`, `mentions`; reuse existing `listenLink` and `credit` Zod objects; export in `collections`
+- [X] T003 Refactor `src/lib/catalog-tracks.ts` — add internal `sortDate` on `DiscographyEntry`; extract jukebox row builder; implement pure `mergeDiscographyEntries(...)` per merge contract; sort via shared `dateKey` (not full `CatalogTrack` mapping unless needed)
+- [X] T004 Implement `getMergedDiscography(validStageIds)` in `src/lib/catalog-tracks.ts` — load `jukebox` + `tracks` collections; skip track ids present in jukebox; sort by UTC `sortDate` desc then title asc; replace or alias `getDiscographyFromJukebox` export
+- [X] T005 [P] Extend `src/lib/catalog-tracks.test.ts` — cover tracks-only row, jukebox-wins dedup on matching id, combined sort by date/title, `inDiscography: false` exclusion via jukebox row builder inputs
+- [X] T006 Update `src/components/Discography.astro` — import and call `getMergedDiscography(validIds)` instead of `getDiscographyFromJukebox`
 
 **Checkpoint**: `npm run check` passes; merge unit tests green; Discography still lists existing jukebox rows (no tracks files yet)
 
@@ -47,10 +47,10 @@ Discography in foundational; US1 adds catalog-only content; US2 validates jukebo
 
 ### Implementation for User Story 1
 
-- [ ] T007 [P] [US1] Create `src/content/tracks/example-catalog-only.md` per `specs/014-discography-only-tracks/contracts/tracks-content.md` — EXAMPLE label, `sortDate` older than current jukebox entries, optional `kind` and one `listenLinks` row
-- [ ] T008 [US1] Run `npm run build` and confirm example track appears in Discography with year/kind and no stage button
-- [ ] T009 [US1] Confirm example track id is absent from V-Flip jukebox list and `data-stage-catalog` JSON in `src/components/Jukebox.astro` (quickstart Scenario 1)
-- [ ] T010 [US1] Confirm Discography title link uses primary platform priority when `listenLinks` configured (quickstart Scenario 2)
+- [X] T007 [P] [US1] Create `src/content/tracks/example-catalog-only.md` per `specs/014-discography-only-tracks/contracts/tracks-content.md` — EXAMPLE label, `sortDate` older than current jukebox entries, optional `kind` and one `listenLinks` row
+- [X] T008 [US1] Run `npm run build` and confirm example track appears in Discography with year/kind and no stage button
+- [X] T009 [US1] Confirm example track id is absent from V-Flip jukebox list and `data-stage-catalog` JSON in `src/components/Jukebox.astro` (quickstart Scenario 1)
+- [X] T010 [US1] Confirm Discography title link uses primary platform priority when `listenLinks` configured (quickstart Scenario 2)
 
 **Checkpoint**: MVP — catalog-only songs publish to Discography without touching jukebox
 
@@ -64,13 +64,13 @@ Discography in foundational; US1 adds catalog-only content; US2 validates jukebo
 
 ### Implementation for User Story 2
 
-- [ ] T011 [US2] Compare Discography row count and stage buttons against pre-feature baseline — all jukebox entries with `sortDate` (and not `inDiscography: false`) still present with unchanged stage affordances (quickstart Scenario 3)
-- [ ] T012 [US2] Add temporary `src/content/tracks/nightmare.md` with conflicting metadata; verify single jukebox-sourced row; remove temp file after test (quickstart Scenario 4)
-- [ ] T013 [US2] Verify full-date sort: entries sharing a year order by `sortDate` month/day when titles differ (quickstart Scenario 6)
-- [ ] T014 [P] [US2] Verify stage isolation — confirm `src/lib/background.ts`, `src/components/Jukebox.astro`, `src/components/TrackInfoPanel.astro`, and `src/lib/stage-schedule.ts` do not import or load `tracks` collection (quickstart Scenarios 8)
-- [ ] T015 [US2] Add vitest case or manual check that invalid track file (missing `sortDate`) is omitted with warning while build succeeds (quickstart Scenario 7)
-- [ ] T016 [US2] Verify `inDiscography: false` on a jukebox entry hides it from Discography; confirm same-id tracks file does not produce a row (quickstart Scenario 5)
-- [ ] T017 [US2] Verify combined Discography at **320px** viewport width — no horizontal scroll (quickstart Scenario 12, SC-004)
+- [X] T011 [US2] Compare Discography row count and stage buttons against pre-feature baseline — all jukebox entries with `sortDate` (and not `inDiscography: false`) still present with unchanged stage affordances (quickstart Scenario 3)
+- [X] T012 [US2] Add temporary `src/content/tracks/nightmare.md` with conflicting metadata; verify single jukebox-sourced row; remove temp file after test (quickstart Scenario 4)
+- [X] T013 [US2] Verify full-date sort: entries sharing a year order by `sortDate` month/day when titles differ (quickstart Scenario 6)
+- [X] T014 [P] [US2] Verify stage isolation — confirm `src/lib/background.ts`, `src/components/Jukebox.astro`, `src/components/TrackInfoPanel.astro`, and `src/lib/stage-schedule.ts` do not import or load `tracks` collection (quickstart Scenarios 8)
+- [X] T015 [US2] Add vitest case or manual check that invalid track file (missing `sortDate`) is omitted with warning while build succeeds (quickstart Scenario 7)
+- [X] T016 [US2] Verify `inDiscography: false` on a jukebox entry hides it from Discography; confirm same-id tracks file does not produce a row (quickstart Scenario 5)
+- [X] T017 [US2] Verify combined Discography at **320px** viewport width — no horizontal scroll (quickstart Scenario 12, SC-004)
 
 **Checkpoint**: No regression on jukebox discography; merge edge cases covered
 
@@ -84,9 +84,9 @@ Discography in foundational; US1 adds catalog-only content; US2 validates jukebo
 
 ### Implementation for User Story 3
 
-- [ ] T018 [US3] Update `docs/artist-guide.md` — split Discography section: jukebox for stage + discography; `src/content/tracks/` for catalog-only; shared field vocabulary; promotion steps (same id); same-id + `inDiscography: false` pitfall; deprecate poster-only jukebox workaround for new catalog-only releases
-- [ ] T019 [P] [US3] Add cross-link at bottom of `specs/010-track-catalog/contracts/track-catalog-content.md` pointing to `specs/014-discography-only-tracks/contracts/tracks-content.md`
-- [ ] T020 [US3] Self-check SC-003: confirm guide answers jukebox vs. tracks for stage single, back-catalog single, and stage-only WIP scenarios (quickstart Scenario 11 step 3)
+- [X] T018 [US3] Update `docs/artist-guide.md` — split Discography section: jukebox for stage + discography; `src/content/tracks/` for catalog-only; shared field vocabulary; promotion steps (same id); same-id + `inDiscography: false` pitfall; deprecate poster-only jukebox workaround for new catalog-only releases
+- [X] T019 [P] [US3] Add cross-link at bottom of `specs/010-track-catalog/contracts/track-catalog-content.md` pointing to `specs/014-discography-only-tracks/contracts/tracks-content.md`
+- [X] T020 [US3] Self-check SC-003: confirm guide answers jukebox vs. tracks for stage single, back-catalog single, and stage-only WIP scenarios (quickstart Scenario 11 step 3)
 
 **Checkpoint**: Artist-facing docs match shipped edit surfaces (constitution VII)
 
@@ -96,9 +96,9 @@ Discography in foundational; US1 adds catalog-only content; US2 validates jukebo
 
 **Purpose**: Full validation, CI, cleanup
 
-- [ ] T021 [P] Walk remaining `specs/014-discography-only-tracks/quickstart.md` scenarios not covered above; note any follow-ups in PR description
-- [ ] T022 Run `npm run check`, `npm run build`, and `npm test` — all green
-- [ ] T023 [P] Confirm no new client JS, HUD panels, or third-party embeds introduced (spec FR-015, SC-006)
+- [X] T021 [P] Walk remaining `specs/014-discography-only-tracks/quickstart.md` scenarios not covered above; note any follow-ups in PR description
+- [X] T022 Run `npm run check`, `npm run build`, and `npm test` — all green
+- [X] T023 [P] Confirm no new client JS, HUD panels, or third-party embeds introduced (spec FR-015, SC-006)
 
 ---
 

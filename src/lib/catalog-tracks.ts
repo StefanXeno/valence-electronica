@@ -30,15 +30,23 @@ export interface CatalogTrack {
   mentions?: string;
 }
 
-/** Discography row derived from a jukebox file (single source of truth). */
+/** Discography row — jukebox-backed or catalog-only (tracks collection). */
 export interface DiscographyEntry {
   id: string;
   title: string;
   year: number;
+  sortDate: Date;
   kind?: string;
   url?: string;
   /** Stage id when this release can be played on stage (same as id). */
   jukeboxId?: string;
+}
+
+export interface CatalogMetadataFields {
+  label?: string;
+  sortDate?: Date;
+  kind?: string;
+  listenLinks?: { platform: string; url: string }[];
 }
 
 export const PLATFORM_LABELS: Record<ListenPlatform, string> = {
@@ -112,7 +120,7 @@ export function parseCredits(
   return credits;
 }
 
-function dateKey(value: Date): number {
+export function dateKey(value: Date): number {
   return Date.UTC(value.getUTCFullYear(), value.getUTCMonth(), value.getUTCDate());
 }
 
@@ -123,35 +131,95 @@ export function sortCatalogTracks(tracks: CatalogTrack[]): CatalogTrack[] {
   );
 }
 
-export async function getDiscographyFromJukebox(
+export function sortDiscographyEntries(entries: DiscographyEntry[]): DiscographyEntry[] {
+  return [...entries].sort(
+    (a, b) => dateKey(b.sortDate) - dateKey(a.sortDate) || a.title.localeCompare(b.title),
+  );
+}
+
+export function toDiscographyEntry(
+  id: string,
+  data: CatalogMetadataFields,
+  options: { source: 'jukebox' | 'track'; validStageIds?: ReadonlySet<string> },
+): DiscographyEntry | undefined {
+  const title = data.label?.trim();
+  const sortDate = data.sortDate;
+  if (!title) {
+    const kind = options.source === 'jukebox' ? 'jukebox' : 'track';
+    console.warn(`[catalog] omitted ${kind} "${id}" (missing label)`);
+    return undefined;
+  }
+  if (!sortDate) {
+    if (options.source === 'track') {
+      console.warn(`[catalog] omitted track "${id}" (missing sortDate)`);
+    }
+    return undefined;
+  }
+
+  const listenLinks = parseListenLinks(data.listenLinks, id);
+  const jukeboxId =
+    options.source === 'jukebox' && options.validStageIds?.has(id) ? id : undefined;
+
+  return {
+    id,
+    title,
+    year: sortDate.getUTCFullYear(),
+    sortDate,
+    kind: data.kind?.trim() || undefined,
+    url: pickPrimaryListenUrl(listenLinks),
+    jukeboxId,
+  };
+}
+
+/** Merge jukebox-derived rows with catalog-only rows; track rows must already exclude jukebox ids. */
+export function mergeDiscographyEntries(
+  jukeboxRows: DiscographyEntry[],
+  trackRows: DiscographyEntry[],
+): DiscographyEntry[] {
+  return sortDiscographyEntries([...jukeboxRows, ...trackRows]);
+}
+
+export async function getMergedDiscography(
   validStageIds: ReadonlySet<string>,
 ): Promise<DiscographyEntry[]> {
   const { getCollection } = await import('astro:content');
-  const raw = await getCollection('jukebox');
-  const items: DiscographyEntry[] = [];
+  const [jukeboxRaw, tracksRaw] = await Promise.all([
+    getCollection('jukebox'),
+    getCollection('tracks'),
+  ]);
 
-  for (const entry of raw) {
+  const jukeboxIds = new Set<string>();
+  const jukeboxRows: DiscographyEntry[] = [];
+
+  for (const entry of jukeboxRaw) {
     if (entry.id.startsWith('__empty__')) continue;
+    jukeboxIds.add(entry.id);
     if (entry.data.inDiscography === false) continue;
 
-    const title = entry.data.label?.trim();
-    const sortDate = entry.data.sortDate;
-    if (!title) {
-      console.warn(`[catalog] omitted jukebox "${entry.id}" (missing label)`);
-      continue;
-    }
-    if (!sortDate) continue;
-
-    const listenLinks = parseListenLinks(entry.data.listenLinks, entry.id);
-    items.push({
-      id: entry.id,
-      title,
-      year: sortDate.getUTCFullYear(),
-      kind: entry.data.kind?.trim() || undefined,
-      url: pickPrimaryListenUrl(listenLinks),
-      jukeboxId: validStageIds.has(entry.id) ? entry.id : undefined,
+    const row = toDiscographyEntry(entry.id, entry.data, {
+      source: 'jukebox',
+      validStageIds,
     });
+    if (row) jukeboxRows.push(row);
   }
 
-  return items.sort((a, b) => b.year - a.year || a.title.localeCompare(b.title));
+  const trackRows: DiscographyEntry[] = [];
+  for (const entry of tracksRaw) {
+    if (entry.id.startsWith('__empty__')) continue;
+    if (jukeboxIds.has(entry.id)) {
+      console.info(`[catalog] track "${entry.id}" skipped (jukebox entry wins)`);
+      continue;
+    }
+    const row = toDiscographyEntry(entry.id, entry.data, { source: 'track' });
+    if (row) trackRows.push(row);
+  }
+
+  return mergeDiscographyEntries(jukeboxRows, trackRows);
+}
+
+/** @deprecated Use getMergedDiscography — kept as alias for callers migrating incrementally. */
+export async function getDiscographyFromJukebox(
+  validStageIds: ReadonlySet<string>,
+): Promise<DiscographyEntry[]> {
+  return getMergedDiscography(validStageIds);
 }

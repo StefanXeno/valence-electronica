@@ -53,23 +53,33 @@ const credit = z.object({
   name: filledText,
 });
 
+const catalogMetadata = {
+  label: filledText,
+  sortDate: z.coerce.date(),
+  kind: z.string().optional(),
+  listenLinks: z.array(listenLink).optional(),
+  blurb: z.string().optional(),
+  credits: z.array(credit).optional(),
+  mentions: z.string().optional(),
+};
+
 const jukebox = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/jukebox' }),
   schema: z.object({
-    label: filledText,
+    ...catalogMetadata,
     sortDate: z.coerce.date().optional(),
-    blurb: z.string().optional(),
-    kind: z.string().optional(),
     inDiscography: z.boolean().optional(),
-    listenLinks: z.array(listenLink).optional(),
-    credits: z.array(credit).optional(),
-    mentions: z.string().optional(),
     themeId: filledText.optional(),
     hasAudio: z.boolean().optional(),
     poster: publicPath,
     default: z.boolean().optional(),
     sources: z.array(mediaSource).optional(),
   }),
+});
+
+const tracks = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/tracks' }),
+  schema: z.object(catalogMetadata),
 });
 
 const about = defineCollection({
@@ -125,4 +135,4 @@ const ui = defineCollection({
   }),
 });
 
-export const collections = { legal, jukebox, about, shows, ui };
+export const collections = { legal, jukebox, tracks, about, shows, ui };

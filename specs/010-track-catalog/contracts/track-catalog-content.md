@@ -78,3 +78,9 @@ Rules:
 - Listen links render as text links with platform name.
 - `target="_blank"` + `rel="noopener noreferrer"`.
 - No embeds, no autoplay widgets.
+
+## Catalog-only tracks (no stage clip)
+
+For discography entries **without** a V-Flip stage file, use
+[`specs/014-discography-only-tracks/contracts/tracks-content.md`](../../014-discography-only-tracks/contracts/tracks-content.md)
+(`src/content/tracks/`).

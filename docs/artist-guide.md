@@ -81,27 +81,71 @@ developer updates every reference (releases, schedule, etc.).
 
 ### Discography
 
-**Source:** Same files as jukebox — [`src/content/jukebox/`](../src/content/jukebox/). One
-Markdown file per release/track. No separate `releases/` folder.
+Discography merges **two** content sources into one panel:
 
-**What appears in the Discography panel:**
+| Goal | Edit surface |
+|------|----------------|
+| Play on V-Flip **and** list in Discography | [`src/content/jukebox/`](jukebox/) |
+| Discography **only** (no stage clip) | [`src/content/tracks/`](tracks/) |
+
+#### Jukebox-backed releases (stage + discography)
+
+**Folder:** [`src/content/jukebox/`](../src/content/jukebox/)
+
+**What appears in Discography:**
 
 - Every jukebox file with a `sortDate` (unless `inDiscography: false`)
 - **Title** ← `label`
 - **Year** ← year from `sortDate`
 - **Kind** ← optional `kind` (e.g. `single`, `ep`)
 - **Title link** ← first `listenLinks` URL (Bandcamp preferred, then Spotify, etc.)
-- **Play on V-Flip** ← automatic when the file is a valid stage entry (poster + optional video)
+- **Play on V-Flip** ← when the file is a valid stage entry
 
-**Example EP without a stage clip:** use a jukebox file with `poster` only and no `sources`.
+#### Catalog-only releases (discography without stage)
+
+**Folder:** [`src/content/tracks/`](../src/content/tracks/)
+
+One Markdown file per song that belongs in your public discography but does **not** need a
+V-Flip stage clip. **Do not** add a jukebox file for the same release unless you want it
+playable on stage.
+
+**Required frontmatter:**
+
+- `label` — title shown in Discography
+- `sortDate` — ISO date (e.g. `2015-06-01`); year and sort order come from this
+
+**Optional:** `kind`, `listenLinks` (same platforms as jukebox), `blurb`, `credits`, `mentions`
+(stored for future use — not shown in the Discography row today).
+
+**No stage fields:** do not add `poster`, `sources`, `themeId`, `hasAudio`, or `default`.
+
+**Promote to stage later:** add `src/content/jukebox/<same-id>.md` with stage assets, then
+optionally delete the matching tracks file. Use the **same filename slug** when promoting.
+
+**Pitfall — same slug as a hidden jukebox entry:** if a jukebox file exists with
+`inDiscography: false`, a tracks file with the **same id** is still skipped. You get **no**
+Discography row for that slug. Use a different tracks filename or remove/rename the jukebox
+file.
+
+**Do not** duplicate the same song in jukebox and tracks with **different** ids unless you
+intentionally want two Discography rows.
+
+---
+
+### Tracks vs jukebox — quick pick
+
+| Situation | Use |
+|-----------|-----|
+| New single with a stage video on V-Flip | `jukebox/` + `sortDate` |
+| Old back-catalog single, streaming links only | `tracks/` |
+| On stage but hidden from Discography | `jukebox/` + `inDiscography: false` |
 
 ---
 
 ### Releases folder (deprecated)
 
 The folder [`src/content/releases/`](../src/content/releases/) is **no longer used** by the
-site. Edit jukebox files instead. You can delete old release files after migrating any data
-into the matching jukebox entry.
+site. Use jukebox (stage) or tracks (catalog-only) instead.
 
 ---
 
