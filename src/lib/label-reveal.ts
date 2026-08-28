@@ -1,7 +1,14 @@
 const REDUCED_MOTION = '(prefers-reduced-motion: reduce)';
+const LABEL_GAP_PX = 6;
 
 function isKeyboardFocus(el: HTMLElement): boolean {
   return el.matches(':focus-visible');
+}
+
+type LabelAnchor = 'above' | 'below';
+
+function readAnchor(el: HTMLElement): LabelAnchor {
+  return el.dataset.hudLabelAnchor === 'below' ? 'below' : 'above';
 }
 
 export function initLabelReveal(): void {
@@ -10,7 +17,6 @@ export function initLabelReveal(): void {
 
   const reduceMotion = window.matchMedia(REDUCED_MOTION);
   let active: HTMLElement | null = null;
-  let raf = 0;
 
   const hide = () => {
     active = null;
@@ -25,29 +31,22 @@ export function initLabelReveal(): void {
   const positionFloater = (el: HTMLElement, label: string) => {
     const rect = el.getBoundingClientRect();
     const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-    const viewportCenter = window.innerWidth / 2;
-    const deltaX = viewportCenter - centerX;
+    const anchor = readAnchor(el);
 
     floater.textContent = label;
     floater.hidden = false;
     floater.style.left = `${centerX}px`;
-    floater.style.top = `${centerY}px`;
 
-    if (reduceMotion.matches) {
-      floater.classList.add('is-visible', 'is-reduced');
-      floater.style.transform = 'translate(-50%, -50%)';
-      return;
+    if (anchor === 'below') {
+      floater.style.top = `${rect.bottom + LABEL_GAP_PX}px`;
+      floater.style.transform = 'translate(-50%, 0)';
+    } else {
+      floater.style.top = `${rect.top - LABEL_GAP_PX}px`;
+      floater.style.transform = 'translate(-50%, -100%)';
     }
 
     floater.classList.add('is-visible');
-    floater.classList.remove('is-reduced');
-    floater.style.transform = 'translate(-50%, -50%)';
-
-    cancelAnimationFrame(raf);
-    raf = requestAnimationFrame(() => {
-      floater.style.transform = `translate(calc(-50% + ${deltaX}px), -50%)`;
-    });
+    floater.classList.toggle('is-reduced', reduceMotion.matches);
   };
 
   const show = (el: HTMLElement) => {

@@ -20,11 +20,13 @@ const [chrome, about, { defaultVideoId }] = await Promise.all([
       <details class="stage-panel glitch-hit" data-glitch-live>
         <summary
           data-hud-label={chrome.aboutTitle}
+          data-hud-label-anchor="above"
           title={chrome.aboutTitle}
         >
           <span class="visually-hidden">{chrome.aboutTitle}</span>
           <HudIcon token={chrome.aboutIcon} emoji={chrome.aboutIconEmoji} />
         </summary>
+        <p class="stage-panel__title">{chrome.aboutTitle}</p>
         <div class="stage-panel__body">
           <AboutPanel />
         </div>
@@ -32,28 +34,43 @@ const [chrome, about, { defaultVideoId }] = await Promise.all([
     )
   }
   <details class="stage-panel glitch-hit" data-glitch-live>
-    <summary data-hud-label={chrome.lyricsTitle} title={chrome.lyricsTitle}>
+    <summary
+      data-hud-label={chrome.lyricsTitle}
+      data-hud-label-anchor="above"
+      title={chrome.lyricsTitle}
+    >
       <span class="visually-hidden">{chrome.lyricsTitle}</span>
       <HudIcon token={chrome.lyricsIcon} emoji={chrome.lyricsIconEmoji} />
     </summary>
+    <p class="stage-panel__title">{chrome.lyricsTitle}</p>
     <div class="stage-panel__body">
       <LyricsPanel chrome={chrome} />
     </div>
   </details>
   <details class="stage-panel glitch-hit" data-glitch-live>
-    <summary data-hud-label={chrome.discographyTitle} title={chrome.discographyTitle}>
+    <summary
+      data-hud-label={chrome.discographyTitle}
+      data-hud-label-anchor="above"
+      title={chrome.discographyTitle}
+    >
       <span class="visually-hidden">{chrome.discographyTitle}</span>
       <HudIcon token={chrome.discographyIcon} emoji={chrome.discographyIconEmoji} />
     </summary>
+    <p class="stage-panel__title">{chrome.discographyTitle}</p>
     <div class="stage-panel__body">
       <Discography chrome={chrome} defaultId={defaultVideoId} />
     </div>
   </details>
   <details class="stage-panel glitch-hit" data-glitch-live>
-    <summary data-hud-label={chrome.tourTitle} title={chrome.tourTitle}>
+    <summary
+      data-hud-label={chrome.tourTitle}
+      data-hud-label-anchor="above"
+      title={chrome.tourTitle}
+    >
       <span class="visually-hidden">{chrome.tourTitle}</span>
       <HudIcon token={chrome.tourIcon} emoji={chrome.tourIconEmoji} />
     </summary>
+    <p class="stage-panel__title">{chrome.tourTitle}</p>
     <div class="stage-panel__body">
       <TourDates chrome={chrome} />
     </div>
@@ -132,6 +149,21 @@ const [chrome, about, { defaultVideoId }] = await Promise.all([
     color: var(--color-accent-alt);
   }
 
+  .stage-panel__title {
+    display: none;
+    margin: 0;
+    padding: 0 0.75em 0.35em;
+    font-family: var(--font-display);
+    font-size: calc(0.65rem * var(--hud-scale));
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+  }
+
+  .stage-panel[open] .stage-panel__title {
+    display: block;
+  }
+
   .stage-panel__body {
     padding: 0 0.75em 0.75em;
     max-height: min(30svh, calc(11rem * var(--hud-scale)));
@@ -140,7 +172,8 @@ const [chrome, about, { defaultVideoId }] = await Promise.all([
     color: var(--color-text);
   }
 
-  .stage-panel:not([open]) .stage-panel__body {
+  .stage-panel:not([open]) .stage-panel__body,
+  .stage-panel:not([open]) .stage-panel__title {
     display: none;
   }
 

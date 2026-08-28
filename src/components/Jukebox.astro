@@ -31,13 +31,15 @@ const catalog = videos.map((entry) => ({
         data-jukebox-toggle
         data-glitch-live
         data-hud-label={chrome.jukeboxLabel}
+        data-hud-label-anchor="above"
         title={chrome.jukeboxLabel}
         aria-label={chrome.jukeboxLabel}
       >
         <HudIcon token={chrome.jukeboxIcon} emoji={chrome.jukeboxIconEmoji} />
       </summary>
       <div class="jukebox__panel">
-        <div class="jukebox__list" role="group" aria-label={chrome.jukeboxLabel}>
+        <p class="jukebox__heading" id="jukebox-heading">{chrome.jukeboxLabel}</p>
+        <div class="jukebox__list" role="group" aria-labelledby="jukebox-heading">
           {videos.map((entry) => (
             <button
               type="button"
@@ -210,6 +212,20 @@ const catalog = videos.map((entry) => ({
     pointer-events: auto;
     padding: 0.35rem 0.15rem 0.35rem;
     box-sizing: border-box;
+  }
+
+  .jukebox__heading {
+    display: none;
+    margin: 0 0 0.35rem;
+    font-family: var(--font-display);
+    font-size: calc(0.65rem * var(--hud-scale));
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+  }
+
+  .jukebox[open] .jukebox__heading {
+    display: block;
   }
 
   .jukebox__list {
