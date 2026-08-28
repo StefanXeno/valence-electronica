@@ -199,7 +199,7 @@ syntax and examples. Here: edit **only** this JSON file to retime defaults; run
 **File:** [`src/data/tagline-pool.json`](../src/data/tagline-pool.json)
 
 **Controls:** Short hooks under the Valence wordmark. The site rotates through **normal**
-lines every **60 seconds** (fade out, then fade in). **Easter-egg** lines with schedule
+lines every **15 seconds** (fade out, then fade in). **Easter-egg** lines with schedule
 rules can replace the normal pool on matching days or times (Europe/Berlin).
 
 **Fallback:** If nothing matches, the site shows `artist.tagline` from

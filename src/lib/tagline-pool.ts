@@ -322,7 +322,7 @@ export function validateTaglinePool(pool: TaglinePool): void {
 /** Dev-only query key: `?tagline-interval=<seconds>` (ignored in production). */
 export const TAGLINE_INTERVAL_QUERY = 'tagline-interval';
 
-export const TAGLINE_ROTATION_MS_PRODUCTION = 60_000;
+export const TAGLINE_ROTATION_MS_PRODUCTION = 15_000;
 export const TAGLINE_ROTATION_MS_DEV_DEFAULT = 10_000;
 
 const TAGLINE_INTERVAL_SECONDS_MIN = 1;
@@ -347,7 +347,7 @@ export function resolveTaglineRotationMs(options: {
   return TAGLINE_ROTATION_MS_DEV_DEFAULT;
 }
 
-/** Client-only: production is always 60 s; dev defaults to 10 s unless query overrides. */
+/** Client-only: production is always 15 s; dev defaults to 10 s unless query overrides. */
 export function readTaglineRotationMsFromLocation(): number {
   if (typeof window === 'undefined') {
     return resolveTaglineRotationMs({ dev: import.meta.env.DEV });
