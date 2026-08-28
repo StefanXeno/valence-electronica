@@ -107,13 +107,13 @@ const {
       return Boolean(video && !(video.muted || video.volume === 0));
     };
 
-    // Idle mute button only glitches while muted — it goes quiet once audio plays,
-    // and the shell morph owns the element during a toggle.
+    // In-jukebox hover glitch is owned by Jukebox.astro (all toolbar buttons).
     const hoverGlitch = createContinuousGlitch(
       button,
       () =>
         pointerOverMute &&
         !control.hidden &&
+        !control.classList.contains('volume-control--in-jukebox') &&
         !isAudioPlaying() &&
         !control.classList.contains('is-glitching'),
     );
@@ -208,12 +208,12 @@ const {
 
     button.addEventListener('pointerenter', () => {
       pointerOverMute = true;
-      hoverGlitch.start();
+      if (!control.classList.contains('volume-control--in-jukebox')) hoverGlitch.start();
     });
 
     button.addEventListener('pointerleave', () => {
       pointerOverMute = false;
-      hoverGlitch.stop();
+      if (!control.classList.contains('volume-control--in-jukebox')) hoverGlitch.stop();
     });
 
     button.addEventListener('click', (event) => {

@@ -133,8 +133,43 @@ const showMute = videos.some((entry) => entry.hasAudio);
 
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
     let morphTimer: number | undefined;
-    let pointerOver = false;
     let isOpen = false;
+
+    const bindHoverGlitch = (btn: HTMLElement) => {
+      let over = false;
+      const hoverGlitch = createContinuousGlitch(btn, () => {
+        if (!over || reduceMotion.matches || !isGlitchThemeActive()) return false;
+        if (root.classList.contains('is-glitching') || btn.classList.contains('is-glitching')) {
+          return false;
+        }
+        if (
+          btn.matches('[data-shuffle-toggle], [data-loop-toggle]') &&
+          btn.getAttribute('aria-pressed') === 'true'
+        ) {
+          return false;
+        }
+        if (btn.matches('[data-mute-control]')) {
+          const slot = btn.closest('[data-jukebox-mute-slot]');
+          if (slot?.hasAttribute('hidden')) return false;
+        }
+        return true;
+      });
+      btn.addEventListener('pointerenter', () => {
+        over = true;
+        hoverGlitch.start();
+      });
+      btn.addEventListener('pointerleave', () => {
+        over = false;
+        hoverGlitch.stop();
+      });
+      return hoverGlitch;
+    };
+
+    const vinylHoverGlitch = bindHoverGlitch(toggle);
+
+    root.querySelectorAll<HTMLElement>(
+      '[data-shuffle-toggle], [data-loop-toggle], [data-jukebox-option]',
+    ).forEach(bindHoverGlitch);
 
     const setOpen = (next: boolean) => {
       isOpen = next;
@@ -142,33 +177,21 @@ const showMute = videos.some((entry) => entry.hasAudio);
       toggle.setAttribute('aria-expanded', next ? 'true' : 'false');
     };
 
-    const hoverGlitch = createContinuousGlitch(
-      toggle,
-      () => pointerOver && !isOpen && !root.classList.contains('is-glitching'),
-    );
+    const muteToggle = root.querySelector<HTMLElement>('[data-mute-control]');
+    if (muteToggle) bindHoverGlitch(muteToggle);
 
     const playMorph = (direction: 'in' | 'out') => {
       if (reduceMotion.matches || !isGlitchThemeActive()) return;
-      hoverGlitch.stop();
+      vinylHoverGlitch.stop();
       root.dataset.glitch = direction;
       window.clearTimeout(morphTimer);
       const dur = playElementGlitch(root, 'is-glitching');
       morphTimer = window.setTimeout(() => {
         root.classList.remove('is-glitching');
         delete root.dataset.glitch;
-        if (!isOpen) hoverGlitch.start();
+        vinylHoverGlitch.start();
       }, dur + 80);
     };
-
-    toggle.addEventListener('pointerenter', () => {
-      pointerOver = true;
-      hoverGlitch.start();
-    });
-
-    toggle.addEventListener('pointerleave', () => {
-      pointerOver = false;
-      hoverGlitch.stop();
-    });
 
     toggle.addEventListener('click', (event) => {
       event.preventDefault();
