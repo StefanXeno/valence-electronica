@@ -95,11 +95,11 @@ Discography merges **two** content sources into one panel:
 **What appears in Discography:**
 
 - Every jukebox file with a `sortDate` (unless `inDiscography: false`)
-- **Title** ← `label`
-- **Year** ← year from `sortDate`
-- **Kind** ← optional `kind` (e.g. `single`, `ep`)
-- **Title link** ← first `listenLinks` URL (Bandcamp preferred, then Spotify, etc.)
-- **Play on V-Flip** ← when the file is a valid stage entry
+- **Title** ← plain text from `label`
+- **Year · kind** ← year from `sortDate`; optional `kind`
+- **Listen On** ← platform icon links when `listenLinks` are set (jukebox or tracks)
+- **Play on V-Flip** ← when the file is a valid stage entry and not currently active
+- **Currently playing** ← replaces the button while that track is active on V-Flip
 
 #### Catalog-only releases (discography without stage)
 
@@ -114,8 +114,9 @@ playable on stage.
 - `label` — title shown in Discography
 - `sortDate` — ISO date (e.g. `2015-06-01`); year and sort order come from this
 
-**Optional:** `kind`, `listenLinks` (same platforms as jukebox), `blurb`, `credits`, `mentions`
-(stored for future use — not shown in the Discography row today).
+**Optional:** `kind`, `listenLinks` (same platforms as jukebox — shown as **Listen On** icon
+links in Discography when set), `blurb`, `credits`, `mentions` (stored for future use — not
+shown in the Discography row today).
 
 **No stage fields:** do not add `poster`, `sources`, `themeId`, `hasAudio`, or `default`.
 
@@ -186,6 +187,9 @@ landing intro copy (`introLead`, `introName`), and optional **HUD icon overrides
 
 - `trackInfoTitle` — section heading inside open V-Flip (default: Track info)
 - `releasedLabel` — label before the release date (default: Released)
+- `stageButtonLabel` — label on discography rows that switch the active V-Flip track
+- `currentlyPlayingLabel` — replaces the stage button on the active discography row (default:
+  Currently playing)
 - `listenOnLabel` — label before streaming platform icons (default: Listen On)
 - `emptyTrackLinks` — when a track has no `listenLinks`
 

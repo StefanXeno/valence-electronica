@@ -68,8 +68,10 @@ jukebox files only.
 
 ## Outbound links (visitor)
 
-Same as `010`: Discography title links use primary platform priority (Bandcamp → Spotify →
-…); `target="_blank"` + `rel="noopener noreferrer"`; no embeds.
+When `listenLinks` are present, Discography shows a **Listen On** row with one icon button
+per platform (same tokens as jukebox / V-Flip). Links use `target="_blank"` +
+`rel="noopener noreferrer"`; no embeds or autoplay. Applies to **tracks** and **jukebox-backed**
+discography rows.
 
 ## Cross-references
 

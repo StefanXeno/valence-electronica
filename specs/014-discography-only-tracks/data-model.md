@@ -32,7 +32,7 @@ row when `sortDate` present and `inDiscography !== false`.
 
 ## Entity: DiscographyEntry (presentation row)
 
-Merged view consumed by `Discography.astro` — shape **unchanged** for UI compatibility.
+Merged view consumed by `Discography.astro`.
 
 | Field | Type | Required | Source |
 |-------|------|----------|--------|
@@ -41,8 +41,27 @@ Merged view consumed by `Discography.astro` — shape **unchanged** for UI compa
 | `year` | number | yes | UTC year from `sortDate` |
 | `sortDate` | Date | yes (internal) | Used for merge sort; not rendered directly |
 | `kind` | string | no | Optional `kind` |
-| `url` | string | no | `pickPrimaryListenUrl(listenLinks)` |
+| `url` | string | no | `pickPrimaryListenUrl(listenLinks)` — retained for helpers; UI uses `listenLinks` |
+| `listenLinks` | ListenLink[] | yes | Parsed via `parseListenLinks`; may be empty |
 | `jukeboxId` | string | no | Set when id ∈ valid stage catalog; omitted for tracks-only |
+
+## Entity: Discography row UI (runtime)
+
+Rendered per `DiscographyEntry` in `Discography.astro`:
+
+| Element | Jukebox-backed | Catalog-only |
+|---------|----------------|--------------|
+| Card container | yes | yes |
+| Title (plain text) | yes | yes |
+| Year · kind | yes | yes |
+| Play on V-Flip button | when not active | no |
+| Currently playing badge | when active on stage | no |
+| Listen On icon links | when `listenLinks.length > 0` | when `listenLinks.length > 0` |
+
+Active-row sync: `syncStageUi(activeId)` in `stage-switch.ts` toggles `[data-stage-button]`,
+`[data-discog-playing]`, and `[data-discog-active]` on discography rows.
+
+Panel width: `stage-panel--discography` opens at `22rem` (HUD-scaled) vs `18rem` default.
 
 ## Entity: ListenLink / Credit
 

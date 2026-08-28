@@ -18,6 +18,7 @@ metadata without stage assets, merging into the existing **Discography panel** v
 - `getMergedDiscography()` replaces `getDiscographyFromJukebox()` at Discography call site.
 - Pure merge/dedup/sort tests in `catalog-tracks.test.ts`.
 - Artist guide + example track file; amend `010` contract cross-link.
+- Discography UI contract: [contracts/discography-ui.md](./contracts/discography-ui.md).
 
 ## Technical Context
 
@@ -127,6 +128,7 @@ See [research.md](./research.md) — all Technical Context items resolved.
 | Data model | [data-model.md](./data-model.md) |
 | Tracks content contract | [contracts/tracks-content.md](./contracts/tracks-content.md) |
 | Merge contract | [contracts/discography-merge.md](./contracts/discography-merge.md) |
+| Discography UI contract | [contracts/discography-ui.md](./contracts/discography-ui.md) |
 | Validation guide | [quickstart.md](./quickstart.md) |
 
 ## Implementation Notes (for `/speckit-tasks`)

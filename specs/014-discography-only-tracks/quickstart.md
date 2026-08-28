@@ -40,7 +40,20 @@
    ```
 
 2. Rebuild / reload.
-3. **Expect**: Title is a link opening Spotify in new tab; still no stage button.
+3. **Expect**: **Listen On** row with platform icon(s); title is plain text (not a link).
+
+## Scenario 2b — Listen links on V-Flip track (US2)
+
+1. Open a jukebox-backed discography row that has `listenLinks` in content.
+2. **Expect**: Same **Listen On** icon row as catalog-only entries.
+
+## Scenario 2c — Currently playing (US2)
+
+1. Open Discography; note the active V-Flip track row.
+2. **Expect**: **Currently playing** badge with subtle EQ animation (or static bars under
+   reduced motion); **Play on V-Flip** hidden on that row.
+3. Switch to another track in V-Flip.
+4. **Expect**: Previous row shows **Play on V-Flip** again; new active row shows **Currently playing**.
 
 ## Scenario 3 — Jukebox rows unchanged (US2)
 

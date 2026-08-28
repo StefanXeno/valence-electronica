@@ -43,14 +43,14 @@ Discography in foundational; US1 adds catalog-only content; US2 validates jukebo
 
 **Goal**: Artist adds a track file without jukebox; it appears in Discography only (no stage button, not in V-Flip)
 
-**Independent Test**: quickstart.md Scenarios 1–2 — catalog-only row visible; absent from jukebox drawer; listen link works when configured
+**Independent Test**: quickstart.md Scenarios 1–2 — catalog-only row visible; absent from jukebox drawer; Listen On icons work when configured
 
 ### Implementation for User Story 1
 
 - [X] T007 [P] [US1] Create `src/content/tracks/example-catalog-only.md` per `specs/014-discography-only-tracks/contracts/tracks-content.md` — EXAMPLE label, `sortDate` older than current jukebox entries, optional `kind` and one `listenLinks` row
 - [X] T008 [US1] Run `npm run build` and confirm example track appears in Discography with year/kind and no stage button
 - [X] T009 [US1] Confirm example track id is absent from V-Flip jukebox list and `data-stage-catalog` JSON in `src/components/Jukebox.astro` (quickstart Scenario 1)
-- [X] T010 [US1] Confirm Discography title link uses primary platform priority when `listenLinks` configured (quickstart Scenario 2)
+- [X] T010 [US1] Confirm Discography **Listen On** row shows platform icon links when `listenLinks` configured; title stays plain text (quickstart Scenario 2)
 
 **Checkpoint**: MVP — catalog-only songs publish to Discography without touching jukebox
 
@@ -58,13 +58,13 @@ Discography in foundational; US1 adds catalog-only content; US2 validates jukebo
 
 ## Phase 4: User Story 2 - Jukebox-backed discography unchanged (Priority: P1)
 
-**Goal**: Existing jukebox discography rows, stage buttons, sort, and dedup rules behave as before
+**Goal**: Existing jukebox discography merge, sort, dedup, and stage binding behave as before; post-ship UI adds Listen On icons and Currently playing badge
 
-**Independent Test**: quickstart.md Scenarios 3–8 — jukebox rows unchanged; id collision dedupes; schedule unaffected
+**Independent Test**: quickstart.md Scenarios 2b–2c, 3–8 — jukebox rows present with stage affordances; listen icons when configured; id collision dedupes; schedule unaffected
 
 ### Implementation for User Story 2
 
-- [X] T011 [US2] Compare Discography row count and stage buttons against pre-feature baseline — all jukebox entries with `sortDate` (and not `inDiscography: false`) still present with unchanged stage affordances (quickstart Scenario 3)
+- [X] T011 [US2] Compare Discography row count and stage affordances against pre-feature baseline — all jukebox entries with `sortDate` (and not `inDiscography: false`) still present with Play on V-Flip / Currently playing as appropriate (quickstart Scenarios 2b–2c, 3)
 - [X] T012 [US2] Add temporary `src/content/tracks/nightmare.md` with conflicting metadata; verify single jukebox-sourced row; remove temp file after test (quickstart Scenario 4)
 - [X] T013 [US2] Verify full-date sort: entries sharing a year order by `sortDate` month/day when titles differ (quickstart Scenario 6)
 - [X] T014 [P] [US2] Verify stage isolation — confirm `src/lib/background.ts`, `src/components/Jukebox.astro`, `src/components/TrackInfoPanel.astro`, and `src/lib/stage-schedule.ts` do not import or load `tracks` collection (quickstart Scenarios 8)
@@ -168,4 +168,5 @@ T011 → T012 → T013 → T014 → T015
 - Do **not** reintroduce `TrackCatalog.astro` or Tracks HUD panel (`010` US2 superseded)
 - `getDiscographyFromJukebox` may remain as private helper or thin alias — avoid duplicate merge logic
 - Remove temporary test files (`tracks/nightmare.md`, `tracks/broken.md`) before merge unless kept as documented examples
+- Post-ship UI (2026-08-28): card rows, wider panel, Listen On icons for all rows with links, Currently playing badge — documented in [contracts/discography-ui.md](./contracts/discography-ui.md)
 - Task count: **23 tasks** — Setup: 1, Foundational: 5, US1: 4, US2: 7, US3: 3, Polish: 3

@@ -32,6 +32,7 @@ getMergedDiscography(validStageIds: ReadonlySet<string>): Promise<DiscographyEnt
 | `year` | `sortDate` UTC year | `sortDate` UTC year |
 | `kind` | optional | optional |
 | `url` | `pickPrimaryListenUrl(...)` | `pickPrimaryListenUrl(...)` |
+| `listenLinks` | parsed array (may be empty) | parsed array (may be empty) |
 | `jukeboxId` | id when `validStageIds.has(id)` | **always omitted** |
 
 ## Sort
@@ -57,11 +58,14 @@ Tracks collection is read only inside catalog/discography helpers.
 
 ## UI consumer
 
-`src/components/Discography.astro` — unchanged row markup:
+See [discography-ui.md](./discography-ui.md) for row markup, Listen On icons, Currently playing
+badge, and `syncStageUi` behavior.
 
-- Link when `url` set
-- Stage button when `jukeboxId` set
-- No button for tracks-only rows
+Summary:
+
+- Card rows; plain title; optional Listen On icon links when links exist
+- Stage button when `jukeboxId` set and not active; Currently playing when active
+- No stage affordance for tracks-only rows
 
 ## Regression guard
 

@@ -4,7 +4,7 @@
 
 **Created**: 2026-08-28
 
-**Status**: Ready for implementation
+**Status**: As-built (synced to code 2026-08-28)
 
 **Input**: User description: "I want to be able to add songs to the discography without
 adding them to the jukebox."
@@ -31,6 +31,17 @@ the song-identity model started in `010` without reviving the separate Tracks HU
   row in v1 (same as jukebox-backed discography rows today); they remain available if a
   track is later promoted to stage or a future detail surface reads them.
 
+### Session 2026-08-28 (as-built UI)
+
+- Q: How should listen links appear in Discography? → A: **Listen On row** with platform icon
+  buttons (same family as V-Flip track detail) for **every** row that has `listenLinks` —
+  jukebox-backed and catalog-only. Title is plain text (not a single primary URL link).
+- Q: Active V-Flip track in Discography? → A: **Currently playing** badge (editable
+  `currentlyPlayingLabel` in chrome) with a small equalizer animation replaces **Play on
+  V-Flip** while that track is active; syncs on stage switch via existing `syncStageUi`.
+- Q: Discography row layout? → A: **Card-style rows** inside a **wider panel** (`22rem` vs
+  default `18rem` on-demand panels) for title, year/kind, stage affordance, and listen icons.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Artist lists a release in discography without a stage clip (Priority: P1)
@@ -56,10 +67,10 @@ it appears in Discography, is absent from the jukebox/V-Flip picker, and has no 
 2. **Given** a catalog-only track entry, **When** the visitor opens the jukebox (V-Flip
    drawer), **Then** that title does not appear in the selectable track list or shuffle pool.
 3. **Given** a catalog-only entry with `listenLinks` configured, **When** the visitor views
-   the row, **Then** the title links to the primary outbound URL using the same platform
-   priority as jukebox-derived discography rows (`pickPrimaryListenUrl` rules).
+   the row, **Then** a **Listen On** row shows one outbound icon link per configured platform
+   (opens in a new tab; no autoplay).
 4. **Given** a catalog-only entry without listen links, **When** the visitor views the row,
-   **Then** the title is plain text (not a dead link).
+   **Then** the Listen On row is omitted (not an empty placeholder).
 5. **Given** a catalog-only entry, **When** the visitor views its row, **Then** no
    stage/play button is shown.
 
@@ -81,8 +92,11 @@ buttons, sort order, and `inDiscography: false` behavior unchanged.
 **Acceptance Scenarios**:
 
 1. **Given** a jukebox entry with `sortDate` and valid stage assets, **When** Discography
-   opens, **Then** it appears with a stage/play affordance unchanged from pre-feature
-   behavior.
+   opens, **Then** it appears in a card row with **Play on V-Flip** when that track is not
+   active on stage.
+1a. **Given** that jukebox entry is the **active** V-Flip track, **When** Discography
+   opens, **Then** **Play on V-Flip** is replaced by **Currently playing** (with a subtle
+   equalizer animation unless reduced motion is requested) and the row is visually highlighted.
 2. **Given** a jukebox entry with `inDiscography: false`, **When** Discography opens,
    **Then** it remains hidden even if a catalog-only track file shares the same title.
 3. **Given** jukebox-backed and catalog-only entries with different sort dates, **When** the
@@ -164,9 +178,11 @@ jukebox vs. tracks for three scenarios (stage single, back-catalog single, hidde
 - **FR-006**: Catalog-only tracks MUST NOT appear in the jukebox/V-Flip picker, stage catalog
   JSON, shuffle/loop rotation, or scheduled default resolution.
 - **FR-007**: Catalog-only discography rows MUST NOT show a stage/play button; jukebox-backed
-  rows MUST retain stage buttons when stage-valid (unchanged).
-- **FR-008**: Discography title links for catalog-only rows MUST use **`pickPrimaryListenUrl`**
-  (shared helper from `catalog-tracks.ts`).
+  rows MUST show **Play on V-Flip** when not active and **Currently playing** when that
+  track is the active stage entry (synced client-side on jukebox/discography stage picks).
+- **FR-008**: When `listenLinks` are configured, Discography MUST render a **Listen On** row
+  with one outbound platform icon link per valid entry (jukebox-backed and catalog-only);
+  links MUST open in a new tab without autoplay embeds.
 - **FR-009**: `inDiscography: false` on jukebox entries MUST continue to hide those entries
   from the merged discography list.
 - **FR-010**: When jukebox and tracks content share an id, **jukebox MUST win** for
@@ -181,6 +197,12 @@ jukebox vs. tracks for three scenarios (stage single, back-catalog single, hidde
   (clearly marked) for demonstration.
 - **FR-015**: The separate **Tracks HUD panel** from `010` US2 MUST NOT be reintroduced;
   `011`/`013` V-Flip track detail remains the stage metadata surface.
+- **FR-016**: Discography panel chrome MUST expose **`currentlyPlayingLabel`** (and reuse
+  **`listenOnLabel`**) via `src/content/ui/chrome.md`; row labels MUST NOT be hard-coded in
+  components.
+- **FR-017**: Discography rows MUST use card-style presentation with sufficient padding for
+  title, year/kind, stage affordance, and optional Listen On row; panel MAY be wider than
+  other on-demand panels to fit content at default HUD scale.
 
 ### Key Entities
 
@@ -189,8 +211,9 @@ jukebox vs. tracks for three scenarios (stage single, back-catalog single, hidde
   have a stage clip.
 - **Jukebox / stage entry** (unchanged): Playable track with atmosphere assets; when
   `sortDate` is set and `inDiscography` is not false, contributes a discography row.
-- **Discography row** (presentation): Merged view — title, year, optional kind, optional
-  outbound title link, optional stage button (jukebox-backed only).
+- **Discography row** (presentation): Card-style merged view — plain title, year, optional
+  kind, optional **Listen On** platform icon links, optional **Play on V-Flip** or
+  **Currently playing** (jukebox-backed only).
 
 ## Success Criteria *(mandatory)*
 
@@ -198,8 +221,9 @@ jukebox vs. tracks for three scenarios (stage single, back-catalog single, hidde
 
 - **SC-001**: An operator can add a catalog-only track file and see it in Discography after
   a normal content publish, with zero jukebox/stage side effects in the same session.
-- **SC-002**: 100% of pre-feature jukebox discography rows retain prior behavior with no
-  jukebox file changes.
+- **SC-002**: 100% of pre-feature jukebox discography rows remain listed with correct sort,
+  stage binding, and dedup rules; jukebox rows additionally show **Listen On** icons when
+  `listenLinks` are configured and **Currently playing** when active (post-ship UI enhancement).
 - **SC-003**: A non-developer chooses jukebox vs. tracks edit surface correctly for **3 of 3**
   scenarios after reading the updated artist guide once.
 - **SC-004**: Combined discography with jukebox-backed and catalog-only entries sorts per

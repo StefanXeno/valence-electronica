@@ -58,8 +58,9 @@ All Technical Context items resolved below.
 ## R5: Discography UI surface
 
 - **Decision**: **Discography panel only** — no revival of `010` Tracks HUD panel (`011`/`013`
-  superseded). `Discography.astro` swaps `getDiscographyFromJukebox` → `getMergedDiscography`;
-  row markup unchanged.
+  superseded). `Discography.astro` uses `getMergedDiscography`; rows are **card-style** with
+  plain title, optional **Listen On** platform icons, and **Play on V-Flip** / **Currently
+  playing** for jukebox-backed entries. See [contracts/discography-ui.md](./contracts/discography-ui.md).
 - **Rationale**: Spec FR-015; smallest diff; artist asked for discography without jukebox.
 - **Alternatives considered**:
   - V-Flip track list includes catalog-only — out of scope (rejected).
