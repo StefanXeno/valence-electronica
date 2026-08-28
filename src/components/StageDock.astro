@@ -2,9 +2,20 @@
 ---
 <div class="stage-dock">
   <div class="stage-dock__left">
-    <slot name="jukebox" />
+    <div class="stage-dock__cluster">
+      <slot name="jukebox" />
+      <slot name="mute" />
+    </div>
   </div>
   <div class="stage-dock__right">
     <slot name="panels" />
   </div>
 </div>
+
+<style>
+  .stage-dock__cluster {
+    display: flex;
+    align-items: flex-end;
+    gap: calc(0.35rem * var(--hud-scale));
+  }
+</style>
