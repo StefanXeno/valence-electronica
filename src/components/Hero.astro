@@ -1,30 +1,27 @@
 ---
+import { Image } from 'astro:assets';
 import site from '../data/site.json';
-import { withBase } from '../lib/url';
 import { formatTagline, loadTaglinePool, validateTaglinePool } from '../lib/tagline-pool';
+import wordmark from '../assets/images/brand/valence-wordmark.png';
 
 const { name, tagline } = site.artist;
 validateTaglinePool(loadTaglinePool());
 
-const wordmarkSrc = withBase('/images/brand/valence-wordmark.webp');
-const wordmarkFallback = withBase('/images/brand/valence-wordmark.png');
 const fallbackTagline = formatTagline(tagline.trim());
 ---
 
-<section class="identity" aria-label={name}>
+<section class="identity">
   <h1 class="identity__name glitch-hit">
-    <picture>
-      <source srcset={wordmarkSrc} type="image/webp" />
-      <img
-        class="identity__wordmark"
-        src={wordmarkFallback}
-        alt={name}
-        width="960"
-        height="362"
-        decoding="async"
-        fetchpriority="high"
-      />
-    </picture>
+    <Image
+      class="identity__wordmark"
+      src={wordmark}
+      alt={name}
+      widths={[480, 960]}
+      sizes="(max-width: 768px) 72vw, 14rem"
+      decoding="async"
+      loading="eager"
+      fetchpriority="high"
+    />
   </h1>
   <p
     class="tagline glitch-hit"

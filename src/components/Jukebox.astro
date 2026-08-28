@@ -23,6 +23,7 @@ const showMute = videos.some((entry) => entry.hasAudio);
   videos.length > 0 && (
     <div
       class="jukebox"
+      role="region"
       aria-label={chrome.jukeboxLabel}
       data-jukebox
       data-stage-catalog={JSON.stringify(catalog)}

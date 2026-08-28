@@ -40,7 +40,8 @@ const channels = site.channels.map((channel) => {
             </li>
           ) : (
             <li class="placeholder">
-              <span aria-label={`${channel.label} — ${chrome.comingSoon}`}>
+              <span>
+                <span class="visually-hidden">{channel.label} — {chrome.comingSoon}</span>
                 <ChannelIcon id={channel.id} label={channel.label} />
               </span>
             </li>
