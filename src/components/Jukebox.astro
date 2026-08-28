@@ -72,6 +72,7 @@ const showMute = videos.some((entry) => entry.hasAudio);
           type="button"
           class="jukebox__tool jukebox__tool--shuffle glitch-hit"
           data-shuffle-toggle
+          data-glitch-live
           aria-pressed={chrome.shuffleDefault ? 'true' : 'false'}
           aria-label={chrome.shuffleLabel}
           data-hud-label={chrome.shuffleLabel}
@@ -84,6 +85,7 @@ const showMute = videos.some((entry) => entry.hasAudio);
           type="button"
           class="jukebox__tool jukebox__tool--loop glitch-hit"
           data-loop-toggle
+          data-glitch-live
           aria-pressed={chrome.loopDefault ? 'true' : 'false'}
           aria-label={chrome.loopLabel}
           data-hud-label={chrome.loopLabel}

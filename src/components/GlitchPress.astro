@@ -10,6 +10,13 @@
 
   function isMorphOwned(el: Element): boolean {
     if (el.closest('[data-jukebox-option]')) return false;
+    if (
+      el.matches(
+        '[data-shuffle-toggle][aria-pressed="true"], [data-loop-toggle][aria-pressed="true"]',
+      )
+    ) {
+      return true;
+    }
     return (
       el.matches('[data-mute-control], [data-volume-control], [data-jukebox-toggle], [data-stage-panel]') ||
       Boolean(el.closest('[data-volume-control], [data-jukebox]'))
@@ -17,7 +24,9 @@
   }
 
   function isLiveToggle(el: Element): boolean {
-    return el.matches('[data-mute-control], [data-jukebox-toggle]');
+    return el.matches(
+      '[data-mute-control], [data-jukebox-toggle], [data-shuffle-toggle][aria-pressed="true"], [data-loop-toggle][aria-pressed="true"]',
+    );
   }
 
   function isOpenStagePanel(el: Element): boolean {

@@ -1,5 +1,6 @@
 import {
   applyThemeAttributes,
+  packAllowsHudGlitch,
   packAllowsMute,
   packSupportsLoopingVideo,
   resolveThemePack,
@@ -20,6 +21,7 @@ import {
   setShuffle,
   watchIntroGate,
 } from './playback';
+import { createContinuousGlitch, isGlitchThemeActive } from './glitch';
 
 export type StageCatalogEntry = {
   id: string;
@@ -31,30 +33,62 @@ export type StageCatalogEntry = {
 };
 
 export const STAGE_SELECT_EVENT = 'stage-select';
-const CROSSFADE_MS = 700;
+
+const CROSSFADE_SMOOTH_MS = 1000;
+const CROSSFADE_GLITCH_MS = 720;
+
+type ThemeHandoffMode = 'instant' | 'smooth' | 'glitch';
 
 let themeCrossfadeTimer: number | undefined;
+let syncPlaybackToggleGlitch: (() => void) | undefined;
+
+function resolveThemeHandoff(
+  fromEntry: StageCatalogEntry | undefined,
+  toEntry: StageCatalogEntry,
+): { mode: ThemeHandoffMode; leavingGlitch: boolean; durationMs: number } {
+  const fromGlitch = packAllowsHudGlitch(resolveThemePack(fromEntry?.themeId));
+  const toGlitch = packAllowsHudGlitch(resolveThemePack(toEntry.themeId));
+
+  if (fromGlitch || toGlitch) {
+    return {
+      mode: 'glitch',
+      leavingGlitch: fromGlitch && !toGlitch,
+      durationMs: CROSSFADE_GLITCH_MS,
+    };
+  }
+
+  return { mode: 'smooth', leavingGlitch: false, durationMs: CROSSFADE_SMOOTH_MS };
+}
 
 function applyThemeForHandoff(
   attrs: ReturnType<typeof applyThemeAttributes>,
   animated: boolean,
+  handoff: { mode: ThemeHandoffMode; leavingGlitch: boolean; durationMs: number },
 ): void {
   window.clearTimeout(themeCrossfadeTimer);
 
-  if (!animated) {
+  if (!animated || handoff.mode === 'instant') {
     delete document.documentElement.dataset.stageCrossfade;
     document.documentElement.dataset.theme = attrs.themeId;
     document.documentElement.dataset.hudGlitch = attrs.hudGlitch;
     return;
   }
 
-  document.documentElement.dataset.stageCrossfade = 'true';
+  document.documentElement.dataset.stageCrossfade = handoff.mode;
+
   requestAnimationFrame(() => {
     document.documentElement.dataset.theme = attrs.themeId;
-    document.documentElement.dataset.hudGlitch = attrs.hudGlitch;
+    if (!handoff.leavingGlitch) {
+      document.documentElement.dataset.hudGlitch = attrs.hudGlitch;
+    }
+
     themeCrossfadeTimer = window.setTimeout(() => {
       delete document.documentElement.dataset.stageCrossfade;
-    }, CROSSFADE_MS);
+      if (handoff.leavingGlitch) {
+        document.documentElement.dataset.hudGlitch = attrs.hudGlitch;
+      }
+      syncPlaybackToggleGlitch?.();
+    }, handoff.durationMs);
   });
 }
 
@@ -149,7 +183,7 @@ export function applyStageEntry(entry: StageCatalogEntry, keepMuted: boolean) {
 
   const pack = resolveThemePack(entry.themeId);
   const attrs = applyThemeAttributes(pack);
-  applyThemeForHandoff(attrs, false);
+  applyThemeForHandoff(attrs, false, { mode: 'instant', leavingGlitch: false, durationMs: 0 });
 
   const hasSources = entry.sources.length > 0;
   const playsVideo = packSupportsLoopingVideo(pack, hasSources);
@@ -193,7 +227,11 @@ export function applyStageEntry(entry: StageCatalogEntry, keepMuted: boolean) {
   notify();
 }
 
-async function crossfadeStageEntry(entry: StageCatalogEntry, keepMuted: boolean): Promise<void> {
+async function crossfadeStageEntry(
+  entry: StageCatalogEntry,
+  keepMuted: boolean,
+  fromEntry?: StageCatalogEntry,
+): Promise<void> {
   const { atmosphere, current, next, poster } = getAtmosphereVideos();
   if (!atmosphere || !current) return;
 
@@ -202,6 +240,7 @@ async function crossfadeStageEntry(entry: StageCatalogEntry, keepMuted: boolean)
   const attrs = applyThemeAttributes(pack);
   const hasSources = entry.sources.length > 0;
   const playsVideo = packSupportsLoopingVideo(pack, hasSources);
+  const handoff = resolveThemeHandoff(fromEntry, entry);
 
   if (!next || !playsVideo || reduceMotion) {
     applyStageEntry(entry, keepMuted);
@@ -209,7 +248,8 @@ async function crossfadeStageEntry(entry: StageCatalogEntry, keepMuted: boolean)
     return;
   }
 
-  applyThemeForHandoff(attrs, true);
+  applyThemeForHandoff(attrs, true, handoff);
+  syncPlaybackToggleGlitch?.();
   updateAtmosphereMeta(atmosphere, entry, playsVideo);
 
   const notify = () => {
@@ -232,14 +272,17 @@ async function crossfadeStageEntry(entry: StageCatalogEntry, keepMuted: boolean)
   const playAttempt = next.play();
   if (playAttempt) await playAttempt.catch(() => {});
 
+  const crossfadeEase =
+    handoff.mode === 'glitch' ? 'steps(4, end)' : 'cubic-bezier(0.45, 0, 0.55, 1)';
+
   requestAnimationFrame(() => {
-    next.style.transition = `opacity ${CROSSFADE_MS}ms cubic-bezier(0.4, 0, 0.2, 1)`;
+    next.style.transition = `opacity ${handoff.durationMs}ms ${crossfadeEase}`;
     current.style.transition = next.style.transition;
     next.style.opacity = '1';
     current.style.opacity = '0';
   });
 
-  await new Promise((resolve) => window.setTimeout(resolve, CROSSFADE_MS));
+  await new Promise((resolve) => window.setTimeout(resolve, handoff.durationMs));
 
   swapAtmosphereVideos(current, next);
 
@@ -281,6 +324,46 @@ export function syncStageUi(activeId: string) {
   document.querySelectorAll<HTMLButtonElement>('[data-loop-toggle]').forEach((button) => {
     button.setAttribute('aria-pressed', getPlaybackMode().loop ? 'true' : 'false');
   });
+
+  syncPlaybackToggleGlitch?.();
+}
+
+function initPlaybackToggleGlitch(): () => void {
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const toggles = document.querySelectorAll<HTMLButtonElement>(
+    '[data-shuffle-toggle], [data-loop-toggle]',
+  );
+  const loops = new Map<HTMLButtonElement, ReturnType<typeof createContinuousGlitch>>();
+
+  toggles.forEach((btn) => {
+    loops.set(
+      btn,
+      createContinuousGlitch(btn, () => {
+        if (reduceMotion.matches || !isGlitchThemeActive()) return false;
+        return btn.getAttribute('aria-pressed') === 'true';
+      }),
+    );
+  });
+
+  const sync = () => {
+    toggles.forEach((btn) => {
+      const control = loops.get(btn);
+      if (!control) return;
+      if (btn.getAttribute('aria-pressed') === 'true' && isGlitchThemeActive()) {
+        control.start();
+      } else {
+        control.stop();
+      }
+    });
+  };
+
+  reduceMotion.addEventListener('change', sync);
+  new MutationObserver(sync).observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ['data-hud-glitch'],
+  });
+
+  return sync;
 }
 
 export function initStageSwitch(
@@ -342,9 +425,10 @@ export function initStageSwitch(
 
     const video = document.querySelector<HTMLVideoElement>('[data-bg-video]');
     const keepMuted = video ? video.muted : true;
+    const priorEntry = byId.get(activeId);
     activeId = id;
 
-    void crossfadeStageEntry(entry, keepMuted).then(() => {
+    void crossfadeStageEntry(entry, keepMuted, priorEntry).then(() => {
       syncStageUi(activeId);
       restartClock();
     });
@@ -397,6 +481,9 @@ export function initStageSwitch(
     () => restartClock(),
   );
 
+  syncPlaybackToggleGlitch = initPlaybackToggleGlitch();
+
   syncStageUi(activeId);
+  syncPlaybackToggleGlitch();
   restartClock();
 }

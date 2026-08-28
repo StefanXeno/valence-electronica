@@ -227,6 +227,13 @@ const panels = [
     height: auto;
     min-height: var(--control-size);
     padding: var(--stage-panel-inset);
+    color: var(--color-accent-alt);
+  }
+
+  .stage-panel[open] .stage-panel__summary :global(.hud-icon) {
+    filter: drop-shadow(
+      0 0 calc(0.35rem * var(--hud-scale)) color-mix(in srgb, var(--color-accent) 55%, transparent)
+    );
   }
 
   .stage-panel__summary::marker {
@@ -248,13 +255,15 @@ const panels = [
     line-height: 1;
     letter-spacing: 0.04em;
     text-transform: uppercase;
-    color: var(--color-text);
+    color: inherit;
     white-space: nowrap;
     min-width: 0;
   }
 
   .stage-panel[open] .stage-panel__label {
     display: block;
+    text-shadow: 0 0 calc(0.35rem * var(--hud-scale))
+      color-mix(in srgb, var(--color-accent) 55%, transparent);
   }
 
   .stage-panel__body {
