@@ -66,6 +66,16 @@
           "to": "04:00"
         }
       ]
+    },
+    {
+      "text": "Pass that sh*t homie.",
+      "rules": [
+        {
+          "type": "time",
+          "from": "04:20",
+          "to": "04:25"
+        }
+      ]
     }
   ]
 }
