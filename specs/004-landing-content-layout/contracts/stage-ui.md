@@ -2,6 +2,12 @@
 
 **Date**: 2026-08-14 (as-built sync 2026-08-24) | **Plan**: [../plan.md](../plan.md) | **Spec**: [../spec.md](../spec.md)
 
+> **Desktop layout supersession**: After feature `009-desktop-stage-ui` ships, **laptop
+> HUD slot layout** (corners, dock, footer position, icon-first chrome) is defined in
+> [`specs/009-desktop-stage-ui/contracts/desktop-hud-ui.md`](../../009-desktop-stage-ui/contracts/desktop-hud-ui.md).
+> This file remains authoritative for jukebox, discography, tour, exclusive-open, and
+> glitch behavior unless `009` explicitly amends a row below.
+
 Behavior contract for the landing HUD as built. Complements `002` atmosphere UI
 (mute, reduced motion, legal overlay) and `003` glitch. Glitch on HUD chrome runs
 only while `html[data-hud-glitch='true']` (pack `hudGlitch` — feature `005`).
@@ -18,10 +24,10 @@ Chrome scale: `--hud-scale: 1.5`.
 | Center | Atmosphere only. No About, lyrics, lists, or jukebox **body** in the middle. |
 | Identity | Persistent compact chrome: name + hook from `site.json` only. Top-left. Not a huge centered title. Location/description are not shown here. |
 | Socials | Persistent compact chrome: existing channels as **equal-sized icons only** (~2.5rem × `--hud-scale` circles). Top-right. Visible labels off; names via `aria-label`. Active links: new tab + `glitch-hit` when glitch enabled. Inactive: non-link icon + coming-soon accessible name. |
-| Jukebox | Persistent compact chrome. Bottom-left. **Collapsed vinyl-record control** at rest (same family as mute). Song list only while open (`<details>`). Always present, including with one entry. Accessible name from chrome `jukeboxLabel` (shipped: `V-Flip`). |
-| On-demand | About, Lyrics, Discography, Tour. Bottom-right cluster of disclosure controls. Closed on load. |
-| Legal footer | Transparent, bottom-left cluster: `© {year} Valence` then Impressum / Datenschutzerklärung. No bar. Overlay from `002` unchanged. |
-| Mute | Existing `002` control, bottom-right **below** the on-demand cluster; not covered by panels; hidden when the active entry has no looping video with audio. |
+| Jukebox | Persistent compact chrome. Bottom-left *(004 as-built)*. **Desktop `009`:** dock left segment — icon-only trigger; list at dock edge. **Collapsed vinyl-record control** at rest (same family as mute). Song list only while open (`<details>`). Always present, including with one entry. Accessible name from chrome `jukeboxLabel` (shipped: `V-Flip`). |
+| On-demand | About, Lyrics, Discography, Tour. Bottom-right vertical cluster *(004 as-built)*. **Desktop `009`:** horizontal icon row in dock right segment. Closed on load. |
+| Legal footer | Transparent, bottom-left cluster *(004 as-built)*. **Desktop `009`:** bottom-center cluster. `© {year} Valence` then Impressum / Datenschutzerklärung. No bar. Overlay from `002` unchanged. |
+| Mute | Existing `002` control, bottom-right **below** the on-demand cluster *(004)* / dock trailing edge *(009 desktop)*; not covered by panels; hidden when the active entry has no looping video with audio. |
 | Landing intro | Feature `006` portal overlay on `/` only — not part of persistent HUD chrome. |
 
 On-demand panels expand along the edge (~20–28rem max scaled), scroll internally if

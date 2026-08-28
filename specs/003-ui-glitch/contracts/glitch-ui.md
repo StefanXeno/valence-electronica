@@ -27,6 +27,12 @@ MUST glitch (when motion allowed **and** `data-hud-glitch='true'`):
 6. Jukebox option buttons (list open)
 7. On-demand stage panels (`StagePanels` `<details>`): whole box is the hit
 
+**Amendment (feature `009`, desktop dock):** Dock panel summary triggers MUST use the
+**live-safe** glitch keyframe family (`ui-glitch-live-*`, `data-glitch-live` or equivalent)
+so `clip-path` fragmentation does not create dead pointer zones inside the control bounds.
+Visual split MAY occur; the full summary bounding box MUST stay clickable and keyboard-
+activatable (FR-008 in `009`).
+
 MUST NOT glitch:
 
 - Volume range/slider
