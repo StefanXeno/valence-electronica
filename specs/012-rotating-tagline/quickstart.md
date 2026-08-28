@@ -44,8 +44,14 @@ npm run preview
 
 ## Timing note
 
-Manual tests need real-time waits (~60 s). During implementation, a dev-only shorter interval
-MAY be added for QA; production interval is **60 seconds** (FR-006).
+Production interval is **60 seconds** (FR-006). In dev, the default is **10 seconds** for faster
+QA. Override with a query param (dev only, ignored in production builds):
+
+```
+http://localhost:4321/?tagline-interval=5
+```
+
+Valid range: **1–3600** seconds. Invalid or missing values fall back to the dev default.
 
 ## Reference
 

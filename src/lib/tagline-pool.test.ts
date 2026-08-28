@@ -126,3 +126,34 @@ describe('formatTagline', () => {
     expect(formatTagline('coming for you')).toBe('coming for\u00A0you');
   });
 });
+
+describe('tagline rotation interval', () => {
+  it('parses valid query seconds and rejects invalid values', async () => {
+    const { parseTaglineIntervalSeconds } = await import('./tagline-pool');
+    expect(parseTaglineIntervalSeconds('5')).toBe(5);
+    expect(parseTaglineIntervalSeconds('3600')).toBe(3600);
+    expect(parseTaglineIntervalSeconds('0')).toBeUndefined();
+    expect(parseTaglineIntervalSeconds('3601')).toBeUndefined();
+    expect(parseTaglineIntervalSeconds('nope')).toBeUndefined();
+    expect(parseTaglineIntervalSeconds(null)).toBeUndefined();
+  });
+
+  it('resolves production vs dev defaults and overrides', async () => {
+    const {
+      TAGLINE_ROTATION_MS_DEV_DEFAULT,
+      TAGLINE_ROTATION_MS_PRODUCTION,
+      resolveTaglineRotationMs,
+    } = await import('./tagline-pool');
+    expect(resolveTaglineRotationMs({ dev: false })).toBe(TAGLINE_ROTATION_MS_PRODUCTION);
+    expect(resolveTaglineRotationMs({ dev: true })).toBe(TAGLINE_ROTATION_MS_DEV_DEFAULT);
+    expect(resolveTaglineRotationMs({ dev: true, intervalSeconds: 5 })).toBe(5000);
+  });
+
+  it('compares tagline text after typography normalization', async () => {
+    const { taglineTextsEqual } = await import('./tagline-pool');
+    expect(taglineTextsEqual("Something's coming for you.", "Something's coming for\u00A0you.")).toBe(
+      true,
+    );
+    expect(taglineTextsEqual('Line A.', 'Line B.')).toBe(false);
+  });
+});

@@ -228,6 +228,10 @@ export function formatTagline(text: string): string {
   return text.replace(' for ', ' for\u00A0');
 }
 
+export function taglineTextsEqual(a: string, b: string): boolean {
+  return formatTagline(a.trim()) === formatTagline(b.trim());
+}
+
 export function loadTaglinePool(): TaglinePool {
   if (!poolJson || typeof poolJson !== 'object') {
     throw new Error('[tagline-pool] src/data/tagline-pool.json is missing or invalid');
@@ -313,4 +317,45 @@ export function validateTaglinePool(pool: TaglinePool): void {
       });
     }
   });
+}
+
+/** Dev-only query key: `?tagline-interval=<seconds>` (ignored in production). */
+export const TAGLINE_INTERVAL_QUERY = 'tagline-interval';
+
+export const TAGLINE_ROTATION_MS_PRODUCTION = 60_000;
+export const TAGLINE_ROTATION_MS_DEV_DEFAULT = 10_000;
+
+const TAGLINE_INTERVAL_SECONDS_MIN = 1;
+const TAGLINE_INTERVAL_SECONDS_MAX = 3600;
+
+export function parseTaglineIntervalSeconds(raw: string | null): number | undefined {
+  if (raw === null || raw.trim() === '') return undefined;
+  const seconds = Number(raw);
+  if (!Number.isFinite(seconds) || seconds < TAGLINE_INTERVAL_SECONDS_MIN) return undefined;
+  if (seconds > TAGLINE_INTERVAL_SECONDS_MAX) return undefined;
+  return seconds;
+}
+
+export function resolveTaglineRotationMs(options: {
+  dev: boolean;
+  intervalSeconds?: number;
+}): number {
+  if (!options.dev) return TAGLINE_ROTATION_MS_PRODUCTION;
+  if (options.intervalSeconds !== undefined) {
+    return Math.round(options.intervalSeconds * 1000);
+  }
+  return TAGLINE_ROTATION_MS_DEV_DEFAULT;
+}
+
+/** Client-only: production is always 60 s; dev defaults to 10 s unless query overrides. */
+export function readTaglineRotationMsFromLocation(): number {
+  if (typeof window === 'undefined') {
+    return resolveTaglineRotationMs({ dev: import.meta.env.DEV });
+  }
+  if (!import.meta.env.DEV) return TAGLINE_ROTATION_MS_PRODUCTION;
+
+  const seconds = parseTaglineIntervalSeconds(
+    new URLSearchParams(window.location.search).get(TAGLINE_INTERVAL_QUERY),
+  );
+  return resolveTaglineRotationMs({ dev: true, intervalSeconds: seconds });
 }

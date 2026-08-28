@@ -1,33 +1,57 @@
 import '../styles/tagline-rotate.css';
+import { isGlitchThemeActive, playElementGlitch } from './glitch';
 import {
   buildEligibleSet,
   clampRotationIndex,
   formatTagline,
   loadTaglinePool,
   nextRotationIndex,
+  readTaglineRotationMsFromLocation,
+  taglineTextsEqual,
   type EligibleTagline,
 } from './tagline-pool';
 
-const ROTATION_MS = 60_000;
+const FADE_MS = 500;
+const GLITCH_SWAP_RATIO = 0.45;
 
 function prefersReducedMotion(): boolean {
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 }
 
-function waitForPhaseEnd(element: HTMLElement): Promise<void> {
+function waitForMotionEnd(element: HTMLElement, ms = FADE_MS): Promise<void> {
   return new Promise((resolve) => {
-    const onEnd = (event: Event) => {
-      if (event.target !== element) return;
+    let settled = false;
+    const finish = () => {
+      if (settled) return;
+      settled = true;
       element.removeEventListener('transitionend', onEnd);
       element.removeEventListener('animationend', onEnd);
       resolve();
     };
+    const onEnd = (event: Event) => {
+      if (event.target !== element) return;
+      finish();
+    };
     element.addEventListener('transitionend', onEnd);
     element.addEventListener('animationend', onEnd);
+    window.setTimeout(finish, ms + 100);
+  });
+}
+
+function nextFrame(): Promise<void> {
+  return new Promise((resolve) => {
+    requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+  });
+}
+
+function waitMs(ms: number): Promise<void> {
+  return new Promise((resolve) => {
+    window.setTimeout(resolve, ms);
   });
 }
 
 export function initTaglineRotator(root: HTMLElement, fallbackText: string): () => void {
+  const rotationMs = readTaglineRotationMsFromLocation();
   const pool = loadTaglinePool();
   let eligible: EligibleTagline[] = buildEligibleSet(pool);
   let index = 0;
@@ -42,12 +66,17 @@ export function initTaglineRotator(root: HTMLElement, fallbackText: string): () 
     }
   };
 
+  const clearGlitchState = () => {
+    root.classList.remove('is-glitching', 'is-glitch-hover', 'is-glitch-continuous');
+    delete root.dataset.glitch;
+  };
+
   const scheduleNextRotation = () => {
     if (disposed || eligible.length === 0) return;
     clearRotationTimer();
     rotationTimer = setTimeout(() => {
       void advanceRotation();
-    }, ROTATION_MS);
+    }, rotationMs);
   };
 
   const applyInstant = (text: string) => {
@@ -57,26 +86,59 @@ export function initTaglineRotator(root: HTMLElement, fallbackText: string): () 
   };
 
   const applyWithFade = async (text: string) => {
-    if (text === currentText) return;
+    if (taglineTextsEqual(text, currentText)) return;
+
+    root.removeAttribute('data-tagline-phase');
+    await nextFrame();
+    if (disposed) return;
 
     root.dataset.taglinePhase = 'out';
-    await waitForPhaseEnd(root);
+    void root.offsetWidth;
+    await waitForMotionEnd(root);
     if (disposed) return;
 
     root.textContent = formatTagline(text);
     root.dataset.taglinePhase = 'in';
-    await waitForPhaseEnd(root);
+    await waitForMotionEnd(root);
     if (disposed) return;
 
     root.removeAttribute('data-tagline-phase');
     currentText = text;
   };
 
+  const applyWithGlitch = async (text: string) => {
+    if (taglineTextsEqual(text, currentText)) return;
+
+    root.removeAttribute('data-tagline-phase');
+    clearGlitchState();
+
+    const dur = playElementGlitch(root, 'is-glitching');
+    if (!dur) {
+      applyInstant(text);
+      return;
+    }
+
+    const swapAt = Math.round(dur * GLITCH_SWAP_RATIO);
+    await waitMs(swapAt);
+    if (disposed) return;
+
+    root.textContent = formatTagline(text);
+    currentText = text;
+
+    await waitMs(dur + 80 - swapAt);
+    if (disposed) return;
+
+    clearGlitchState();
+  };
+
   const showLine = (text: string, animate: boolean) => {
-    if (text === currentText) return Promise.resolve();
+    if (taglineTextsEqual(text, currentText)) return Promise.resolve();
     if (!animate || prefersReducedMotion()) {
       applyInstant(text);
       return Promise.resolve();
+    }
+    if (isGlitchThemeActive()) {
+      return applyWithGlitch(text);
     }
     return applyWithFade(text);
   };
@@ -104,7 +166,7 @@ export function initTaglineRotator(root: HTMLElement, fallbackText: string): () 
     }
 
     index = nextIndex;
-    const animate = nextText !== currentText;
+    const animate = !taglineTextsEqual(nextText, currentText);
     await showLine(nextText, animate);
     if (disposed) return;
     scheduleNextRotation();
@@ -124,7 +186,7 @@ export function initTaglineRotator(root: HTMLElement, fallbackText: string): () 
       return;
     }
 
-    await showLine(first, first !== currentText);
+    await showLine(first, !taglineTextsEqual(first, currentText));
     if (disposed) return;
     scheduleNextRotation();
   };
@@ -132,6 +194,7 @@ export function initTaglineRotator(root: HTMLElement, fallbackText: string): () 
   const onPageHide = () => {
     disposed = true;
     clearRotationTimer();
+    clearGlitchState();
     root.removeAttribute('data-tagline-phase');
   };
 
