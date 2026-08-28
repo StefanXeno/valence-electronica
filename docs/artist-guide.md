@@ -50,6 +50,9 @@ filename slug is the stable id (e.g. `nightmare.md` → `nightmare`).
 - `sortDate` — release date shown in **Track info** and used for **Discography** year (ISO
   date, e.g. `2025-06-01`). Required for both panels; omit → track still works on stage but
   is hidden from discography and track-info release line
+- `blurb` — optional one-line hook shown in V-Flip track detail
+- `credits` — optional list of `{ role, name }` rows shown in V-Flip track detail
+- `mentions` — optional thank-you / shout-out line shown in V-Flip track detail
 - `kind` — optional release type in discography (e.g. `single`, `ep`, `album`)
 - `inDiscography` — optional; set `false` to hide from discography while keeping `sortDate`
   for track info
@@ -59,7 +62,9 @@ filename slug is the stable id (e.g. `nightmare.md` → `nightmare`).
   `soundcloud`, or `tidal`; `url` must start with `https://`). Used in Track info; discography
   title link uses Bandcamp first, then Spotify, then other platforms
 
-**Body:** Lyrics for that record (leave empty for instrumentals).
+**Body:** Lyrics for that record (leave empty for instrumentals). **Lyrics are not shown on
+the live site in v1** — the body is kept for a future feature; only frontmatter fields above
+appear in the open V-Flip drawer.
 
 **Do not break:** Do not rename the file slug (`nightmare`, `infinite`, etc.) unless a
 developer updates every reference (releases, schedule, etc.).
@@ -122,8 +127,8 @@ into the matching jukebox entry.
 
 **Controls:** Region titles, empty-state strings, jukebox/social labels, stage-button label,
 landing intro copy (`introLead`, `introName`), and optional **HUD icon overrides**
-(`jukeboxIcon`, `aboutIcon`, `lyricsIcon`, `discographyIcon`, `tourIcon`, `trackInfoIcon`,
-`shuffleIcon`, `loopIcon`).
+(`jukeboxIcon`, `aboutIcon`, `discographyIcon`, `tourIcon`, `trackInfoIcon`, `shuffleIcon`,
+`loopIcon`).
 
 **V-Flip player chrome (optional):**
 
@@ -137,19 +142,18 @@ landing intro copy (`introLead`, `introName`), and optional **HUD icon overrides
 
 - `trackInfoTitle` — section heading inside open V-Flip (default: Track info)
 - `releasedLabel` — label before the release date (default: Released)
+- `listenOnLabel` — label before streaming platform icons (default: Listen On)
 - `emptyTrackLinks` — when a track has no `listenLinks`
-- `lyricsTitle` / `emptyLyrics` — lyrics section heading and empty copy inside V-Flip
 
 **Icon overrides (optional):**
 
 - Leave an `*Icon` field out to use the default pictogram for that control.
-- Set a **token** to pick a built-in icon: `jukebox`, `about`, `lyrics`, `discography`,
-  `tour`, `catalog`, `info`, `shuffle`, or `loop`.
-- Set a **single emoji** (e.g. `lyricsIcon: "🎤"`) to show that character instead of the
-  default pictogram.
+- Set a **token** to pick a built-in icon: `jukebox`, `about`, `discography`, `tour`,
+  `catalog`, `info`, `shuffle`, or `loop`.
 
 **Do not break:** Region title fields still control readable labels and accessibility.
-Lyrics and track info appear **inside open V-Flip**, not as separate right-dock icons.
+Track metadata (blurb, credits, mentions, listen links) appears **inside open V-Flip**, not
+as separate dock icons.
 
 **Shuffle timing:** When shuffle is on and loop is off, the stage advances after **one full
 atmosphere video file length** for audio entries (`hasAudio: true`). Entries with no audio

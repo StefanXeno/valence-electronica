@@ -50,8 +50,8 @@ Full contract: [`specs/005-theme-packs/contracts/theme-packs.md`](specs/005-them
 
 ## Landing intro
 
-First visit to `/` plays a portal intro (copy in `src/content/ui/chrome.md`). Dev replay:
-`/?replay-intro` or `/dev/intro`. Contract:
+First visit to `/` plays a portal intro (copy in `src/content/ui/chrome.md`). **Development
+only** replay: `/?replay-intro` or `/dev/intro` (omitted from production builds). Contract:
 [`specs/006-landing-intro/contracts/intro-ui.md`](specs/006-landing-intro/contracts/intro-ui.md).
 
 ## Deploy

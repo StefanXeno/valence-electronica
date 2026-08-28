@@ -2,6 +2,7 @@
 label: Nightmare
 sortDate: 2025-11-21
 kind: single
+blurb: Cinematic electronic — something's coming for you.
 themeId: nightmare-crimson
 hasAudio: true
 poster: /images/posters/nightmare.jpg
@@ -11,6 +12,10 @@ listenLinks:
     url: https://valenceelectronica.bandcamp.com/track/nightmare
   - platform: spotify
     url: https://open.spotify.com/track/0fBiVHEUo9hW7GDhDvovcj
+credits:
+  - role: Producer
+    name: Valence
+mentions: Thank you to everyone who listened on release night.
 sources:
   - src: /videos/nightmare.mp4
     type: video/mp4

@@ -18,9 +18,9 @@
 
 **Purpose**: Baseline quality gates and contract alignment before edits
 
-- [ ] T001 Verify branch `013-codebase-hardening` and read `specs/013-codebase-hardening/contracts/track-detail-ui.md` and `specs/013-codebase-hardening/contracts/stage-handoff.md`
-- [ ] T002 [P] Read `specs/013-codebase-hardening/research.md` (R1–R11) and `specs/013-codebase-hardening/quickstart.md` validation scenarios
-- [ ] T003 [P] Run `npm run check && npm test && npm run build` from repository root; record baseline test count (expect 57) for SC-004 comparison
+- [x] T001 Verify branch `013-codebase-hardening` and read `specs/013-codebase-hardening/contracts/track-detail-ui.md` and `specs/013-codebase-hardening/contracts/stage-handoff.md`
+- [x] T002 [P] Read `specs/013-codebase-hardening/research.md` (R1–R11) and `specs/013-codebase-hardening/quickstart.md` validation scenarios
+- [x] T003 [P] Run `npm run check && npm test && npm run build` from repository root; record baseline test count (expect 57) for SC-004 comparison
 
 ---
 
@@ -30,8 +30,8 @@
 
 **⚠️ CRITICAL**: No user story work should diverge from these surfaces
 
-- [ ] T004 Confirm `blurb`, `credits`, and `mentions` exist on jukebox schema in `src/content.config.ts` per `specs/010-track-catalog/contracts/track-catalog-content.md`
-- [ ] T005 [P] Confirm `parseCredits`, `parseListenLinks`, and related types in `src/lib/catalog-tracks.ts` are the reuse target for `TrackInfoPanel` (research R5 — do not duplicate parsers)
+- [x] T004 Confirm `blurb`, `credits`, and `mentions` exist on jukebox schema in `src/content.config.ts` per `specs/010-track-catalog/contracts/track-catalog-content.md`
+- [x] T005 [P] Confirm `parseCredits`, `parseListenLinks`, and related types in `src/lib/catalog-tracks.ts` are the reuse target for `TrackInfoPanel` (research R5 — do not duplicate parsers)
 
 **Checkpoint**: Jukebox frontmatter + parsers ready; US1 can render without schema changes
 
@@ -45,12 +45,12 @@
 
 ### Implementation for User Story 1
 
-- [ ] T006 [US1] Extend `src/components/TrackInfoPanel.astro` frontmatter `byId` map to include `blurb`, `credits` (via `parseCredits` from `src/lib/catalog-tracks.ts`), and `mentions` from jukebox collection entries
-- [ ] T007 [US1] Render optional blurb paragraph (`.track-info__blurb`) above release date in `src/components/TrackInfoPanel.astro` per `specs/013-codebase-hardening/contracts/track-detail-ui.md` content order
-- [ ] T008 [US1] Render optional credits `<ul class="track-info__credits">` with role + name plain text per contract; omit when `credits.length === 0`
-- [ ] T009 [US1] Render optional mentions `<p class="track-info__mentions">` below credits; omit when empty
-- [ ] T010 [P] [US1] Add scoped styles in `src/components/TrackInfoPanel.astro` for credits list, long blurb scroll inside drawer, and 320px no horizontal overflow (FR-001, FR-002)
-- [ ] T011 [P] [US1] Add sample `blurb`, `credits`, and optional `mentions` to `src/content/jukebox/nightmare.md` for SC-001 verification
+- [x] T006 [US1] Extend `src/components/TrackInfoPanel.astro` frontmatter `byId` map to include `blurb`, `credits` (via `parseCredits` from `src/lib/catalog-tracks.ts`), and `mentions` from jukebox collection entries
+- [x] T007 [US1] Render optional blurb paragraph (`.track-info__blurb`) above release date in `src/components/TrackInfoPanel.astro` per `specs/013-codebase-hardening/contracts/track-detail-ui.md` content order
+- [x] T008 [US1] Render optional credits `<ul class="track-info__credits">` with role + name plain text per contract; omit when `credits.length === 0`
+- [x] T009 [US1] Render optional mentions `<p class="track-info__mentions">` below credits; omit when empty
+- [x] T010 [P] [US1] Add scoped styles in `src/components/TrackInfoPanel.astro` for credits list, long blurb scroll inside drawer, and 320px no horizontal overflow (FR-001, FR-002)
+- [x] T011 [P] [US1] Add sample `blurb`, `credits`, and optional `mentions` to `src/content/jukebox/nightmare.md` for SC-001 verification
 - [ ] T012 [US1] Manually walk `specs/013-codebase-hardening/quickstart.md` scenarios 1–4 (metadata visible, omitted sections, track switch sync)
 
 **Checkpoint**: US1 complete — `010` FR-009 satisfied in V-Flip UI model
@@ -65,12 +65,12 @@
 
 ### Implementation for User Story 2
 
-- [ ] T013 [US2] Add monotonic `handoffGeneration` (module-level or closure in `initStageSwitch`) in `src/lib/stage-switch.ts` per research R1
-- [ ] T014 [US2] Increment generation on each `select()` in `src/lib/stage-switch.ts`; call `syncStageUi(activeId)` immediately on select
-- [ ] T015 [US2] At end of `crossfadeStageEntry()` in `src/lib/stage-switch.ts`, compare generation before **any** video swap, `data-theme` write, or `restartClock()` — stale handoffs return early with no DOM mutation (FR-003)
-- [ ] T016 [US2] Implement `bindActiveVideoMetadataListener(restartClock)` in `src/lib/stage-switch.ts` that attaches `loadedmetadata` only to current `[data-bg-video]` active element (research R2)
-- [ ] T017 [US2] Call metadata rebind after `swapAtmosphereVideos()` in `src/lib/stage-switch.ts` and on `initStageSwitch` boot; remove one-shot listener on initial video at lines ~476–477 (FR-004)
-- [ ] T018 [US2] Wrap `JSON.parse` for `data-stage-catalog` and `data-stage-schedule` in try/catch inside `bootStageSwitch()` in `src/components/Jukebox.astro`; `console.error` and return without throwing (FR-005)
+- [x] T013 [US2] Add monotonic `handoffGeneration` (module-level or closure in `initStageSwitch`) in `src/lib/stage-switch.ts` per research R1
+- [x] T014 [US2] Increment generation on each `select()` in `src/lib/stage-switch.ts`; call `syncStageUi(activeId)` immediately on select
+- [x] T015 [US2] At end of `crossfadeStageEntry()` in `src/lib/stage-switch.ts`, compare generation before **any** video swap, `data-theme` write, or `restartClock()` — stale handoffs return early with no DOM mutation (FR-003)
+- [x] T016 [US2] Implement `bindActiveVideoMetadataListener(restartClock)` in `src/lib/stage-switch.ts` that attaches `loadedmetadata` only to current `[data-bg-video]` active element (research R2)
+- [x] T017 [US2] Call metadata rebind after `swapAtmosphereVideos()` in `src/lib/stage-switch.ts` and on `initStageSwitch` boot; remove one-shot listener on initial video at lines ~476–477 (FR-004)
+- [x] T018 [US2] Wrap `JSON.parse` for `data-stage-catalog` and `data-stage-schedule` in try/catch inside `bootStageSwitch()` in `src/components/Jukebox.astro`; `console.error` and return without throwing (FR-005)
 - [ ] T019 [US2] Manually walk `specs/013-codebase-hardening/quickstart.md` scenarios 5–7 (rapid switch, shuffle single advance, active video listener); repeat SC-002 protocol **10 times** (five picks in three seconds) and log zero stuck crossfade states
 
 **Checkpoint**: US2 complete — stage handoff contract satisfied
@@ -79,13 +79,13 @@
 
 ## Phase 5: User Story 3 - Identity and tagline stay readable on narrow viewports (Priority: P2)
 
-**Goal**: Long tagline lines ellipsis at 320px without horizontal scroll
+**Goal**: Long tagline lines wrap to two lines at 320px without horizontal scroll
 
 **Independent Test**: 320px viewport + longest pool line → no scrollbar; start of line visible (quickstart scenario 8)
 
 ### Implementation for User Story 3
 
-- [ ] T020 [US3] Update `.tagline` in `src/components/Hero.astro` with two-line wrap (`-webkit-line-clamp: 2` or equivalent), `overflow: hidden`, and `max-width: 100%`; remove strict single-line `nowrap` so long lines wrap without horizontal scroll (operator choice — FR-006)
+- [x] T020 [US3] Update `.tagline` in `src/components/Hero.astro` with two-line wrap (`-webkit-line-clamp: 2` or equivalent), `overflow: hidden`, and `max-width: 100%`; remove strict single-line `nowrap` so long lines wrap without horizontal scroll (operator choice — FR-006)
 - [ ] T021 [US3] Manually walk quickstart scenario 8 at 320px; confirm two-line wrap and no horizontal scroll; spot-check tagline during intro (`data-intro-active`) does not regress
 
 **Checkpoint**: US3 complete — constitution IV tagline overflow addressed
@@ -100,13 +100,13 @@
 
 ### Implementation for User Story 4
 
-- [ ] T022 [P] [US4] Remove `releases` collection definition from `src/content.config.ts` and from `collections` export (research R6, FR-009)
-- [ ] T023 [US4] Delete unused `getValidReleases()` and any `ReleaseItem`-only imports if orphaned in `src/lib/stage.ts`
-- [ ] T024 [P] [US4] Add `blurb`, `credits`, `mentions`, and `listenLinks` examples to jukebox section in `docs/artist-guide.md` (FR-007, SC-006)
-- [ ] T025 [P] [US4] Add **Lyrics not shown on site (v1)** note to jukebox section in `docs/artist-guide.md` — body retained for future spec; remove `lyricsTitle` / `emptyLyrics` references (FR-007)
-- [ ] T026 [P] [US4] Mark `?replay-intro` and `/dev/intro` as **development-only** in README **Landing intro** section per `specs/006-landing-intro/spec.md` FR-011 (FR-007)
-- [ ] T027 [US4] Set `artist.location` to **Berlin** in `src/data/site.json` to match `src/content/about/me.md` (FR-008)
-- [ ] T028 [US4] Run `npm run build` and confirm no recurring warning about missing `src/content/releases/` directory
+- [x] T022 [P] [US4] Remove `releases` collection definition from `src/content.config.ts` and from `collections` export (research R6, FR-009)
+- [x] T023 [US4] Delete unused `getValidReleases()` and any `ReleaseItem`-only imports if orphaned in `src/lib/stage.ts`
+- [x] T024 [P] [US4] Add `blurb`, `credits`, `mentions`, and `listenLinks` examples to jukebox section in `docs/artist-guide.md` (FR-007, SC-006)
+- [x] T025 [P] [US4] Add **Lyrics not shown on site (v1)** note to jukebox section in `docs/artist-guide.md` — body retained for future spec; remove `lyricsTitle` / `emptyLyrics` references (FR-007)
+- [x] T026 [P] [US4] Mark `?replay-intro` and `/dev/intro` as **development-only** in README **Landing intro** section per `specs/006-landing-intro/spec.md` FR-011 (FR-007)
+- [x] T027 [US4] Set `artist.location` to **Berlin** in `src/data/site.json` to match `src/content/about/me.md` (FR-008)
+- [x] T028 [US4] Run `npm run build` and confirm no recurring warning about missing `src/content/releases/` directory
 - [ ] T029 [US4] Manually walk quickstart scenarios 10–13 (docs, build hygiene)
 
 **Checkpoint**: US4 complete — constitution VII satisfied for this change set
@@ -141,9 +141,9 @@
 
 ### Implementation for User Story 6
 
-- [ ] T035 [P] [US6] Create `src/lib/theme-packs.test.ts` with cases for `resolveThemePack` unknown id → default, incomplete id → default, and `applyThemeAttributes` / HUD glitch flag resolution (research R9)
-- [ ] T036 [P] [US6] Create `src/lib/stage.test.ts` with cases for `getUpcomingShows()` Berlin today cutoff (past omitted, today inclusive), sort order, and `berlinToday()` edge using fixture show entries
-- [ ] T037 [US6] Run `npm test` and confirm ≥10 new test cases and zero failures (SC-004)
+- [x] T035 [P] [US6] Create `src/lib/theme-packs.test.ts` with cases for `resolveThemePack` unknown id → default, incomplete id → default, and `applyThemeAttributes` / HUD glitch flag resolution (research R9)
+- [x] T036 [P] [US6] Create `src/lib/stage.test.ts` with cases for `getUpcomingShows()` Berlin today cutoff (past omitted, today inclusive), sort order, and `berlinToday()` edge using fixture show entries
+- [x] T037 [US6] Run `npm test` and confirm ≥10 new test cases and zero failures (SC-004)
 
 **Checkpoint**: US6 complete — critical pure-lib fallbacks guarded
 
@@ -157,11 +157,11 @@
 
 ### Implementation for User Story 7
 
-- [ ] T038 [US7] Delete `src/components/LyricsPanel.astro` and confirm no imports remain in `src/pages/` or `src/components/` (research R7, FR-010)
-- [ ] T039 [US7] Remove `[data-lyrics-for]` branch from `syncStageUi()` in `src/lib/stage-switch.ts` (FR-010)
-- [ ] T040 [US7] Remove `lyricsTitle` and `emptyLyrics` from ui schema in `src/content.config.ts`, `src/content/ui/chrome.md`, `UiChrome` / `getChrome()` in `src/lib/stage.ts`, and any component references (FR-010)
-- [ ] T041 [US7] Remove unused `getValidCatalogTracks()` export from `src/lib/catalog-tracks.ts` if still uncalled after US1; keep `parseCredits` / `parseListenLinks` and existing tests (research R8)
-- [ ] T042 [P] [US7] Run repository searches documented in quickstart scenarios 14–16 (`LyricsPanel`, `data-lyrics-for`, `getValidReleases`, `lyricsTitle`) and fix any stragglers
+- [x] T038 [US7] Delete `src/components/LyricsPanel.astro` and confirm no imports remain in `src/pages/` or `src/components/` (research R7, FR-010)
+- [x] T039 [US7] Remove `[data-lyrics-for]` branch from `syncStageUi()` in `src/lib/stage-switch.ts` (FR-010)
+- [x] T040 [US7] Remove `lyricsTitle` and `emptyLyrics` from ui schema in `src/content.config.ts`, `src/content/ui/chrome.md`, `UiChrome` / `getChrome()` in `src/lib/stage.ts`, and any component references (FR-010)
+- [x] T041 [US7] Remove unused `getValidCatalogTracks()` export from `src/lib/catalog-tracks.ts` if still uncalled after US1; keep `parseCredits` / `parseListenLinks` and existing tests (research R8)
+- [x] T042 [P] [US7] Run repository searches documented in quickstart scenarios 14–16 (`LyricsPanel`, `data-lyrics-for`, `getValidReleases`, `lyricsTitle`) and fix any stragglers
 
 **Checkpoint**: US7 complete — dead paths removed
 
@@ -171,10 +171,10 @@
 
 **Purpose**: Full validation and quality gates
 
-- [ ] T043 Run `npm run check && npm test && npm run build` from repository root; fix any regressions
+- [x] T043 Run `npm run check && npm test && npm run build` from repository root; fix any regressions
 - [ ] T044 Execute full `specs/013-codebase-hardening/quickstart.md` checklist (all 013 scenarios + 011 table complete)
-- [ ] T045 [P] Confirm no third-party scripts, cookies, or tracking added (FR-013)
-- [ ] T046 [P] Confirm scope excludes IDEA-009, IDEA-013, IDEA-015, IDEA-016, IDEA-017, IDEA-018 (FR-014) — no accidental file creep
+- [x] T045 [P] Confirm no third-party scripts, cookies, or tracking added (FR-013)
+- [x] T046 [P] Confirm scope excludes IDEA-009, IDEA-013, IDEA-015, IDEA-016, IDEA-017, IDEA-018 (FR-014) — no accidental file creep
 
 ---
 

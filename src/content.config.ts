@@ -77,17 +77,6 @@ const about = defineCollection({
   schema: z.object({}),
 });
 
-const releases = defineCollection({
-  loader: globAllowEmpty({ pattern: '**/*.md', base: './src/content/releases' }),
-  schema: z.object({
-    title: filledText,
-    year: z.number().int().min(1900).max(2100),
-    kind: filledText.optional(),
-    url: z.url().optional(),
-    jukeboxId: filledText.optional(),
-  }),
-});
-
 const shows = defineCollection({
   loader: globAllowEmpty({ pattern: '**/*.md', base: './src/content/shows' }),
   schema: z.object({
@@ -102,11 +91,9 @@ const ui = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/ui' }),
   schema: z.object({
     aboutTitle: z.string().optional(),
-    lyricsTitle: z.string().optional(),
     discographyTitle: z.string().optional(),
     tourTitle: z.string().optional(),
     stageButtonLabel: z.string().optional(),
-    emptyLyrics: z.string().optional(),
     emptyReleases: z.string().optional(),
     emptyShows: z.string().optional(),
     jukeboxLabel: z.string().optional(),
@@ -119,7 +106,6 @@ const ui = defineCollection({
     introName: z.string().optional(),
     jukeboxIcon: z.string().optional(),
     aboutIcon: z.string().optional(),
-    lyricsIcon: z.string().optional(),
     discographyIcon: z.string().optional(),
     tourIcon: z.string().optional(),
     trackInfoTitle: z.string().optional(),
@@ -139,4 +125,4 @@ const ui = defineCollection({
   }),
 });
 
-export const collections = { legal, jukebox, about, releases, shows, ui };
+export const collections = { legal, jukebox, about, shows, ui };

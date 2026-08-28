@@ -123,37 +123,6 @@ export function sortCatalogTracks(tracks: CatalogTrack[]): CatalogTrack[] {
   );
 }
 
-export async function getValidCatalogTracks(): Promise<CatalogTrack[]> {
-  const { getCollection } = await import('astro:content');
-  const raw = await getCollection('jukebox');
-  const items: CatalogTrack[] = [];
-
-  for (const entry of raw) {
-    if (entry.id.startsWith('__empty__')) continue;
-    const title = entry.data.label?.trim();
-    const sortDate = entry.data.sortDate;
-    if (!title) {
-      console.warn(`[catalog] omitted jukebox "${entry.id}" (missing label)`);
-      continue;
-    }
-    if (!sortDate) {
-      console.warn(`[catalog] omitted jukebox "${entry.id}" from catalog (missing sortDate)`);
-      continue;
-    }
-    items.push({
-      id: entry.id,
-      title,
-      sortDate,
-      blurb: entry.data.blurb?.trim() || undefined,
-      listenLinks: parseListenLinks(entry.data.listenLinks, entry.id),
-      credits: parseCredits(entry.data.credits, entry.id),
-      mentions: entry.data.mentions?.trim() || undefined,
-    });
-  }
-
-  return sortCatalogTracks(items);
-}
-
 export async function getDiscographyFromJukebox(
   validStageIds: ReadonlySet<string>,
 ): Promise<DiscographyEntry[]> {

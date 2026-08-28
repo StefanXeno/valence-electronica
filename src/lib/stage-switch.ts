@@ -41,6 +41,9 @@ type ThemeHandoffMode = 'instant' | 'smooth' | 'glitch';
 
 let themeCrossfadeTimer: number | undefined;
 let syncPlaybackToggleGlitch: (() => void) | undefined;
+let handoffGeneration = 0;
+let metadataVideo: HTMLVideoElement | null = null;
+let metadataHandler: (() => void) | null = null;
 
 function resolveThemeHandoff(
   fromEntry: StageCatalogEntry | undefined,
@@ -177,6 +180,16 @@ function swapAtmosphereVideos(current: HTMLVideoElement, next: HTMLVideoElement)
   next.classList.add('atmosphere__video--current');
 }
 
+function bindActiveVideoMetadataListener(onMetadata: () => void) {
+  const video = document.querySelector<HTMLVideoElement>('[data-bg-video]');
+  if (metadataVideo && metadataHandler) {
+    metadataVideo.removeEventListener('loadedmetadata', metadataHandler);
+  }
+  metadataVideo = video;
+  metadataHandler = onMetadata;
+  video?.addEventListener('loadedmetadata', onMetadata);
+}
+
 export function applyStageEntry(entry: StageCatalogEntry, keepMuted: boolean) {
   const { atmosphere, current, poster } = getAtmosphereVideos();
   if (!atmosphere || !current) return;
@@ -230,10 +243,14 @@ export function applyStageEntry(entry: StageCatalogEntry, keepMuted: boolean) {
 async function crossfadeStageEntry(
   entry: StageCatalogEntry,
   keepMuted: boolean,
-  fromEntry?: StageCatalogEntry,
-): Promise<void> {
+  fromEntry: StageCatalogEntry | undefined,
+  generation: number,
+  isStale: () => boolean,
+): Promise<boolean> {
+  if (isStale()) return false;
+
   const { atmosphere, current, next, poster } = getAtmosphereVideos();
-  if (!atmosphere || !current) return;
+  if (!atmosphere || !current) return false;
 
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const pack = resolveThemePack(entry.themeId);
@@ -243,10 +260,13 @@ async function crossfadeStageEntry(
   const handoff = resolveThemeHandoff(fromEntry, entry);
 
   if (!next || !playsVideo || reduceMotion) {
+    if (isStale()) return false;
     applyStageEntry(entry, keepMuted);
     delete document.documentElement.dataset.stageCrossfade;
-    return;
+    return !isStale();
   }
+
+  if (isStale()) return false;
 
   applyThemeForHandoff(attrs, true, handoff);
   syncPlaybackToggleGlitch?.();
@@ -265,6 +285,8 @@ async function crossfadeStageEntry(
     next.addEventListener('error', done, { once: true });
   });
 
+  if (isStale()) return false;
+
   current.muted = true;
   next.classList.add('atmosphere__video--active');
   next.style.opacity = '0';
@@ -272,10 +294,13 @@ async function crossfadeStageEntry(
   const playAttempt = next.play();
   if (playAttempt) await playAttempt.catch(() => {});
 
+  if (isStale()) return false;
+
   const crossfadeEase =
     handoff.mode === 'glitch' ? 'steps(4, end)' : 'cubic-bezier(0.45, 0, 0.55, 1)';
 
   requestAnimationFrame(() => {
+    if (isStale()) return;
     next.style.transition = `opacity ${handoff.durationMs}ms ${crossfadeEase}`;
     current.style.transition = next.style.transition;
     next.style.opacity = '1';
@@ -283,6 +308,8 @@ async function crossfadeStageEntry(
   });
 
   await new Promise((resolve) => window.setTimeout(resolve, handoff.durationMs));
+
+  if (isStale()) return false;
 
   swapAtmosphereVideos(current, next);
 
@@ -296,16 +323,13 @@ async function crossfadeStageEntry(
 
   atmosphere.dataset.bgState = 'playing';
   notify();
+  return generation === handoffGeneration;
 }
 
 export function syncStageUi(activeId: string) {
   document.querySelectorAll<HTMLElement>('[data-jukebox-option]').forEach((option) => {
     const on = option.dataset.jukeboxOption === activeId;
     option.setAttribute('aria-pressed', on ? 'true' : 'false');
-  });
-
-  document.querySelectorAll<HTMLElement>('[data-lyrics-for]').forEach((node) => {
-    node.hidden = node.dataset.lyricsFor !== activeId;
   });
 
   document.querySelectorAll<HTMLElement>('[data-track-info-for]').forEach((node) => {
@@ -426,12 +450,22 @@ export function initStageSwitch(
     const video = document.querySelector<HTMLVideoElement>('[data-bg-video]');
     const keepMuted = video ? video.muted : true;
     const priorEntry = byId.get(activeId);
-    activeId = id;
 
-    void crossfadeStageEntry(entry, keepMuted, priorEntry).then(() => {
-      syncStageUi(activeId);
-      restartClock();
-    });
+    handoffGeneration += 1;
+    const generation = handoffGeneration;
+    activeId = id;
+    syncStageUi(activeId);
+
+    const isStale = () => generation !== handoffGeneration;
+
+    void crossfadeStageEntry(entry, keepMuted, priorEntry, generation, isStale).then(
+      (completed) => {
+        if (!completed) return;
+        syncStageUi(activeId);
+        bindActiveVideoMetadataListener(restartClock);
+        restartClock();
+      },
+    );
   };
 
   document.addEventListener(STAGE_SELECT_EVENT, (event) => {
@@ -473,8 +507,7 @@ export function initStageSwitch(
     }
   });
 
-  const video = document.querySelector<HTMLVideoElement>('[data-bg-video]');
-  video?.addEventListener('loadedmetadata', () => restartClock());
+  bindActiveVideoMetadataListener(restartClock);
 
   watchIntroGate(
     () => clearAdvanceTimer(),

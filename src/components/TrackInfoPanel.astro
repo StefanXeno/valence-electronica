@@ -1,7 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import { getBackgroundConfig } from '../lib/background';
-import { parseListenLinks } from '../lib/catalog-tracks';
+import { parseCredits, parseListenLinks } from '../lib/catalog-tracks';
 import type { UiChrome } from '../lib/stage';
 import ChannelIcon from './ChannelIcon.astro';
 
@@ -30,6 +30,9 @@ const byId = new Map(
         label: entry.data.label?.trim() ?? entry.id,
         themeId: entry.data.themeId?.trim() ?? '',
         sortDate: entry.data.sortDate,
+        blurb: entry.data.blurb?.trim() || undefined,
+        credits: parseCredits(entry.data.credits, entry.id),
+        mentions: entry.data.mentions?.trim() || undefined,
         listenLinks: parseListenLinks(entry.data.listenLinks, entry.id),
       },
     ]),
@@ -56,6 +59,7 @@ const tracks = trackOrder.map((id) => byId.get(id)).filter((track): track is Non
           hidden={track.id !== defaultVideoId}
         >
           <div class="jukebox__track-meta">
+            {track.blurb && <p class="track-info__blurb">{track.blurb}</p>}
             {track.sortDate && (
               <p class="track-info__released">
                 <span class="track-info__released-label">{chrome.releasedLabel}</span>
@@ -87,6 +91,18 @@ const tracks = trackOrder.map((id) => byId.get(id)).filter((track): track is Non
             ) : (
               <p class="track-info__empty">{chrome.emptyTrackLinks}</p>
             )}
+            {track.credits.length > 0 && (
+              <ul class="track-info__credits">
+                {track.credits.map((credit) => (
+                  <li>
+                    <span class="track-info__credit-role">{credit.role}</span>
+                    {' — '}
+                    <span class="track-info__credit-name">{credit.name}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+            {track.mentions && <p class="track-info__mentions">{track.mentions}</p>}
           </div>
         </div>
       </div>
@@ -176,6 +192,17 @@ const tracks = trackOrder.map((id) => byId.get(id)).filter((track): track is Non
     gap: calc(0.4rem * var(--hud-scale));
     padding-top: calc(0.15rem * var(--hud-scale));
     border-top: 1px solid color-mix(in srgb, var(--color-border) 35%, transparent);
+    max-height: min(40vh, 14rem);
+    overflow-y: auto;
+    overflow-x: hidden;
+    min-width: 0;
+  }
+
+  .track-info__blurb {
+    margin: 0;
+    font-size: calc(0.72rem * var(--hud-scale));
+    line-height: 1.45;
+    color: var(--color-text-muted);
   }
 
   .track-info__released {
@@ -266,5 +293,29 @@ const tracks = trackOrder.map((id) => byId.get(id)).filter((track): track is Non
     margin: 0;
     color: var(--color-text-muted);
     font-size: calc(0.72rem * var(--hud-scale));
+  }
+
+  .track-info__credits {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    font-size: calc(0.72rem * var(--hud-scale));
+    color: var(--color-text-muted);
+  }
+
+  .track-info__credit-role {
+    font-weight: 600;
+    color: var(--color-text);
+  }
+
+  .track-info__mentions {
+    margin: 0;
+    font-size: calc(0.72rem * var(--hud-scale));
+    line-height: 1.45;
+    color: var(--color-text-muted);
+    font-style: italic;
   }
 </style>

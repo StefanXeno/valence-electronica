@@ -121,11 +121,25 @@ const showMute = videos.some((entry) => entry.hasAudio);
     const drawer = root?.querySelector<HTMLElement>('[data-jukebox-drawer]');
     if (!root?.dataset.stageCatalog || !toggle || !drawer) return;
 
-    const catalog = JSON.parse(root.dataset.stageCatalog) as StageCatalogEntry[];
+    let catalog: StageCatalogEntry[];
+    let schedule: StageSchedule = { timezone: 'Europe/Berlin', rules: [] };
+
+    try {
+      catalog = JSON.parse(root.dataset.stageCatalog) as StageCatalogEntry[];
+    } catch (error) {
+      console.error('[jukebox] invalid data-stage-catalog JSON', error);
+      return;
+    }
+
+    if (root.dataset.stageSchedule) {
+      try {
+        schedule = JSON.parse(root.dataset.stageSchedule) as StageSchedule;
+      } catch (error) {
+        console.error('[jukebox] invalid data-stage-schedule JSON', error);
+      }
+    }
+
     const staticFallbackId = root.dataset.stageFallback ?? root.dataset.stageDefault ?? '';
-    const schedule = root.dataset.stageSchedule
-      ? (JSON.parse(root.dataset.stageSchedule) as StageSchedule)
-      : { timezone: 'Europe/Berlin', rules: [] };
     initStageSwitch(catalog, staticFallbackId, schedule, {
       shuffleDefault: root.dataset.shuffleDefault !== 'false',
       loopDefault: root.dataset.loopDefault === 'true',
