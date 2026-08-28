@@ -20,6 +20,11 @@ updates:
       interval: monthly
     commit-message:
       prefix: build
+    # TS 7 breaks @astrojs/check (no Language Service API yet). Stay on 6.x
+    # until Astro supports native TypeScript 7 — see withastro/roadmap#1321.
+    ignore:
+      - dependency-name: typescript
+        update-types: ["version-update:semver-major"]
     groups:
       astro:
         patterns:
