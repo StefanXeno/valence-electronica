@@ -95,6 +95,7 @@ const {
     const muteTooltip = control.dataset.muteTooltip ?? 'Mute';
 
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const phoneHud = window.matchMedia('(max-width: 1023px)');
     let lastVolume = Number(slider.value) || 0.7;
     let wasMuted = true;
     let glitchTimer: number | undefined;
@@ -146,7 +147,7 @@ const {
       const label = muted ? unmuteTooltip : muteTooltip;
       button.setAttribute('aria-label', label);
       button.dataset.hudLabel = label;
-      slider.toggleAttribute('inert', muted);
+      slider.toggleAttribute('inert', muted || phoneHud.matches);
       const video = getVideo();
       if (!muted && video) slider.value = String(video.volume);
     };
@@ -401,6 +402,27 @@ const {
 
   .volume-control[hidden] {
     display: none;
+  }
+
+  @media (max-width: 1023px) {
+    .volume-control__slider-wrap,
+    .volume-control--in-jukebox[data-sound='on'] .volume-control__slider-wrap,
+    .volume-control--in-jukebox[data-sound='off'] .volume-control__slider-wrap {
+      display: none !important;
+      width: 0 !important;
+      max-width: 0 !important;
+      padding: 0 !important;
+      opacity: 0 !important;
+      visibility: hidden !important;
+      pointer-events: none !important;
+    }
+
+    .volume-control--in-jukebox,
+    .volume-control--in-jukebox[data-sound='on'],
+    .volume-control--in-jukebox[data-sound='off'] {
+      width: var(--control-size);
+      min-width: var(--control-size);
+    }
   }
 
   .volume-control__toggle {

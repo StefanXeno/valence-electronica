@@ -16,5 +16,17 @@
     display: flex;
     align-items: flex-end;
     gap: calc(0.35rem * var(--hud-scale));
+    width: 100%;
+  }
+
+  @media (max-width: 1023px) {
+    .stage-dock {
+      width: 100%;
+    }
+
+    .stage-dock__left,
+    .stage-dock__right {
+      width: 100%;
+    }
   }
 </style>

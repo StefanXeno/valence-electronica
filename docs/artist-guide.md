@@ -173,7 +173,7 @@ site. Use jukebox (stage) or tracks (catalog-only) instead.
 **Controls:** Region titles, empty-state strings, jukebox/social labels, stage-button label,
 landing intro copy (`introLead`, `introName`), and optional **HUD icon overrides**
 (`jukeboxIcon`, `aboutIcon`, `discographyIcon`, `tourIcon`, `trackInfoIcon`, `shuffleIcon`,
-`loopIcon`).
+`loopIcon`, `socialsIcon`).
 
 **V-Flip player chrome (optional):**
 
@@ -182,6 +182,10 @@ landing intro copy (`introLead`, `introName`), and optional **HUD icon overrides
 - `loopDefault` — `false` (default) or `true` for load-time loop
 - `unmuteTooltip` / `muteTooltip` — mute button hint when collapsed or open
 - `volumeSliderTooltip` — hint on the volume slider (default: Drag to adjust volume)
+- `playerExpandLabel` / `playerCollapseLabel` — accessible names for the **phone player
+  handle** (arrow on top of the pill). Phone HUD is below 1024px; laptop HUD is unchanged.
+- `socialsIcon` — optional token or emoji for the phone socials trigger (default token:
+  `socials`, a connected-nodes / share glyph — not a chevron)
 
 **Track info in V-Flip (optional):**
 
@@ -197,7 +201,13 @@ landing intro copy (`introLead`, `introName`), and optional **HUD icon overrides
 
 - Leave an `*Icon` field out to use the default pictogram for that control.
 - Set a **token** to pick a built-in icon: `jukebox`, `about`, `discography`, `tour`,
-  `catalog`, `info`, `shuffle`, or `loop`.
+  `catalog`, `info`, `shuffle`, `loop`, or `socials`.
+
+**Label reveal (visitor-facing):** Dock icons show a floating label **above** the control on
+hover/focus. Mute/volume inside V-Flip uses the same floater for tooltips. Social icons show
+the label **below**. On **phone** (viewport below 1024px) the landing uses a bottom-stacked
+HUD: collapsed now-playing pill + boxed content dock + on-demand socials tray. Laptop layout
+from 1024px up is unchanged.
 
 **Do not break:** Region title fields still control readable labels and accessibility.
 Track metadata (blurb, credits, mentions, listen links) appears **inside open V-Flip**, not
@@ -207,10 +217,6 @@ as separate dock icons.
 atmosphere video file length** for audio entries (`hasAudio: true`). Entries with no audio
 advance after **45 seconds**. Today’s short loop-bed mp4s hop on file length until you ship
 longer stage videos.
-
-**Label reveal (visitor-facing):** Dock icons show a floating label **above** the control on
-hover/focus. Mute/volume inside V-Flip uses the same floater for tooltips. Social icons show
-the label **below**.
 
 ---
 

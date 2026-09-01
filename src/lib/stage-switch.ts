@@ -22,6 +22,7 @@ import {
   watchIntroGate,
 } from './playback';
 import { createContinuousGlitch, isGlitchThemeActive } from './glitch';
+import { syncNowPlayingLabel } from './player-dock';
 
 export type StageCatalogEntry = {
   id: string;
@@ -364,6 +365,7 @@ export function syncStageUi(activeId: string) {
     button.setAttribute('aria-pressed', getPlaybackMode().loop ? 'true' : 'false');
   });
 
+  syncNowPlayingLabel(activeId);
   syncPlaybackToggleGlitch?.();
 }
 

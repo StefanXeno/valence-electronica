@@ -10,6 +10,9 @@ jukeboxLabel: V-Flip
 jukeboxPanelTitle: V-Flip aka. Jukebox
 jukeboxPanelTooltip: Pick a track to switch stages—the site theme changes with each one.
 socialsLabel: Socials
+socialsIcon: socials
+playerExpandLabel: Show player controls
+playerCollapseLabel: Hide player controls
 comingSoon: coming soon
 ticketLabel: Tickets
 introLead: "Hi I'm"

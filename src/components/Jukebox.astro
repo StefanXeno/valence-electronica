@@ -17,6 +17,10 @@ const catalog = videos.map((entry) => ({
   sources: entry.sources.map((source) => ({ ...source, src: withBase(source.src) })),
 }));
 const showMute = videos.some((entry) => entry.hasAudio);
+const defaultLabel =
+  videos.find((entry) => entry.id === defaultVideoId)?.label?.trim() ||
+  videos[0]?.label?.trim() ||
+  '';
 ---
 
 {
@@ -26,6 +30,7 @@ const showMute = videos.some((entry) => entry.hasAudio);
       role="region"
       aria-label={chrome.jukeboxLabel}
       data-jukebox
+      data-player-dock
       data-stage-catalog={JSON.stringify(catalog)}
       data-stage-schedule={JSON.stringify(schedule)}
       data-stage-fallback={defaultVideoId}
@@ -33,6 +38,31 @@ const showMute = videos.some((entry) => entry.hasAudio);
       data-shuffle-default={chrome.shuffleDefault ? 'true' : 'false'}
       data-loop-default={chrome.loopDefault ? 'true' : 'false'}
     >
+      <button
+        type="button"
+        class="player-dock__handle glitch-hit"
+        data-player-handle
+        data-expand-label={chrome.playerExpandLabel}
+        data-collapse-label={chrome.playerCollapseLabel}
+        data-hud-label={chrome.playerExpandLabel}
+        data-hud-label-anchor="above"
+        aria-expanded="false"
+        aria-label={chrome.playerExpandLabel}
+      >
+        <span class="player-dock__arrow" aria-hidden="true"></span>
+      </button>
+
+      <div class="player-dock__now-playing">
+        <div class="player-dock__soundwave" aria-hidden="true">
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+        <span class="player-dock__track" data-now-playing title={defaultLabel}>{defaultLabel}</span>
+      </div>
+
       <div class="jukebox__drawer" id="jukebox-drawer" data-jukebox-drawer>
         <div class="jukebox__drawer-inner">
           <div class="jukebox__panel">
@@ -55,6 +85,7 @@ const showMute = videos.some((entry) => entry.hasAudio);
       </div>
 
       <div class="jukebox__toolbar" data-jukebox-toolbar>
+        <div class="player-dock__transport">
         <button
           type="button"
           class="jukebox__tool jukebox__tool--vinyl glitch-hit"
@@ -94,6 +125,7 @@ const showMute = videos.some((entry) => entry.hasAudio);
         >
           <HudIcon token={chrome.loopIcon} emoji={chrome.loopIconEmoji} />
         </button>
+        </div>
 
         {showMute && (
           <div class="jukebox__tool jukebox__tool--mute" data-jukebox-mute-slot hidden>
@@ -114,6 +146,7 @@ const showMute = videos.some((entry) => entry.hasAudio);
   import { createContinuousGlitch, isGlitchThemeActive, playElementGlitch } from '../lib/glitch';
   import { panelCloseDelayMs, runSmoothPanelOpen, shouldSmoothPanelOpen } from '../lib/panel-motion';
   import { initStageSwitch, type StageCatalogEntry } from '../lib/stage-switch';
+  import { initPlayerDock } from '../lib/player-dock';
   import type { StageSchedule } from '../lib/stage-schedule';
 
   function bootStageSwitch() {
@@ -190,6 +223,7 @@ const showMute = videos.some((entry) => entry.hasAudio);
       isOpen = next;
       root.classList.toggle('is-open', next);
       toggle.setAttribute('aria-expanded', next ? 'true' : 'false');
+      document.dispatchEvent(new CustomEvent('vflip-list-change', { detail: { open: next } }));
     };
 
     const muteToggle = root.querySelector<HTMLElement>('[data-mute-control]');
@@ -238,9 +272,14 @@ const showMute = videos.some((entry) => entry.hasAudio);
     });
 
     setOpen(false);
+
+    document.addEventListener('phone-hud-close-vflip', () => {
+      if (isOpen) setOpen(false);
+    });
   }
 
   bootStageSwitch();
+  initPlayerDock();
 </script>
 
 <style>
@@ -511,6 +550,208 @@ const showMute = videos.some((entry) => entry.hasAudio);
     }
   }
 
+  .player-dock__transport {
+    display: contents;
+  }
+
+  .player-dock__handle,
+  .player-dock__now-playing {
+    display: none;
+  }
+
+  .player-dock__arrow {
+    display: block;
+    width: 0.7rem;
+    height: 0.7rem;
+    border-right: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    transform: rotate(-135deg);
+    transform-origin: center;
+  }
+
+  :global(html[data-player-dock-expanded]) .player-dock__arrow {
+    transform: rotate(45deg);
+  }
+
+  .player-dock__soundwave {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 0.16rem;
+    width: var(--control-size);
+    height: 1.15rem;
+    pointer-events: none;
+  }
+
+  .player-dock__soundwave span {
+    display: block;
+    width: 0.14rem;
+    height: 35%;
+    border-radius: 1px;
+    background: currentColor;
+    animation: player-soundwave 0.9s ease-in-out infinite;
+  }
+
+  .player-dock__soundwave span:nth-child(2) {
+    animation-delay: 0.12s;
+    height: 70%;
+  }
+
+  .player-dock__soundwave span:nth-child(3) {
+    animation-delay: 0.24s;
+    height: 100%;
+  }
+
+  .player-dock__soundwave span:nth-child(4) {
+    animation-delay: 0.08s;
+    height: 55%;
+  }
+
+  .player-dock__soundwave span:nth-child(5) {
+    animation-delay: 0.3s;
+    height: 40%;
+  }
+
+  .player-dock__track {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-family: var(--font-display);
+    font-size: calc(0.72rem * var(--hud-scale));
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .player-dock__handle.is-hinting .player-dock__arrow {
+    animation: player-handle-nod 0.45s ease-in-out 3;
+  }
+
+  @keyframes player-soundwave {
+    0%,
+    100% {
+      transform: scaleY(0.45);
+    }
+    50% {
+      transform: scaleY(1);
+    }
+  }
+
+  @keyframes player-handle-nod {
+    0%,
+    100% {
+      translate: 0 0;
+    }
+    50% {
+      translate: 0 -0.28rem;
+    }
+  }
+
+  @media (max-width: 1023px) {
+    .jukebox {
+      display: grid;
+      width: 100%;
+      max-width: none;
+      overflow: visible;
+      border-radius: calc(0.85rem * var(--hud-scale));
+      grid-template-columns: var(--control-size) minmax(0, 1fr) var(--control-size);
+      grid-template-areas:
+        'drawer drawer drawer'
+        'handle handle handle'
+        'wave name mute'
+        'transport transport transport';
+    }
+
+    :global(html[data-player-dock-js]:not([data-player-dock-expanded])) .jukebox {
+      grid-template-areas:
+        'drawer drawer drawer'
+        'handle handle handle'
+        'wave name mute';
+    }
+
+    .player-dock__handle {
+      display: grid;
+      place-items: center;
+      grid-area: handle;
+      width: 100%;
+      min-width: 44px;
+      height: 1.5rem;
+      min-height: 24px;
+      margin: 0;
+      padding: 0;
+      border: 0;
+      border-radius: calc(0.85rem * var(--hud-scale)) calc(0.85rem * var(--hud-scale)) 0 0;
+      background: transparent;
+      color: inherit;
+      cursor: pointer;
+    }
+
+    .player-dock__now-playing {
+      display: contents;
+    }
+
+    .player-dock__soundwave {
+      grid-area: wave;
+    }
+
+    .player-dock__track {
+      grid-area: name;
+      align-self: center;
+      padding-inline: 0.15rem;
+    }
+
+    .jukebox__drawer {
+      grid-area: drawer;
+    }
+
+    .jukebox__toolbar {
+      display: contents;
+    }
+
+    .player-dock__transport {
+      display: flex;
+      grid-area: transport;
+      align-items: center;
+      justify-content: space-evenly;
+      width: 100%;
+      min-height: var(--control-size);
+      padding: var(--jukebox-toolbar-pad);
+      box-sizing: border-box;
+    }
+
+    :global(html[data-player-dock-js]:not([data-player-dock-expanded])) .player-dock__transport {
+      display: none;
+    }
+
+    :global(html:not([data-player-dock-js])) .player-dock__handle {
+      display: none;
+    }
+
+    .jukebox__tool--mute {
+      grid-area: mute;
+      width: var(--control-size);
+      min-width: var(--control-size);
+      flex: none;
+    }
+
+    .jukebox:has(.volume-control--in-jukebox[data-sound='on']) {
+      --jukebox-mute-width: var(--control-size);
+    }
+
+    .jukebox.is-open {
+      width: 100%;
+      border-radius: calc(0.85rem * var(--hud-scale));
+    }
+
+    .jukebox.is-open:not(.is-panel-opening) .jukebox__panel {
+      max-height: min(50svh, calc(19rem * var(--hud-scale)));
+    }
+
+    .jukebox.is-open:not(.is-panel-opening) .jukebox__drawer-inner {
+      padding: calc(0.55rem * var(--hud-scale));
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .jukebox,
     .jukebox__panel,
@@ -521,6 +762,15 @@ const showMute = videos.some((entry) => entry.hasAudio);
     .jukebox.is-glitching,
     .jukebox.is-glitching .jukebox__panel {
       animation: none !important;
+    }
+
+    .player-dock__soundwave span,
+    .player-dock__handle.is-hinting .player-dock__arrow {
+      animation: none !important;
+    }
+
+    .player-dock__soundwave span {
+      transform: none;
     }
   }
 </style>

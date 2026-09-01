@@ -66,4 +66,25 @@ const year = new Date().getFullYear();
   p {
     margin: 0;
   }
+
+  @media (max-width: 1023px) {
+    footer {
+      left: var(--hud-inset);
+      right: var(--hud-inset);
+      width: auto;
+      max-width: none;
+      transform: none;
+      bottom: calc(
+        var(--hud-dock-bottom) + var(--phone-player-h) + var(--phone-content-h) +
+          (2 * var(--phone-stack-gap))
+      );
+    }
+
+    :global(html[data-socials-open]) footer {
+      bottom: calc(
+        var(--hud-dock-bottom) + var(--phone-player-h) + var(--phone-content-h) + var(--phone-tray-h) +
+          (3 * var(--phone-stack-gap))
+      );
+    }
+  }
 </style>

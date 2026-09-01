@@ -10,7 +10,9 @@ html[data-intro-pending] .stage__socials,
 html[data-intro-pending] .stage-dock,
 html[data-intro-active] .stage__identity,
 html[data-intro-active] .stage__socials,
-html[data-intro-active] .stage-dock {
+html[data-intro-active] .stage-dock,
+html[data-intro-pending] [data-player-handle],
+html[data-intro-active] [data-player-handle] {
   pointer-events: none !important;
 }
 

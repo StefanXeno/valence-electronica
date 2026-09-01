@@ -15,6 +15,10 @@ export interface UiChrome {
   jukeboxPanelTitle: string;
   jukeboxPanelTooltip: string;
   socialsLabel: string;
+  socialsIcon: HudIconToken;
+  socialsIconEmoji?: string;
+  playerExpandLabel: string;
+  playerCollapseLabel: string;
   comingSoon: string;
   ticketLabel: string;
   introLead: string;
@@ -58,6 +62,9 @@ const CHROME_FALLBACK: UiChrome = {
   jukeboxPanelTitle: 'V-Flip aka. Jukebox',
   jukeboxPanelTooltip: 'Pick a track to switch stages—the site theme changes with each one.',
   socialsLabel: 'Socials',
+  socialsIcon: 'socials',
+  playerExpandLabel: 'Show player controls',
+  playerCollapseLabel: 'Hide player controls',
   comingSoon: 'coming soon',
   ticketLabel: 'Tickets',
   introLead: "Hi I'm",
@@ -110,6 +117,10 @@ export async function getChrome(): Promise<UiChrome> {
     jukeboxPanelTooltip:
       entry.data.jukeboxPanelTooltip?.trim() || CHROME_FALLBACK.jukeboxPanelTooltip,
     socialsLabel: entry.data.socialsLabel?.trim() || CHROME_FALLBACK.socialsLabel,
+    playerExpandLabel:
+      entry.data.playerExpandLabel?.trim() || CHROME_FALLBACK.playerExpandLabel,
+    playerCollapseLabel:
+      entry.data.playerCollapseLabel?.trim() || CHROME_FALLBACK.playerCollapseLabel,
     comingSoon: entry.data.comingSoon?.trim() || CHROME_FALLBACK.comingSoon,
     ticketLabel: entry.data.ticketLabel?.trim() || CHROME_FALLBACK.ticketLabel,
     introLead: entry.data.introLead?.trim() || CHROME_FALLBACK.introLead,
@@ -122,6 +133,7 @@ export async function getChrome(): Promise<UiChrome> {
       const trackInfo = resolveHudIcon(entry.data.trackInfoIcon, 'info');
       const shuffle = resolveHudIcon(entry.data.shuffleIcon, 'shuffle');
       const loop = resolveHudIcon(entry.data.loopIcon, 'loop');
+      const socials = resolveHudIcon(entry.data.socialsIcon, 'socials');
       return {
         jukeboxIcon: jukebox.token,
         jukeboxIconEmoji: jukebox.emoji,
@@ -137,6 +149,8 @@ export async function getChrome(): Promise<UiChrome> {
         shuffleIconEmoji: shuffle.emoji,
         loopIcon: loop.token,
         loopIconEmoji: loop.emoji,
+        socialsIcon: socials.token,
+        socialsIconEmoji: socials.emoji,
       };
     })(),
     trackInfoTitle: entry.data.trackInfoTitle?.trim() || CHROME_FALLBACK.trackInfoTitle,

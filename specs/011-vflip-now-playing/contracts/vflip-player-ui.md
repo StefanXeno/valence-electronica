@@ -15,7 +15,9 @@ Mute **behavior** (show/hide, volume, glitch) stays
 [`002`](../../002-themed-background-video/) + existing `MuteControl`. Only **placement**
 changes.
 
-Visual target: typical laptop (~1280px+). Phone polish is IDEA-013.
+Visual target: typical laptop (~1280px+). Phone chrome (collapsed pill, no
+slider, dock-anchored sheets) is
+[`015/contracts/mobile-hud-ui.md`](../../015-mobile-stage-hud/contracts/mobile-hud-ui.md).
 
 ## Left dock cluster
 

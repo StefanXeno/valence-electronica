@@ -39,7 +39,7 @@ const panels = [
     panels.map((panel) => (
       <details
         class:list={['stage-panel', panel.body === 'discography' && 'stage-panel--discography']}
-        data-stage-panel
+        data-stage-panel={panel.body}
       >
         <summary
           class="stage-panel__summary glitch-hit"
@@ -60,6 +60,22 @@ const panels = [
       </details>
     ))
   }
+  <div class="stage-panel stage-panel--socials">
+    <button
+      type="button"
+      class="stage-panel__summary glitch-hit"
+      data-socials-trigger
+      data-hud-label={chrome.socialsLabel}
+      data-hud-label-anchor="above"
+      aria-expanded="false"
+      aria-controls="stage-socials"
+      aria-label={chrome.socialsLabel}
+    >
+      <span class="visually-hidden">{chrome.socialsLabel}</span>
+      <HudIcon token={chrome.socialsIcon} emoji={chrome.socialsIconEmoji} />
+      <span class="stage-panel__label">{chrome.socialsLabel}</span>
+    </button>
+  </div>
 </div>
 
 <script>
@@ -160,6 +176,18 @@ const panels = [
     background: color-mix(in srgb, var(--color-surface) 90%, transparent);
     backdrop-filter: blur(8px);
     box-sizing: border-box;
+  }
+
+  .stage-panel--socials {
+    display: none;
+  }
+
+  .stage-panel--socials .stage-panel__summary {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    font: inherit;
+    color: inherit;
   }
 
   html[data-hud-glitch='true'] .stage-panel {
@@ -384,6 +412,72 @@ const panels = [
     .stage-panel.is-glitching,
     .stage-panel.is-glitching .stage-panel__body {
       animation: none !important;
+    }
+  }
+
+  @media (max-width: 1023px) {
+    .stage-panels {
+      justify-content: space-evenly;
+      align-items: center;
+      flex-wrap: nowrap;
+      width: 100%;
+      padding: 0.2rem 0.15rem;
+      border: 1px solid var(--color-border);
+      border-radius: calc(0.85rem * var(--hud-scale));
+      background: color-mix(in srgb, var(--color-surface) 92%, transparent);
+      backdrop-filter: blur(10px);
+      box-sizing: border-box;
+    }
+
+    .stage-panel,
+    .stage-panel--socials {
+      display: block;
+      border: 0;
+      background: transparent;
+      backdrop-filter: none;
+      overflow: visible;
+    }
+
+    .stage-panel[open],
+    .stage-panel--discography[open] {
+      width: var(--control-size);
+      max-width: var(--control-size);
+      border-radius: 999px;
+    }
+
+    .stage-panel[open] .stage-panel__summary {
+      width: var(--control-size);
+      min-width: var(--control-size);
+      height: var(--control-size);
+      min-height: var(--control-size);
+      padding: 0;
+      justify-content: center;
+    }
+
+    .stage-panel[open] .stage-panel__label,
+    .stage-panel--socials .stage-panel__label {
+      display: none;
+    }
+
+    .stage-panel__body {
+      position: fixed;
+      left: var(--hud-inset);
+      right: var(--hud-inset);
+      bottom: calc(
+        var(--hud-dock-bottom) + var(--phone-player-h) + var(--phone-content-h) + var(--phone-stack-gap)
+      );
+      width: auto;
+      max-width: none;
+      z-index: 4;
+      border: 1px solid var(--color-border);
+      border-radius: calc(0.85rem * var(--hud-scale));
+      background: color-mix(in srgb, var(--color-surface) 94%, transparent);
+      backdrop-filter: blur(12px);
+      box-sizing: border-box;
+    }
+
+    .stage-panel[open]:not(.is-panel-opening) .stage-panel__body {
+      max-height: min(50svh, calc(22rem * var(--hud-scale)));
     }
   }
 </style>

@@ -8,8 +8,10 @@
 for left-cluster jukebox shell (mute inside V-Flip), open player anatomy, and right-dock
 icons (About, Discography, Tour only — no Lyrics / Track info dock icons).
 
-**Visual target**: typical laptop (~1280px+). Phone polish is IDEA-013; page MUST still load
-at 320px.
+**Visual target**: typical laptop (~1280px+). Phone HUD is
+[`015/contracts/mobile-hud-ui.md`](../../015-mobile-stage-hud/contracts/mobile-hud-ui.md)
+(viewport width ≤ 1023px). This contract is authority from **1024px** up. The page MUST still
+load at 320px.
 
 ## Layout (desktop)
 
@@ -180,5 +182,5 @@ and [`specs/010-track-catalog/contracts/track-catalog-content.md`](../../010-tra
 
 ## Out of scope
 
-- Mobile dedicated HUD (IDEA-013)
+- Mobile dedicated HUD — see [`015`](../../015-mobile-stage-hud/contracts/mobile-hud-ui.md)
 - New routes or embeds

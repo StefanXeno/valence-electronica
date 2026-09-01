@@ -71,4 +71,14 @@ const fallbackTagline = formatTagline(tagline.trim());
     line-clamp: 2;
     overflow-wrap: break-word;
   }
+
+  @media (max-width: 1023px) {
+    .identity__wordmark {
+      width: min(calc(9.25rem * var(--hud-scale)), 58vw);
+    }
+
+    .tagline {
+      font-size: clamp(0.7rem, 3.2vw, 0.85rem);
+    }
+  }
 </style>

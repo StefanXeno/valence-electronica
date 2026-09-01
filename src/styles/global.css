@@ -159,3 +159,81 @@ a {
 .hud-label-reveal.is-visible {
   opacity: 1;
 }
+
+/* Phone HUD (015): ≤1023px. Laptop HUD unchanged from 1024px. */
+@media (max-width: 1023px) {
+  :root {
+    --hud-scale: 1;
+    --phone-handle: 1.5rem;
+    --phone-stack-gap: 0.45rem;
+    --phone-player-h: calc(var(--control-size) + var(--phone-handle) + 0.55rem);
+    --phone-content-h: calc(var(--control-size) + 0.55rem);
+    --phone-tray-h: calc(var(--control-size) + 1.15rem);
+    --hud-dock-bottom: calc(0.3rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  html[data-player-dock-expanded] {
+    --phone-player-h: calc(2 * var(--control-size) + var(--phone-handle) + 0.85rem);
+  }
+
+  .stage {
+    overflow-x: clip;
+  }
+
+  .stage__identity {
+    max-width: calc(100vw - 2 * var(--hud-inset));
+  }
+
+  .stage-dock {
+    flex-direction: column-reverse;
+    align-items: stretch;
+    justify-content: flex-end;
+    gap: var(--phone-stack-gap);
+  }
+
+  .stage-dock__left,
+  .stage-dock__right {
+    width: 100%;
+    max-width: none;
+    flex: 0 0 auto;
+    justify-content: stretch;
+    flex-wrap: nowrap;
+  }
+
+  /* One Channels tree: not a top-right bar. Tray slot above the content dock. */
+  .stage__socials {
+    top: auto;
+    right: var(--hud-inset);
+    left: var(--hud-inset);
+    bottom: calc(
+      var(--hud-dock-bottom) + var(--phone-player-h) + var(--phone-content-h) + var(--phone-stack-gap)
+    );
+    max-width: none;
+    visibility: hidden;
+    pointer-events: none;
+    opacity: 0;
+  }
+
+  html[data-socials-open] .stage__socials {
+    visibility: visible;
+    pointer-events: auto;
+    opacity: 1;
+  }
+
+  .stage__socials .channels {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.35rem 0.45rem;
+    border: 1px solid var(--color-border);
+    border-radius: calc(0.85rem * var(--hud-scale));
+    background: color-mix(in srgb, var(--color-surface) 92%, transparent);
+    backdrop-filter: blur(10px);
+  }
+
+  .stage__socials .channels ul {
+    justify-content: center;
+    flex-wrap: wrap;
+    max-height: min(30svh, 8rem);
+    overflow: auto;
+  }
+}
