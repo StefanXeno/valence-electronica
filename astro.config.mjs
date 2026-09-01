@@ -26,4 +26,8 @@ if (!base.startsWith('/')) {
 export default defineConfig({
   site: `https://${owner}.github.io`,
   base,
+  // Keep the overlay out of the way during local HUD / layout work.
+  devToolbar: {
+    enabled: false,
+  },
 });
