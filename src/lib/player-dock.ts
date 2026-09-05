@@ -598,7 +598,7 @@ export function initPlayerDock(): void {
       0.45 * rem;
     const safe =
       Number.parseFloat(getComputedStyle(dock ?? html).getPropertyValue('--phone-safe-bottom')) || 0;
-    return control + gap + safe;
+    return control + 2 * gap + safe;
   };
 
   const sheetCapPx = () => {
@@ -680,13 +680,13 @@ export function initPlayerDock(): void {
     );
   };
 
-  /** Solo open target: chrome + the playing card only. */
+  /** Solo open target: chrome + the playing card only (title + LISTEN ON). */
   const measureSoloOpenPx = (collapsedH: number) => {
     const playing = playingPlaylistRow();
     const cardH = playing ? measureRowNaturalPx(playing, 'solo') : 0;
     const rem = remPx();
-    // Air under LISTEN ON + the card's rounded bottom (clipped when this is 0).
-    const cardFloor = cssVarPx(dock ?? html, '--phone-now-gap', 0.45 * rem);
+    // Extra air under LISTEN ON — last-chance measures clipped the links row.
+    const cardFloor = cssVarPx(dock ?? html, '--phone-now-gap', 0.45 * rem) + 1.15 * rem;
     return clampOpenSheetPx(
       measureSheetChromePx() + Math.max(0, cardH) + cardFloor,
       collapsedH,
@@ -709,6 +709,27 @@ export function initPlayerDock(): void {
       return measurePlaylistOpenPx(collapsedH, heights, gap);
     }
     return measureSoloOpenPx(collapsedH);
+  };
+
+  /** After click/drag settle: if LISTEN ON sits under transport, grow the sheet. */
+  const growSheetToFitCard = () => {
+    if (!dock || !expanded || dock.classList.contains('is-theme-tracks')) return;
+    const playing = playingPlaylistRow();
+    const listen = playing?.querySelector<HTMLElement>('.discog__listen-links');
+    if (!playing || !listen) return;
+    const listenBottom = listen.getBoundingClientRect().bottom;
+    const transport = dock.querySelector<HTMLElement>('[data-player-transport]');
+    const title = dock.querySelector<HTMLElement>('[data-now-playing]');
+    const ceiling =
+      (transport && transport.offsetParent
+        ? transport.getBoundingClientRect().top
+        : title?.getBoundingClientRect().top) ?? dock.getBoundingClientRect().bottom;
+    const overflow = listenBottom + 12 - ceiling;
+    if (overflow <= 1) return;
+    const collapsedH = collapsedHeightPx();
+    const next = clampOpenSheetPx(readDockHeight() + overflow, collapsedH);
+    html.setAttribute('data-player-sheet-sized', '');
+    setSheetHeight(next, collapsedH, next);
   };
 
   /** Drag-open cap: same solo/playlist px as a tap — never a live 1fr reflow. */
@@ -889,8 +910,22 @@ export function initPlayerDock(): void {
         list.setAttribute(attr.name, attr.value);
       }
     }
+    for (const attr of row.attributes) {
+      if (attr.name.startsWith('data-astro') && !probe.hasAttribute(attr.name)) {
+        probe.setAttribute(attr.name, attr.value);
+      }
+    }
     list.appendChild(probe);
-    shell.appendChild(list);
+    const section = document.createElement('section');
+    section.className = 'jukebox__section jukebox__section--theme-tracks';
+    const liveSection = row.closest('.jukebox__section--theme-tracks');
+    if (liveSection) {
+      for (const attr of liveSection.attributes) {
+        if (attr.name.startsWith('data-astro')) section.setAttribute(attr.name, attr.value);
+      }
+    }
+    section.appendChild(list);
+    shell.appendChild(section);
     shell.style.cssText =
       `position:fixed;left:-9999px;top:0;width:${Math.max(0, width)}px;` +
       'height:auto;max-height:none;overflow:visible;visibility:hidden;pointer-events:none;z-index:-1;';
@@ -961,6 +996,7 @@ export function initPlayerDock(): void {
       token,
       () => {
         if (!toOpen) applyExpanded(false, { animated: false });
+        else window.requestAnimationFrame(growSheetToFitCard);
       },
       toOpen,
     );
@@ -1210,6 +1246,7 @@ export function initPlayerDock(): void {
       }
       window.requestAnimationFrame(() => {
         endSheetDragStyles({ keepHeight: toOpen });
+        if (toOpen) growSheetToFitCard();
       });
     };
     if (motionMq.matches || Math.abs(toH - fromH) < 2) {

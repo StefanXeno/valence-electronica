@@ -190,9 +190,9 @@ a.channel-btn:focus-visible {
     --phone-safe-bottom: env(safe-area-inset-bottom, 0px);
     /* Extra air between expand handle and now-playing title (collapsed + expanded). */
     --phone-now-gap: 0.45rem;
-    /* Collapsed player only — matches the floor row + safe-area inside the chrome. */
+    /* Collapsed player: handle air above + matching air below the floor row. */
     --phone-player-h: calc(
-      var(--control-size) + var(--phone-now-gap) + var(--phone-safe-bottom)
+      var(--control-size) + 2 * var(--phone-now-gap) + var(--phone-safe-bottom)
     );
     /* Equal chrome air (collapsed pill): top === bottom. Keep compact so the 5-icon bar stays short. */
     --phone-bar-pad: 0.28rem;
@@ -211,12 +211,15 @@ a.channel-btn:focus-visible {
     /* Socials channel button row (Channels li = 2.5rem). Does not include bar/open pad. */
     --phone-tray-h: calc(2.5rem * var(--hud-scale));
     --hud-dock-bottom: 0px;
+    /* Collapsed player floats this much above the viewport so the capsule
+       bottom corners stay visible (videos: two stacked pills, not a floor slab). */
+    --phone-dock-lift: 0.4rem;
     --phone-pill-shadow: 0 0.4rem 1.2rem color-mix(in srgb, black 45%, transparent);
     --phone-rise-ease: cubic-bezier(0.4, 0, 0.2, 1);
     /* Shared morph timing (width/height/chrome) — not a scale bloom. */
     --phone-bloom-dur: 280ms;
     --phone-bloom-ease: var(--phone-rise-ease);
-    /* Rounded top, square floor — small enough that sides stay vertical. */
+    /* Expanded sheet only — collapsed player uses a capsule (height/2). */
     --phone-player-radius: 1.25rem;
     --phone-chrome-pad: 0.65rem;
     /* Shared left/right gutter for player + content + socials + footer. */
@@ -289,7 +292,7 @@ a.channel-btn:focus-visible {
   }
 
   .stage-dock__right {
-    bottom: calc(var(--phone-player-h) + var(--phone-stack-gap));
+    bottom: calc(var(--phone-player-h) + var(--phone-stack-gap) + var(--phone-dock-lift));
     z-index: 2;
     /* stretch is not valid on justify-content — keep the pill full dock width. */
     align-items: stretch;
@@ -311,8 +314,8 @@ a.channel-btn:focus-visible {
     right: var(--phone-dock-inset);
     left: var(--phone-dock-inset);
     bottom: calc(
-      var(--hud-dock-bottom) + var(--phone-player-h) + var(--phone-stack-gap) + var(--phone-bar-pad) +
-        var(--control-size)
+      var(--hud-dock-bottom) + var(--phone-dock-lift) + var(--phone-player-h) + var(--phone-stack-gap) +
+        var(--phone-bar-pad) + var(--control-size)
     );
     max-width: none;
     visibility: hidden;
@@ -328,8 +331,8 @@ a.channel-btn:focus-visible {
   html[data-sheet-open] .stage__socials,
   html[data-socials-open] .stage__socials {
     bottom: calc(
-      var(--hud-dock-bottom) + var(--phone-player-h) + var(--phone-stack-gap) + var(--phone-open-pad) +
-        var(--phone-body-gap) + var(--control-size)
+      var(--hud-dock-bottom) + var(--phone-dock-lift) + var(--phone-player-h) + var(--phone-stack-gap) +
+        var(--phone-open-pad) + var(--phone-body-gap) + var(--control-size)
     );
   }
 
