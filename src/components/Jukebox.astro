@@ -1027,6 +1027,28 @@ const defaultLabel =
     }
   }
 
+  @keyframes player-transport-in {
+    from {
+      opacity: 0;
+      transform: translateY(0.45rem);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes player-transport-out {
+    from {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    to {
+      opacity: 0;
+      transform: translateY(0.45rem);
+    }
+  }
+
   @media (max-width: 1023px) {
     .jukebox,
     .jukebox *,
@@ -1043,39 +1065,47 @@ const defaultLabel =
     .jukebox {
       --phone-now-pad: var(--phone-chrome-pad, 0.65rem);
       --phone-floor-radius: var(--phone-player-radius, 1.25rem);
-      /* In-flow transport row — never an absolute overlay. */
-      --player-transport-h: calc(var(--control-size) + 0.25rem);
+      /* Tight title / card air — leftover 1fr was the solo dead zone. */
+      --phone-sheet-head-gap: 0.28rem;
+      /* In-flow transport row — never an absolute overlay. Keep it tight under the card. */
+      --player-transport-h: calc(var(--control-size) + 0.08rem);
+      --player-playlist-morph-dur: 380ms;
+      overscroll-behavior: none;
       /* Whole sheet cap — card + now-playing row, never the viewport top. */
       --player-sheet-max: min(68svh, calc(100svh - 5.5rem));
 
-      /* Collapsed: floating capsule (videos). Expanded: grow from bottom: 0. */
+      /* Collapsed + expanded: floor-pinned. Height grows up; chrome does not lift. */
       position: absolute;
       left: 0;
       right: 0;
-      bottom: var(--phone-dock-lift, 0.4rem);
+      bottom: 0;
       margin: 0;
       display: grid;
       width: 100%;
       max-width: 100%;
       min-width: 0;
+      /* Lock the paint box to the floor row. 0fr min-content + transport height
+         used to grow this behind the icon pill (one shared red “blob”). */
+      height: var(--phone-player-h);
       min-height: var(--phone-player-h);
+      max-height: var(--phone-player-h);
       isolation: isolate;
       overflow: hidden;
-      border-bottom: 1px solid var(--color-border);
-      /* Capsule = half the collapsed bar. Never 999px (sausage mid-morph). */
-      --phone-player-pill-radius: calc(var(--phone-player-h) / 2);
-      border-radius: var(--phone-player-pill-radius);
+      /* No floor stroke — a bottom border + radius reads as a floating capsule. */
+      border-bottom: 0;
+      /* Moderate top corners. Bottom square so the bar clips into the viewport. */
+      border-radius: var(--phone-dock-radius, 14px) var(--phone-dock-radius, 14px) 0 0;
       background: color-mix(in srgb, var(--color-bg) 88%, var(--color-surface));
       /* Upward only — a downward shadow paints a fake gap under the floor. */
       box-shadow: 0 -0.45rem 1.2rem color-mix(in srgb, black 45%, transparent);
-      /* Safe-area stays inside the chrome, not a strip below the border. */
-      padding: var(--phone-now-gap, 0.45rem) var(--phone-now-pad)
-        calc(var(--phone-now-gap, 0.45rem) + var(--phone-safe-bottom, env(safe-area-inset-bottom, 0px)));
+      /* Compact collapsed chrome — floor row only. Handle hitbox overflows this box. */
+      padding: var(--phone-bar-pad, 0.28rem) var(--phone-now-pad)
+        calc(var(--phone-bar-pad, 0.28rem) + var(--phone-safe-bottom, env(safe-area-inset-bottom, 0px)));
       align-items: stretch;
       justify-items: stretch;
       grid-template-columns: var(--control-size) minmax(0, 1fr) var(--control-size);
-      /* Collapsed: drawer + transport are 0fr. Floor is wave | title | mute. */
-      grid-template-rows: 0fr 0fr minmax(var(--control-size), auto);
+      /* minmax(0, 0fr) — bare 0fr still sizes to min-content (drawer + transport). */
+      grid-template-rows: minmax(0, 0fr) minmax(0, 0fr) minmax(var(--control-size), auto);
       grid-template-areas:
         'drawer drawer drawer'
         'transport transport transport'
@@ -1107,13 +1137,12 @@ const defaultLabel =
     }
 
     .jukebox.is-player-expanded:not(.is-sheet-dragging):not(.is-panel-opening):not(.is-panel-closing) .jukebox__header,
-    .jukebox.is-open:not(.is-sheet-dragging):not(.is-panel-opening):not(.is-panel-closing) .jukebox__header,
-    :global(html:not([data-player-dock-js])) .jukebox__header {
+    .jukebox.is-open:not(.is-sheet-dragging):not(.is-panel-opening):not(.is-panel-closing) .jukebox__header {
       opacity: 1;
       visibility: visible;
       max-height: none;
-      margin: 0 0 calc(0.5rem * var(--hud-scale));
-      padding-bottom: calc(0.45rem * var(--hud-scale));
+      margin: 0 0 var(--phone-sheet-head-gap, 0.28rem);
+      padding-bottom: var(--phone-sheet-head-gap, 0.28rem);
       border-bottom: 1px solid color-mix(in srgb, var(--color-border) 45%, transparent);
       overflow: visible;
       pointer-events: none;
@@ -1130,36 +1159,30 @@ const defaultLabel =
       position: relative;
     }
 
-    /* Short sequential swap — 140ms delay left CURRENTLY PLAYING up for a beat. */
+    /* Crossfade with the playlist morph — an 80ms swap read as a title pop. */
     .jukebox__title-phone--now,
     .jukebox__title-phone--playlist {
       display: block;
-      transition: opacity 80ms var(--phone-bloom-ease, cubic-bezier(0.4, 0, 0.2, 1));
-    }
-
-    .jukebox__title-phone--now {
-      transition-delay: 80ms;
+      transition: opacity var(--player-playlist-morph-dur, 380ms)
+        cubic-bezier(0.22, 1, 0.36, 1);
     }
 
     .jukebox__title-phone--playlist {
       position: absolute;
       inset: 0;
       opacity: 0;
-      transition-delay: 0ms;
     }
 
     .jukebox.is-theme-tracks .jukebox__title-phone--now {
       opacity: 0;
-      transition-delay: 0ms;
     }
 
     .jukebox.is-theme-tracks .jukebox__title-phone--playlist {
       opacity: 1;
-      transition-delay: 80ms;
     }
 
-    /* Motion: drawer grows, transport row stays 0fr (buttons hidden).
-       Settled open switches the middle row on so height does not clip-down. */
+    /* Transport is a real row whenever the sheet is open or morphing.
+       Never display:none — that popped the buttons after the sheet grew. */
     .jukebox.is-player-expanded,
     .jukebox.is-open,
     .jukebox.is-sheet-dragging,
@@ -1167,37 +1190,103 @@ const defaultLabel =
       bottom: 0;
       border-bottom: 0;
       border-radius: var(--phone-floor-radius) var(--phone-floor-radius) 0 0;
-      grid-template-rows: minmax(0, 1fr) 0fr minmax(var(--control-size), auto);
+      /* Solo settled: hug content. Any leftover 1fr / minmax(auto) parks a void. */
+      height: auto;
+      max-height: none;
+      min-height: 0;
+      align-content: start;
+      grid-template-rows: auto var(--player-transport-h) var(--control-size);
+      /* Open pad matches the handle clearance — don't add a second head gap. */
+      padding: 0 var(--phone-now-pad)
+        calc(var(--phone-bar-pad, 0.28rem) + var(--phone-safe-bottom, env(safe-area-inset-bottom, 0px)));
     }
 
-    .jukebox.is-player-expanded:not(.is-sheet-dragging):not(.is-sheet-collapsing):not(.is-sheet-morphing),
-    .jukebox.is-open:not(.is-sheet-dragging):not(.is-sheet-collapsing):not(.is-sheet-morphing) {
-      grid-template-rows: minmax(0, 1fr) var(--player-transport-h) minmax(var(--control-size), auto);
+    /* Playlist settled: drawer fills leftover so the list is a real scrollport. */
+    .jukebox.is-theme-tracks:not(.is-playlist-morphing) {
+      min-height: var(--phone-player-h);
+      grid-template-rows: minmax(0, 1fr) var(--player-transport-h) var(--control-size);
     }
 
-    /* Always on the sheet's top chrome edge — collapsed (up) and expanded (down). */
+    /* Let the collapsed grab strip receive taps above the compact pill.
+       Drawer/transport stay clipped so they cannot paint the shared blob. */
+    .jukebox:not(.is-player-expanded):not(.is-open):not(.is-sheet-dragging):not(.is-sheet-morphing) {
+      overflow: visible;
+    }
+
+    .jukebox:not(.is-player-expanded):not(.is-open):not(.is-sheet-dragging):not(.is-sheet-morphing)
+      .jukebox__drawer,
+    .jukebox:not(.is-player-expanded):not(.is-open):not(.is-sheet-dragging):not(.is-sheet-morphing)
+      .player-dock__transport {
+      height: 0;
+      min-height: 0;
+      max-height: 0;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    /*
+     * Solo open/close + drag: height interpolates from --phone-player-h to the
+     * shrink-wrapped stack. All rows auto — no 1fr (that was the bottom void).
+     * align-content:end only while the box is SHORTER than content so the floor
+     * stays painted and the drawer clips from the top. Once height === content
+     * there is no leftover. Do not end-align a taller box (that was the top void).
+     */
+    .jukebox.is-sheet-dragging:not(.is-theme-tracks),
+    .jukebox.is-sheet-morphing:not(.is-playlist-morphing):not(.is-theme-tracks) {
+      align-content: end;
+      grid-template-rows: auto var(--player-transport-h) var(--control-size);
+    }
+
+    /* Wide grab strip. Visible chevron stays small; extra hit is transparent. */
     .player-dock__handle {
       display: grid;
-      place-items: center;
+      place-items: start center;
+      place-content: start center;
       position: absolute;
       top: 0;
       left: 0;
       right: 0;
       z-index: 2;
-      width: 3.5rem;
-      min-width: 44px;
-      height: var(--phone-handle, 1.5rem);
-      min-height: 24px;
-      margin: 0 auto;
-      padding: 0;
+      width: 100%;
+      min-width: 0;
+      height: var(--phone-handle-hit, 2.75rem);
+      min-height: 44px;
+      margin: 0;
+      /* Park the chevron in the original 1.5rem chrome; extra px are invisible hit. */
+      padding: calc((var(--phone-handle, 1.5rem) - 0.62rem) / 2) 0 0;
       border: 0;
-      border-radius: 999px;
+      border-radius: 0;
       background: transparent;
       color: inherit;
       cursor: grab;
       touch-action: none;
+      overscroll-behavior: none;
       user-select: none;
       resize: none;
+    }
+
+    /*
+     * Collapsed: center column so mute + visualizer stay tappable.
+     * Layout height stays --phone-player-h; extra hit overflows into the 6px gap
+     * (not over the five icons) plus downward through the compact pill.
+     */
+    .jukebox:not(.is-player-expanded):not(.is-open):not(.is-sheet-dragging):not(.is-sheet-morphing)
+      .player-dock__handle {
+      left: calc(var(--phone-now-pad, 0.65rem) + var(--control-size));
+      right: calc(var(--phone-now-pad, 0.65rem) + var(--control-size));
+      width: auto;
+      top: calc(-1 * var(--phone-dock-gap, 6px));
+      height: calc(100% + var(--phone-dock-gap, 6px));
+      /* Floor only — 44px must not grow .jukebox / --phone-player-h. */
+      min-height: 44px;
+      /* Chevron sits on the pill top — padding skips the transparent gap strip. */
+      padding: calc(var(--phone-dock-gap, 6px) + 0.1rem) 0 0;
+      background: transparent;
+      border: 0;
     }
 
     .player-dock__handle:active {
@@ -1218,15 +1307,25 @@ const defaultLabel =
       justify-content: flex-start;
     }
 
+    /* Solo: drawer-inner must not eat leftover height (flex-grow was a silent 1fr). */
+    .jukebox:not(.is-theme-tracks) .jukebox__drawer-inner {
+      flex: 0 0 auto;
+    }
+
     /* Solo: size to the playing card. Playlist: fill leftover drawer so the
        theme-track section can be a real scrollport (not clipped by overflow:hidden). */
     .jukebox__panel {
       flex: 0 0 auto;
     }
 
-    .jukebox.is-theme-tracks .jukebox__panel,
-    .jukebox.is-playlist-morphing .jukebox__panel {
+    .jukebox.is-theme-tracks .jukebox__panel {
       flex: 1 1 auto;
+      min-height: 0;
+    }
+
+    /* Morph: pack to card heights so the growing sheet cannot open a dark void. */
+    .jukebox.is-playlist-morphing .jukebox__panel {
+      flex: 0 0 auto;
       min-height: 0;
     }
 
@@ -1236,9 +1335,9 @@ const defaultLabel =
       max-height: none;
     }
 
-    /* Never display:contents on phone — that dumped pause next to the EQ. */
+    /* Stay in layout — display:none mid-morph is the transport pop. */
     .player-dock__transport {
-      display: none !important;
+      display: flex !important;
       grid-area: transport;
       position: static;
       left: auto;
@@ -1251,44 +1350,76 @@ const defaultLabel =
       gap: var(--jukebox-toolbar-gap);
       width: 100%;
       height: var(--player-transport-h);
+      min-height: var(--player-transport-h);
+      max-height: var(--player-transport-h);
+      align-self: center;
       padding: 0;
       box-sizing: border-box;
       background: transparent;
+      overflow: visible;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transform: translateY(0.4rem);
     }
 
-    /* Settled open only. Drag / tap-close / morph keep the floor as wave|title|mute. */
+    .player-dock__transport .jukebox__tool {
+      flex: 0 0 var(--control-size);
+      overflow: visible;
+    }
+
+    /* Settled open + playlist morph: row stays fully painted. */
     :global(html[data-player-dock-js]) .jukebox.is-player-expanded:not(.is-panel-opening):not(.is-sheet-dragging):not(.is-sheet-collapsing):not(.is-sheet-morphing) .player-dock__transport,
-    :global(html[data-player-dock-js]) .jukebox.is-open:not(.is-panel-opening):not(.is-sheet-dragging):not(.is-sheet-collapsing):not(.is-sheet-morphing) .player-dock__transport {
-      display: flex !important;
-      position: static;
+    :global(html[data-player-dock-js]) .jukebox.is-open:not(.is-panel-opening):not(.is-sheet-dragging):not(.is-sheet-collapsing):not(.is-sheet-morphing) .player-dock__transport,
+    :global(html[data-player-dock-js]) .jukebox.is-playlist-morphing .player-dock__transport {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transform: none;
+      animation: none;
     }
 
-    :global(html[data-player-dock-js]) .jukebox.is-sheet-dragging .player-dock__transport,
-    :global(html[data-player-dock-js]) .jukebox.is-sheet-collapsing .player-dock__transport,
-    :global(html[data-player-dock-js]) .jukebox.is-sheet-morphing .player-dock__transport {
-      display: none !important;
+    /* Tap-open: fade/slide in with the sheet height. Never display:none. */
+    :global(html[data-player-dock-js]) .jukebox.is-sheet-morphing:not(.is-playlist-morphing):not(.is-sheet-collapsing) .player-dock__transport {
+      visibility: visible;
+      pointer-events: none;
+      animation: player-transport-in var(--phone-panel-morph-dur, 320ms)
+        var(--phone-bloom-ease, cubic-bezier(0.4, 0, 0.2, 1)) both;
+    }
+
+    /* Tap-close: fade/slide out with the sheet. Still in layout. */
+    :global(html[data-player-dock-js]) .jukebox.is-sheet-collapsing:not(.is-sheet-dragging) .player-dock__transport {
+      visibility: visible;
+      pointer-events: none;
+      animation: player-transport-out var(--phone-panel-morph-dur, 320ms)
+        var(--phone-bloom-ease, cubic-bezier(0.4, 0, 0.2, 1)) both;
+    }
+
+    /* Drag: opacity tracks live sheet progress. */
+    :global(html[data-player-dock-js]) .jukebox.is-sheet-dragging .player-dock__transport {
+      visibility: visible;
+      pointer-events: none;
+      animation: none;
+      opacity: clamp(0, calc((var(--player-sheet-progress, 0) - 0.12) / 0.55), 1);
+      transform: translateY(calc((1 - var(--player-sheet-progress, 0)) * 0.4rem));
+    }
+
+    /* No-JS: same compact floor as JS. Handle is hidden — no expand path. */
+    :global(html:not([data-player-dock-js])) .player-dock__transport {
+      height: 0;
+      min-height: 0;
+      max-height: 0;
       opacity: 0;
       visibility: hidden;
       pointer-events: none;
     }
 
-    /* Reserve transport height in the drawer while buttons are hidden (same end px). */
-    :global(html[data-player-dock-js]) .jukebox.is-player-expanded:not(.is-sheet-collapsing) .jukebox__drawer,
-    :global(html[data-player-dock-js]) .jukebox.is-open:not(.is-sheet-collapsing) .jukebox__drawer,
-    :global(html[data-player-dock-js]) .jukebox.is-sheet-dragging:not(.is-sheet-collapsing) .jukebox__drawer,
-    :global(html[data-player-dock-js]) .jukebox.is-sheet-morphing:not(.is-sheet-collapsing) .jukebox__drawer {
-      padding-bottom: var(--player-transport-h);
-    }
-
-    :global(html[data-player-dock-js]) .jukebox.is-player-expanded:not(.is-sheet-dragging):not(.is-sheet-collapsing):not(.is-sheet-morphing) .jukebox__drawer,
-    :global(html[data-player-dock-js]) .jukebox.is-open:not(.is-sheet-dragging):not(.is-sheet-collapsing):not(.is-sheet-morphing) .jukebox__drawer {
-      padding-bottom: 0;
-    }
-
-    /* No-JS: transport stays in the toolbar as a real grid row. */
-    :global(html:not([data-player-dock-js])) .player-dock__transport {
-      display: flex !important;
-      grid-area: transport;
+    /* Collapsed: transport height token must not inflate the floor chrome. */
+    .jukebox:not(.is-player-expanded):not(.is-open):not(.is-sheet-dragging):not(.is-sheet-morphing)
+      .player-dock__transport {
+      height: 0;
+      min-height: 0;
+      max-height: 0;
     }
 
     .player-dock__soundwave {
@@ -1354,6 +1485,7 @@ const defaultLabel =
     .jukebox.is-player-expanded:not(.is-theme-tracks):not(.is-playlist-morphing) .jukebox__panel,
     .jukebox.is-open:not(.is-theme-tracks):not(.is-playlist-morphing) .jukebox__panel {
       overflow: visible;
+      padding-bottom: 0;
     }
 
     .jukebox.is-player-expanded .jukebox__header,
@@ -1388,11 +1520,9 @@ const defaultLabel =
       touch-action: none;
     }
 
-    /* Playlist + morph: section is the bound. */
+    /* Playlist settled: section is the bound. Morph packs to card heights. */
     .jukebox.is-theme-tracks .jukebox__section--theme-tracks,
-    .jukebox.is-theme-tracks .jukebox__section--theme-tracks[hidden],
-    .jukebox.is-playlist-morphing .jukebox__section--theme-tracks,
-    .jukebox.is-playlist-morphing .jukebox__section--theme-tracks[hidden] {
+    .jukebox.is-theme-tracks .jukebox__section--theme-tracks[hidden] {
       flex: 1 1 auto;
       min-height: 0;
       overflow-y: auto;
@@ -1401,22 +1531,31 @@ const defaultLabel =
       touch-action: pan-y;
     }
 
+    .jukebox.is-playlist-morphing .jukebox__section--theme-tracks,
+    .jukebox.is-playlist-morphing .jukebox__section--theme-tracks[hidden] {
+      flex: 0 0 auto;
+      min-height: 0;
+      overflow: hidden;
+      touch-action: none;
+    }
+
     /* Rest collapse lives in Discography (scoped items). Keep gap + playing card stacked. */
     .jukebox.is-player-expanded:not(.is-theme-tracks) :global(.discog[data-theme-tracks]),
     .jukebox.is-open:not(.is-theme-tracks) :global(.discog[data-theme-tracks]) {
       gap: 0;
     }
 
-    /* Solo card must not flex-shrink inside a short overflow sheet (click-open clip). */
+    /* Solo card must not flex-shrink or grow — leftover 1fr used to stretch it. */
     .jukebox:not(.is-theme-tracks)
       :global(.discog[data-theme-tracks] .discog__item[data-discog-active='true']) {
+      flex-grow: 0;
       flex-shrink: 0;
     }
 
     .jukebox.is-playlist-morphing
       :global(.discog[data-theme-tracks] .discog__item[data-discog-active='true']) {
       position: relative;
-      z-index: 2;
+      z-index: 3;
     }
 
     /* Clip siblings only while they add in / while the handle is dragging.
@@ -1510,8 +1649,12 @@ const defaultLabel =
       width: 100%;
       max-width: 100%;
       min-width: 0;
-      max-height: var(--player-sheet-max);
       border-radius: var(--phone-floor-radius) var(--phone-floor-radius) 0 0;
+    }
+
+    /* Playlist only — a 68svh cap on solo is how leftover height came back. */
+    .jukebox.is-open.is-theme-tracks {
+      max-height: var(--player-sheet-max);
     }
 
     /* No-JS fallback only. JS path must never reuse a 50svh / 19rem panel cap. */
@@ -1533,8 +1676,8 @@ const defaultLabel =
     }
 
     .jukebox.is-open:not(.is-panel-opening) .jukebox__drawer-inner {
-      /* Clear the absolute handle on the top edge, then a little title air. */
-      padding: calc(var(--phone-handle, 1.5rem) + var(--phone-now-gap, 0.45rem)) 0 0;
+      /* Visual handle only (1.5rem) — --phone-handle-hit must not pad this. */
+      padding: calc(var(--phone-handle, 1.5rem) + var(--phone-sheet-head-gap, 0.28rem)) 0 0;
     }
 
     /* Pixel height from JS — one layout property, floor stays at bottom: 0. */
@@ -1565,9 +1708,21 @@ const defaultLabel =
       transition: none;
     }
 
-    /* Settled open: keep the measured px. Dropping the lock lets 1fr / 50svh clip down. */
-    :global(html[data-player-sheet-sized]) .jukebox.is-player-expanded,
-    :global(html[data-player-sheet-sized]) .jukebox.is-open {
+    /*
+     * Settled solo: NEVER lock height to --player-sheet-h. That token overshooting
+     * + align-content:start is the bottom void under the floor. Hug content.
+     * Exclude morph/drag so the interpolated px can still run.
+     * Playlist still needs the px lock so 1fr can be a real scrollport.
+     */
+    :global(html[data-player-sheet-sized])
+      .jukebox.is-player-expanded:not(.is-theme-tracks):not(.is-sheet-morphing):not(.is-sheet-dragging),
+    :global(html[data-player-sheet-sized])
+      .jukebox.is-open:not(.is-theme-tracks):not(.is-sheet-morphing):not(.is-sheet-dragging) {
+      height: auto;
+      max-height: none;
+    }
+
+    :global(html[data-player-sheet-sized]) .jukebox.is-theme-tracks {
       height: var(--player-sheet-h);
       max-height: none;
     }
@@ -1587,7 +1742,7 @@ const defaultLabel =
 
     :global(html[data-player-sheet-morphing]) .jukebox.is-sheet-morphing .jukebox__drawer-inner,
     :global(html[data-player-sheet-morphing]) .jukebox.is-sheet-morphing.is-open:not(.is-panel-opening) .jukebox__drawer-inner {
-      padding: calc(var(--phone-handle, 1.5rem) + var(--phone-now-gap, 0.45rem)) 0 0;
+      padding: calc(var(--phone-handle, 1.5rem) + var(--phone-sheet-head-gap, 0.28rem)) 0 0;
     }
 
     :global(html[data-player-sheet-morphing]) .jukebox.is-sheet-morphing .jukebox__header,
@@ -1596,8 +1751,8 @@ const defaultLabel =
       opacity: 1;
       visibility: visible;
       max-height: none;
-      margin: 0 0 calc(0.5rem * var(--hud-scale));
-      padding-bottom: calc(0.45rem * var(--hud-scale));
+      margin: 0 0 var(--phone-sheet-head-gap, 0.28rem);
+      padding-bottom: var(--phone-sheet-head-gap, 0.28rem);
       border-bottom: 1px solid color-mix(in srgb, var(--color-border) 45%, transparent);
       overflow: hidden;
       pointer-events: none;
@@ -1615,19 +1770,18 @@ const defaultLabel =
 
     :global(html[data-player-sheet-dragging]) .jukebox.is-sheet-dragging .jukebox__drawer-inner,
     :global(html[data-player-sheet-dragging]) .jukebox.is-sheet-dragging.is-open:not(.is-panel-opening) .jukebox__drawer-inner {
-      padding: calc(var(--phone-handle, 1.5rem) + var(--phone-now-gap, 0.45rem)) 0 0;
+      padding: calc(var(--phone-handle, 1.5rem) + var(--phone-sheet-head-gap, 0.28rem)) 0 0;
     }
 
-    /* Same open header box as a click — stay in flow so drag is not a
-       second skeleton. Copy fades in only when the sheet is fully open. */
+    /* Same fade as transport — a 97% snap was the header arriving a beat late. */
     :global(html[data-player-sheet-dragging]) .jukebox.is-sheet-dragging .jukebox__header,
     :global(html[data-player-sheet-dragging]) .jukebox.is-sheet-dragging.is-player-expanded .jukebox__header,
     :global(html[data-player-sheet-dragging]) .jukebox.is-sheet-dragging.is-open .jukebox__header {
-      opacity: min(1, max(0, calc((var(--player-sheet-progress, 0) - 0.97) * 33)));
+      opacity: clamp(0, calc((var(--player-sheet-progress, 0) - 0.12) / 0.55), 1);
       visibility: visible;
       max-height: none;
-      margin: 0 0 calc(0.5rem * var(--hud-scale));
-      padding-bottom: calc(0.45rem * var(--hud-scale));
+      margin: 0 0 var(--phone-sheet-head-gap, 0.28rem);
+      padding-bottom: var(--phone-sheet-head-gap, 0.28rem);
       border-bottom: 1px solid color-mix(in srgb, var(--color-border) 45%, transparent);
       overflow: hidden;
       pointer-events: none;
@@ -1645,6 +1799,7 @@ const defaultLabel =
     .jukebox__title-phone,
     .player-dock__transport {
       transition: none !important;
+      animation: none !important;
     }
 
     .jukebox.is-glitching,
