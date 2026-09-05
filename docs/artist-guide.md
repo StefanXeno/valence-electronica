@@ -98,8 +98,8 @@ Discography merges **two** content sources into one panel:
 - **Title** ← plain text from `label`
 - **Year · kind** ← year from `sortDate`; optional `kind`
 - **Listen On** ← platform icon links when `listenLinks` are set (jukebox or tracks)
-- **Play on V-Flip** ← when the file is a valid stage entry and not currently active
-- **Currently playing** ← replaces the button while that track is active on V-Flip
+- **Play on V-Flip** ← icon-only play control when the file is a valid stage entry and not currently active (accessible name: `stageButtonLabel`)
+- **Currently playing** ← five-bar soundwave replaces the play control while that track is active (accessible name: `currentlyPlayingLabel`)
 
 #### Catalog-only releases (discography without stage)
 
@@ -173,7 +173,7 @@ site. Use jukebox (stage) or tracks (catalog-only) instead.
 **Controls:** Region titles, empty-state strings, jukebox/social labels, stage-button label,
 landing intro copy (`introLead`, `introName`), and optional **HUD icon overrides**
 (`jukeboxIcon`, `aboutIcon`, `discographyIcon`, `tourIcon`, `trackInfoIcon`, `shuffleIcon`,
-`loopIcon`, `socialsIcon`).
+`loopIcon`, `socialsIcon`, `infoIcon`).
 
 **V-Flip player chrome (optional):**
 
@@ -186,14 +186,15 @@ landing intro copy (`introLead`, `introName`), and optional **HUD icon overrides
   handle** (arrow on top of the pill). Phone HUD is below 1024px; laptop HUD is unchanged.
 - `socialsIcon` — optional token or emoji for the phone socials trigger (default token:
   `socials`, a connected-nodes / share glyph — not a chevron)
+- `infoTitle` / `infoIcon` — phone Info sheet (copyright + Impressum + Datenschutzerklärung).
+  Default title: Info. Default token: `info` (circled i). Laptop still uses the footer.
 
 **Track info in V-Flip (optional):**
 
 - `trackInfoTitle` — section heading inside open V-Flip (default: Track info)
 - `releasedLabel` — label before the release date (default: Released)
-- `stageButtonLabel` — label on discography rows that switch the active V-Flip track
-- `currentlyPlayingLabel` — replaces the stage button on the active discography row (default:
-  Currently playing)
+- `stageButtonLabel` — accessible name for the discography play control (icon-only; not shown as button text)
+- `currentlyPlayingLabel` — accessible name for the active-row playing indicator (soundwave; not shown as visible text)
 - `listenOnLabel` — label before streaming platform icons (default: Listen On)
 - `emptyTrackLinks` — when a track has no `listenLinks`
 
@@ -201,7 +202,7 @@ landing intro copy (`introLead`, `introName`), and optional **HUD icon overrides
 
 - Leave an `*Icon` field out to use the default pictogram for that control.
 - Set a **token** to pick a built-in icon: `jukebox`, `about`, `discography`, `tour`,
-  `catalog`, `info`, `shuffle`, `loop`, or `socials`.
+  `catalog`, `info`, `shuffle`, `loop`, `socials`, or `play`.
 
 **Label reveal (visitor-facing):** Dock icons show a floating label **above** the control on
 hover/focus. Mute/volume inside V-Flip uses the same floater for tooltips. Social icons show
@@ -227,7 +228,8 @@ longer stage videos.
 **Files:** `imprint.md` (Impressum), `privacy.md` (Datenschutzerklärung)
 
 **Controls:** Legally required texts for a German public presence. Write the content in
-**German** where the law requires it; this guide stays in English.
+**German** where the law requires it; this guide stays in English. Laptop visitors open these
+from the footer; on phone they live in the **Info** sheet (circled-i icon on the content bar).
 
 **Important:** Both files are currently placeholders. **Replace them with real information
 before you promote the site publicly.** This is not legal advice — ask a lawyer if you are
