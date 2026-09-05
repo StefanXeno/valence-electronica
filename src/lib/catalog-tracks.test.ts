@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  filterThemeTracks,
   mergeDiscographyEntries,
   parseCredits,
   parseListenLinks,
@@ -130,6 +131,16 @@ describe('toDiscographyEntry', () => {
       { source: 'track' },
     );
     expect(entry?.jukeboxId).toBeUndefined();
+  });
+});
+
+describe('filterThemeTracks', () => {
+  it('keeps stage-bound rows and drops catalog-only releases', () => {
+    const filtered = filterThemeTracks([
+      row('show-me-how', 'Show Me How', '2026-02-26', { jukeboxId: 'show-me-how' }),
+      row('catalog', 'Catalog Only', '2015-01-01'),
+    ]);
+    expect(filtered.map((e) => e.id)).toEqual(['show-me-how']);
   });
 });
 

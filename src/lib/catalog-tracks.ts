@@ -173,6 +173,45 @@ export function toDiscographyEntry(
   };
 }
 
+/** Stage/theme switcher — has a jukebox id, even when hasAudio is false (e.g. Show Me How). */
+export function isThemeTrack(entry: DiscographyEntry): boolean {
+  return Boolean(entry.jukeboxId);
+}
+
+/** Drop catalog-only releases that cannot change the stage / background. */
+export function filterThemeTracks(entries: DiscographyEntry[]): DiscographyEntry[] {
+  return entries.filter(isThemeTrack);
+}
+
+/**
+ * Theme playlist: every valid jukebox/stage entry, including `inDiscography: false`
+ * and hasAudio: false. Catalog-only tracks are never included.
+ */
+export async function getThemeTrackDiscography(
+  validStageIds: ReadonlySet<string>,
+): Promise<DiscographyEntry[]> {
+  const { getCollection } = await import('astro:content');
+  const jukeboxRaw = await getCollection('jukebox');
+  const rows: DiscographyEntry[] = [];
+
+  for (const entry of jukeboxRaw) {
+    if (entry.id.startsWith('__empty__')) continue;
+    if (!validStageIds.has(entry.id)) continue;
+
+    const row = toDiscographyEntry(
+      entry.id,
+      {
+        ...entry.data,
+        sortDate: entry.data.sortDate ?? new Date(0),
+      },
+      { source: 'jukebox', validStageIds },
+    );
+    if (row?.jukeboxId) rows.push(row);
+  }
+
+  return sortDiscographyEntries(rows);
+}
+
 /** Merge jukebox-derived rows with catalog-only rows; track rows must already exclude jukebox ids. */
 export function mergeDiscographyEntries(
   jukeboxRows: DiscographyEntry[],

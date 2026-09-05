@@ -2,6 +2,7 @@
 import { getBackgroundConfig } from '../lib/background';
 import { getChrome } from '../lib/stage';
 import { withBase } from '../lib/url';
+import Discography from './Discography.astro';
 import HudIcon from './HudIcon.astro';
 import MuteControl from './MuteControl.astro';
 import TrackInfoPanel from './TrackInfoPanel.astro';
@@ -47,9 +48,20 @@ const defaultLabel =
         data-hud-label={chrome.playerExpandLabel}
         data-hud-label-anchor="above"
         aria-expanded="false"
+        aria-controls="jukebox-drawer"
         aria-label={chrome.playerExpandLabel}
       >
-        <span class="player-dock__arrow" aria-hidden="true"></span>
+        <span class="player-dock__arrow" aria-hidden="true">
+          <svg viewBox="0 0 32 14" fill="none">
+            <path
+              d="M5 10.25 L16 3.75 L27 10.25"
+              stroke="currentColor"
+              stroke-width="2.35"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            ></path>
+          </svg>
+        </span>
       </button>
 
       <div class="player-dock__now-playing">
@@ -60,32 +72,45 @@ const defaultLabel =
           <span></span>
           <span></span>
         </div>
-        <span class="player-dock__track" data-now-playing title={defaultLabel}>{defaultLabel}</span>
+        <span class="player-dock__track" data-now-playing>{defaultLabel}</span>
       </div>
 
       <div class="jukebox__drawer" id="jukebox-drawer" data-jukebox-drawer>
         <div class="jukebox__drawer-inner">
           <div class="jukebox__panel">
             <header class="jukebox__header">
-              <h2
-                class="jukebox__title"
-                data-hud-label={chrome.jukeboxPanelTooltip}
-                data-hud-label-anchor="above"
-                title={chrome.jukeboxPanelTooltip}
-              >
-                {chrome.jukeboxPanelTitle}
+              <h2 class="jukebox__title">
+                <span
+                  class="jukebox__title-laptop"
+                  data-hud-label={chrome.jukeboxPanelTooltip}
+                  data-hud-label-anchor="above"
+                  data-desktop-title={chrome.jukeboxPanelTooltip}
+                  title={chrome.jukeboxPanelTooltip}
+                >{chrome.jukeboxPanelTitle}</span>
+                <span class="jukebox__title-phone jukebox__title-phone--now">{chrome.currentlyPlayingLabel}</span>
+                <span class="jukebox__title-phone jukebox__title-phone--playlist">{chrome.jukeboxPanelTitle}</span>
               </h2>
             </header>
 
             <section class="jukebox__section jukebox__section--list" aria-label={chrome.jukeboxLabel}>
               <TrackInfoPanel chrome={chrome} trackOrder={videos.map((entry) => entry.id)} />
             </section>
+
+            <section
+              class="jukebox__section jukebox__section--theme-tracks"
+              id="jukebox-theme-tracks"
+              data-theme-tracks-panel
+              aria-label={chrome.jukeboxPanelTitle}
+              hidden
+            >
+              <Discography chrome={chrome} defaultId={defaultVideoId} themeTracksOnly />
+            </section>
           </div>
         </div>
       </div>
 
       <div class="jukebox__toolbar" data-jukebox-toolbar>
-        <div class="player-dock__transport">
+        <div class="player-dock__transport" data-player-transport>
         <button
           type="button"
           class="jukebox__tool jukebox__tool--vinyl glitch-hit"
@@ -125,6 +150,40 @@ const defaultLabel =
         >
           <HudIcon token={chrome.loopIcon} emoji={chrome.loopIconEmoji} />
         </button>
+
+        <button
+          type="button"
+          class="jukebox__tool jukebox__tool--video-play glitch-hit"
+          data-bg-play-toggle
+          data-glitch-live
+          data-play-label="Play video"
+          data-pause-label="Pause video"
+          data-hud-label="Pause video"
+          data-hud-label-anchor="above"
+          aria-label="Pause video"
+        >
+          <span class="player-dock__video-icon" data-bg-play-icon="play" hidden>
+            <HudIcon token="play" />
+          </span>
+          <span class="player-dock__video-icon" data-bg-play-icon="pause">
+            <HudIcon token="pause" />
+          </span>
+        </button>
+
+        <button
+          type="button"
+          class="jukebox__tool jukebox__tool--playlist glitch-hit"
+          data-playlist-toggle
+          data-glitch-live
+          aria-pressed="false"
+          aria-expanded="false"
+          aria-controls="jukebox-theme-tracks"
+          aria-label={chrome.playlistLabel}
+          data-hud-label={chrome.playlistLabel}
+          data-hud-label-anchor="above"
+        >
+          <HudIcon token="playlist" />
+        </button>
         </div>
 
         {showMute && (
@@ -145,7 +204,7 @@ const defaultLabel =
 <script>
   import { createContinuousGlitch, isGlitchThemeActive, playElementGlitch } from '../lib/glitch';
   import { panelCloseDelayMs, runSmoothPanelOpen, shouldSmoothPanelOpen } from '../lib/panel-motion';
-  import { initStageSwitch, type StageCatalogEntry } from '../lib/stage-switch';
+  import { initStageSwitch, STAGE_SELECT_EVENT, type StageCatalogEntry } from '../lib/stage-switch';
   import { initPlayerDock } from '../lib/player-dock';
   import type { StageSchedule } from '../lib/stage-schedule';
 
@@ -216,13 +275,50 @@ const defaultLabel =
     const vinylHoverGlitch = bindHoverGlitch(toggle);
 
     root.querySelectorAll<HTMLElement>(
-      '[data-shuffle-toggle], [data-loop-toggle], [data-jukebox-option]',
+      '[data-shuffle-toggle], [data-loop-toggle], [data-bg-play-toggle], [data-playlist-toggle], [data-jukebox-option]',
     ).forEach(bindHoverGlitch);
+
+    const playlistBtn = root.querySelector<HTMLButtonElement>('[data-playlist-toggle]');
+    const themePanel = root.querySelector<HTMLElement>('[data-theme-tracks-panel]');
+
+    const setPlaylistOpen = (
+      next: boolean,
+      phase: 'prepare' | 'apply' | 'commit' | 'instant' = 'instant',
+    ) => {
+      playlistBtn?.setAttribute('aria-pressed', next ? 'true' : 'false');
+      playlistBtn?.setAttribute('aria-expanded', next ? 'true' : 'false');
+      const phone = window.matchMedia('(max-width: 1023px)').matches;
+      if (phase === 'prepare') {
+        // Phone: one discog list. Keep it mounted — never display:none mid-morph.
+        if (themePanel) themePanel.hidden = false;
+        return;
+      }
+      root.classList.toggle('is-theme-tracks', next);
+      if (!themePanel) return;
+      if (phone) {
+        themePanel.hidden = false;
+        if (phase !== 'apply') {
+          root.querySelectorAll<HTMLElement>('.discog[data-theme-tracks] .discog__item').forEach((item) => {
+            const on = item.dataset.discogActive === 'true';
+            item.classList.toggle('is-playlist-collapsed', !next && !on);
+            if (next || on) item.removeAttribute('aria-hidden');
+            else item.setAttribute('aria-hidden', 'true');
+          });
+        }
+        return;
+      }
+      if (next) themePanel.hidden = false;
+      else if (phase !== 'apply') themePanel.hidden = true;
+    };
 
     const setOpen = (next: boolean) => {
       isOpen = next;
       root.classList.toggle('is-open', next);
       toggle.setAttribute('aria-expanded', next ? 'true' : 'false');
+      if (!next) setPlaylistOpen(false);
+      else if (window.matchMedia('(max-width: 1023px)').matches && themePanel) {
+        themePanel.hidden = false;
+      }
       document.dispatchEvent(new CustomEvent('vflip-list-change', { detail: { open: next } }));
     };
 
@@ -242,39 +338,104 @@ const defaultLabel =
       }, dur + 80);
     };
 
-    toggle.addEventListener('click', (event) => {
-      event.preventDefault();
-      event.stopPropagation();
-
-      if (!isOpen) {
-        if (shouldSmoothPanelOpen(reduceMotion.matches)) {
-          setOpen(true);
-          runSmoothPanelOpen(root, reduceMotion.matches);
-        } else {
-          setOpen(true);
-          playMorph('in');
-        }
+    const openVflip = (animated = true) => {
+      if (isOpen) return;
+      if (!animated || reduceMotion.matches) {
+        setOpen(true);
         return;
       }
+      if (shouldSmoothPanelOpen(reduceMotion.matches)) {
+        setOpen(true);
+        runSmoothPanelOpen(root, reduceMotion.matches);
+      } else {
+        setOpen(true);
+        playMorph('in');
+      }
+    };
 
+    const closeVflip = (animated: boolean) => {
+      if (!isOpen) return;
+      if (!animated) {
+        setOpen(false);
+        root.classList.remove('is-panel-closing');
+        return;
+      }
+      // Phone click-close: player-dock interpolates sheet height. Stay open
+      // until that morph commits — is-panel-closing hides transport instantly.
+      if (window.matchMedia('(max-width: 1023px)').matches) {
+        document.dispatchEvent(new CustomEvent('phone-hud-request-collapse'));
+        return;
+      }
       if (root.classList.contains('is-glitching')) return;
-
       if (isGlitchThemeActive()) {
         playMorph('out');
       } else if (!reduceMotion.matches) {
         root.classList.add('is-panel-closing');
       }
-
       window.setTimeout(() => {
         setOpen(false);
         root.classList.remove('is-panel-closing');
       }, panelCloseDelayMs(reduceMotion.matches));
+    };
+
+    toggle.addEventListener('click', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      if (!isOpen) openVflip();
+      else closeVflip(true);
+    });
+
+    playlistBtn?.addEventListener('click', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      if (!window.matchMedia('(max-width: 1023px)').matches) return;
+      // Player open/close owns the sheet — don't start a second height morph.
+      if (root.classList.contains('is-sheet-morphing') && !root.classList.contains('is-playlist-morphing')) {
+        return;
+      }
+      const next = !root.classList.contains('is-theme-tracks');
+      if (reduceMotion.matches) {
+        setPlaylistOpen(next);
+        return;
+      }
+      document.dispatchEvent(new CustomEvent('phone-player-playlist', { detail: { open: next } }));
+    });
+
+    document.addEventListener('phone-player-playlist-apply', (event) => {
+      const detail = (
+        event as CustomEvent<{
+          open?: boolean;
+          phase?: 'prepare' | 'apply' | 'commit' | 'instant';
+        }>
+      ).detail;
+      setPlaylistOpen(Boolean(detail?.open), detail?.phase ?? 'instant');
+    });
+
+    // Row tap (not listen links / play) switches the stage the same as discog play.
+    themePanel?.addEventListener('click', (event) => {
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      if (target.closest('a, [data-stage-button]')) return;
+      const item = target.closest<HTMLElement>('[data-discog-item]');
+      const id = item?.dataset.discogItem;
+      if (!id) return;
+      document.dispatchEvent(new CustomEvent(STAGE_SELECT_EVENT, { detail: { id } }));
+    });
+
+    window.matchMedia('(max-width: 1023px)').addEventListener('change', (event) => {
+      if (!event.matches) setPlaylistOpen(false);
     });
 
     setOpen(false);
 
-    document.addEventListener('phone-hud-close-vflip', () => {
-      if (isOpen) setOpen(false);
+    document.addEventListener('phone-hud-open-vflip', (event) => {
+      const animated = (event as CustomEvent<{ animated?: boolean }>).detail?.animated !== false;
+      openVflip(animated);
+    });
+
+    document.addEventListener('phone-hud-close-vflip', (event) => {
+      const animated = Boolean((event as CustomEvent<{ animated?: boolean }>).detail?.animated);
+      closeVflip(animated);
     });
   }
 
@@ -309,6 +470,7 @@ const defaultLabel =
     padding: 0;
     border: 1px solid var(--color-border);
     border-radius: 999px;
+    resize: none;
     background: color-mix(in srgb, var(--color-surface) 92%, transparent);
     backdrop-filter: blur(10px);
     color: var(--color-text);
@@ -383,6 +545,25 @@ const defaultLabel =
     text-overflow: ellipsis;
     color: var(--color-text);
     cursor: help;
+  }
+
+  /* Phone header: currentlyPlayingLabel at rest, jukeboxPanelTitle in playlist. */
+  .jukebox__title-phone {
+    display: none;
+  }
+
+  .jukebox__title-phone--playlist {
+    display: none;
+  }
+
+  .jukebox__section--theme-tracks,
+  .jukebox__section--theme-tracks[hidden] {
+    display: none;
+  }
+
+  /* Laptop: vinyl/V-Flip is the list — no extra playlist control. */
+  .jukebox__tool--playlist {
+    display: none;
   }
 
   .jukebox__panel {
@@ -481,13 +662,16 @@ const defaultLabel =
     color: var(--color-accent-alt);
   }
 
-  .jukebox__tool--mute {
+  .jukebox__tool--mute,
+  .jukebox__tool--mute:hover {
     position: relative;
     flex: 0 0 var(--jukebox-mute-width);
     width: var(--jukebox-mute-width);
     min-width: var(--jukebox-mute-width);
     height: var(--control-size);
+    /* Sit in the V-Flip / player pill — no second circle around the speaker. */
     border: 0;
+    border-color: transparent;
     padding: 0;
     overflow: visible;
   }
@@ -504,8 +688,29 @@ const defaultLabel =
   }
 
   .jukebox__tool--shuffle,
-  .jukebox__tool--loop {
+  .jukebox__tool--loop,
+  .jukebox__tool--video-play,
+  .jukebox__tool--playlist {
     flex: 0 0 auto;
+  }
+
+  /* Laptop keeps vinyl + loop; play/pause + playlist are phone-only. */
+  .jukebox__tool--video-play {
+    display: none;
+  }
+
+  .player-dock__video-icon {
+    display: grid;
+    place-items: center;
+  }
+
+  .player-dock__video-icon[hidden] {
+    display: none;
+  }
+
+  .jukebox__tool--video-play:disabled {
+    opacity: 0.4;
+    pointer-events: none;
   }
 
   .jukebox.is-glitching[data-glitch='in'] .jukebox__panel {
@@ -559,57 +764,113 @@ const defaultLabel =
     display: none;
   }
 
+  /* Grabber chevron: ~1.6×0.62rem, rounded caps — not a wide needle V. */
   .player-dock__arrow {
     display: block;
-    width: 0.7rem;
-    height: 0.7rem;
-    border-right: 2px solid currentColor;
-    border-bottom: 2px solid currentColor;
-    transform: rotate(-135deg);
-    transform-origin: center;
+    width: 1.6rem;
+    height: 0.62rem;
+    filter: drop-shadow(0 0.2rem 0.4rem color-mix(in srgb, black 50%, transparent));
+  }
+
+  .player-dock__arrow svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
   }
 
   :global(html[data-player-dock-expanded]) .player-dock__arrow {
-    transform: rotate(45deg);
+    transform: rotate(180deg);
   }
 
   .player-dock__soundwave {
+    /* Integer px so paused ticks don't subpixel-round into uneven widths. */
+    --eq-bar-width: 4px;
+    --eq-bar-gap: 3px;
+    --eq-paused-bar-height: 4px;
+    --eq-flatten-duration: 280ms;
+    --eq-flatten-easing: cubic-bezier(0.4, 0, 0.2, 1);
     display: flex;
-    align-items: flex-end;
+    align-items: center;
     justify-content: center;
-    gap: 0.16rem;
+    gap: var(--eq-bar-gap);
     width: var(--control-size);
     height: 1.15rem;
     pointer-events: none;
   }
 
+  /* Idle rest = taller-in-the-middle diamond. Playing = per-bar EQ, not a shared sine. */
   .player-dock__soundwave span {
     display: block;
-    width: 0.14rem;
-    height: 35%;
+    box-sizing: border-box;
+    flex: 0 0 var(--eq-bar-width);
+    width: var(--eq-bar-width);
+    min-width: var(--eq-bar-width);
+    max-width: var(--eq-bar-width);
+    height: calc(100% / 3);
     border-radius: 1px;
     background: currentColor;
-    animation: player-soundwave 0.9s ease-in-out infinite;
+    transform-origin: center center;
+    animation: player-eq-1 2.16s cubic-bezier(0.3, 0, 0.2, 1) infinite;
+    transition:
+      height var(--eq-flatten-duration) var(--eq-flatten-easing),
+      min-height var(--eq-flatten-duration) var(--eq-flatten-easing),
+      max-height var(--eq-flatten-duration) var(--eq-flatten-easing);
   }
 
   .player-dock__soundwave span:nth-child(2) {
-    animation-delay: 0.12s;
-    height: 70%;
+    height: calc(200% / 3);
+    animation-name: player-eq-2;
+    animation-duration: 1.64s;
+    animation-delay: -0.72s;
   }
 
   .player-dock__soundwave span:nth-child(3) {
-    animation-delay: 0.24s;
     height: 100%;
+    animation-name: player-eq-3;
+    animation-duration: 1.32s;
+    animation-delay: -0.28s;
   }
 
   .player-dock__soundwave span:nth-child(4) {
-    animation-delay: 0.08s;
-    height: 55%;
+    height: calc(200% / 3);
+    animation-name: player-eq-4;
+    animation-duration: 2.48s;
+    animation-delay: -1.16s;
   }
 
   .player-dock__soundwave span:nth-child(5) {
-    animation-delay: 0.3s;
-    height: 40%;
+    height: calc(100% / 3);
+    animation-name: player-eq-5;
+    animation-duration: 1.88s;
+    animation-delay: -0.48s;
+  }
+
+  /* Pause: freeze the dance only. Height → 4px comes from .is-eq-flat (JS bake). */
+  :global(html[data-player-paused]) .player-dock__soundwave span:nth-child(n) {
+    animation-play-state: paused;
+    flex: 0 0 var(--eq-bar-width);
+    width: var(--eq-bar-width);
+    min-width: var(--eq-bar-width);
+    max-width: var(--eq-bar-width);
+  }
+
+  /* After JS locks visual height, drop keyframes and ease to the flat line. */
+  :global(html[data-player-paused]) .player-dock__soundwave.is-eq-flat span:nth-child(n) {
+    animation: none;
+    transform: none;
+    height: var(--eq-paused-bar-height);
+    min-height: var(--eq-paused-bar-height);
+    max-height: var(--eq-paused-bar-height);
+  }
+
+  /* No-JS: still flatten (instant). JS path must not use this — it snaps. */
+  :global(html:not([data-player-dock-js])[data-player-paused]) .player-dock__soundwave span:nth-child(n) {
+    animation: none;
+    transform: none;
+    height: var(--eq-paused-bar-height);
+    min-height: var(--eq-paused-bar-height);
+    max-height: var(--eq-paused-bar-height);
   }
 
   .player-dock__track {
@@ -627,13 +888,132 @@ const defaultLabel =
     animation: player-handle-nod 0.45s ease-in-out 3;
   }
 
-  @keyframes player-soundwave {
+  /* Irregular peaks; scale ranges fit rest height so bars flatten + spike independently. */
+  @keyframes player-eq-1 {
     0%,
     100% {
-      transform: scaleY(0.45);
+      transform: scaleY(0.35);
     }
-    50% {
-      transform: scaleY(1);
+    14% {
+      transform: scaleY(2.55);
+    }
+    28% {
+      transform: scaleY(0.4);
+    }
+    43% {
+      transform: scaleY(1.7);
+    }
+    58% {
+      transform: scaleY(0.55);
+    }
+    74% {
+      transform: scaleY(2.9);
+    }
+    88% {
+      transform: scaleY(0.22);
+    }
+  }
+
+  @keyframes player-eq-2 {
+    0%,
+    100% {
+      transform: scaleY(0.2);
+    }
+    16% {
+      transform: scaleY(1.32);
+    }
+    27% {
+      transform: scaleY(0.48);
+    }
+    42% {
+      transform: scaleY(0.82);
+    }
+    57% {
+      transform: scaleY(1.45);
+    }
+    71% {
+      transform: scaleY(0.28);
+    }
+    86% {
+      transform: scaleY(1.12);
+    }
+  }
+
+  @keyframes player-eq-3 {
+    0%,
+    100% {
+      transform: scaleY(0.16);
+    }
+    11% {
+      transform: scaleY(0.92);
+    }
+    23% {
+      transform: scaleY(0.28);
+    }
+    36% {
+      transform: scaleY(1.06);
+    }
+    49% {
+      transform: scaleY(0.18);
+    }
+    62% {
+      transform: scaleY(0.68);
+    }
+    76% {
+      transform: scaleY(1.02);
+    }
+    89% {
+      transform: scaleY(0.34);
+    }
+  }
+
+  @keyframes player-eq-4 {
+    0%,
+    100% {
+      transform: scaleY(0.88);
+    }
+    13% {
+      transform: scaleY(0.22);
+    }
+    30% {
+      transform: scaleY(1.42);
+    }
+    44% {
+      transform: scaleY(0.52);
+    }
+    59% {
+      transform: scaleY(1.18);
+    }
+    73% {
+      transform: scaleY(0.16);
+    }
+    87% {
+      transform: scaleY(1.36);
+    }
+  }
+
+  @keyframes player-eq-5 {
+    0%,
+    100% {
+      transform: scaleY(1.55);
+    }
+    15% {
+      transform: scaleY(0.28);
+    }
+    32% {
+      transform: scaleY(2.35);
+    }
+    48% {
+      transform: scaleY(0.65);
+    }
+    64% {
+      transform: scaleY(0.2);
+    }
+    79% {
+      transform: scaleY(2.85);
+    }
+    91% {
+      transform: scaleY(1.05);
     }
   }
 
@@ -648,90 +1028,473 @@ const defaultLabel =
   }
 
   @media (max-width: 1023px) {
+    .jukebox,
+    .jukebox *,
+    .jukebox textarea,
+    .jukebox input {
+      resize: none;
+    }
+
+    .jukebox::-webkit-resizer,
+    .jukebox *::-webkit-resizer {
+      display: none;
+    }
+
     .jukebox {
+      --phone-now-pad: var(--phone-chrome-pad, 0.65rem);
+      --phone-floor-radius: var(--phone-player-radius, 1.25rem);
+      /* In-flow transport row — never an absolute overlay. */
+      --player-transport-h: calc(var(--control-size) + 0.25rem);
+      /* Whole sheet cap — card + now-playing row, never the viewport top. */
+      --player-sheet-max: min(68svh, calc(100svh - 5.5rem));
+
+      /* Floor-pinned sheet: grow height from bottom: 0. Never translate the chrome. */
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      margin: 0;
       display: grid;
       width: 100%;
-      max-width: none;
-      overflow: visible;
-      border-radius: calc(0.85rem * var(--hud-scale));
+      max-width: 100%;
+      min-width: 0;
+      min-height: var(--phone-player-h);
+      isolation: isolate;
+      overflow: hidden;
+      /* Square floor — no bottom stroke floating above the viewport. */
+      border-bottom: 0;
+      border-radius: var(--phone-floor-radius) var(--phone-floor-radius) 0 0;
+      background: color-mix(in srgb, var(--color-bg) 88%, var(--color-surface));
+      /* Upward only — a downward shadow paints a fake gap under the floor. */
+      box-shadow: 0 -0.45rem 1.2rem color-mix(in srgb, black 45%, transparent);
+      /* Safe-area stays inside the chrome, not a strip below the border. */
+      padding: var(--phone-now-gap, 0.45rem) var(--phone-now-pad)
+        var(--phone-safe-bottom, env(safe-area-inset-bottom, 0px));
+      align-items: stretch;
+      justify-items: stretch;
       grid-template-columns: var(--control-size) minmax(0, 1fr) var(--control-size);
+      /* Collapsed: drawer + transport are 0fr. Floor is wave | title | mute. */
+      grid-template-rows: 0fr 0fr minmax(var(--control-size), auto);
       grid-template-areas:
         'drawer drawer drawer'
-        'handle handle handle'
-        'wave name mute'
-        'transport transport transport';
+        'transport transport transport'
+        'wave   title  mute';
     }
 
-    :global(html[data-player-dock-js]:not([data-player-dock-expanded])) .jukebox {
-      grid-template-areas:
-        'drawer drawer drawer'
-        'handle handle handle'
-        'wave name mute';
+    html:not([data-hud-glitch='true']) .jukebox {
+      transition: none;
     }
 
-    .player-dock__handle {
-      display: grid;
-      place-items: center;
-      grid-area: handle;
-      width: 100%;
-      min-width: 44px;
-      height: 1.5rem;
-      min-height: 24px;
+    .jukebox__title-laptop {
+      display: none;
+    }
+
+    .jukebox__title-phone {
+      display: inline;
+    }
+
+    /* CURRENTLY PLAYING only when the sheet is fully open — not collapsed / mid-drag. */
+    .jukebox__header {
+      opacity: 0;
+      visibility: hidden;
+      max-height: 0;
       margin: 0;
       padding: 0;
       border: 0;
-      border-radius: calc(0.85rem * var(--hud-scale)) calc(0.85rem * var(--hud-scale)) 0 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .jukebox.is-player-expanded:not(.is-sheet-dragging):not(.is-panel-opening):not(.is-panel-closing) .jukebox__header,
+    .jukebox.is-open:not(.is-sheet-dragging):not(.is-panel-opening):not(.is-panel-closing) .jukebox__header,
+    :global(html:not([data-player-dock-js])) .jukebox__header {
+      opacity: 1;
+      visibility: visible;
+      max-height: none;
+      margin: 0 0 calc(0.5rem * var(--hud-scale));
+      padding-bottom: calc(0.45rem * var(--hud-scale));
+      border-bottom: 1px solid color-mix(in srgb, var(--color-border) 45%, transparent);
+      overflow: visible;
+      pointer-events: none;
+    }
+
+    .jukebox__title,
+    .jukebox__title-phone,
+    .player-dock__track {
+      cursor: default;
+      pointer-events: none;
+    }
+
+    .jukebox__title {
+      position: relative;
+    }
+
+    /* Short sequential swap — 140ms delay left CURRENTLY PLAYING up for a beat. */
+    .jukebox__title-phone--now,
+    .jukebox__title-phone--playlist {
+      display: block;
+      transition: opacity 80ms var(--phone-bloom-ease, cubic-bezier(0.4, 0, 0.2, 1));
+    }
+
+    .jukebox__title-phone--now {
+      transition-delay: 80ms;
+    }
+
+    .jukebox__title-phone--playlist {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      transition-delay: 0ms;
+    }
+
+    .jukebox.is-theme-tracks .jukebox__title-phone--now {
+      opacity: 0;
+      transition-delay: 0ms;
+    }
+
+    .jukebox.is-theme-tracks .jukebox__title-phone--playlist {
+      opacity: 1;
+      transition-delay: 80ms;
+    }
+
+    /* Motion: drawer grows, transport row stays 0fr (buttons hidden).
+       Settled open switches the middle row on so height does not clip-down. */
+    .jukebox.is-player-expanded,
+    .jukebox.is-open,
+    .jukebox.is-sheet-dragging,
+    .jukebox.is-sheet-morphing {
+      grid-template-rows: minmax(0, 1fr) 0fr minmax(var(--control-size), auto);
+    }
+
+    .jukebox.is-player-expanded:not(.is-sheet-dragging):not(.is-sheet-collapsing):not(.is-sheet-morphing),
+    .jukebox.is-open:not(.is-sheet-dragging):not(.is-sheet-collapsing):not(.is-sheet-morphing) {
+      grid-template-rows: minmax(0, 1fr) var(--player-transport-h) minmax(var(--control-size), auto);
+    }
+
+    /* Always on the sheet's top chrome edge — collapsed (up) and expanded (down). */
+    .player-dock__handle {
+      display: grid;
+      place-items: center;
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 2;
+      width: 3.5rem;
+      min-width: 44px;
+      height: var(--phone-handle, 1.5rem);
+      min-height: 24px;
+      margin: 0 auto;
+      padding: 0;
+      border: 0;
+      border-radius: 999px;
       background: transparent;
       color: inherit;
-      cursor: pointer;
+      cursor: grab;
+      touch-action: none;
+      user-select: none;
+      resize: none;
     }
 
-    .player-dock__now-playing {
-      display: contents;
+    .player-dock__handle:active {
+      cursor: grabbing;
     }
 
-    .player-dock__soundwave {
-      grid-area: wave;
-    }
-
-    .player-dock__track {
-      grid-area: name;
-      align-self: center;
-      padding-inline: 0.15rem;
-    }
-
-    .jukebox__drawer {
-      grid-area: drawer;
-    }
-
+    /* Flatten now-playing + toolbar so wave/title/mute sit in the floor row.
+       Transport is a real grid row (area: transport) — never an overlay. */
+    .player-dock__now-playing,
     .jukebox__toolbar {
       display: contents;
     }
 
-    .player-dock__transport {
-      display: flex;
-      grid-area: transport;
-      align-items: center;
-      justify-content: space-evenly;
-      width: 100%;
-      min-height: var(--control-size);
-      padding: var(--jukebox-toolbar-pad);
-      box-sizing: border-box;
+    .jukebox__drawer-inner {
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow: hidden;
+      justify-content: flex-start;
     }
 
-    :global(html[data-player-dock-js]:not([data-player-dock-expanded])) .player-dock__transport {
+    /* Solo: size to the playing card. Playlist: fill leftover drawer so the
+       theme-track section can be a real scrollport (not clipped by overflow:hidden). */
+    .jukebox__panel {
+      flex: 0 0 auto;
+    }
+
+    .jukebox.is-theme-tracks .jukebox__panel,
+    .jukebox.is-playlist-morphing .jukebox__panel {
+      flex: 1 1 auto;
+      min-height: 0;
+    }
+
+    /* JS owns sheet height. No 50svh / 19rem panel cap — that shaved listen-on. */
+    :global(html[data-player-dock-js]) .jukebox.is-open:not(.is-panel-opening) .jukebox__panel,
+    :global(html[data-player-dock-js]) .jukebox.is-player-expanded .jukebox__panel {
+      max-height: none;
+    }
+
+    .player-dock__transport {
       display: none;
+      grid-area: transport;
+      position: static;
+      left: auto;
+      right: auto;
+      bottom: auto;
+      z-index: auto;
+      flex: 0 0 auto;
+      justify-content: center;
+      align-items: center;
+      gap: var(--jukebox-toolbar-gap);
+      width: 100%;
+      height: var(--player-transport-h);
+      padding: 0;
+      box-sizing: border-box;
+      background: transparent;
+    }
+
+    /* Settled open only. Drag / tap-close / morph keep the floor as wave|title|mute. */
+    :global(html[data-player-dock-js]) .jukebox.is-player-expanded:not(.is-panel-opening):not(.is-sheet-dragging):not(.is-sheet-collapsing):not(.is-sheet-morphing) .player-dock__transport,
+    :global(html[data-player-dock-js]) .jukebox.is-open:not(.is-panel-opening):not(.is-sheet-dragging):not(.is-sheet-collapsing):not(.is-sheet-morphing) .player-dock__transport {
+      display: flex;
+      position: static;
+    }
+
+    :global(html[data-player-dock-js]) .jukebox.is-sheet-dragging .player-dock__transport,
+    :global(html[data-player-dock-js]) .jukebox.is-sheet-collapsing .player-dock__transport,
+    :global(html[data-player-dock-js]) .jukebox.is-sheet-morphing .player-dock__transport {
+      display: none !important;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    /* Reserve transport height in the drawer while buttons are hidden (same end px). */
+    :global(html[data-player-dock-js]) .jukebox.is-player-expanded:not(.is-sheet-collapsing) .jukebox__drawer,
+    :global(html[data-player-dock-js]) .jukebox.is-open:not(.is-sheet-collapsing) .jukebox__drawer,
+    :global(html[data-player-dock-js]) .jukebox.is-sheet-dragging:not(.is-sheet-collapsing) .jukebox__drawer,
+    :global(html[data-player-dock-js]) .jukebox.is-sheet-morphing:not(.is-sheet-collapsing) .jukebox__drawer {
+      padding-bottom: var(--player-transport-h);
+    }
+
+    :global(html[data-player-dock-js]) .jukebox.is-player-expanded:not(.is-sheet-dragging):not(.is-sheet-collapsing):not(.is-sheet-morphing) .jukebox__drawer,
+    :global(html[data-player-dock-js]) .jukebox.is-open:not(.is-sheet-dragging):not(.is-sheet-collapsing):not(.is-sheet-morphing) .jukebox__drawer {
+      padding-bottom: 0;
+    }
+
+    /* No-JS: transport stays in the toolbar as a real grid row. */
+    :global(html:not([data-player-dock-js])) .player-dock__transport {
+      display: flex;
+      grid-area: transport;
+    }
+
+    .player-dock__soundwave {
+      grid-area: wave;
+      justify-self: start;
+      align-self: center;
+      width: var(--control-size);
+    }
+
+    .player-dock__track {
+      grid-area: title;
+      justify-self: stretch;
+      align-self: center;
+      text-align: center;
+      padding-inline: 0.2rem;
+      min-width: 0;
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .jukebox__drawer {
+      display: flex;
+      flex-direction: column;
+      grid-area: drawer;
+      min-height: 0;
+      overflow: hidden;
+      clip-path: inset(0);
+      justify-self: stretch;
+      align-self: stretch;
+    }
+
+    /* Pill handle opens V-Flip — no separate vinyl control on phone. */
+    .jukebox__tool--vinyl,
+    .jukebox__tool--loop {
+      display: none;
+    }
+
+    .jukebox__tool--video-play,
+    .jukebox__tool--playlist {
+      display: inline-grid;
+    }
+
+    /* Phone sheet: one discog list. TrackInfoPanel is laptop-only. */
+    .jukebox.is-player-expanded .jukebox__section--list,
+    .jukebox.is-open .jukebox__section--list,
+    .jukebox.is-sheet-morphing .jukebox__section--list,
+    .jukebox.is-sheet-dragging .jukebox__section--list {
+      display: none;
+    }
+
+    .jukebox.is-player-expanded .jukebox__panel,
+    .jukebox.is-open:not(.is-panel-opening) .jukebox__panel,
+    .jukebox.is-sheet-dragging .jukebox__panel,
+    .jukebox.is-playlist-morphing .jukebox__panel {
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .jukebox.is-player-expanded:not(.is-theme-tracks):not(.is-playlist-morphing) .jukebox__panel,
+    .jukebox.is-open:not(.is-theme-tracks):not(.is-playlist-morphing) .jukebox__panel {
+      overflow: visible;
+    }
+
+    .jukebox.is-player-expanded .jukebox__header,
+    .jukebox.is-open .jukebox__header,
+    .jukebox.is-playlist-morphing .jukebox__header {
+      flex: 0 0 auto;
+    }
+
+    /* !important beats UA `[hidden] { display: none !important }`. */
+    .jukebox.is-player-expanded .jukebox__section--theme-tracks,
+    .jukebox.is-player-expanded .jukebox__section--theme-tracks[hidden],
+    .jukebox.is-open:not(.is-panel-opening) .jukebox__section--theme-tracks,
+    .jukebox.is-open:not(.is-panel-opening) .jukebox__section--theme-tracks[hidden],
+    .jukebox.is-sheet-dragging .jukebox__section--theme-tracks,
+    .jukebox.is-sheet-dragging .jukebox__section--theme-tracks[hidden],
+    .jukebox.is-sheet-morphing .jukebox__section--theme-tracks,
+    .jukebox.is-sheet-morphing .jukebox__section--theme-tracks[hidden],
+    .jukebox.is-playlist-morphing .jukebox__section--theme-tracks,
+    .jukebox.is-playlist-morphing .jukebox__section--theme-tracks[hidden] {
+      display: block !important;
+      overflow-x: hidden;
+    }
+
+    /* Solo: size to the card. overflow:visible so listen-on + radius are not shaved. */
+    .jukebox.is-player-expanded:not(.is-theme-tracks):not(.is-playlist-morphing)
+      .jukebox__section--theme-tracks,
+    .jukebox.is-open:not(.is-theme-tracks):not(.is-playlist-morphing)
+      .jukebox__section--theme-tracks {
+      flex: 0 0 auto;
+      min-height: 0;
+      overflow: visible;
+      touch-action: none;
+    }
+
+    /* Playlist + morph: section is the bound. */
+    .jukebox.is-theme-tracks .jukebox__section--theme-tracks,
+    .jukebox.is-theme-tracks .jukebox__section--theme-tracks[hidden],
+    .jukebox.is-playlist-morphing .jukebox__section--theme-tracks,
+    .jukebox.is-playlist-morphing .jukebox__section--theme-tracks[hidden] {
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-y;
+    }
+
+    /* Rest collapse lives in Discography (scoped items). Keep gap + playing card stacked. */
+    .jukebox.is-player-expanded:not(.is-theme-tracks) :global(.discog[data-theme-tracks]),
+    .jukebox.is-open:not(.is-theme-tracks) :global(.discog[data-theme-tracks]) {
+      gap: 0;
+    }
+
+    /* Solo card must not flex-shrink inside a short overflow sheet (click-open clip). */
+    .jukebox:not(.is-theme-tracks)
+      :global(.discog[data-theme-tracks] .discog__item[data-discog-active='true']) {
+      flex-shrink: 0;
+    }
+
+    .jukebox.is-playlist-morphing
+      :global(.discog[data-theme-tracks] .discog__item[data-discog-active='true']) {
+      position: relative;
+      z-index: 2;
+    }
+
+    /* Clip siblings only while they add in / while the handle is dragging.
+       Do not key this off is-sheet-morphing — that class lingering killed scroll. */
+    .jukebox.is-playlist-morphing .jukebox__section--theme-tracks,
+    .jukebox.is-theme-tracks.is-sheet-dragging .jukebox__section--theme-tracks {
+      overflow: hidden;
+      touch-action: none;
+    }
+
+    /* Settled playlist: section is the scrollport (panel is the bound). */
+    .jukebox.is-theme-tracks:not(.is-playlist-morphing):not(.is-sheet-dragging)
+      .jukebox__section--theme-tracks,
+    .jukebox.is-theme-tracks:not(.is-playlist-morphing):not(.is-sheet-dragging)
+      .jukebox__section--theme-tracks[hidden] {
+      overflow-x: hidden;
+      overflow-y: auto;
+      max-height: 100%;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-y;
+      pointer-events: auto;
     }
 
     :global(html:not([data-player-dock-js])) .player-dock__handle {
       display: none;
     }
 
-    .jukebox__tool--mute {
+    .jukebox__tool--mute,
+    .jukebox__tool--mute:hover {
       grid-area: mute;
+      justify-self: end;
+      align-self: center;
+      align-items: center;
+      justify-content: center;
+      z-index: 1;
+      display: grid;
+      place-items: center;
+      place-content: center;
+      position: relative;
       width: var(--control-size);
       min-width: var(--control-size);
+      max-width: var(--control-size);
+      height: var(--control-size);
+      max-height: var(--control-size);
+      margin: 0;
+      padding: 0;
       flex: none;
+      box-sizing: border-box;
+      border: 0;
+      border-color: transparent;
+      resize: none;
+    }
+
+    .jukebox__tool--mute :global(.volume-control--in-jukebox),
+    .jukebox__tool--mute :global(.volume-control--in-jukebox[data-sound='on']),
+    .jukebox__tool--mute :global(.volume-control--in-jukebox[data-sound='off']) {
+      display: grid;
+      place-items: center;
+      place-content: center;
+      position: relative;
+      align-self: center;
+      width: var(--control-size);
+      height: var(--control-size);
+      max-height: var(--control-size);
+      margin: 0;
+    }
+
+    .jukebox__tool--mute :global(.volume-control--in-jukebox .volume-control__toggle) {
+      position: relative;
+      inset: auto;
+      top: auto;
+      left: auto;
+      margin: 0;
+      width: var(--control-size);
+      height: var(--control-size);
+    }
+
+    /* Keep the mute column so wave | title | mute never reflows. */
+    .jukebox__tool--mute[hidden] {
+      display: grid;
+      visibility: hidden;
+      pointer-events: none;
     }
 
     .jukebox:has(.volume-control--in-jukebox[data-sound='on']) {
@@ -740,22 +1503,142 @@ const defaultLabel =
 
     .jukebox.is-open {
       width: 100%;
-      border-radius: calc(0.85rem * var(--hud-scale));
+      max-width: 100%;
+      min-width: 0;
+      max-height: var(--player-sheet-max);
+      border-radius: var(--phone-floor-radius) var(--phone-floor-radius) 0 0;
     }
 
-    .jukebox.is-open:not(.is-panel-opening) .jukebox__panel {
+    /* No-JS fallback only. JS path must never reuse a 50svh / 19rem panel cap. */
+    :global(html:not([data-player-dock-js])) .jukebox.is-open:not(.is-panel-opening) .jukebox__panel {
       max-height: min(50svh, calc(19rem * var(--hud-scale)));
+      overflow: hidden;
+      resize: none;
+    }
+
+    :global(html[data-player-dock-js]) .jukebox.is-open:not(.is-panel-opening) .jukebox__panel,
+    :global(html[data-player-dock-js]) .jukebox.is-player-expanded .jukebox__panel {
+      max-height: none;
+      resize: none;
+    }
+
+    :global(html[data-player-dock-js]) .jukebox.is-theme-tracks .jukebox__panel,
+    :global(html[data-player-dock-js]) .jukebox.is-playlist-morphing .jukebox__panel {
+      overflow: hidden;
     }
 
     .jukebox.is-open:not(.is-panel-opening) .jukebox__drawer-inner {
-      padding: calc(0.55rem * var(--hud-scale));
+      /* Clear the absolute handle on the top edge, then a little title air. */
+      padding: calc(var(--phone-handle, 1.5rem) + var(--phone-now-gap, 0.45rem)) 0 0;
+    }
+
+    /* Pixel height from JS — one layout property, floor stays at bottom: 0. */
+    :global(html[data-player-sheet-dragging]) .jukebox.is-sheet-dragging {
+      height: var(--player-sheet-h);
+      max-height: none;
+      translate: none;
+      transform: none;
+      transition: none !important;
+      will-change: height;
+      contain: layout;
+    }
+
+    /* Click open/close + playlist: same height lock as drag, with content-bar easing. */
+    :global(html[data-player-sheet-morphing]) .jukebox.is-sheet-morphing {
+      height: var(--player-sheet-h);
+      max-height: none;
+      bottom: 0;
+      translate: none;
+      transform: none;
+      transition: height var(--phone-panel-morph-dur, 320ms)
+        var(--phone-bloom-ease, cubic-bezier(0.4, 0, 0.2, 1));
+      will-change: height;
+    }
+
+    /* Playlist: WAAPI owns height — a CSS transition on the same property pops. */
+    :global(html[data-player-sheet-morphing]) .jukebox.is-sheet-morphing.is-playlist-morphing {
+      transition: none;
+    }
+
+    /* Settled open: keep the measured px. Dropping the lock lets 1fr / 50svh clip down. */
+    :global(html[data-player-sheet-sized]) .jukebox.is-player-expanded,
+    :global(html[data-player-sheet-sized]) .jukebox.is-open {
+      height: var(--player-sheet-h);
+      max-height: none;
+    }
+
+    :global(html[data-player-sheet-sized]) .jukebox.is-player-expanded .jukebox__panel,
+    :global(html[data-player-sheet-sized]) .jukebox.is-open:not(.is-panel-opening) .jukebox__panel {
+      max-height: none;
+    }
+
+    :global(html[data-player-sheet-morphing]) .jukebox.is-sheet-morphing .jukebox__panel,
+    :global(html[data-player-sheet-morphing]) .jukebox.is-sheet-morphing.is-open:not(.is-panel-opening) .jukebox__panel {
+      max-height: none;
+      opacity: 1;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    :global(html[data-player-sheet-morphing]) .jukebox.is-sheet-morphing .jukebox__drawer-inner,
+    :global(html[data-player-sheet-morphing]) .jukebox.is-sheet-morphing.is-open:not(.is-panel-opening) .jukebox__drawer-inner {
+      padding: calc(var(--phone-handle, 1.5rem) + var(--phone-now-gap, 0.45rem)) 0 0;
+    }
+
+    :global(html[data-player-sheet-morphing]) .jukebox.is-sheet-morphing .jukebox__header,
+    :global(html[data-player-sheet-morphing]) .jukebox.is-sheet-morphing.is-player-expanded .jukebox__header,
+    :global(html[data-player-sheet-morphing]) .jukebox.is-sheet-morphing.is-open .jukebox__header {
+      opacity: 1;
+      visibility: visible;
+      max-height: none;
+      margin: 0 0 calc(0.5rem * var(--hud-scale));
+      padding-bottom: calc(0.45rem * var(--hud-scale));
+      border-bottom: 1px solid color-mix(in srgb, var(--color-border) 45%, transparent);
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    :global(html[data-player-sheet-dragging]) .jukebox.is-sheet-dragging .jukebox__panel,
+    :global(html[data-player-sheet-dragging]) .jukebox.is-sheet-dragging.is-open:not(.is-panel-opening) .jukebox__panel,
+    :global(html[data-player-sheet-dragging]) .jukebox.is-sheet-dragging.is-open.is-panel-opening .jukebox__panel {
+      max-height: none;
+      opacity: 1;
+      overflow: hidden;
+      pointer-events: none;
+      transition: none !important;
+    }
+
+    :global(html[data-player-sheet-dragging]) .jukebox.is-sheet-dragging .jukebox__drawer-inner,
+    :global(html[data-player-sheet-dragging]) .jukebox.is-sheet-dragging.is-open:not(.is-panel-opening) .jukebox__drawer-inner {
+      padding: calc(var(--phone-handle, 1.5rem) + var(--phone-now-gap, 0.45rem)) 0 0;
+    }
+
+    /* Same open header box as a click — stay in flow so drag is not a
+       second skeleton. Copy fades in only when the sheet is fully open. */
+    :global(html[data-player-sheet-dragging]) .jukebox.is-sheet-dragging .jukebox__header,
+    :global(html[data-player-sheet-dragging]) .jukebox.is-sheet-dragging.is-player-expanded .jukebox__header,
+    :global(html[data-player-sheet-dragging]) .jukebox.is-sheet-dragging.is-open .jukebox__header {
+      opacity: min(1, max(0, calc((var(--player-sheet-progress, 0) - 0.97) * 33)));
+      visibility: visible;
+      max-height: none;
+      margin: 0 0 calc(0.5rem * var(--hud-scale));
+      padding-bottom: calc(0.45rem * var(--hud-scale));
+      border-bottom: 1px solid color-mix(in srgb, var(--color-border) 45%, transparent);
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    :global(html[data-player-sheet-dragging]) .player-dock__arrow {
+      transform: rotate(calc(min(1, var(--player-sheet-progress, 0)) * 180deg));
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
     .jukebox,
     .jukebox__panel,
-    .jukebox__tool {
+    .jukebox__tool,
+    .jukebox__title-phone,
+    .player-dock__transport {
       transition: none !important;
     }
 
@@ -771,6 +1654,13 @@ const defaultLabel =
 
     .player-dock__soundwave span {
       transform: none;
+      transition: none;
+    }
+
+    :global(html[data-player-paused]) .player-dock__soundwave span:nth-child(n) {
+      height: var(--eq-paused-bar-height);
+      min-height: var(--eq-paused-bar-height);
+      max-height: var(--eq-paused-bar-height);
     }
   }
 </style>
