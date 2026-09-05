@@ -4,6 +4,13 @@
 
 **Prerequisites**: plan.md, spec.md, research.md, data-model.md, contracts/, quickstart.md
 
+**As-built (2026-09-05)**: Implementation shipped past the original task
+wording (4 icons, loop, vinyl-in-pill, detached socials tray, footer
+offset, hint-collapsed-only). Do **not** reopen T013–T036 to restore that
+sketch. Authority is [spec.md](./spec.md). Remaining work is **manual QA**
+against the updated [quickstart.md](./quickstart.md). Completed task text
+below is historical.
+
 **Tests**: None requested in spec. CI: `astro check`, `astro build`. Manual
 validation in `quickstart.md` (320 / 390 / 1023 / 1024).
 
@@ -51,7 +58,7 @@ validation in `quickstart.md` (320 / 390 / 1023 / 1024).
 - [X] T009 [US1] Offset `src/components/Footer.astro` above the phone dock stack (`bottom` + `env(safe-area-inset-bottom)`) so copyright and legal links are not covered
 - [X] T010 [P] [US1] Compact identity on phone in `src/components/Hero.astro` (stay top; do not move into docks)
 - [X] T011 [US1] Adjust `.stage` grid / inset variables in `src/styles/global.css` so 320px has no horizontal page scroll and dock controls stay on-screen
-- [ ] T012 [US1] Manually walk `specs/015-mobile-stage-hud/quickstart.md` Scenario 1 US1 checkpoint (390 and 320): stacked docks, no top socials, no sideways scroll. Confirm 1024px still shows `009`/`011` corner HUD. Do **not** fail this task if the player still looks like today’s jukebox.
+- [ ] T012 [US1] Manually walk `specs/015-mobile-stage-hud/quickstart.md` Scenario 1 (390 and 320): stacked docks, **five** content icons, no top socials, **no phone footer**, no sideways scroll. Confirm 1024px still shows `009`/`011` corner HUD.
 
 **Checkpoint**: Phone composition exists; laptop ≥1024px unchanged in placement
 
@@ -75,7 +82,7 @@ validation in `quickstart.md` (320 / 390 / 1023 / 1024).
 - [X] T020 [US2] Sync now-playing center text from active jukebox `label` in `src/lib/player-dock.ts` / `src/lib/stage-switch.ts` (never show `themeId`; ellipsis + accessible full name)
 - [X] T021 [US2] Boot `initPlayerDock()` from `src/components/Jukebox.astro` script (or `src/pages/index.astro`) after existing jukebox boot; set `html[data-player-dock-js]`
 - [X] T044 [US2] Restyle the open V-Flip list (`[data-jukebox]` drawer) below 1024px in `src/components/Jukebox.astro` as a dock-anchored sheet (full width minus insets, ~50svh max, internal scroll; player dock stays visible). Do **not** reuse the laptop side-panel composition as-is.
-- [ ] T022 [US2] Manually walk `specs/015-mobile-stage-hud/quickstart.md` Scenarios 2, 3, and 4 (hint ±5s; reduced-motion = 0 nods; vinyl list is a player-dock sheet)
+- [ ] T022 [US2] Manually walk `specs/015-mobile-stage-hud/quickstart.md` Scenarios 2, 3, and 4 (expand === V-Flip; no loop; hint ±5s **including expanded**; reduced-motion = 0 nods; playlist is theme tracks inside the player)
 
 **Checkpoint**: Player pill matches collapsed/expanded contract; playback toggles still `011`
 
@@ -94,7 +101,7 @@ validation in `quickstart.md` (320 / 390 / 1023 / 1024).
 - [X] T025 [US3] Box the on-demand triggers in `src/components/StagePanels.astro` (one pill/box, matching circular buttons including a socials trigger using `socialsLabel` / `socialsIcon`)
 - [X] T026 [US3] Restyle open About / Discography / Tour bodies below 1024px in `src/components/StagePanels.astro` as dock-anchored sheets (full width minus insets, ~50svh max, internal scroll; docks stay visible)
 - [X] T027 [US3] Confirm missing About still hides that control in `src/components/StagePanels.astro`; remaining buttons stay boxed
-- [ ] T028 [US3] Manually open About, Discography, and Tour at 390px per `specs/015-mobile-stage-hud/quickstart.md` Scenario 5 (sheet from content dock, not laptop side panel)
+- [ ] T028 [US3] Manually open About, Discography, and Tour at 390px per `specs/015-mobile-stage-hud/quickstart.md` Scenario 5 (same content **pill grows**; icons stay on the bottom; Discography scrolls inside; not a laptop side panel)
 
 **Checkpoint**: Content dock looks like the mockup cluster; panels are sheets
 
@@ -111,7 +118,7 @@ validation in `quickstart.md` (320 / 390 / 1023 / 1024).
 - [X] T029 [US4] CSS-place the **same** `.stage__socials` / `Channels` instance from `src/pages/index.astro` into the socials tray slot above the content dock below 1024px (`src/styles/global.css` / `src/components/StagePanels.astro`). MUST NOT mount a second `Channels.astro`.
 - [X] T030 [US4] Implement tray open/close from the socials trigger in `src/components/StagePanels.astro` + `src/lib/player-dock.ts` (or a small hook in the same module): boxed row **above** the content dock; `aria-expanded`; coming-soon not dead links
 - [X] T031 [US4] Tray overflow wraps or scrolls inside the box in `src/components/StagePanels.astro` / `src/components/Channels.astro` — no page sideways scroll at 320px
-- [ ] T032 [US4] Manually walk socials open/close and outbound links per `specs/015-mobile-stage-hud/quickstart.md` Scenario 5
+- [ ] T032 [US4] Manually walk Socials + Info per `specs/015-mobile-stage-hud/quickstart.md` Scenario 5 (channels **inside** the content pill; Info © + English legal pills → overlay; overlay Exit does not collapse Info)
 
 **Checkpoint**: No permanent phone socials bar; tray is on-demand
 
@@ -129,7 +136,7 @@ validation in `quickstart.md` (320 / 390 / 1023 / 1024).
 - [X] T034 [US5] Keep ≥1024px exclusive-open as `011` (panels among themselves; V-Flip may stay open) in `src/components/StagePanels.astro`
 - [X] T035 [US5] Hide phone player dock, content dock, and socials tray during intro in `src/styles/intro.css` (`data-intro-pending` / `data-intro-active`); do not run handle hint until intro is gone (`src/lib/player-dock.ts`)
 - [X] T036 [US5] Verify discography “Play on V-Flip” still switches stage from a phone sheet in `src/components/Discography.astro` (no playback-rule changes)
-- [ ] T037 [US5] Manually walk `specs/015-mobile-stage-hud/quickstart.md` Scenarios 6, 7, 8, and 9 (1023 phone HUD, 1024 laptop slider, keyboard, reduced motion)
+- [ ] T037 [US5] Manually walk `specs/015-mobile-stage-hud/quickstart.md` Scenarios 6, 7, 8, and 9 (no phone footer; 1023 phone HUD; 1024 laptop slider + hover labels; keyboard; reduced motion; click-outside)
 - [X] T045 [US5] Bind `matchMedia(PHONE_MQ)` in `src/lib/player-dock.ts`: on resize to ≥1024px stop swipe/hint (do not require collapsing); on resize back to phone restore collapsed unless the handle was left expanded this visit; tear down listeners on teardown
 
 **Checkpoint**: Sheets don’t stack; laptop and intro behave
@@ -145,7 +152,7 @@ validation in `quickstart.md` (320 / 390 / 1023 / 1024).
 - [X] T040 [P] Amend `<1024px` chrome pointer to `015` in `specs/011-vflip-now-playing/contracts/vflip-player-ui.md`
 - [X] T041 Confirm glitch hit boxes still cover full dock controls in `src/styles/glitch.css` / `src/components/Jukebox.astro` / `src/components/StagePanels.astro` (`009` FR-008)
 - [X] T042 Run `npm run check` and `npm run build`; fix regressions in touched files. Confirm no new cookies/embeds/routes (FR-020) and no second atmosphere stack or extra font files. Manual: landing still usable under constitution IV’s 2s mobile bar (same bar as `001`; no new load-test harness).
-- [ ] T043 Full manual pass of `specs/015-mobile-stage-hud/quickstart.md` (all scenarios)
+- [ ] T043 Full manual pass of `specs/015-mobile-stage-hud/quickstart.md` (all as-built scenarios)
 
 ---
 
@@ -209,8 +216,8 @@ Task: "Compact identity on phone in src/components/Hero.astro"
 ### Notes
 
 - Do **not** add npm packages
-- Do **not** change `011` shuffle/loop/dwell rules
+- Do **not** restore phone loop / vinyl / detached socials tray / footer strip
 - Mute must not live inside the handle
-- No-JS: transport remains visible (always expanded)
-- One `<Channels />` only — CSS moves it; never duplicate the list
-- Handle hit target ≥ 44×24px; `html[data-player-dock-js]` is the collapsed-transport hook
+- No-JS: collapsed floor still paints; expand is not guaranteed
+- One `<Channels />` only — park it in the content sheet; never duplicate the list
+- Handle hit target ≥ 44×24px; `html[data-player-dock-js]` is the JS-ready hook

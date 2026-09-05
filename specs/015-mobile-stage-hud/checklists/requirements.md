@@ -31,11 +31,13 @@
 
 ## Notes
 
-- Validation 2026-09-01 (iteration 1): all items pass.
+- Validation 2026-09-01 (iteration 1): all items pass against the original mock.
 - Owner defaults from IDEA-013 were encoded as assumptions (phone mute = toggle
   only; boxed clusters; exclusive sheets on small screens; laptop HUD unchanged).
-  No clarification round required.
-- Visual annex: `docs/mockups/mobile-stage-hud.jpg` (chevron in the sketch is
-  rejected in-spec; socials trigger matches the other dock buttons).
-- Ready for `/speckit-plan`. `/speckit-clarify` is optional if the owner wants
-  to revisit breakpoint cutoff or now-playing presentation (label vs sheet).
+- Visual annex `docs/mockups/mobile-stage-hud.jpg` is **historical**. As-built
+  2026-09-05: five-icon growing content pill, Socials in-sheet, Info legal,
+  expand === V-Flip, no phone loop/vinyl, footer hidden, hint including
+  expanded. See [spec.md](../spec.md).
+- Re-checked 2026-09-05 after the as-built sync: no `[NEEDS CLARIFICATION]`
+  markers; leftover visual polish (open overshoot / playlist jump) is **not**
+  specified as required work.

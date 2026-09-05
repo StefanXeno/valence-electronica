@@ -186,15 +186,18 @@ landing intro copy (`introLead`, `introName`), and optional **HUD icon overrides
   handle** (arrow on top of the pill). Phone HUD is below 1024px; laptop HUD is unchanged.
 - `socialsIcon` — optional token or emoji for the phone socials trigger (default token:
   `socials`, a connected-nodes / share glyph — not a chevron)
-- `infoTitle` / `infoIcon` — phone Info sheet (copyright + Impressum + Datenschutzerklärung).
-  Default title: Info. Default token: `info` (circled i). Laptop still uses the footer.
+- `infoTitle` / `infoIcon` — phone Info sheet (© top-right + English **Imprint** /
+  **Privacy Policy** pills that open the existing legal overlay). Default title:
+  Info. Default token: `info` (circled i). Laptop still uses the footer.
 
 **Track info in V-Flip (optional):**
 
 - `trackInfoTitle` — section heading inside open V-Flip (default: Track info)
 - `releasedLabel` — label before the release date (default: Released)
 - `stageButtonLabel` — accessible name for the discography play control (icon-only; not shown as button text)
-- `currentlyPlayingLabel` — accessible name for the active-row playing indicator (soundwave; not shown as visible text)
+- `currentlyPlayingLabel` — discography now-playing indicator name; on phone also
+  the expanded player header while playlist is off (visible). Playlist on uses
+  `jukeboxPanelTitle` (`V-Flip aka. Jukebox`). `jukeboxPanelTooltip` is laptop-only.
 - `listenOnLabel` — label before streaming platform icons (default: Listen On)
 - `emptyTrackLinks` — when a track has no `listenLinks`
 
@@ -202,13 +205,15 @@ landing intro copy (`introLead`, `introName`), and optional **HUD icon overrides
 
 - Leave an `*Icon` field out to use the default pictogram for that control.
 - Set a **token** to pick a built-in icon: `jukebox`, `about`, `discography`, `tour`,
-  `catalog`, `info`, `shuffle`, `loop`, `socials`, or `play`.
+  `catalog`, `info`, `shuffle`, `loop`, `socials`, `play`, `pause`, or `playlist`.
 
-**Label reveal (visitor-facing):** Dock icons show a floating label **above** the control on
-hover/focus. Mute/volume inside V-Flip uses the same floater for tooltips. Social icons show
-the label **below**. On **phone** (viewport below 1024px) the landing uses a bottom-stacked
-HUD: collapsed now-playing pill + boxed content dock + on-demand socials tray. Laptop layout
-from 1024px up is unchanged.
+**Label reveal (visitor-facing):** On **laptop** (1024px up), dock icons show a floating
+label **above** the control on hover/focus. Mute/volume inside V-Flip uses the same floater.
+Social icons show the label **below**. On **phone** (viewport below 1024px) those floaters
+are **off** (no hover tooltips, no “pick a track” title). Phone HUD: floor-pinned player
+pill (expand **is** V-Flip; shuffle + play/pause + playlist; no loop) + one **five-icon**
+content pill (About, Discography, Tour, Socials, Info). Socials open **inside** that pill.
+Legal is Info, not the footer.
 
 **Do not break:** Region title fields still control readable labels and accessibility.
 Track metadata (blurb, credits, mentions, listen links) appears **inside open V-Flip**, not
