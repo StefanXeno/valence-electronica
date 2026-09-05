@@ -21,6 +21,9 @@ Thumbs.db
 *.tmp
 *.swp
 
+# HUD verify artifacts (agent self-testing; never commit)
+.verify-hud/
+
 # local drop-zone for oversized source assets (never ship)
 tmp/
 
