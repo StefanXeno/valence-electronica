@@ -36,6 +36,15 @@ export function isIntroActive(): boolean {
   return html.hasAttribute('data-intro-pending') || html.hasAttribute('data-intro-active');
 }
 
+/** Phone play/pause (and any playable video pause). CSS + shuffle both honor this. */
+export function isPlayerPaused(): boolean {
+  return document.documentElement.hasAttribute('data-player-paused');
+}
+
+export function setPlayerPaused(paused: boolean): void {
+  document.documentElement.toggleAttribute('data-player-paused', paused);
+}
+
 export type PlaybackMode = {
   shuffle: boolean;
   loop: boolean;
@@ -69,12 +78,16 @@ export function clearAdvanceTimer(): void {
   }
 }
 
+function isAdvanceBlocked(): boolean {
+  return !mode.shuffle || mode.loop || isIntroActive() || isPlayerPaused();
+}
+
 export function scheduleAdvance(dwellSec: number, fire: () => void): void {
   clearAdvanceTimer();
-  if (!mode.shuffle || mode.loop || isIntroActive()) return;
+  if (isAdvanceBlocked()) return;
   advanceTimer = setTimeout(() => {
     advanceTimer = undefined;
-    if (!mode.shuffle || mode.loop || isIntroActive()) return;
+    if (isAdvanceBlocked()) return;
     fire();
   }, Math.max(0, dwellSec) * 1000);
 }
@@ -84,7 +97,7 @@ export function restartAdvanceClock(
   videoDurationSec: number | null | undefined,
   fire: () => void,
 ): void {
-  if (!mode.shuffle || mode.loop || isIntroActive()) {
+  if (isAdvanceBlocked()) {
     clearAdvanceTimer();
     return;
   }
@@ -103,6 +116,23 @@ export function watchIntroGate(onClear: () => void, onRestart: () => void): () =
   observer.observe(document.documentElement, {
     attributes: true,
     attributeFilter: ['data-intro-pending', 'data-intro-active'],
+  });
+  return () => observer.disconnect();
+}
+
+/** Pause holds the shuffle clock; play restarts dwell. Same shape as the intro gate. */
+export function watchPlayerPause(onPause: () => void, onResume: () => void): () => void {
+  const observer = new MutationObserver(() => {
+    if (isPlayerPaused()) {
+      clearAdvanceTimer();
+      onPause();
+    } else {
+      onResume();
+    }
+  });
+  observer.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ['data-player-paused'],
   });
   return () => observer.disconnect();
 }

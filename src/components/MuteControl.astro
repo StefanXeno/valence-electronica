@@ -80,6 +80,11 @@ const {
 
 <script>
   import { createContinuousGlitch, isGlitchThemeActive, playElementGlitch } from '../lib/glitch';
+  import { PHONE_MQ } from '../lib/player-dock';
+
+  /** Phone HUD unmuted level (no slider). Laptop keeps the 0.7 default. */
+  const PHONE_VOLUME = 0.5;
+  const DESKTOP_VOLUME = 0.7;
 
   function initMuteControl() {
     const root = document.querySelector<HTMLElement>('[data-atmosphere]');
@@ -95,8 +100,8 @@ const {
     const muteTooltip = control.dataset.muteTooltip ?? 'Mute';
 
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-    const phoneHud = window.matchMedia('(max-width: 1023px)');
-    let lastVolume = Number(slider.value) || 0.7;
+    const phoneHud = window.matchMedia(PHONE_MQ);
+    let lastVolume = phoneHud.matches ? PHONE_VOLUME : Number(slider.value) || DESKTOP_VOLUME;
     let wasMuted = true;
     let glitchTimer: number | undefined;
     let pointerOverMute = false;
@@ -165,7 +170,10 @@ const {
         wasMuted = true;
         return;
       }
-      if (!hasAudio) {
+      // Laptop: hide mute when the entry has no audio.
+      // Phone: keep the speaker in the floor row so the pill chrome
+      // (wave | title | mute) does not collapse on no-audio tracks.
+      if (!hasAudio && !phoneHud.matches) {
         setMuteSlotVisible(false);
         hoverGlitch.stop();
         applySoundUi(true);
@@ -225,7 +233,13 @@ const {
 
       if (video.muted || video.volume === 0) {
         video.muted = false;
-        video.volume = lastVolume > 0 ? lastVolume : 0.7;
+        // Phone: always 50% when unmuted. Laptop: last slider / 0.7 default.
+        video.volume = phoneHud.matches
+          ? PHONE_VOLUME
+          : lastVolume > 0
+            ? lastVolume
+            : DESKTOP_VOLUME;
+        lastVolume = video.volume;
         slider.value = String(video.volume);
       } else {
         lastVolume = video.volume > 0 ? video.volume : lastVolume;
@@ -248,6 +262,15 @@ const {
     root.addEventListener('bg-state-change', sync);
     reduceMotion.addEventListener('change', () => {
       if (reduceMotion.matches) hoverGlitch.stop();
+      sync();
+    });
+    phoneHud.addEventListener('change', (event) => {
+      if (event.matches) {
+        lastVolume = PHONE_VOLUME;
+        const video = getVideo();
+        if (video) video.volume = PHONE_VOLUME;
+        slider.value = String(PHONE_VOLUME);
+      }
       sync();
     });
     sync();
@@ -303,14 +326,17 @@ const {
     flex: none;
   }
 
-  .volume-control--in-jukebox .volume-control__toggle {
-    position: absolute;
-    left: 0;
-    top: 0;
-    z-index: 1;
-    width: var(--control-size);
-    height: var(--control-size);
-    flex: none;
+  /* Laptop only — phone mute is a grid cell, not an overlay at top:0. */
+  @media (min-width: 1024px) {
+    .volume-control--in-jukebox .volume-control__toggle {
+      position: absolute;
+      left: 0;
+      top: 0;
+      z-index: 1;
+      width: var(--control-size);
+      height: var(--control-size);
+      flex: none;
+    }
   }
 
   .volume-control--in-jukebox .volume-control__slider-wrap {
@@ -422,6 +448,19 @@ const {
     .volume-control--in-jukebox[data-sound='off'] {
       width: var(--control-size);
       min-width: var(--control-size);
+      max-width: var(--control-size);
+      height: var(--control-size);
+      display: grid;
+      place-items: center;
+    }
+
+    .volume-control--in-jukebox .volume-control__toggle {
+      position: relative;
+      top: auto;
+      left: auto;
+      inset: auto;
+      width: var(--control-size);
+      height: var(--control-size);
     }
   }
 

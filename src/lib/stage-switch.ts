@@ -14,12 +14,14 @@ import {
   clearAdvanceTimer,
   getPlaybackMode,
   initPlaybackDefaults,
+  isPlayerPaused,
   pickOtherId,
   readVideoDuration,
   restartAdvanceClock,
   setLoop,
   setShuffle,
   watchIntroGate,
+  watchPlayerPause,
 } from './playback';
 import { createContinuousGlitch, isGlitchThemeActive } from './glitch';
 import { syncNowPlayingLabel } from './player-dock';
@@ -355,6 +357,10 @@ export function syncStageUi(activeId: string) {
     } else {
       delete item.dataset.discogActive;
     }
+    if (item.closest('.discog[data-theme-tracks]')) {
+      const listOpen = Boolean(item.closest('.jukebox')?.classList.contains('is-theme-tracks'));
+      item.classList.toggle('is-playlist-collapsed', !listOpen && !on);
+    }
   });
 
   document.querySelectorAll<HTMLButtonElement>('[data-shuffle-toggle]').forEach((button) => {
@@ -381,6 +387,7 @@ function initPlaybackToggleGlitch(): () => void {
       btn,
       createContinuousGlitch(btn, () => {
         if (reduceMotion.matches || !isGlitchThemeActive()) return false;
+        if (btn.matches('[data-shuffle-toggle]') && isPlayerPaused()) return false;
         return btn.getAttribute('aria-pressed') === 'true';
       }),
     );
@@ -390,7 +397,8 @@ function initPlaybackToggleGlitch(): () => void {
     toggles.forEach((btn) => {
       const control = loops.get(btn);
       if (!control) return;
-      if (btn.getAttribute('aria-pressed') === 'true' && isGlitchThemeActive()) {
+      const shuffleHeld = btn.matches('[data-shuffle-toggle]') && isPlayerPaused();
+      if (btn.getAttribute('aria-pressed') === 'true' && isGlitchThemeActive() && !shuffleHeld) {
         control.start();
       } else {
         control.stop();
@@ -401,7 +409,7 @@ function initPlaybackToggleGlitch(): () => void {
   reduceMotion.addEventListener('change', sync);
   new MutationObserver(sync).observe(document.documentElement, {
     attributes: true,
-    attributeFilter: ['data-hud-glitch'],
+    attributeFilter: ['data-hud-glitch', 'data-player-paused'],
   });
 
   return sync;
@@ -448,6 +456,7 @@ export function initStageSwitch(
   };
 
   const hop = () => {
+    if (isPlayerPaused()) return;
     const video = document.querySelector<HTMLVideoElement>('[data-bg-video]');
     const pool = shuffleCandidateIds(catalogIds, byId, isVideoUnmuted(video));
     const isAllowed = (id: string) => pool.includes(id);
@@ -529,6 +538,17 @@ export function initStageSwitch(
   watchIntroGate(
     () => clearAdvanceTimer(),
     () => restartClock(),
+  );
+
+  watchPlayerPause(
+    () => {
+      clearAdvanceTimer();
+      syncPlaybackToggleGlitch?.();
+    },
+    () => {
+      syncPlaybackToggleGlitch?.();
+      restartClock();
+    },
   );
 
   syncPlaybackToggleGlitch = initPlaybackToggleGlitch();

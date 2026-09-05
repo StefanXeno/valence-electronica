@@ -1,3 +1,5 @@
+import { PHONE_MQ } from './player-dock';
+
 const REDUCED_MOTION = '(prefers-reduced-motion: reduce)';
 const LABEL_GAP_PX = 6;
 
@@ -16,6 +18,7 @@ export function initLabelReveal(): void {
   if (!floater) return;
 
   const reduceMotion = window.matchMedia(REDUCED_MOTION);
+  const phoneHud = window.matchMedia(PHONE_MQ);
   let active: HTMLElement | null = null;
 
   const hide = () => {
@@ -58,7 +61,24 @@ export function initLabelReveal(): void {
     floater.classList.toggle('is-reduced', reduceMotion.matches);
   };
 
+  const syncNativeTitles = () => {
+    document.querySelectorAll<HTMLElement>('.jukebox__title-laptop').forEach((el) => {
+      const stored = el.dataset.desktopTitle;
+      if (phoneHud.matches) el.removeAttribute('title');
+      else if (stored) el.setAttribute('title', stored);
+    });
+    document
+      .querySelectorAll<HTMLElement>(
+        '[data-now-playing], .jukebox__title, .jukebox__title-phone, .jukebox__track-select',
+      )
+      .forEach((el) => {
+        el.removeAttribute('title');
+      });
+    if (phoneHud.matches) hide();
+  };
+
   const show = (el: HTMLElement) => {
+    if (phoneHud.matches) return;
     const label = el.dataset.hudLabel?.trim();
     if (!label) return;
     const panel = el.closest('details');
@@ -94,6 +114,16 @@ export function initLabelReveal(): void {
   });
 
   reduceMotion.addEventListener('change', () => {
+    if (phoneHud.matches) {
+      hide();
+      return;
+    }
     if (active) positionFloater(active, active.dataset.hudLabel ?? '');
   });
+
+  phoneHud.addEventListener('change', () => {
+    syncNativeTitles();
+  });
+
+  syncNativeTitles();
 }

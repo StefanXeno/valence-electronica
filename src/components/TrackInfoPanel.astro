@@ -318,4 +318,39 @@ const tracks = trackOrder.map((id) => byId.get(id)).filter((track): track is Non
     color: var(--color-text-muted);
     font-style: italic;
   }
+
+  /*
+   * Phone V-Flip: current track only. Sibling rows stay in the DOM so
+   * laptop (≥1024) keeps the full playlist and syncStageUi can still
+   * move aria-pressed / [hidden] when the playing track changes.
+   */
+  @media (max-width: 1023px) {
+    .jukebox__track-row:not(:has(.jukebox__track-select[aria-pressed='true'])) {
+      display: none;
+    }
+
+    .jukebox__track-row:has(.jukebox__track-select[aria-pressed='true']) {
+      border-color: color-mix(in srgb, var(--color-accent) 55%, var(--color-border));
+      background: color-mix(in srgb, var(--color-accent) 8%, transparent);
+    }
+
+    /* Title is the playing track, not a playlist picker. */
+    .jukebox__track-select {
+      pointer-events: none;
+      cursor: default;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .track-info__blurb,
+    .track-info__credits,
+    .track-info__mentions {
+      display: none;
+    }
+
+    .jukebox__track-meta {
+      max-height: none;
+      overflow: visible;
+    }
+  }
 </style>
