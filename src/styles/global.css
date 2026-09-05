@@ -64,6 +64,27 @@ a {
   color: var(--color-accent-alt);
 }
 
+/*
+ * Shared Channels / social-circle chrome (Channels.astro `li a`).
+ * Info legal pills reuse this class — same fill, stroke, radius, hover.
+ * Size stays with the caller (2.5rem circles vs ≥44px text pills).
+ */
+.channel-btn {
+  box-sizing: border-box;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-surface) 88%, transparent);
+  backdrop-filter: blur(6px);
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+a.channel-btn:hover,
+a.channel-btn:focus-visible {
+  border-color: var(--color-accent);
+  color: var(--color-accent-alt);
+}
+
 :focus-visible {
   outline: 2px solid var(--color-accent-alt);
   outline-offset: 3px;
@@ -166,74 +187,229 @@ a {
     --hud-scale: 1;
     --phone-handle: 1.5rem;
     --phone-stack-gap: 0.45rem;
-    --phone-player-h: calc(var(--control-size) + var(--phone-handle) + 0.55rem);
-    --phone-content-h: calc(var(--control-size) + 0.55rem);
-    --phone-tray-h: calc(var(--control-size) + 1.15rem);
-    --hud-dock-bottom: calc(0.3rem + env(safe-area-inset-bottom, 0px));
-  }
-
-  html[data-player-dock-expanded] {
-    --phone-player-h: calc(2 * var(--control-size) + var(--phone-handle) + 0.85rem);
+    --phone-safe-bottom: env(safe-area-inset-bottom, 0px);
+    /* Extra air between expand handle and now-playing title (collapsed + expanded). */
+    --phone-now-gap: 0.45rem;
+    /* Collapsed player only — matches the floor row + safe-area inside the chrome. */
+    --phone-player-h: calc(
+      var(--control-size) + var(--phone-now-gap) + var(--phone-safe-bottom)
+    );
+    /* Equal chrome air (collapsed pill): top === bottom. Keep compact so the 5-icon bar stays short. */
+    --phone-bar-pad: 0.28rem;
+    /* Open sheet / socials: equal top+bottom, visibly roomier than collapsed. */
+    --phone-open-pad: 0.65rem;
+    /* Shared L/R inset inside the content pill and the socials row (left === right). */
+    --phone-inline-pad: 0.45rem;
+    /* Vertical air between sheet/socials row and the 5 dock icons. Grows the pill — do not steal chrome pad. */
+    --phone-body-gap: 0.65rem;
+    --phone-tray-gap: var(--phone-body-gap);
+    --phone-content-h: calc(var(--control-size) + 2 * var(--phone-bar-pad));
+    /* Collapsed-bar capsule radius. Keep constant on open — never interpolate 999px → 0.85rem. */
+    --phone-pill-radius: calc(var(--phone-content-h) / 2);
+    /* Phone content-pill morph (About / socials). Slightly longer than desktop 280ms. */
+    --phone-panel-morph-dur: 320ms;
+    /* Socials channel button row (Channels li = 2.5rem). Does not include bar/open pad. */
+    --phone-tray-h: calc(2.5rem * var(--hud-scale));
+    --hud-dock-bottom: 0px;
+    --phone-pill-shadow: 0 0.4rem 1.2rem color-mix(in srgb, black 45%, transparent);
+    --phone-rise-ease: cubic-bezier(0.4, 0, 0.2, 1);
+    /* Shared morph timing (width/height/chrome) — not a scale bloom. */
+    --phone-bloom-dur: 280ms;
+    --phone-bloom-ease: var(--phone-rise-ease);
+    /* Rounded top, square floor — small enough that sides stay vertical. */
+    --phone-player-radius: 1.25rem;
+    --phone-chrome-pad: 0.65rem;
+    /* Shared left/right gutter for player + content + socials + footer. */
+    --phone-dock-inset: clamp(1rem, 5vw, 1.25rem);
   }
 
   .stage {
     overflow-x: clip;
   }
 
+  .hud-label-reveal,
+  .hud-label-reveal.is-visible {
+    display: none;
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .jukebox,
+  .jukebox *,
+  .jukebox textarea,
+  .jukebox input {
+    resize: none;
+  }
+
+  .jukebox::-webkit-resizer,
+  .jukebox *::-webkit-resizer {
+    display: none;
+  }
+
   .stage__identity {
-    max-width: calc(100vw - 2 * var(--hud-inset));
+    /* 100% of the fixed containing block — not 100vw (scrollbar / visual viewport). */
+    max-width: calc(100% - 2 * var(--hud-inset));
   }
 
   .stage-dock {
+    z-index: 3;
+    left: var(--phone-dock-inset);
+    right: var(--phone-dock-inset);
+    width: auto;
+    max-width: 100%;
+    box-sizing: border-box;
     flex-direction: column-reverse;
     align-items: stretch;
     justify-content: flex-end;
-    gap: var(--phone-stack-gap);
+    gap: 0;
+    bottom: var(--hud-dock-bottom);
   }
 
   .stage-dock__left,
   .stage-dock__right {
-    width: 100%;
-    max-width: none;
+    position: absolute;
+    left: 0;
+    right: 0;
+    width: auto;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
     flex: 0 0 auto;
     justify-content: stretch;
     flex-wrap: nowrap;
   }
 
-  /* One Channels tree: not a top-right bar. Tray slot above the content dock. */
+  /* Player always paints over content dock / footer during expand+collapse.
+     Height-0 floor anchor: the pill is position:absolute; bottom:0 inside this. */
+  .stage-dock__left {
+    bottom: 0;
+    z-index: 5;
+    overflow: visible;
+  }
+
+  .stage-dock__right {
+    bottom: calc(var(--phone-player-h) + var(--phone-stack-gap));
+    z-index: 2;
+    /* stretch is not valid on justify-content — keep the pill full dock width. */
+    align-items: stretch;
+    justify-content: flex-start;
+  }
+
+  html[data-socials-open] .stage-dock__right,
+  html[data-sheet-open] .stage-dock__right,
+  .stage-dock__right:has([data-stage-panel][open]) {
+    z-index: 3;
+  }
+
+  /*
+   * No-JS fallback: overlay the one Channels tree in the dock's grown
+   * padding-top. JS parks the same node inside .stage-panels__sheet (below).
+   */
   .stage__socials {
     top: auto;
-    right: var(--hud-inset);
-    left: var(--hud-inset);
+    right: var(--phone-dock-inset);
+    left: var(--phone-dock-inset);
     bottom: calc(
-      var(--hud-dock-bottom) + var(--phone-player-h) + var(--phone-content-h) + var(--phone-stack-gap)
+      var(--hud-dock-bottom) + var(--phone-player-h) + var(--phone-stack-gap) + var(--phone-bar-pad) +
+        var(--control-size)
     );
     max-width: none;
     visibility: hidden;
     pointer-events: none;
     opacity: 0;
+    transform: none;
+    transition:
+      opacity 220ms var(--phone-bloom-ease, var(--phone-rise-ease)),
+      visibility 0s linear 280ms;
+  }
+
+  /* Keep socials parked on the icon row while the pill stays open (cross-switch). */
+  html[data-sheet-open] .stage__socials,
+  html[data-socials-open] .stage__socials {
+    bottom: calc(
+      var(--hud-dock-bottom) + var(--phone-player-h) + var(--phone-stack-gap) + var(--phone-open-pad) +
+        var(--phone-body-gap) + var(--control-size)
+    );
   }
 
   html[data-socials-open] .stage__socials {
+    z-index: 4;
     visibility: visible;
     pointer-events: auto;
     opacity: 1;
+    transition:
+      opacity 220ms var(--phone-bloom-ease, var(--phone-rise-ease)),
+      visibility 0s;
+  }
+
+  /*
+   * JS-parked: in-sheet, clipped by --phone-sheet-h. Icons stay in
+   * .stage-panels__icons (z-index 2) so they ride the growing chrome.
+   */
+  .stage-panels__sheet .stage__socials {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: auto;
+    z-index: 1;
+    max-width: none;
+    transform: none;
+  }
+
+  html[data-sheet-open] .stage-panels__sheet .stage__socials,
+  html[data-socials-open] .stage-panels__sheet .stage__socials {
+    bottom: auto;
+  }
+
+  /* Expand/close: reveal by sheet height only — don't fade in outside the pill. */
+  html[data-socials-open] .stage-panels.is-sheet-open:not(.is-cross-switching) .stage-panels__sheet .stage__socials,
+  html[data-socials-open] .stage-panels.is-sheet-closing .stage-panels__sheet .stage__socials {
+    opacity: 1;
+    visibility: visible;
+    transition: none;
   }
 
   .stage__socials .channels {
     width: 100%;
+    max-width: 100%;
     box-sizing: border-box;
-    padding: 0.35rem 0.45rem;
-    border: 1px solid var(--color-border);
-    border-radius: calc(0.85rem * var(--hud-scale));
-    background: color-mix(in srgb, var(--color-surface) 92%, transparent);
-    backdrop-filter: blur(10px);
+    /* Same L/R inset as .stage-panels — both rows share one chrome width. */
+    padding: 0 var(--phone-inline-pad);
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    backdrop-filter: none;
+    box-shadow: none;
   }
 
   .stage__socials .channels ul {
-    justify-content: center;
-    flex-wrap: wrap;
-    max-height: min(30svh, 8rem);
-    overflow: auto;
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 100%;
+    gap: 0;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .stage__socials .channels li {
+    flex: 0 0 auto;
+  }
+
+  .stage-panels__sheet .stage__socials .channels {
+    /* Pill already applies --phone-inline-pad. */
+    padding: 0;
+  }
+}
+
+@media (max-width: 1023px) and (prefers-reduced-motion: reduce) {
+  .stage__socials,
+  html[data-socials-open] .stage__socials {
+    transform: none;
+    transition: none;
   }
 }

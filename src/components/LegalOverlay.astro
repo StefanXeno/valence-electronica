@@ -19,13 +19,15 @@ const pathWithoutBase = Astro.url.pathname.startsWith(basePath)
 const openSlug = pathWithoutBase.match(/^\/legal\/([^/]+)\/?$/)?.[1] ?? null;
 ---
 
-{
-  rendered.map(({ entry, Content }) => (
-    <LegalPanel title={entry.data.title} slug={entry.id} open={entry.id === openSlug}>
-      <Content />
-    </LegalPanel>
-  ))
-}
+<div id="legal-overlay">
+  {
+    rendered.map(({ entry, Content }) => (
+      <LegalPanel title={entry.data.title} slug={entry.id} open={entry.id === openSlug}>
+        <Content />
+      </LegalPanel>
+    ))
+  }
+</div>
 
 <script
   is:inline

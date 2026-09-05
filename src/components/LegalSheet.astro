@@ -1,0 +1,119 @@
+---
+import { getCollection } from 'astro:content';
+import { getChrome } from '../lib/stage';
+import { withBase } from '../lib/url';
+
+const [legalPages, chrome] = await Promise.all([getCollection('legal'), getChrome()]);
+
+const order = ['imprint', 'privacy'];
+const pages = [...legalPages].sort((a, b) => {
+  const ai = order.indexOf(a.id);
+  const bi = order.indexOf(b.id);
+  return (ai === -1 ? order.length : ai) - (bi === -1 ? order.length : bi);
+});
+
+const buttonLabel = (id: string, fallback: string) => {
+  if (id === 'imprint') return chrome.imprintButton;
+  if (id === 'privacy') return chrome.privacyButton;
+  return fallback;
+};
+---
+
+<!--
+  Phone Info sheet only. Same data-legal-slug hook as Footer — LegalOverlay
+  intercepts and opens the existing fullscreen LegalPanel (no in-pill accordion).
+  Each destination is its own <li> + .channel-btn so the two labels cannot collapse
+  into one underlined run (JSX map emits adjacent <a>s; footer `nav a` underline
+  must not win). HUD labels are chrome imprintButton / privacyButton (English);
+  legal markdown titles stay on the fullscreen panel.
+-->
+<nav class="legal-sheet" aria-label="Legal">
+  <ul class="legal-sheet__list">
+    {
+      pages.map((page) => {
+        const label = buttonLabel(page.id, page.data.title);
+        return (
+          <li class="legal-sheet__item">
+            <a
+              class="channel-btn legal-sheet__btn glitch-hit"
+              href={withBase(`/legal/${page.id}`)}
+              data-legal-slug={page.id}
+              aria-label={label}
+            >
+              {label}
+            </a>
+          </li>
+        );
+      })
+    }
+  </ul>
+</nav>
+
+<style is:global>
+  /* is:global: beat leaked `a` / `nav a` underline + any scoped :where() miss. */
+  .legal-sheet {
+    display: block;
+    margin: 0;
+    /* Pad inside overflow:hidden so 44px pill chrome (1px + 999 radius) isn't sheared. */
+    padding: calc(0.45rem * var(--hud-scale)) 0;
+    overflow-x: hidden;
+    overflow-y: hidden;
+  }
+
+  .legal-sheet__list {
+    list-style: none;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    gap: calc(0.45rem * var(--hud-scale));
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+    padding-inline-start: 0;
+    /* Both axes visible — parent already clips x. overflow-x:hidden here
+       computes overflow-y to auto and was slicing the first pill row. */
+    overflow: visible;
+  }
+
+  .legal-sheet__item {
+    display: flex;
+    flex: 1 1 0;
+    min-width: 0;
+    list-style: none;
+  }
+
+  .legal-sheet__item::marker {
+    content: none;
+  }
+
+  /* Pill-sized Channels chrome (.channel-btn) — text only, ≥44px hit. */
+  .legal-sheet a.legal-sheet__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1 1 auto;
+    width: 100%;
+    min-width: 0;
+    min-height: max(44px, calc(2.5rem * var(--hud-scale)));
+    padding: calc(0.2rem * var(--hud-scale)) calc(0.45rem * var(--hud-scale));
+    font-family: var(--font-display);
+    font-size: calc(11px * var(--hud-scale));
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    line-height: 1.15;
+    text-align: center;
+    text-decoration: none;
+    text-transform: none;
+    white-space: normal;
+    overflow-wrap: break-word;
+    color: var(--color-text);
+  }
+
+  .legal-sheet a.legal-sheet__btn:hover,
+  .legal-sheet a.legal-sheet__btn:focus-visible {
+    border-color: var(--color-accent);
+    color: var(--color-accent-alt);
+  }
+</style>

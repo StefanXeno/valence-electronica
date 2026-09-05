@@ -1,10 +1,14 @@
 ---
 import AboutPanel from './AboutPanel.astro';
 import Discography from './Discography.astro';
+import LegalSheet from './LegalSheet.astro';
 import TourDates from './TourDates.astro';
 import HudIcon from './HudIcon.astro';
+import site from '../data/site.json';
 import { getBackgroundConfig } from '../lib/background';
 import { getAboutEntry, getChrome } from '../lib/stage';
+
+const year = new Date().getFullYear();
 
 const [chrome, about, { defaultVideoId }] = await Promise.all([
   getChrome(),
@@ -35,52 +39,106 @@ const panels = [
 ---
 
 <div class="stage-panels" data-stage-panels>
-  {
-    panels.map((panel) => (
-      <details
-        class:list={['stage-panel', panel.body === 'discography' && 'stage-panel--discography']}
-        data-stage-panel={panel.body}
+  <div class="stage-panels__sheet">
+    {
+      panels.map((panel) => (
+        <details
+          class:list={['stage-panel', panel.body === 'discography' && 'stage-panel--discography']}
+          id={`stage-panel-${panel.body}`}
+          data-stage-panel={panel.body}
+        >
+          <summary
+            class="stage-panel__summary glitch-hit"
+            data-hud-label={panel.title}
+            data-hud-label-anchor="above"
+          >
+            <span class="visually-hidden">{panel.title}</span>
+            <HudIcon token={panel.icon} emoji={panel.emoji} />
+            <span class="stage-panel__label">{panel.title}</span>
+          </summary>
+          <div class="stage-panel__body">
+            <h2 class="stage-panel__sheet-title">
+              <HudIcon token={panel.icon} emoji={panel.emoji} />
+              <span class="stage-panel__sheet-title-text">{panel.title}</span>
+            </h2>
+            <div class="stage-panel__scroll">
+              {panel.body === 'about' && <AboutPanel />}
+              {panel.body === 'discography' && (
+                <Discography chrome={chrome} defaultId={defaultVideoId} />
+              )}
+              {panel.body === 'tour' && <TourDates chrome={chrome} />}
+            </div>
+          </div>
+        </details>
+      ))
+    }
+    <details class="stage-panel stage-panel--info" id="stage-panel-info" data-stage-panel="info">
+      <summary
+        class="stage-panel__summary glitch-hit"
+        data-hud-label={chrome.infoTitle}
+        data-hud-label-anchor="above"
       >
-        <summary
-          class="stage-panel__summary glitch-hit"
-          data-hud-label={panel.title}
-          data-hud-label-anchor="above"
+        <span class="visually-hidden">{chrome.infoTitle}</span>
+        <HudIcon token={chrome.infoIcon} emoji={chrome.infoIconEmoji} />
+        <span class="stage-panel__label">{chrome.infoTitle}</span>
+      </summary>
+      <div class="stage-panel__body">
+        <h2 class="stage-panel__sheet-title">
+          <HudIcon token={chrome.infoIcon} emoji={chrome.infoIconEmoji} />
+          <span class="stage-panel__sheet-title-text">{chrome.infoTitle}</span>
+          <span class="stage-panel__sheet-copy glitch-hit">© {year} {site.artist.name}</span>
+        </h2>
+        <div class="stage-panel__scroll">
+          <LegalSheet />
+        </div>
+      </div>
+    </details>
+  </div>
+  <div class="stage-panels__icons" data-stage-panel-icons>
+    {
+      panels.map((panel) => (
+        <button
+          type="button"
+          class="stage-panel__summary stage-panel__icon glitch-hit"
+          data-stage-panel-trigger={panel.body}
+          aria-expanded="false"
+          aria-controls={`stage-panel-${panel.body}`}
+          aria-label={panel.title}
         >
           <span class="visually-hidden">{panel.title}</span>
           <HudIcon token={panel.icon} emoji={panel.emoji} />
-          <span class="stage-panel__label">{panel.title}</span>
-        </summary>
-        <div class="stage-panel__body">
-          {panel.body === 'about' && <AboutPanel />}
-          {panel.body === 'discography' && (
-            <Discography chrome={chrome} defaultId={defaultVideoId} />
-          )}
-          {panel.body === 'tour' && <TourDates chrome={chrome} />}
-        </div>
-      </details>
-    ))
-  }
-  <div class="stage-panel stage-panel--socials">
+        </button>
+      ))
+    }
     <button
       type="button"
-      class="stage-panel__summary glitch-hit"
+      class="stage-panel__summary stage-panel__icon stage-panel__icon--socials glitch-hit"
       data-socials-trigger
-      data-hud-label={chrome.socialsLabel}
-      data-hud-label-anchor="above"
       aria-expanded="false"
       aria-controls="stage-socials"
       aria-label={chrome.socialsLabel}
     >
       <span class="visually-hidden">{chrome.socialsLabel}</span>
       <HudIcon token={chrome.socialsIcon} emoji={chrome.socialsIconEmoji} />
-      <span class="stage-panel__label">{chrome.socialsLabel}</span>
+    </button>
+    <button
+      type="button"
+      class="stage-panel__summary stage-panel__icon glitch-hit"
+      data-stage-panel-trigger="info"
+      aria-expanded="false"
+      aria-controls="stage-panel-info"
+      aria-label={chrome.infoTitle}
+    >
+      <span class="visually-hidden">{chrome.infoTitle}</span>
+      <HudIcon token={chrome.infoIcon} emoji={chrome.infoIconEmoji} />
     </button>
   </div>
 </div>
 
 <script>
   import { isGlitchThemeActive, playElementGlitch } from '../lib/glitch';
-  import { panelCloseDelayMs, runSmoothPanelOpen, shouldSmoothPanelOpen } from '../lib/panel-motion';
+  import { panelCloseDelayMs } from '../lib/panel-motion';
+  import { isPhoneHud, requestPhoneContent, type PhoneContentSheet } from '../lib/player-dock';
 
   function initExclusivePanels() {
     const cluster = document.querySelector('[data-stage-panels]');
@@ -89,6 +147,8 @@ const panels = [
     cluster.addEventListener(
       'toggle',
       (event) => {
+        // Phone: player-dock cross-switch keeps the outgoing [open] while fading.
+        if (isPhoneHud()) return;
         const target = event.target;
         if (!(target instanceof HTMLDetailsElement) || !target.open) return;
         cluster.querySelectorAll('details[open]').forEach((node) => {
@@ -118,16 +178,16 @@ const panels = [
     };
 
     summary.addEventListener('click', (event) => {
-      if (!panel.open) {
-        if (!shouldSmoothPanelOpen(reduceMotion.matches)) return;
-        event.preventDefault();
-        panel.open = true;
-        runSmoothPanelOpen(panel, reduceMotion.matches);
-        return;
-      }
+      // Phone: icon row drives open/close (native open + delayed close).
+      if (isPhoneHud()) return;
+
+      // Native open — width + max-height run together from t=0.
+      if (!panel.open) return;
 
       event.preventDefault();
-      if (panel.classList.contains('is-glitching')) return;
+      if (panel.classList.contains('is-glitching') || panel.classList.contains('is-panel-closing')) {
+        return;
+      }
 
       if (isGlitchThemeActive()) {
         playMorph('out');
@@ -142,12 +202,55 @@ const panels = [
     });
 
     panel.addEventListener('toggle', () => {
+      if (isPhoneHud()) return;
       if (panel.open) playMorph('in');
     });
   }
 
+  function initPhoneIconTriggers() {
+    const cluster = document.querySelector('[data-stage-panels]');
+    const icons = cluster?.querySelector('[data-stage-panel-icons]');
+    if (!cluster || !icons) return;
+
+    const syncExpanded = () => {
+      icons.querySelectorAll<HTMLButtonElement>('[data-stage-panel-trigger]').forEach((btn) => {
+        const id = btn.dataset.stagePanelTrigger;
+        const open = Boolean(
+          id &&
+            cluster.querySelector(
+              `[data-stage-panel="${id}"][open]:not(.is-cross-out):not(.is-panel-closing)`,
+            ),
+        );
+        btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      });
+    };
+
+    icons.addEventListener('click', (event) => {
+      const btn = event.target instanceof Element
+        ? event.target.closest<HTMLButtonElement>('[data-stage-panel-trigger]')
+        : null;
+      if (!btn) return;
+      const id = btn.dataset.stagePanelTrigger;
+      if (id !== 'about' && id !== 'discography' && id !== 'tour' && id !== 'info') return;
+      event.preventDefault();
+
+      if (isPhoneHud()) {
+        requestPhoneContent(id as PhoneContentSheet);
+        return;
+      }
+
+      const panel = cluster.querySelector<HTMLDetailsElement>(`[data-stage-panel="${id}"]`);
+      const summary = panel?.querySelector<HTMLElement>(':scope > summary');
+      summary?.click();
+    });
+
+    cluster.addEventListener('toggle', syncExpanded, true);
+    syncExpanded();
+  }
+
   function bootStagePanels() {
     initExclusivePanels();
+    initPhoneIconTriggers();
     document.querySelectorAll<HTMLDetailsElement>('[data-stage-panel]').forEach(initStagePanelGlitch);
   }
 
@@ -164,6 +267,21 @@ const panels = [
     gap: calc(0.35rem * var(--hud-scale));
   }
 
+  /* Desktop: wrappers dissolve so details stay flex pills. Phone restyles both. */
+  .stage-panels__sheet {
+    display: contents;
+  }
+
+  .stage-panels__icons {
+    display: none;
+  }
+
+  .stage-panel__icon {
+    appearance: none;
+    font: inherit;
+    color: inherit;
+  }
+
   .stage-panel {
     --stage-panel-inset: calc(0.65rem * var(--hud-scale));
 
@@ -178,7 +296,8 @@ const panels = [
     box-sizing: border-box;
   }
 
-  .stage-panel--socials {
+  .stage-panel--socials,
+  .stage-panel--info {
     display: none;
   }
 
@@ -237,9 +356,9 @@ const panels = [
       padding 280ms cubic-bezier(0.4, 0, 0.2, 1);
   }
 
+  /* Close: width + height reverse together while [open] is still true. */
   html:not([data-hud-glitch='true']) .stage-panel.is-panel-closing .stage-panel__body,
-  html:not([data-hud-glitch='true']) .stage-panel.is-panel-opening .stage-panel__body,
-  html:not([data-hud-glitch='true']) .stage-panel[open].is-panel-opening .stage-panel__body {
+  html:not([data-hud-glitch='true']) .stage-panel[open].is-panel-closing .stage-panel__body {
     max-height: 0;
     opacity: 0;
     pointer-events: none;
@@ -260,6 +379,32 @@ const panels = [
   .stage-panel--discography[open] {
     width: min(calc(22rem * var(--hud-scale)), calc(100vw - 2 * var(--hud-inset)));
     max-width: min(calc(22rem * var(--hud-scale)), calc(100vw - 2 * var(--hud-inset)));
+  }
+
+  /* Laptop only — phone pill stays full dock width while height reverses. */
+  @media (min-width: 1024px) {
+    html:not([data-hud-glitch='true']) .stage-panel[open].is-panel-closing,
+    html:not([data-hud-glitch='true']) .stage-panel--discography[open].is-panel-closing {
+      width: var(--control-size);
+      max-width: var(--control-size);
+      border-radius: 999px;
+    }
+
+    html:not([data-hud-glitch='true']) .stage-panel[open].is-panel-closing .stage-panel__summary {
+      justify-content: center;
+      width: var(--control-size);
+      min-width: var(--control-size);
+      height: var(--control-size);
+      min-height: var(--control-size);
+      padding: 0;
+    }
+
+    html:not([data-hud-glitch='true']) .stage-panel[open].is-panel-closing .stage-panel__label {
+      flex: 0 0 auto;
+      width: 0;
+      max-width: 0;
+      opacity: 0;
+    }
   }
 
   .stage-panel__summary {
@@ -347,7 +492,7 @@ const panels = [
     color: var(--color-text);
   }
 
-  .stage-panel[open]:not(.is-panel-opening) .stage-panel__body {
+  .stage-panel[open] .stage-panel__body {
     max-height: min(30svh, calc(11rem * var(--hud-scale)));
     opacity: 1;
     overflow: auto;
@@ -401,12 +546,24 @@ const panels = [
     margin: 0;
   }
 
+  /* Phone sheet header only — desktop already titles the open summary. */
+  .stage-panel__sheet-title {
+    display: none;
+  }
+
   @media (prefers-reduced-motion: reduce) {
+    .stage-panels,
+    .stage-panels__sheet,
     .stage-panel,
     .stage-panel__summary,
     .stage-panel__body,
     .stage-panel__label {
       transition: none !important;
+      transform: none !important;
+    }
+
+    .stage-panel__body {
+      transform: none !important;
     }
 
     .stage-panel.is-glitching,
@@ -417,67 +574,449 @@ const panels = [
 
   @media (max-width: 1023px) {
     .stage-panels {
-      justify-content: space-evenly;
-      align-items: center;
+      /* List/legal scrollport cap — JS overwrites with sheet minus title. */
+      --phone-sheet-scroll-h: min(45svh, calc(20rem * var(--hud-scale)));
+      position: relative;
+      display: flex;
+      flex-direction: column;
       flex-wrap: nowrap;
+      align-items: stretch;
+      /* Icons stay on the floor so close never recenters them through the sheet. */
+      justify-content: flex-end;
+      /* Kill the desktop 0.35rem row gap — it leaked between sheet and icons. */
+      gap: 0;
       width: 100%;
-      padding: 0.2rem 0.15rem;
+      max-width: 100%;
+      min-width: 0;
+      padding-top: var(--phone-bar-pad);
+      padding-bottom: var(--phone-bar-pad);
+      padding-left: var(--phone-inline-pad);
+      padding-right: var(--phone-inline-pad);
       border: 1px solid var(--color-border);
-      border-radius: calc(0.85rem * var(--hud-scale));
+      /* Constant collapsed-bar radius — 999px→0.85rem looked more circular mid-flight. */
+      border-radius: var(--phone-pill-radius);
       background: color-mix(in srgb, var(--color-surface) 92%, transparent);
       backdrop-filter: blur(10px);
+      box-shadow: var(--phone-pill-shadow, 0 0.4rem 1.2rem color-mix(in srgb, black 45%, transparent));
       box-sizing: border-box;
+      overflow: visible;
+      /* padding + gap only — do not interpolate border-radius */
+      transition:
+        padding var(--phone-panel-morph-dur, 320ms) var(--phone-bloom-ease, cubic-bezier(0.4, 0, 0.2, 1)),
+        gap var(--phone-panel-morph-dur, 320ms) var(--phone-bloom-ease, cubic-bezier(0.4, 0, 0.2, 1));
     }
 
-    .stage-panel,
-    .stage-panel--socials {
+    /* Desktop glitch steps() on .stage-panel must not leak onto the phone pill. */
+    html[data-hud-glitch='true'] .stage-panels .stage-panel {
+      transition: none;
+    }
+
+    /* Open pill: same glass family as desktop [open] StagePanel. */
+    .stage-panels.is-sheet-open,
+    .stage-panels:has([data-stage-panel][open]) {
+      touch-action: pan-y;
+    }
+
+    .stage-panels:has([data-stage-panel][open]),
+    .stage-panels.is-socials-open,
+    .stage-panels.is-sheet-open,
+    :global(html[data-socials-open]) .stage-panels {
+      /* Same token for sheet-body↔icons and socials↔icons. */
+      gap: var(--phone-body-gap);
+      background: color-mix(in srgb, var(--color-surface) 90%, transparent);
+      backdrop-filter: blur(8px);
+      /* Roomier equal T/B when a sheet or socials is open; collapsed stays --phone-bar-pad. */
+      padding-top: var(--phone-open-pad);
+      padding-bottom: var(--phone-open-pad);
+    }
+
+    /* No-JS / fallback: tray lives in extra top pad. JS open uses --phone-sheet-h. */
+    .stage-panels.is-socials-open:not(.is-sheet-open):not(.is-sheet-closing),
+    :global(html[data-socials-open]) .stage-panels:not(.is-sheet-open):not(.is-sheet-closing) {
+      padding-top: calc(var(--phone-open-pad) + var(--phone-tray-h));
+      padding-bottom: var(--phone-open-pad);
+    }
+
+    /* Close: chrome + body height reverse together (do not wait for [open] to drop). */
+    .stage-panels:has([data-stage-panel][open].is-panel-closing),
+    .stage-panels.is-sheet-closing {
+      gap: 0;
+      background: color-mix(in srgb, var(--color-surface) 92%, transparent);
+      backdrop-filter: blur(10px);
+      padding-top: var(--phone-bar-pad);
+      padding-bottom: var(--phone-bar-pad);
+    }
+
+    /* Sheet above, icons pinned below — never display:contents (that dumped summaries). */
+    .stage-panels__sheet {
       display: block;
+      position: relative;
+      z-index: 1;
+      order: 1;
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      overflow: hidden;
+      flex: 0 0 auto;
+    }
+
+    /* Collapsed: sheet must not leak height into the bar (that shoved icons off-center). */
+    .stage-panels:not(:has([data-stage-panel][open])):not(.is-sheet-open) .stage-panels__sheet {
+      height: 0;
+      min-height: 0;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    /* JS morph: interpolate sheet height (open, close, and cross-switch). */
+    .stage-panels.is-sheet-open .stage-panels__sheet,
+    .stage-panels.is-sheet-closing .stage-panels__sheet {
+      height: var(--phone-sheet-h, 0px);
+      min-height: 0;
+      visibility: visible;
+      pointer-events: auto;
+      transition: height var(--phone-panel-morph-dur, 320ms)
+        var(--phone-bloom-ease, cubic-bezier(0.4, 0, 0.2, 1));
+    }
+
+    .stage-panels.is-sheet-open .stage-panels__sheet .stage-panel[open],
+    .stage-panels.is-sheet-closing .stage-panels__sheet .stage-panel[open] {
+      /* Flex column so the body can shrink below content and become the scrollport. */
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    /* Cross-switch: overlay both sheets, fade opacity, height comes from --phone-sheet-h. */
+    .stage-panels.is-cross-switching .stage-panel.is-cross-out,
+    .stage-panels.is-cross-switching .stage-panel.is-cross-in {
+      position: absolute;
+      inset: 0 0 auto 0;
+      width: 100%;
+      height: 100%;
+      visibility: visible;
+      pointer-events: none;
+    }
+
+    .stage-panels.is-cross-switching .stage-panel.is-cross-in {
+      pointer-events: auto;
+    }
+
+    .stage-panels.is-cross-switching .stage-panel.is-cross-out .stage-panel__body,
+    .stage-panels.is-cross-switching .stage-panel.is-cross-in .stage-panel__body {
+      max-height: none;
+      height: 100%;
+      visibility: visible;
+      overflow: hidden;
+    }
+
+    .stage-panels.is-cross-switching .stage-panel.is-cross-out .stage-panel__body {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .stage-panels.is-cross-switching .stage-panel.is-cross-in .stage-panel__body {
+      opacity: 1;
+    }
+
+    .stage-panels__icons {
+      display: flex;
+      position: relative;
+      z-index: 2;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      justify-content: space-between;
+      align-items: center;
+      align-self: stretch;
+      order: 2;
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      flex: 0 0 var(--control-size);
+      height: var(--control-size);
+      min-height: var(--control-size);
+      max-height: var(--control-size);
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      line-height: 0;
+      /* space-between spans the inner width; leftover goes between icons, not the right edge. */
+      gap: 0;
+    }
+
+    .stage-panels__sheet .stage-panel {
+      display: block;
+      position: static;
+      width: 100%;
+      max-width: 100%;
       border: 0;
+      border-radius: 0;
       background: transparent;
       backdrop-filter: none;
       overflow: visible;
     }
 
-    .stage-panel[open],
-    .stage-panel--discography[open] {
-      width: var(--control-size);
-      max-width: var(--control-size);
-      border-radius: 999px;
+    /* Open details must clip — overflow:visible lets the UA slot grow and the sheet clips it. */
+    .stage-panels__sheet .stage-panel[open],
+    .stage-panels__sheet .stage-panel--discography[open] {
+      display: block;
+      position: static;
+      width: 100%;
+      max-width: 100%;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      backdrop-filter: none;
+      overflow: hidden;
     }
 
-    .stage-panel[open] .stage-panel__summary {
-      width: var(--control-size);
-      min-width: var(--control-size);
-      height: var(--control-size);
-      min-height: var(--control-size);
-      padding: 0;
-      justify-content: center;
+    /* Stay in-flow when closed so max-height/opacity can fade like socials. */
+    .stage-panels__sheet .stage-panel:not([open]) {
+      display: block;
+      visibility: hidden;
+      pointer-events: none;
     }
 
-    .stage-panel[open] .stage-panel__label,
-    .stage-panel--socials .stage-panel__label {
+    /* Native summary stays in the details for a11y/JS; the icon row is the HUD. */
+    .stage-panels__sheet .stage-panel__summary {
       display: none;
     }
 
-    .stage-panel__body {
-      position: fixed;
-      left: var(--hud-inset);
-      right: var(--hud-inset);
-      bottom: calc(
-        var(--hud-dock-bottom) + var(--phone-player-h) + var(--phone-content-h) + var(--phone-stack-gap)
-      );
-      width: auto;
-      max-width: none;
-      z-index: 4;
+    .stage-panels__icons .stage-panel__icon {
       border: 1px solid var(--color-border);
-      border-radius: calc(0.85rem * var(--hud-scale));
-      background: color-mix(in srgb, var(--color-surface) 94%, transparent);
-      backdrop-filter: blur(12px);
-      box-sizing: border-box;
+      border-radius: 999px;
+      background: transparent;
+      width: var(--control-size);
+      min-width: var(--control-size);
+      max-width: var(--control-size);
+      height: var(--control-size);
+      min-height: var(--control-size);
+      max-height: var(--control-size);
+      padding: 0;
+      margin: 0;
+      justify-content: center;
+      align-self: center;
+      flex: 0 0 var(--control-size);
+      overflow: hidden;
+      line-height: 0;
     }
 
-    .stage-panel[open]:not(.is-panel-opening) .stage-panel__body {
+    .stage-panels__icons .stage-panel__icon:hover {
+      border-color: color-mix(in srgb, var(--color-border) 80%, transparent);
+    }
+
+    .stage-panels__icons [data-stage-panel-trigger][aria-expanded='true'],
+    :global(html[data-socials-open]) .stage-panels__icons [data-socials-trigger] {
+      border-color: var(--color-accent);
+      background: color-mix(in srgb, var(--color-accent) 16%, transparent);
+      color: var(--color-accent-alt);
+    }
+
+    .stage-panel__label,
+    .stage-panel[open] .stage-panel__label,
+    html[data-hud-glitch='true'] .stage-panel__label,
+    html[data-hud-glitch='true'] .stage-panel[open] .stage-panel__label,
+    html:not([data-hud-glitch='true']) .stage-panel__label,
+    html:not([data-hud-glitch='true']) .stage-panel[open] .stage-panel__label {
+      display: none;
+      width: 0;
+      max-width: 0;
+      opacity: 0;
+      overflow: hidden;
+      flex: 0 0 auto;
+    }
+
+    .stage-panel__body,
+    html:not([data-hud-glitch='true']) .stage-panel.is-panel-closing .stage-panel__body,
+    html:not([data-hud-glitch='true']) .stage-panel[open].is-panel-closing .stage-panel__body {
+      position: static;
+      left: auto;
+      right: auto;
+      bottom: auto;
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      margin-inline: 0;
+      z-index: auto;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      backdrop-filter: none;
+      box-shadow: none;
+      box-sizing: border-box;
+      transform: none;
+      max-height: 0;
+      opacity: 0;
+      visibility: hidden;
+      overflow: hidden;
+      pointer-events: none;
+      padding: 0 var(--stage-panel-inset);
+      transition:
+        max-height var(--phone-panel-morph-dur, 320ms) var(--phone-bloom-ease, cubic-bezier(0.4, 0, 0.2, 1)),
+        opacity 220ms var(--phone-bloom-ease, cubic-bezier(0.4, 0, 0.2, 1)),
+        padding var(--phone-panel-morph-dur, 320ms) var(--phone-bloom-ease, cubic-bezier(0.4, 0, 0.2, 1)),
+        visibility 0s linear var(--phone-panel-morph-dur, 320ms);
+    }
+
+    .stage-panel[open] .stage-panel__body {
+      display: flex;
+      flex-direction: column;
       max-height: min(50svh, calc(22rem * var(--hud-scale)));
+      opacity: 1;
+      visibility: visible;
+      /* Body is a clip box only. Details' UA slot is height:auto — overflow-y here never scrolls. */
+      overflow: hidden;
+      pointer-events: auto;
+      padding: 0 var(--stage-panel-inset);
+      transform: none;
+      transition:
+        max-height var(--phone-panel-morph-dur, 320ms) var(--phone-bloom-ease, cubic-bezier(0.4, 0, 0.2, 1)),
+        opacity 220ms var(--phone-bloom-ease, cubic-bezier(0.4, 0, 0.2, 1)),
+        padding var(--phone-panel-morph-dur, 320ms) var(--phone-bloom-ease, cubic-bezier(0.4, 0, 0.2, 1)),
+        visibility 0s;
+    }
+
+    .stage-panel[open].is-panel-closing .stage-panel__body {
+      max-height: 0;
+      opacity: 0;
+      visibility: hidden;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    /*
+     * JS sheet: keep a DEFINITE max-height. Do not use max-height:none + height:100%.
+     * <details> wraps the body in a UA slot (height:auto), so % / flex-on-details never bound it.
+     */
+    .stage-panels.is-sheet-open:not(.is-cross-switching) .stage-panel[open] .stage-panel__body,
+    .stage-panels.is-sheet-closing .stage-panel[open] .stage-panel__body {
+      display: flex;
+      flex-direction: column;
+      flex: none;
+      max-height: min(50svh, var(--phone-sheet-h, 50svh), calc(22rem * var(--hud-scale)));
+      height: auto;
+      min-height: 0;
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    .stage-panels.is-sheet-closing .stage-panel[open].is-panel-closing .stage-panel__body {
+      max-height: none;
+      height: 100%;
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    /* Phone glitch theme: no steps() on this morph — same cubic-bezier as default. */
+    html[data-hud-glitch='true'] .stage-panel__body,
+    html[data-hud-glitch='true'] .stage-panel[open] .stage-panel__body {
+      transition:
+        max-height var(--phone-panel-morph-dur, 320ms) var(--phone-bloom-ease, cubic-bezier(0.4, 0, 0.2, 1)),
+        opacity 220ms var(--phone-bloom-ease, cubic-bezier(0.4, 0, 0.2, 1)),
+        padding var(--phone-panel-morph-dur, 320ms) var(--phone-bloom-ease, cubic-bezier(0.4, 0, 0.2, 1)),
+        visibility 0s;
+    }
+
+    .stage-panel.is-glitching[data-glitch='in'] .stage-panel__body,
+    .stage-panel.is-glitching[data-glitch='out'] .stage-panel__body {
+      animation: none;
+    }
+
+    /* Phone sheet header = desktop open summary: token icon + glowing title. */
+    .stage-panel[open] .stage-panel__sheet-title {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      gap: calc(0.5rem * var(--hud-scale));
+      margin: 0 0 calc(0.5rem * var(--hud-scale));
+      padding: 0;
+      font-family: var(--font-display);
+      font-size: calc(18px * var(--hud-scale));
+      font-weight: 400;
+      line-height: 1;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--color-accent-alt);
+      text-shadow: 0 0 calc(0.35rem * var(--hud-scale))
+        color-mix(in srgb, var(--color-accent) 55%, transparent);
+    }
+
+    .stage-panel[open] .stage-panel__sheet-title :global(.hud-icon) {
+      flex: 0 0 auto;
+      filter: drop-shadow(
+        0 0 calc(0.35rem * var(--hud-scale)) color-mix(in srgb, var(--color-accent) 55%, transparent)
+      );
+    }
+
+    .stage-panel__sheet-title-text {
+      min-width: 0;
+      white-space: nowrap;
+    }
+
+    /* Optically top-right of the Info chrome — same row as ⓘ INFO. */
+    .stage-panel--info .stage-panel__sheet-copy {
+      margin-left: auto;
+      flex: 0 0 auto;
+      font-family: var(--font-body);
+      font-size: calc(0.72rem * var(--hud-scale));
+      font-weight: 400;
+      letter-spacing: 0.02em;
+      text-transform: none;
+      color: var(--color-text-muted);
+      text-shadow: none;
+      white-space: nowrap;
+    }
+
+    /*
+     * Real scrollport. max-height is a length (svh / --phone-sheet-scroll-h), not height:100%.
+     * Details' UA slot is height:auto — % height and flex-on-<details> never bound the body.
+     */
+    .stage-panels.is-sheet-open .stage-panel[open] .stage-panel__scroll,
+    .stage-panels.is-sheet-closing .stage-panel[open] .stage-panel__scroll,
+    .stage-panel[open] .stage-panel__scroll {
+      flex: 1 1 auto;
+      min-height: 0;
+      min-width: 0;
+      max-height: min(50svh, calc(22rem * var(--hud-scale)), var(--phone-sheet-scroll-h, 45svh));
+      overflow-x: hidden;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-y;
+    }
+
+    /* Info: two pills, no inner scroller — overflow:auto here paints a leftover bar.
+     * Keep overflow hidden, but size to the padded legal row (don't shrink + shear). */
+    .stage-panels.is-sheet-open .stage-panel--info[open] .stage-panel__scroll,
+    .stage-panels.is-sheet-closing .stage-panel--info[open] .stage-panel__scroll,
+    .stage-panel--info[open] .stage-panel__scroll {
+      flex: 0 0 auto;
+      min-height: auto;
+      max-height: none;
+      overflow-x: hidden;
+      overflow-y: hidden;
+    }
+
+    /* Discography: the <ul> is the scroller. Wrapper must not nest another overflow:auto. */
+    .stage-panels.is-sheet-open .stage-panel--discography[open] .stage-panel__scroll,
+    .stage-panel--discography[open] .stage-panel__scroll {
+      overflow: visible;
+      max-height: none;
+    }
+
+    .stage-panels.is-sheet-open .stage-panel--discography[open] .stage-panel__scroll :global(.discog),
+    .stage-panel--discography[open] .stage-panel__scroll :global(.discog) {
+      max-height: min(50svh, calc(22rem * var(--hud-scale)), var(--phone-sheet-scroll-h, 45svh));
+      overflow-x: hidden;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-y;
     }
   }
 </style>

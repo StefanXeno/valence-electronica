@@ -20,13 +20,28 @@
   }
 
   @media (max-width: 1023px) {
+    /* Do not set width: 100% here — left+right insets already stretch the
+       fixed dock. width:100% + left:inset overflows by the inset (shears the
+       right cap / mute). */
     .stage-dock {
-      width: 100%;
+      width: auto;
+      max-width: 100%;
+      box-sizing: border-box;
+      overflow: visible;
     }
 
     .stage-dock__left,
     .stage-dock__right {
+      width: auto;
+      max-width: 100%;
+      min-width: 0;
+      box-sizing: border-box;
+    }
+
+    .stage-dock__cluster {
       width: 100%;
+      max-width: 100%;
+      min-width: 0;
     }
   }
 </style>

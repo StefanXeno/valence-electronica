@@ -26,7 +26,7 @@ const channels = site.channels.map((channel) => {
           channel.active ? (
             <li>
               <a
-                class="glitch-hit"
+                class="channel-btn glitch-hit"
                 href={channel.url}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -40,7 +40,7 @@ const channels = site.channels.map((channel) => {
             </li>
           ) : (
             <li class="placeholder">
-              <span>
+              <span class="channel-btn">
                 <span class="visually-hidden">{channel.label} — {chrome.comingSoon}</span>
                 <ChannelIcon id={channel.id} label={channel.label} />
               </span>
@@ -66,6 +66,17 @@ const channels = site.channels.map((channel) => {
     justify-content: flex-end;
     align-items: center;
     gap: calc(0.3rem * var(--hud-scale));
+  }
+
+  /* Phone tray: one even row spanning the same inner width as the dock icons. */
+  @media (max-width: 1023px) {
+    ul {
+      flex-wrap: nowrap;
+      justify-content: space-between;
+      width: 100%;
+      max-width: 100%;
+      gap: 0;
+    }
   }
 
   li a,

@@ -17,6 +17,11 @@ export interface UiChrome {
   socialsLabel: string;
   socialsIcon: HudIconToken;
   socialsIconEmoji?: string;
+  infoTitle: string;
+  infoIcon: HudIconToken;
+  infoIconEmoji?: string;
+  imprintButton: string;
+  privacyButton: string;
   playerExpandLabel: string;
   playerCollapseLabel: string;
   comingSoon: string;
@@ -38,6 +43,7 @@ export interface UiChrome {
   listenOnLabel: string;
   emptyTrackLinks: string;
   shuffleLabel: string;
+  playlistLabel: string;
   loopLabel: string;
   shuffleIcon: HudIconToken;
   shuffleIconEmoji?: string;
@@ -63,6 +69,10 @@ const CHROME_FALLBACK: UiChrome = {
   jukeboxPanelTooltip: 'Pick a track to switch stages—the site theme changes with each one.',
   socialsLabel: 'Socials',
   socialsIcon: 'socials',
+  infoTitle: 'Info',
+  infoIcon: 'info',
+  imprintButton: 'Imprint',
+  privacyButton: 'Privacy Policy',
   playerExpandLabel: 'Show player controls',
   playerCollapseLabel: 'Hide player controls',
   comingSoon: 'coming soon',
@@ -79,6 +89,7 @@ const CHROME_FALLBACK: UiChrome = {
   listenOnLabel: 'Listen On',
   emptyTrackLinks: 'No streaming links yet',
   shuffleLabel: 'Shuffle',
+  playlistLabel: 'Playlist',
   loopLabel: 'Loop',
   shuffleIcon: 'shuffle',
   loopIcon: 'loop',
@@ -117,6 +128,9 @@ export async function getChrome(): Promise<UiChrome> {
     jukeboxPanelTooltip:
       entry.data.jukeboxPanelTooltip?.trim() || CHROME_FALLBACK.jukeboxPanelTooltip,
     socialsLabel: entry.data.socialsLabel?.trim() || CHROME_FALLBACK.socialsLabel,
+    infoTitle: entry.data.infoTitle?.trim() || CHROME_FALLBACK.infoTitle,
+    imprintButton: entry.data.imprintButton?.trim() || CHROME_FALLBACK.imprintButton,
+    privacyButton: entry.data.privacyButton?.trim() || CHROME_FALLBACK.privacyButton,
     playerExpandLabel:
       entry.data.playerExpandLabel?.trim() || CHROME_FALLBACK.playerExpandLabel,
     playerCollapseLabel:
@@ -134,6 +148,7 @@ export async function getChrome(): Promise<UiChrome> {
       const shuffle = resolveHudIcon(entry.data.shuffleIcon, 'shuffle');
       const loop = resolveHudIcon(entry.data.loopIcon, 'loop');
       const socials = resolveHudIcon(entry.data.socialsIcon, 'socials');
+      const info = resolveHudIcon(entry.data.infoIcon, 'info');
       return {
         jukeboxIcon: jukebox.token,
         jukeboxIconEmoji: jukebox.emoji,
@@ -151,6 +166,8 @@ export async function getChrome(): Promise<UiChrome> {
         loopIconEmoji: loop.emoji,
         socialsIcon: socials.token,
         socialsIconEmoji: socials.emoji,
+        infoIcon: info.token,
+        infoIconEmoji: info.emoji,
       };
     })(),
     trackInfoTitle: entry.data.trackInfoTitle?.trim() || CHROME_FALLBACK.trackInfoTitle,
@@ -158,6 +175,7 @@ export async function getChrome(): Promise<UiChrome> {
     listenOnLabel: entry.data.listenOnLabel?.trim() || CHROME_FALLBACK.listenOnLabel,
     emptyTrackLinks: entry.data.emptyTrackLinks?.trim() || CHROME_FALLBACK.emptyTrackLinks,
     shuffleLabel: entry.data.shuffleLabel?.trim() || CHROME_FALLBACK.shuffleLabel,
+    playlistLabel: entry.data.playlistLabel?.trim() || CHROME_FALLBACK.playlistLabel,
     loopLabel: entry.data.loopLabel?.trim() || CHROME_FALLBACK.loopLabel,
     shuffleDefault: entry.data.shuffleDefault ?? CHROME_FALLBACK.shuffleDefault,
     loopDefault: entry.data.loopDefault ?? CHROME_FALLBACK.loopDefault,

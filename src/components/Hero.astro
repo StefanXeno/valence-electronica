@@ -17,7 +17,7 @@ const fallbackTagline = formatTagline(tagline.trim());
       src={wordmark}
       alt={name}
       widths={[480, 960]}
-      sizes="(max-width: 768px) 72vw, 14rem"
+      sizes="(max-width: 1023px) 82vw, 14rem"
       decoding="async"
       loading="eager"
       fetchpriority="high"
@@ -74,11 +74,12 @@ const fallbackTagline = formatTagline(tagline.trim());
 
   @media (max-width: 1023px) {
     .identity__wordmark {
-      width: min(calc(9.25rem * var(--hud-scale)), 58vw);
+      width: min(calc(13.25rem * var(--hud-scale)), 100%);
+      max-width: 100%;
     }
 
     .tagline {
-      font-size: clamp(0.7rem, 3.2vw, 0.85rem);
+      font-size: clamp(0.88rem, 4vw, 1.08rem);
     }
   }
 </style>

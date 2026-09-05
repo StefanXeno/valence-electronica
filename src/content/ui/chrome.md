@@ -11,6 +11,10 @@ jukeboxPanelTitle: V-Flip aka. Jukebox
 jukeboxPanelTooltip: Pick a track to switch stages—the site theme changes with each one.
 socialsLabel: Socials
 socialsIcon: socials
+infoTitle: Info
+infoIcon: info
+imprintButton: Imprint
+privacyButton: Privacy Policy
 playerExpandLabel: Show player controls
 playerCollapseLabel: Hide player controls
 comingSoon: coming soon
@@ -23,6 +27,7 @@ releasedLabel: Released
 listenOnLabel: Listen On
 emptyTrackLinks: No streaming links yet
 shuffleLabel: Shuffle
+playlistLabel: Playlist
 loopLabel: Loop
 shuffleIcon: shuffle
 loopIcon: loop
