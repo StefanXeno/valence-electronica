@@ -6,14 +6,17 @@ running costs.
 
 ## Local development
 
-Requires Node.js 22+ (LTS).
+Requires Node.js 24 (`.nvmrc`; `engines` allows ≥22). Tool pins live in `mise.toml`.
 
 ```bash
-npm install       # once
+mise install      # Node 24 + Playwright CLI
+npm ci            # Astro / vitest / playwright module
+mise run playwright:chromium   # Chromium + OS libs (⚠️ may sudo/apt)
 npm run dev       # dev server at http://localhost:4321/valence-electronica/
 npm run check     # type + content schema validation
 npm run build     # check + static build into dist/
 npm run preview   # serve the built site locally
+npm run verify:hud  # agent HUD check (Playwright; not for the artist)
 ```
 
 ## Editing content (artist)

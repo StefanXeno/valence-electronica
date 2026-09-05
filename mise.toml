@@ -1,0 +1,19 @@
+# Project toolchain for operators and agents.
+# Clone path: mise install → npm ci → mise run playwright:chromium
+# No secrets. Do not add unused tools.
+
+[tools]
+# Node major matches .nvmrc and GitHub Actions (check.yml / deploy.yml).
+node = "24"
+# Same version 016 declared in package.json (devDependency).
+"npm:playwright" = "1.62.1"
+
+# Remaining step after mise install: browser binary + OS libs.
+# ⚠️ --with-deps may invoke sudo/apt on Linux (operator-approved 2026-09-05).
+[tasks."playwright:chromium"]
+description = "Download Playwright Chromium and OS libraries"
+run = "playwright install --with-deps chromium"
+
+[tasks.setup]
+description = "After mise install: lockfile deps + Chromium + OS libs"
+run = "npm ci && playwright install --with-deps chromium"
