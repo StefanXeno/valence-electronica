@@ -143,6 +143,37 @@
     },
     {
       "text": "Still a better lovestory than Twilight"
+    },
+    {
+      "text": "Who wants a Krabby Patty at 3 in the morning?",
+      "rules": [
+        {
+          "type": "time",
+          "from": "03:00",
+          "to": "03:05"
+        }
+      ]
+    },
+    {
+      "text": "You look good today"
+    },
+    {
+      "text": "contacts... they hurt my eyes"
+    },
+    {
+      "text": "Let's add smooth jazz at the end"
+    },
+    {
+      "text": "Attention please! The next song is going to be a banger."
+    },
+    {
+      "text": "Will the real Slim Shady please stand up?"
+    },
+    {
+      "text": "Check out my cool website"
+    },
+    {
+      "text": "Attention please! The next song is going to be a banger."
     }
   ]
 }
