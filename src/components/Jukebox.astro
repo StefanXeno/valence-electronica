@@ -389,15 +389,8 @@ const defaultLabel =
       event.preventDefault();
       event.stopPropagation();
       if (!window.matchMedia('(max-width: 1023px)').matches) return;
-      // Player open/close owns the sheet — don't start a second height morph.
-      if (root.classList.contains('is-sheet-morphing') && !root.classList.contains('is-playlist-morphing')) {
-        return;
-      }
+      // Last committed playlist request — player-dock queues if open/close is in flight.
       const next = !root.classList.contains('is-theme-tracks');
-      if (reduceMotion.matches) {
-        setPlaylistOpen(next);
-        return;
-      }
       document.dispatchEvent(new CustomEvent('phone-player-playlist', { detail: { open: next } }));
     });
 
@@ -416,6 +409,7 @@ const defaultLabel =
       const target = event.target;
       if (!(target instanceof Element)) return;
       if (target.closest('a, [data-stage-button]')) return;
+      if (target.closest('[data-playlist-placeholder]')) return;
       const item = target.closest<HTMLElement>('[data-discog-item]');
       const id = item?.dataset.discogItem;
       if (!id) return;
@@ -1096,8 +1090,9 @@ const defaultLabel =
       /* Moderate top corners. Bottom square so the bar clips into the viewport. */
       border-radius: var(--phone-dock-radius, 14px) var(--phone-dock-radius, 14px) 0 0;
       background: color-mix(in srgb, var(--color-bg) 88%, var(--color-surface));
-      /* Upward only — a downward shadow paints a fake gap under the floor. */
-      box-shadow: 0 -0.45rem 1.2rem color-mix(in srgb, black 45%, transparent);
+      /* Glass blur on this box eats box-shadow (Chromium). Collapsed lift
+         is .stage-dock__left::after; expanded re-applies --phone-player-shadow. */
+      backdrop-filter: none;
       /* Compact collapsed chrome — floor row only. Handle hitbox overflows this box. */
       padding: var(--phone-bar-pad, 0.28rem) var(--phone-now-pad)
         calc(var(--phone-bar-pad, 0.28rem) + var(--phone-safe-bottom, env(safe-area-inset-bottom, 0px)));
@@ -1190,6 +1185,8 @@ const defaultLabel =
       bottom: 0;
       border-bottom: 0;
       border-radius: var(--phone-floor-radius) var(--phone-floor-radius) 0 0;
+      /* Same token as collapsed ::after — backdrop-filter is already none. */
+      box-shadow: var(--phone-player-shadow, 0 -0.45rem 1.2rem color-mix(in srgb, black 45%, transparent));
       /* Solo settled: hug content. Any leftover 1fr / minmax(auto) parks a void. */
       height: auto;
       max-height: none;
@@ -1287,6 +1284,22 @@ const defaultLabel =
       padding: calc(var(--phone-dock-gap, 6px) + 0.1rem) 0 0;
       background: transparent;
       border: 0;
+    }
+
+    /*
+     * Open content pill: the sheet's bottom pad sits on the 6px gap / chevron.
+     * Grow the transparent grab into --phone-open-pad so one swipe hits the
+     * handle. Do not reach the 5 icons (they sit above that pad).
+     */
+    :global(html[data-sheet-open])
+      .jukebox:not(.is-player-expanded):not(.is-open):not(.is-sheet-dragging):not(.is-sheet-morphing)
+      .player-dock__handle,
+    :global(html[data-socials-open])
+      .jukebox:not(.is-player-expanded):not(.is-open):not(.is-sheet-dragging):not(.is-sheet-morphing)
+      .player-dock__handle {
+      top: calc(-1 * (var(--phone-dock-gap, 6px) + var(--phone-open-pad, 0.65rem)));
+      height: calc(100% + var(--phone-dock-gap, 6px) + var(--phone-open-pad, 0.65rem));
+      padding: calc(var(--phone-dock-gap, 6px) + var(--phone-open-pad, 0.65rem) + 0.1rem) 0 0;
     }
 
     .player-dock__handle:active {
@@ -1400,7 +1413,7 @@ const defaultLabel =
       visibility: visible;
       pointer-events: none;
       animation: none;
-      opacity: clamp(0, calc((var(--player-sheet-progress, 0) - 0.12) / 0.55), 1);
+      opacity: clamp(0, var(--player-sheet-progress, 0), 1);
       transform: translateY(calc((1 - var(--player-sheet-progress, 0)) * 0.4rem));
     }
 
@@ -1480,12 +1493,13 @@ const defaultLabel =
       flex-direction: column;
       position: relative;
       overflow: hidden;
+      /* Same list/card → shuffle air on solo and playlist (laptop open-panel pad). */
+      padding-bottom: var(--jukebox-toolbar-pad);
     }
 
     .jukebox.is-player-expanded:not(.is-theme-tracks):not(.is-playlist-morphing) .jukebox__panel,
     .jukebox.is-open:not(.is-theme-tracks):not(.is-playlist-morphing) .jukebox__panel {
       overflow: visible;
-      padding-bottom: 0;
     }
 
     .jukebox.is-player-expanded .jukebox__header,
@@ -1540,9 +1554,16 @@ const defaultLabel =
     }
 
     /* Rest collapse lives in Discography (scoped items). Keep gap + playing card stacked. */
-    .jukebox.is-player-expanded:not(.is-theme-tracks) :global(.discog[data-theme-tracks]),
-    .jukebox.is-open:not(.is-theme-tracks) :global(.discog[data-theme-tracks]) {
+    .jukebox.is-player-expanded:not(.is-theme-tracks):not(.is-playlist-morphing)
+      :global(.discog[data-theme-tracks]),
+    .jukebox.is-open:not(.is-theme-tracks):not(.is-playlist-morphing)
+      :global(.discog[data-theme-tracks]) {
       gap: 0;
+    }
+
+    /* Morph: same inter-card gap as the settled playlist from frame 0. */
+    .jukebox.is-playlist-morphing :global(.discog[data-theme-tracks]) {
+      gap: var(--discog-row-gap);
     }
 
     /* Solo card must not flex-shrink or grow — leftover 1fr used to stretch it. */
@@ -1566,14 +1587,14 @@ const defaultLabel =
       touch-action: none;
     }
 
-    /* Settled playlist: section is the scrollport (panel is the bound). */
+    /* Settled playlist: three-row viewport (scroll the full real list). */
     .jukebox.is-theme-tracks:not(.is-playlist-morphing):not(.is-sheet-dragging)
       .jukebox__section--theme-tracks,
     .jukebox.is-theme-tracks:not(.is-playlist-morphing):not(.is-sheet-dragging)
       .jukebox__section--theme-tracks[hidden] {
       overflow-x: hidden;
       overflow-y: auto;
-      max-height: 100%;
+      max-height: var(--player-playlist-viewport-h, 100%);
       overscroll-behavior: contain;
       -webkit-overflow-scrolling: touch;
       touch-action: pan-y;
@@ -1773,11 +1794,11 @@ const defaultLabel =
       padding: calc(var(--phone-handle, 1.5rem) + var(--phone-sheet-head-gap, 0.28rem)) 0 0;
     }
 
-    /* Same fade as transport — a 97% snap was the header arriving a beat late. */
+    /* Drag: opacity tracks --player-sheet-progress (1 at the open cap). */
     :global(html[data-player-sheet-dragging]) .jukebox.is-sheet-dragging .jukebox__header,
     :global(html[data-player-sheet-dragging]) .jukebox.is-sheet-dragging.is-player-expanded .jukebox__header,
     :global(html[data-player-sheet-dragging]) .jukebox.is-sheet-dragging.is-open .jukebox__header {
-      opacity: clamp(0, calc((var(--player-sheet-progress, 0) - 0.12) / 0.55), 1);
+      opacity: clamp(0, var(--player-sheet-progress, 0), 1);
       visibility: visible;
       max-height: none;
       margin: 0 0 var(--phone-sheet-head-gap, 0.28rem);

@@ -102,6 +102,13 @@ const releases = themeTracksOnly
     </ul>
   )
 }
+{
+  themeTracksOnly ? (
+    <template data-playlist-placeholder-template>
+      <li class="discog__item" data-playlist-placeholder aria-hidden="true"></li>
+    </template>
+  ) : null
+}
 
 <style>
   .discog {
@@ -707,6 +714,23 @@ const releases = themeTracksOnly
       min-height: 0;
       overflow: hidden;
       pointer-events: none;
+    }
+
+    /* Inert pad slots when n < 3 (injected by player-dock). Not startable. */
+    .discog[data-theme-tracks] [data-playlist-placeholder] {
+      cursor: default;
+      pointer-events: none;
+      user-select: none;
+      min-height: calc(3.4rem * var(--hud-scale));
+      background: color-mix(in srgb, var(--color-border) 28%, transparent);
+      border-style: dashed;
+      opacity: 0.4;
+    }
+
+    .discog[data-theme-tracks] [data-playlist-placeholder] .discog__stage,
+    .discog[data-theme-tracks] [data-playlist-placeholder] .discog__eq,
+    .discog[data-theme-tracks] [data-playlist-placeholder] .discog__now-playing {
+      display: none;
     }
   }
 </style>

@@ -1,6 +1,25 @@
 import { initEqFlatten } from './eq-flatten';
 import { isIntroActive, setPlayerPaused } from './playback';
 import { PHONE_PANEL_PHASE_MS } from './panel-motion';
+import {
+  applyDragHeight as clampDragHeight,
+  dragFaceOpenPx,
+  OVERSCROLL_PX_MAX,
+  pickSoloOpenPx,
+  PLAYLIST_ROW_GAP_REM,
+  playlistStackPx,
+  PLAYLIST_WINDOW_SLOTS,
+  plausibleRowPx,
+  resolvePlaylistGapPx,
+  RUBBER,
+  sheetProgress,
+} from './player-sheet';
+import { playlistWindow, shouldRewindow } from './playlist-window';
+import {
+  consumeHandlePointerTap,
+  isHandleDoubleTapEcho,
+  isHandlePointerTap,
+} from './player-handle-tap';
 
 /** Phone HUD media query (SC-007: 1023 = phone, 1024 = laptop). */
 export const PHONE_MQ = '(max-width: 1023px)';
@@ -14,10 +33,6 @@ const HINT_PERIOD_MS = 60_000;
 const SNAP_PX = 40;
 /** Below this, pointerup is a tap (click still toggles). */
 const TAP_SLOP_PX = 8;
-/** Dampen overscroll past the fully-open cap only. */
-const RUBBER = 0.32;
-/** Finger past fully open: rubber-band this many px, then snap back. */
-const OVERSCROLL_PX_MAX = 18;
 /** Drag-release settle — same duration as tap open/close so chrome and content stay locked. */
 const SETTLE_MS = PHONE_PANEL_PHASE_MS;
 const FLICK_PX_MS = 0.45;
@@ -377,6 +392,8 @@ function createPhoneSheetController(): PhoneSheetController {
 
   const close = (opts?: { animated?: boolean }) => {
     if (!active && !cluster?.classList.contains('is-sheet-open')) return;
+    // Player drag/expand may call close again while the morph is already running.
+    if (cluster?.classList.contains('is-sheet-closing') && opts?.animated !== false) return;
     const animated = opts?.animated !== false && !reduceMq.matches;
     const closingSocials = active === 'socials';
     const panel = active && active !== 'socials' ? panelEl(active) : null;
@@ -455,11 +472,20 @@ export function initPlayerDock(): void {
   let hintBurst: number | undefined;
   let hintWait: number | undefined;
   let suppressHandleClick = false;
+  /** Last handle tap that actually toggled — `null` until the first tap (now() is ~0 after load). */
+  let lastHandleToggleAt: number | null = null;
   let settleRaf = 0;
+  /** Last committed playlist request while open/close is in flight (FR-008). */
+  let pendingPlaylist: boolean | null = null;
+  /** Last handle pointerup that counted as a tap (pairs into a double-tap). */
+  let lastPointerTapAt: number | null = null;
   let drag:
     | {
         pointerId: number;
+        startX: number;
         startY: number;
+        startT: number;
+        lastX: number;
         lastY: number;
         lastT: number;
         velocity: number;
@@ -468,6 +494,10 @@ export function initPlayerDock(): void {
         collapsedH: number;
         openH: number;
         fromExpanded: boolean;
+        /** Playlist face at pointerdown — drag-close keeps the 3-row cap. */
+        fromPlaylist: boolean;
+        /** Gesture started on the sheet that was covering the handle. */
+        retargeted: boolean;
       }
     | undefined;
 
@@ -530,6 +560,16 @@ export function initPlayerDock(): void {
 
   const applyExpanded = (next: boolean, opts?: { syncVflip?: boolean; animated?: boolean }) => {
     const syncVflip = opts?.syncVflip !== false;
+    // Instant collapse during drag/settle drops data-player-dock-expanded while
+    // --player-sheet-h is still tall — HUD pill (z-index 6) then paints on top.
+    // Drag settle still commits with { animated: false }.
+    if (
+      !next &&
+      opts?.animated !== false &&
+      (Boolean(drag) || html.hasAttribute('data-player-sheet-dragging'))
+    ) {
+      return;
+    }
     const wantAnim =
       Boolean(morphPlayerSheet) &&
       opts?.animated !== false &&
@@ -538,6 +578,7 @@ export function initPlayerDock(): void {
       !html.hasAttribute('data-player-sheet-dragging');
 
     if (wantAnim && expanded !== next && syncVflip) {
+      if (next && phoneMq.matches) closePhoneSheetsExcept('vflip-list');
       morphPlayerSheet?.(next);
       return;
     }
@@ -555,10 +596,14 @@ export function initPlayerDock(): void {
     // Same 3×/60s nod for up (collapsed) and down (expanded).
     if (changed) scheduleHint();
 
+    // Phone: opening the player exclusive-closes About / Discography / Tour / socials / Info.
+    if (changed && next && phoneMq.matches) {
+      closePhoneSheetsExcept('vflip-list');
+    }
+
     // Phone: pill expanded opens V-Flip; collapsed closes it.
     if (changed && syncVflip && phoneMq.matches) {
       if (next) {
-        closePhoneSheetsExcept('vflip-list');
         document.dispatchEvent(
           new CustomEvent('phone-hud-open-vflip', {
             detail: { animated: opts?.animated !== false },
@@ -572,6 +617,23 @@ export function initPlayerDock(): void {
 
   applyExpanded(false);
 
+  // Click still single-taps (015). Pointer double-tap toggles when click never
+  // fires. Echo lock only after a successful toggle so the extra half cannot undo.
+  const toggleFromHandleTap = () => {
+    if (!phoneMq.matches) return;
+    const now = performance.now();
+    if (lastHandleToggleAt != null && isHandleDoubleTapEcho(now, lastHandleToggleAt)) return;
+    lastHandleToggleAt = now;
+    applyExpanded(!expanded);
+  };
+
+  const suppressClickAfterPointerToggle = () => {
+    suppressHandleClick = true;
+    window.setTimeout(() => {
+      suppressHandleClick = false;
+    }, 50);
+  };
+
   handle?.addEventListener('click', (event) => {
     event.preventDefault();
     event.stopPropagation();
@@ -579,8 +641,14 @@ export function initPlayerDock(): void {
       suppressHandleClick = false;
       return;
     }
-    if (!phoneMq.matches) return;
-    applyExpanded(!expanded);
+    toggleFromHandleTap();
+  });
+
+  handle?.addEventListener('dblclick', (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (suppressHandleClick) return;
+    toggleFromHandleTap();
   });
 
   const remPx = () => Number.parseFloat(getComputedStyle(html).fontSize) || 16;
@@ -674,8 +742,9 @@ export function initPlayerDock(): void {
   };
 
   /**
-   * Header + transport + floor + handle clearance. Never 1fr / 50svh / full-list
-   * scrollHeight / --phone-handle-hit — those overshoot the painted stack.
+   * Header + list/card→transport pad + transport + floor + handle clearance.
+   * Never 1fr / 50svh / full-list scrollHeight / --phone-handle-hit — those
+   * overshoot the painted stack.
    */
   const measureSheetChromePx = () => {
     if (!dock) return 0;
@@ -690,16 +759,29 @@ export function initPlayerDock(): void {
     const headerH = measureHeaderNaturalPx();
     const floorH = cssVarPx(dock, '--control-size', 3.1 * rem);
     const transportH = cssVarPx(dock, '--player-transport-h', floorH);
-    return padTop + innerPadTop + headerH + transportH + floorH + padBottom;
+    // Card/list → transport: `--jukebox-toolbar-pad` on `.jukebox__panel` (other agent).
+    const panel = dock.querySelector<HTMLElement>('.jukebox__panel');
+    const panelPad = panel ? Number.parseFloat(getComputedStyle(panel).paddingBottom) || 0 : 0;
+    const listTransportGap = Math.max(
+      cssVarPx(dock, '--jukebox-toolbar-pad', 0.25 * rem),
+      panelPad,
+    );
+    return padTop + innerPadTop + headerH + listTransportGap + transportH + floorH + padBottom;
   };
 
   const playlistGapPx = () => {
     const list = playlistList();
-    if (!list) return 0;
-    return (
-      Number.parseFloat(getComputedStyle(list).getPropertyValue('--discog-row-gap')) ||
-      Number.parseFloat(getComputedStyle(list).gap) ||
-      0
+    const rem = remPx();
+    const hud =
+      Number.parseFloat(getComputedStyle(dock ?? html).getPropertyValue('--hud-scale')) || 1;
+    const fallback = PLAYLIST_ROW_GAP_REM * rem * hud;
+    if (!list) return fallback;
+    // Token first — solo `gap: 0` and parseFloat("calc(...)") both miss the
+    // settled `--discog-row-gap` (0.55rem * --hud-scale).
+    return resolvePlaylistGapPx(
+      cssVarPx(list, '--discog-row-gap', 0),
+      Number.parseFloat(getComputedStyle(list).gap) || 0,
+      fallback,
     );
   };
 
@@ -752,39 +834,35 @@ export function initPlayerDock(): void {
   /** Playing-card box. Prefer the off-DOM solo clone — live 1fr can stretch it. */
   const measureSoloCardPx = () => {
     const playing = playingPlaylistRow();
-    const clonedCard = playing ? measureRowNaturalPx(playing, 'solo') : 0;
+    const clonedCard = playing ? measurePlausibleRowPx(playing, 'solo') : 0;
     const liveCard = playing?.getBoundingClientRect().height ?? 0;
     const liveOk = liveCard > 1 && (clonedCard < 1 || liveCard <= clonedCard + 8);
     return Math.max(0, clonedCard, soloCardPx, liveOk ? liveCard : 0);
   };
 
   /**
-   * Solo open target = handle clearance + header + card + transport + floor.
-   * Never playlist scrollHeight, never 1fr leftover, never --phone-handle-hit.
-   * Clone is a witness only — if it overshoots the chrome sum, ignore it.
+   * Solo open target = handle clearance + header + card + transport + floor
+   * (plus any card-to-transport gap from CSS). Prefer shrink-wrap so that gap
+   * is not dropped — ignoring wrap used to hop the sheet up at playlist-close.
    */
   const measureSoloOpenPx = (collapsedH: number) => {
     const exact = measureSheetChromePx() + measureSoloCardPx();
     const wrapped = measureSoloShrinkWrapPx();
-    const chosen =
-      wrapped > collapsedH + 4 && wrapped <= exact + 12 ? Math.min(wrapped, exact) : exact;
-    return Math.max(chosen, collapsedH + 8);
+    return pickSoloOpenPx(collapsedH, exact, wrapped, sheetCapPx());
   };
 
-  /** Playlist open target: chrome + every row + gaps. */
-  const measurePlaylistOpenPx = (collapsedH: number, rowHeights: number[], gap: number) => {
-    const rowsH = rowHeights.reduce((sum, height) => sum + Math.max(0, height), 0);
-    const gaps = Math.max(0, rowHeights.length - 1) * Math.max(0, gap);
-    return clampOpenSheetPx(measureSheetChromePx() + rowsH + gaps, collapsedH);
-  };
+  /** Playlist open target: chrome + exactly three row heights + two gaps. */
+  const measurePlaylistOpenPx = (collapsedH: number, rowHeights: number[], gap: number) =>
+    clampOpenSheetPx(
+      playlistStackPx(measureSheetChromePx(), rowHeights, gap, PLAYLIST_WINDOW_SLOTS),
+      collapsedH,
+    );
 
   const openHeightPx = () => {
     const collapsedH = collapsedHeightPx();
     if (dock?.classList.contains('is-theme-tracks')) {
-      const rows = playlistRows();
       const gap = playlistGapPx();
-      const heights = rows.map((row) => measureRowNaturalPx(row, 'playlist'));
-      return measurePlaylistOpenPx(collapsedH, heights, gap);
+      return measurePlaylistOpenPx(collapsedH, measureThreeSlotHeights(), gap);
     }
     return measureSoloOpenPx(collapsedH);
   };
@@ -801,27 +879,28 @@ export function initPlayerDock(): void {
     dock.style.removeProperty('--player-sheet-progress');
   };
 
-  /** Drag-open cap: same solo/playlist px as a tap — never a live 1fr reflow. */
-  const measureOpenHeightPx = (collapsedH: number) => {
-    void collapsedH;
-    return openHeightPx();
+  /**
+   * Drag cap for this gesture. Drag-open is solo even after applyExpanded;
+   * do not re-read is-theme-tracks / 3-row height into --player-sheet-progress.
+   */
+  const measureDragOpenPx = (collapsedH: number, playlistFace: boolean) => {
+    const soloH = measureSoloOpenPx(collapsedH);
+    if (!playlistFace) return soloH;
+    return dragFaceOpenPx(
+      true,
+      soloH,
+      measurePlaylistOpenPx(collapsedH, measureThreeSlotHeights(), playlistGapPx()),
+    );
   };
 
   const setSheetHeight = (px: number, collapsedH: number, openH: number) => {
-    const span = Math.max(1, openH - collapsedH);
-    const progress = Math.min(1, Math.max(0, (px - collapsedH) / span));
     dock?.style.setProperty('--player-sheet-h', `${Math.max(0, px)}px`);
-    dock?.style.setProperty('--player-sheet-progress', String(progress));
+    dock?.style.setProperty('--player-sheet-progress', String(sheetProgress(px, collapsedH, openH)));
   };
 
   /** 1:1 height from the floor. Rubber-band only past the open cap. */
-  const applyDragHeight = (rawH: number, collapsedH: number, openH: number) => {
-    if (rawH > openH) {
-      return openH + Math.min((rawH - openH) * RUBBER, OVERSCROLL_PX_MAX);
-    }
-    if (rawH < collapsedH) return collapsedH;
-    return rawH;
-  };
+  const applyDragHeight = (rawH: number, collapsedH: number, openH: number) =>
+    clampDragHeight(rawH, collapsedH, openH, RUBBER, OVERSCROLL_PX_MAX);
 
   const syncCollapseChrome = (heightPx: number, openH: number, fromExpanded: boolean) => {
     // Drag-down from open: fade transport with --player-sheet-progress (CSS).
@@ -861,23 +940,48 @@ export function initPlayerDock(): void {
   let sheetMorphGen = 0;
   let playlistPinRaf = 0;
 
-  const playlistRows = () =>
-    Array.from(
-      dock?.querySelectorAll<HTMLElement>('.discog[data-theme-tracks] .discog__item') ?? [],
-    );
-
   const playlistList = () =>
     dock?.querySelector<HTMLElement>('.discog[data-theme-tracks]') ?? null;
 
+  const playlistSection = () =>
+    dock?.querySelector<HTMLElement>('.jukebox__section--theme-tracks') ?? null;
+
+  /** Real theme-track rows only (no placeholders, no test-only fixture hides). */
+  const realPlaylistRows = () =>
+    Array.from(
+      dock?.querySelectorAll<HTMLElement>(
+        '.discog[data-theme-tracks] .discog__item[data-discog-item]',
+      ) ?? [],
+    ).filter((row) => !row.hasAttribute('data-playlist-fixture-hide') && !row.hidden);
+
+  const playlistRows = () =>
+    Array.from(
+      dock?.querySelectorAll<HTMLElement>(
+        '.discog[data-theme-tracks] .discog__item:not([data-playlist-fixture-hide])',
+      ) ?? [],
+    ).filter((row) => !row.hidden);
+
+  const placeholderRows = () =>
+    Array.from(
+      dock?.querySelectorAll<HTMLElement>(
+        '.discog[data-theme-tracks] [data-playlist-placeholder]',
+      ) ?? [],
+    );
+
   const playingPlaylistRow = () =>
     dock?.querySelector<HTMLElement>(
-      '.discog[data-theme-tracks] .discog__item[data-discog-active="true"]',
-    ) ?? playlistRows()[0] ?? null;
+      '.discog[data-theme-tracks] .discog__item[data-discog-item][data-discog-active="true"]',
+    ) ?? realPlaylistRows()[0] ?? null;
+
+  const currentRowIndex = (rows: HTMLElement[]) => {
+    const index = rows.findIndex((row) => row.dataset.discogActive === 'true');
+    return index < 0 ? 0 : index;
+  };
 
   const refreshSoloCardPx = () => {
     const playing = playingPlaylistRow();
     if (!playing) return;
-    const next = measureRowNaturalPx(playing, 'solo');
+    const next = measurePlausibleRowPx(playing, 'solo');
     if (next > 1) soloCardPx = next;
   };
 
@@ -903,6 +1007,7 @@ export function initPlayerDock(): void {
       row.style.removeProperty('position');
       row.style.removeProperty('z-index');
       row.style.removeProperty('flex-shrink');
+      row.style.removeProperty('flex-grow');
     }
     if (list) list.style.removeProperty('gap');
   };
@@ -910,38 +1015,6 @@ export function initPlayerDock(): void {
   const stopPlaylistPin = () => {
     window.cancelAnimationFrame(playlistPinRaf);
     playlistPinRaf = 0;
-  };
-
-  /** Keep the playing card at a fixed viewport Y while siblings add in. */
-  const pinPlayingToViewport = (
-    playing: HTMLElement | null,
-    section: HTMLElement | null,
-    pinY: number,
-  ) => {
-    if (!playing || !section) return;
-    const dy = playing.getBoundingClientRect().top - pinY;
-    if (Math.abs(dy) > 0.5) section.scrollTop += dy;
-  };
-
-  const runPlaylistPin = (
-    playing: HTMLElement | null,
-    section: HTMLElement | null,
-    pinY: number,
-    token: number,
-    duration: number,
-  ) => {
-    stopPlaylistPin();
-    const start = performance.now();
-    const tick = (now: number) => {
-      if (token !== sheetMorphGen) return;
-      pinPlayingToViewport(playing, section, pinY);
-      if (now - start < duration) {
-        playlistPinRaf = window.requestAnimationFrame(tick);
-        return;
-      }
-      playlistPinRaf = 0;
-    };
-    playlistPinRaf = window.requestAnimationFrame(tick);
   };
 
   const endSheetMorphStyles = (opts?: { keepHeight?: boolean }) => {
@@ -962,6 +1035,8 @@ export function initPlayerDock(): void {
    * Natural row box. Clone inside a jukebox shell so solo/playlist Discography
    * rules apply — a body-only clone missed stage-slot collapse and under/over
    * measured listen-on. Never use the live clipped rect in a short sheet.
+   * Force block + is-playlist-morphing so 1fr / max-height:100% cannot stretch
+   * the probe to the sheet or viewport (that blew sibling rows on morph).
    */
   const measureRowNaturalPx = (row: HTMLElement, mode: 'solo' | 'playlist' = 'playlist') => {
     const host = row.parentElement;
@@ -974,8 +1049,8 @@ export function initPlayerDock(): void {
     const shell = document.createElement('div');
     shell.className =
       mode === 'solo'
-        ? 'jukebox is-player-expanded is-open'
-        : 'jukebox is-player-expanded is-open is-theme-tracks';
+        ? 'jukebox is-player-expanded is-open is-playlist-morphing'
+        : 'jukebox is-player-expanded is-open is-theme-tracks is-playlist-morphing';
     if (dock) {
       for (const attr of dock.attributes) {
         if (attr.name.startsWith('data-astro')) shell.setAttribute(attr.name, attr.value);
@@ -1006,14 +1081,182 @@ export function initPlayerDock(): void {
     shell.appendChild(section);
     shell.style.cssText =
       `position:fixed;left:-9999px;top:0;width:${Math.max(0, width)}px;` +
-      'height:auto;max-height:none;overflow:visible;visibility:hidden;pointer-events:none;z-index:-1;';
+      'display:block;height:auto !important;min-height:0 !important;max-height:none !important;' +
+      'overflow:visible;visibility:hidden;pointer-events:none;z-index:-1;' +
+      'grid-template-rows:none;align-content:start;';
+    section.style.cssText = 'flex:0 0 auto;height:auto;max-height:none;overflow:visible;min-height:0;';
+    list.style.cssText =
+      'display:flex;flex-direction:column;height:auto;max-height:none;flex:0 0 auto;';
     probe.style.cssText =
       'height:auto;max-height:none;min-height:0;overflow:visible;clip-path:none;' +
-      'opacity:1;visibility:visible;flex-shrink:0;';
+      'opacity:1;visibility:visible;flex:0 0 auto;align-self:start;';
     document.body.appendChild(shell);
     const natural = probe.getBoundingClientRect().height;
     shell.remove();
     return natural;
+  };
+
+  const rowPxCap = () => Math.max(48, Math.min(sheetCapPx() * 0.4, window.innerHeight * 0.28));
+
+  const measurePlausibleRowPx = (
+    row: HTMLElement,
+    mode: 'solo' | 'playlist',
+    typical = 0,
+  ) => plausibleRowPx(measureRowNaturalPx(row, mode), typical, rowPxCap());
+
+  const createPlaceholderRow = () => {
+    const template = dock?.querySelector<HTMLTemplateElement>(
+      '[data-playlist-placeholder-template]',
+    );
+    const fromTemplate = template?.content.firstElementChild?.cloneNode(true);
+    if (fromTemplate instanceof HTMLElement) return fromTemplate;
+    const li = document.createElement('li');
+    li.className = 'discog__item';
+    li.setAttribute('data-playlist-placeholder', '');
+    li.setAttribute('aria-hidden', 'true');
+    return li;
+  };
+
+  const removePlaceholders = () => {
+    for (const row of placeholderRows()) row.remove();
+  };
+
+  /** Pad leading/trailing inert slots when n < 3. Never duplicate reals. */
+  const applyPlaceholders = () => {
+    removePlaceholders();
+    const list = playlistList();
+    if (!list) return;
+    const rows = realPlaylistRows();
+    const n = rows.length;
+    if (n >= PLAYLIST_WINDOW_SLOTS) return;
+    const win = playlistWindow(n, currentRowIndex(rows));
+    let lead = 0;
+    for (const idx of win.indices) {
+      if (idx === 'placeholder') lead += 1;
+      else break;
+    }
+    let trail = 0;
+    for (let k = win.indices.length - 1; k >= 0; k -= 1) {
+      if (win.indices[k] === 'placeholder') trail += 1;
+      else break;
+    }
+    for (let k = 0; k < lead; k += 1) {
+      list.insertBefore(createPlaceholderRow(), list.firstChild);
+    }
+    for (let k = 0; k < trail; k += 1) {
+      list.appendChild(createPlaceholderRow());
+    }
+  };
+
+  const measureThreeSlotHeights = (): number[] => {
+    const rows = realPlaylistRows();
+    const n = rows.length;
+    const win = playlistWindow(n, currentRowIndex(rows));
+    const typical = rows[0] ? measurePlausibleRowPx(rows[0], 'playlist') : 0;
+    const placeholders = placeholderRows();
+    let ph = 0;
+    return win.indices.map((idx) => {
+      if (idx === 'placeholder') {
+        const node = placeholders[ph];
+        ph += 1;
+        return node ? Math.max(measurePlausibleRowPx(node, 'playlist', typical), typical) : typical;
+      }
+      return measurePlausibleRowPx(rows[idx], 'playlist', typical);
+    });
+  };
+
+  const setPlaylistViewportVar = () => {
+    const heights = measureThreeSlotHeights();
+    const gap = playlistGapPx();
+    const typical = heights.find((height) => height > 1) ?? 0;
+    const slots = heights.map((height) => (height > 1 ? height : typical));
+    while (slots.length < PLAYLIST_WINDOW_SLOTS) slots.push(typical);
+    const viewport =
+      slots.slice(0, PLAYLIST_WINDOW_SLOTS).reduce((sum, height) => sum + height, 0) +
+      (PLAYLIST_WINDOW_SLOTS - 1) * gap;
+    dock?.style.setProperty('--player-playlist-viewport-h', `${Math.max(0, viewport)}px`);
+  };
+
+  const scrollWindowIntoView = () => {
+    const section = playlistSection();
+    const rows = realPlaylistRows();
+    if (!section || !rows.length) return;
+    const win = playlistWindow(rows.length, currentRowIndex(rows));
+    const firstReal = win.indices.find((idx): idx is number => idx !== 'placeholder');
+    const lastReal = [...win.indices].reverse().find((idx): idx is number => idx !== 'placeholder');
+    if (firstReal === undefined || lastReal === undefined) return;
+    const first = rows[firstReal];
+    const last = rows[lastReal];
+    if (!first || !last) return;
+    const port = section.getBoundingClientRect();
+    const firstTop = first.getBoundingClientRect().top - port.top + section.scrollTop;
+    if (win.slot === 'bottom') {
+      const lastBottom = last.getBoundingClientRect().bottom - port.top + section.scrollTop;
+      section.scrollTop = Math.max(0, lastBottom - section.clientHeight);
+      return;
+    }
+    section.scrollTop = Math.max(0, firstTop);
+  };
+
+  const visibleRealIndices = () => {
+    const section = playlistSection();
+    const rows = realPlaylistRows();
+    if (!section) return rows.map((_, index) => index);
+    const port = section.getBoundingClientRect();
+    const visible: number[] = [];
+    rows.forEach((row, index) => {
+      const box = row.getBoundingClientRect();
+      if (box.bottom > port.top + 1 && box.top < port.bottom - 1) visible.push(index);
+    });
+    return visible;
+  };
+
+  const rewindowIfNeeded = () => {
+    if (!dock?.classList.contains('is-theme-tracks')) return;
+    if (dock.classList.contains('is-playlist-morphing')) return;
+    if (!phoneMq.matches) return;
+    const rows = realPlaylistRows();
+    const next = currentRowIndex(rows);
+    if (!shouldRewindow(visibleRealIndices(), next)) return;
+    applyPlaceholders();
+    setPlaylistViewportVar();
+    scrollWindowIntoView();
+  };
+
+  /** Test-only SC-010 fixture. Never the live four-track catalog. */
+  const applyPlaylistFixture = () => {
+    const raw = new URLSearchParams(window.location.search).get('playlist-fixture');
+    if (raw !== '1' && raw !== '2') return;
+    const want = Number(raw);
+    const rows = Array.from(
+      dock?.querySelectorAll<HTMLElement>('.discog[data-theme-tracks] .discog__item[data-discog-item]') ??
+        [],
+    );
+    const current = rows.find((row) => row.dataset.discogActive === 'true');
+    const keep = new Set<HTMLElement>();
+    if (current) keep.add(current);
+    for (const row of rows) {
+      if (keep.size >= want) break;
+      keep.add(row);
+    }
+    for (const row of rows) {
+      if (keep.has(row)) continue;
+      row.hidden = true;
+      row.setAttribute('data-playlist-fixture-hide', '');
+      row.setAttribute('aria-hidden', 'true');
+    }
+  };
+
+  const flushPendingPlaylist = () => {
+    if (pendingPlaylist === null) return;
+    if (dock?.classList.contains('is-sheet-morphing')) return;
+    if (!expanded) {
+      pendingPlaylist = null;
+      return;
+    }
+    const next = pendingPlaylist;
+    pendingPlaylist = null;
+    morphPlaylist?.(next);
   };
 
   const startSheetMorph = (fromPx: number, collapsedH: number) => {
@@ -1054,8 +1297,10 @@ export function initPlayerDock(): void {
         refreshSoloCardPx();
         fitSheetToSoloCard();
       } else {
+        pendingPlaylist = null;
         endSheetMorphStyles();
       }
+      flushPendingPlaylist();
       return;
     }
 
@@ -1086,8 +1331,11 @@ export function initPlayerDock(): void {
     afterSheetMorph(
       token,
       () => {
-        if (!toOpen) applyExpanded(false, { animated: false });
-        else window.requestAnimationFrame(fitSheetToSoloCard);
+        if (!toOpen) {
+          pendingPlaylist = null;
+          applyExpanded(false, { animated: false });
+        } else window.requestAnimationFrame(fitSheetToSoloCard);
+        flushPendingPlaylist();
       },
       false,
     );
@@ -1097,35 +1345,73 @@ export function initPlayerDock(): void {
     if (!dock || !phoneMq.matches) return;
     const already = dock.classList.contains('is-theme-tracks');
     if (already === open) return;
+    // Open/close owns the sheet — queue last-committed playlist until it settles.
     if (dock.classList.contains('is-sheet-morphing') && !dock.classList.contains('is-playlist-morphing')) {
+      pendingPlaylist = open;
       return;
     }
 
+    // Last committed playlist wins — cancel an in-flight playlist morph.
+    window.cancelAnimationFrame(settleRaf);
+    window.clearTimeout(sheetMorphTimer);
+    stopPlaylistPin();
+    cancelPlaylistRowAnims();
+
     if (motionMq.matches) {
+      if (open) applyPlaceholders();
+      else removePlaceholders();
       document.dispatchEvent(
         new CustomEvent('phone-player-playlist-apply', { detail: { open, phase: 'instant' } }),
       );
+      if (open) {
+        setPlaylistViewportVar();
+        const collapsedH = collapsedHeightPx();
+        const toH = openHeightPx();
+        html.setAttribute('data-player-sheet-sized', '');
+        setSheetHeight(toH, collapsedH, toH);
+        scrollWindowIntoView();
+      } else {
+        dock.style.removeProperty('--player-playlist-viewport-h');
+        fitSheetToSoloCard();
+      }
       return;
     }
 
     const token = ++sheetMorphGen;
-    window.clearTimeout(sheetMorphTimer);
-    stopPlaylistPin();
     const collapsedH = collapsedHeightPx();
     const fromH = readDockHeight() || openHeightPx();
     const list = playlistList();
-    const section = dock.querySelector<HTMLElement>('.jukebox__section--theme-tracks');
+    const section = playlistSection();
+
+    if (open) {
+      applyPlaceholders();
+      // New pads start collapsed so they grow with the two companion rows.
+      for (const row of placeholderRows()) {
+        row.style.height = '0px';
+        row.style.overflow = 'hidden';
+        row.style.opacity = '0';
+      }
+    }
+
+    const rows = realPlaylistRows();
+    const win = playlistWindow(rows.length, currentRowIndex(rows));
+    const windowReals = new Set(
+      win.indices.filter((idx): idx is number => idx !== 'placeholder'),
+    );
     const playing = playingPlaylistRow();
-    const others = playlistRows().filter((row) => row !== playing);
-    const pinY = playing?.getBoundingClientRect().top ?? 0;
-    const fromScroll = section?.scrollTop ?? 0;
+    const companions = [
+      ...rows.filter((row, idx) => windowReals.has(idx) && row !== playing),
+      ...placeholderRows(),
+    ];
+    const extras = open
+      ? companions
+      : playlistRows().filter((row) => row !== playing);
 
     const playingChrome = playing ? getComputedStyle(playing) : null;
     const openPadY = playingChrome?.paddingTop || '0px';
-    const openPadX = playingChrome?.paddingLeft || '0px';
     const openBorder = playingChrome?.borderTopWidth || '1px';
 
-    const otherFrom = others.map((row) => ({
+    const extraFrom = extras.map((row) => ({
       el: row,
       from: row.getBoundingClientRect().height,
     }));
@@ -1134,125 +1420,135 @@ export function initPlayerDock(): void {
       if (anim instanceof CSSAnimation || anim instanceof CSSTransition) return;
       anim.cancel();
     });
-    cancelPlaylistRowAnims();
 
     document.dispatchEvent(
       new CustomEvent('phone-player-playlist-apply', { detail: { open, phase: 'prepare' } }),
     );
 
-    // Lock sibling boxes BEFORE any class that would auto-size them (open pop).
-    for (const row of otherFrom) {
+    // Lock extras BEFORE is-theme-tracks so dest-height rows cannot flash.
+    for (const row of extraFrom) {
       row.el.style.height = `${Math.max(0, row.from)}px`;
       row.el.style.overflow = 'hidden';
-      row.el.style.opacity = '1';
+      row.el.style.opacity = open ? '0' : '1';
       row.el.style.visibility = 'visible';
       row.el.style.clipPath = 'none';
       row.el.style.flexShrink = '0';
+      row.el.style.flexGrow = '0';
       row.el.classList.remove('is-playlist-collapsed');
       if (open) {
         row.el.style.paddingTop = '0px';
         row.el.style.paddingBottom = '0px';
         row.el.style.borderTopWidth = '0px';
         row.el.style.borderBottomWidth = '0px';
-        row.el.removeAttribute('aria-hidden');
+        if (!row.el.hasAttribute('data-playlist-placeholder')) {
+          row.el.removeAttribute('aria-hidden');
+        }
       } else {
         row.el.style.paddingTop = openPadY;
         row.el.style.paddingBottom = openPadY;
-        row.el.style.paddingLeft = openPadX;
-        row.el.style.paddingRight = openPadX;
         row.el.style.borderTopWidth = openBorder;
         row.el.style.borderBottomWidth = openBorder;
       }
     }
 
-    if (playing) {
-      const currentMode = dock.classList.contains('is-theme-tracks') ? 'playlist' : 'solo';
-      const lockH = Math.max(
-        playing.getBoundingClientRect().height,
-        measureRowNaturalPx(playing, currentMode),
-      );
-      playing.style.height = `${lockH}px`;
-      playing.style.overflow = 'hidden';
-      playing.style.flexShrink = '0';
+    // Off-window reals stay collapsed during open (no dest-height flash).
+    if (open) {
+      for (const row of rows) {
+        if (row === playing || windowReals.has(rows.indexOf(row))) continue;
+        row.style.height = '0px';
+        row.style.overflow = 'hidden';
+        row.style.opacity = '0';
+        row.style.visibility = 'hidden';
+      }
     }
 
-    const gapPx = playlistGapPx();
-    if (list) list.style.gap = open ? '0px' : `${gapPx}px`;
+    if (playing) {
+      const fromMode = open ? 'solo' : 'playlist';
+      const naturalFrom = measurePlausibleRowPx(playing, fromMode);
+      const liveH = playing.getBoundingClientRect().height;
+      const lockH =
+        liveH > 1 && liveH <= naturalFrom + 8 ? liveH : naturalFrom;
+      playing.style.height = `${Math.max(0, lockH)}px`;
+      playing.style.overflow = 'hidden';
+      playing.style.flexShrink = '0';
+      playing.style.flexGrow = '0';
+      playing.style.position = 'relative';
+      playing.style.zIndex = '3';
+      playing.style.transform = 'none';
+    }
 
-    // Playlist class first so CSS never hides transport for a frame.
+    // Settled playlist gap from frame 0 — zeroing it packed the FLIP, then
+    // settle re-inserted `--discog-row-gap` and shoved the cards.
+    const gapPx = playlistGapPx();
+    if (list) list.style.gap = `${gapPx}px`;
+
     dock.classList.add('is-playlist-morphing');
     startSheetMorph(fromH, collapsedH);
     void dock.offsetHeight;
 
-    // Dest sizes from off-DOM clones — never paint dest heights (that 1-frame pop).
-    const otherTo = otherFrom.map((row) => ({
+    const typicalPlaylist = playing
+      ? measurePlausibleRowPx(playing, 'playlist')
+      : extraFrom[0]
+        ? measurePlausibleRowPx(extraFrom[0].el, 'playlist')
+        : 0;
+
+    const extraTo = extraFrom.map((row) => ({
       ...row,
-      to: open ? measureRowNaturalPx(row.el, 'playlist') : 0,
+      to: open ? measurePlausibleRowPx(row.el, 'playlist', typicalPlaylist) : 0,
     }));
 
     const playingH = playing
-      ? measureRowNaturalPx(playing, open ? 'playlist' : 'solo')
+      ? measurePlausibleRowPx(playing, open ? 'playlist' : 'solo', typicalPlaylist)
       : 0;
-    const destRowHeights = playlistRows().map((row) => {
-      if (row === playing) return playingH;
-      const found = otherTo.find((entry) => entry.el === row);
-      return found ? found.to : 0;
-    });
-    const toH = open
-      ? measurePlaylistOpenPx(collapsedH, destRowHeights, gapPx)
-      : measureSoloOpenPx(collapsedH);
-
-    // Open: keep the playing card at its solo Y so siblings unfold underneath.
-    // Close: do not pin — the card plucks up to the Currently Playing slot.
-    if (open && section) section.scrollTop = fromScroll;
-    if (open) pinPlayingToViewport(playing, section, pinY);
-    startSheetMorph(fromH, collapsedH);
-
-    const ease = 'cubic-bezier(0.22, 1, 0.36, 1)';
-    const duration = PLAYLIST_MORPH_MS;
-    void dock.offsetHeight;
-    if (open) runPlaylistPin(playing, section, pinY, token, duration);
 
     const applyPlaylistClass = () => {
       document.dispatchEvent(
         new CustomEvent('phone-player-playlist-apply', { detail: { open, phase: 'apply' } }),
       );
     };
-    // Close keeps the old apply-first path (looks fine). Open waits for the
-    // locked from-frame so theme-tracks cannot flash dest-height siblings.
     if (open) {
       window.requestAnimationFrame(() => {
         if (token !== sheetMorphGen) return;
         applyPlaylistClass();
-        pinPlayingToViewport(playing, section, pinY);
       });
     } else {
       applyPlaylistClass();
+      void dock.offsetHeight;
     }
+
+    // Solo target after playlist class drops so wrap includes settled gap CSS.
+    const toH = open
+      ? measurePlaylistOpenPx(collapsedH, measureThreeSlotHeights(), gapPx)
+      : measureSoloOpenPx(collapsedH);
+
+    startSheetMorph(fromH, collapsedH);
+
+    const ease = 'cubic-bezier(0.22, 1, 0.36, 1)';
+    const duration = PLAYLIST_MORPH_MS;
+    void dock.offsetHeight;
+
+    // Slot is layout, not a dest-Y estimate: companions above grow from 0 and
+    // push the current card into TOP/MIDDLE/BOTTOM. Pre-translate by
+    // extraTo[0] * slot yanked the solo card and scaled with blown row clones.
 
     const sheetAnim = dock.animate(
       [{ height: `${fromH}px` }, { height: `${toH}px` }],
       { duration, easing: ease, fill: 'forwards' },
     );
 
-    const listAnim = list
-      ? list.animate(
-          [
-            { gap: open ? '0px' : `${gapPx}px` },
-            { gap: open ? `${gapPx}px` : '0px' },
-          ],
-          { duration, easing: ease, fill: 'forwards' },
-        )
-      : null;
+    // Close interpolates gap away with the shrink so solo settle does not
+    // drop leftover gaps between height:0 siblings. Open keeps gapPx.
+    const listAnim =
+      !open && list && gapPx > 0
+        ? list.animate(
+            [{ gap: `${gapPx}px` }, { gap: '0px' }],
+            { duration, easing: ease, fill: 'forwards' },
+          )
+        : null;
 
-    const restShadow = '0 0 0 transparent';
     const playFromH = playing ? playing.getBoundingClientRect().height : 0;
-    const playingIndex = playing ? playlistRows().indexOf(playing) : 0;
-
     const playingAnims: Animation[] = [];
     if (playing) {
-      playing.style.position = 'relative';
-      playing.style.zIndex = '3';
       if (Math.abs(playFromH - playingH) > 1) {
         playingAnims.push(
           playing.animate(
@@ -1261,42 +1557,20 @@ export function initPlayerDock(): void {
           ),
         );
       }
-      // Keep the picked track in its slot. A translateY pluck flew it over
-      // the sibling above (Nightmare) and read as a hard overlap.
-      playingAnims.push(
-        playing.animate(
-          [
-            { transform: 'translateY(0) scale(1)', boxShadow: restShadow },
-            {
-              transform: open ? 'translateY(0) scale(1)' : 'translateY(0) scale(1.015)',
-              boxShadow: restShadow,
-              offset: 0.45,
-            },
-            { transform: 'translateY(0) scale(1)', boxShadow: restShadow },
-          ],
-          { duration, easing: ease, fill: 'forwards' },
-        ),
-      );
     }
 
-    // Siblings unfold from under the playing card (open) or recede into it (close).
-    // Same duration as the sheet — a stagger left a dark band while rows lagged.
-    const rowAnims = otherTo.map((row) => {
+    // Only the other two visible rows grow in; extras leave with the shrink.
+    const rowAnims = extraTo.map((row) => {
       row.el.style.visibility = 'visible';
       const fromPad = open ? '0px' : openPadY;
       const toPad = open ? openPadY : '0px';
       const fromBorder = open ? '0px' : openBorder;
       const toBorder = open ? openBorder : '0px';
-      const above = playlistRows().indexOf(row.el) < playingIndex;
-      // Above: reveal/hide from the bottom edge (under the playing card).
-      // Below: reveal/hide from the top edge.
-      const folded = above ? 'inset(0 0 100% 0)' : 'inset(100% 0 0 0)';
       return row.el.animate(
         [
           {
             height: `${Math.max(0, row.from)}px`,
-            opacity: 1,
-            clipPath: open ? folded : 'inset(0)',
+            opacity: open ? 0 : 1,
             paddingTop: fromPad,
             paddingBottom: fromPad,
             borderTopWidth: fromBorder,
@@ -1304,8 +1578,7 @@ export function initPlayerDock(): void {
           },
           {
             height: `${Math.max(0, row.to)}px`,
-            opacity: 1,
-            clipPath: open ? 'inset(0)' : folded,
+            opacity: open ? 1 : 0,
             paddingTop: toPad,
             paddingBottom: toPad,
             borderTopWidth: toBorder,
@@ -1319,22 +1592,29 @@ export function initPlayerDock(): void {
     const finish = () => {
       if (token !== sheetMorphGen) return;
       stopPlaylistPin();
-      if (open) pinPlayingToViewport(playing, section, pinY);
       document.dispatchEvent(
         new CustomEvent('phone-player-playlist-apply', { detail: { open, phase: 'commit' } }),
       );
       if (open) {
-        for (const row of otherTo) {
-          row.el.removeAttribute('aria-hidden');
+        for (const row of extraTo) {
+          if (!row.el.hasAttribute('data-playlist-placeholder')) {
+            row.el.removeAttribute('aria-hidden');
+          }
           row.el.classList.remove('is-playlist-collapsed');
         }
-        pinPlayingToViewport(playing, section, pinY);
-      } else {
-        for (const row of otherTo) {
-          row.el.setAttribute('aria-hidden', 'true');
-          row.el.classList.add('is-playlist-collapsed');
+        for (const row of rows) {
+          row.style.removeProperty('visibility');
         }
-        // Siblings are height 0 — only the playing card remains.
+        setPlaylistViewportVar();
+      } else {
+        for (const row of extraTo) {
+          if (!row.el.hasAttribute('data-playlist-placeholder')) {
+            row.el.setAttribute('aria-hidden', 'true');
+            row.el.classList.add('is-playlist-collapsed');
+          }
+        }
+        removePlaceholders();
+        dock.style.removeProperty('--player-playlist-viewport-h');
         if (section) section.scrollTop = 0;
         if (list) list.scrollTop = 0;
       }
@@ -1342,9 +1622,18 @@ export function initPlayerDock(): void {
       sheetAnim.cancel();
       listAnim?.cancel();
       for (const anim of playingAnims) anim.cancel();
-      // Playlist keeps the px lock (1fr scrollport). Solo drops it and hugs.
-      endSheetMorphStyles({ keepHeight: open });
-      if (!open) fitSheetToSoloCard();
+      if (open) {
+        endSheetMorphStyles({ keepHeight: true });
+        scrollWindowIntoView();
+        return;
+      }
+      endSheetMorphStyles({ keepHeight: true });
+      const soloH = measureSoloOpenPx(collapsedH);
+      setSheetHeight(soloH, collapsedH, soloH);
+      window.requestAnimationFrame(() => {
+        if (token !== sheetMorphGen) return;
+        fitSheetToSoloCard();
+      });
     };
 
     let settled = false;
@@ -1360,9 +1649,8 @@ export function initPlayerDock(): void {
       ...playingAnims.map((anim) => anim.finished.catch(() => undefined)),
       ...rowAnims.map((anim) => anim.finished.catch(() => undefined)),
     ]).then(finishOnce);
-    // Always unlock overflow even if a WAAPI finished promise hangs.
     const waitMs = PLAYLIST_MORPH_MS + 48;
-    afterSheetMorph(token, finishOnce, true, waitMs);
+    afterSheetMorph(token, finishOnce, open, waitMs);
   };
 
   const settleSheet = (fromH: number, toOpen: boolean, collapsedH: number, openH: number) => {
@@ -1377,6 +1665,10 @@ export function initPlayerDock(): void {
         else scheduleHint();
       } else if (expanded) {
         // Drag already interpolated height — do not start a second close morph.
+        // Playlist class stays through the shrink; drop it only after settle.
+        pendingPlaylist = null;
+        removePlaceholders();
+        dock?.style.removeProperty('--player-playlist-viewport-h');
         applyExpanded(false, { animated: false });
       } else {
         scheduleHint();
@@ -1385,6 +1677,7 @@ export function initPlayerDock(): void {
         const playlist = Boolean(dock?.classList.contains('is-theme-tracks'));
         endSheetDragStyles({ keepHeight: toOpen && playlist });
         if (toOpen && !playlist) fitSheetToSoloCard();
+        flushPendingPlaylist();
       });
     };
     if (motionMq.matches || Math.abs(toH - fromH) < 2) {
@@ -1412,8 +1705,32 @@ export function initPlayerDock(): void {
   handle?.addEventListener('touchstart', blockHandleOverscroll, { passive: false });
   handle?.addEventListener('touchmove', blockHandleOverscroll, { passive: false });
 
-  handle?.addEventListener('pointerdown', (event) => {
+  const dismissPhoneContentForPlayer = () => {
+    if (!phoneMq.matches) return;
+    const cluster = document.querySelector<HTMLElement>('[data-stage-panels]');
+    if (cluster?.classList.contains('is-sheet-closing')) return;
+    if (sheetCtl?.isOpen()) sheetCtl.close({ animated: true });
+  };
+
+  const pointHitsHandle = (x: number, y: number) => {
+    if (!handle) return false;
+    const r = handle.getBoundingClientRect();
+    if (x >= r.left && x <= r.right && y >= r.top && y <= r.bottom) return true;
+    return document.elementsFromPoint(x, y).includes(handle);
+  };
+
+  const swallowNextClick = () => {
+    const eat = (clickEvent: Event) => {
+      clickEvent.preventDefault();
+      clickEvent.stopPropagation();
+    };
+    document.addEventListener('click', eat, true);
+    window.setTimeout(() => document.removeEventListener('click', eat, true), 50);
+  };
+
+  const armHandlePointer = (event: PointerEvent, opts?: { retargeted?: boolean }) => {
     if (!phoneMq.matches || !handle) return;
+    if (drag?.pointerId === event.pointerId) return;
     window.cancelAnimationFrame(settleRaf);
     window.clearTimeout(sheetMorphTimer);
     sheetMorphGen += 1;
@@ -1425,10 +1742,14 @@ export function initPlayerDock(): void {
     // Keep the open px lock — dropping it here unlocked 1fr/50svh for a frame.
     endSheetDragStyles({ keepHeight: expanded });
     const collapsedH = collapsedHeightPx();
-    const openH = openHeightPx();
+    const fromPlaylist = Boolean(expanded && dock?.classList.contains('is-theme-tracks'));
+    const openH = measureDragOpenPx(collapsedH, fromPlaylist);
     drag = {
       pointerId: event.pointerId,
+      startX: event.clientX,
       startY: event.clientY,
+      startT: performance.now(),
+      lastX: event.clientX,
       lastY: event.clientY,
       lastT: performance.now(),
       velocity: 0,
@@ -1437,8 +1758,21 @@ export function initPlayerDock(): void {
       collapsedH,
       openH,
       fromExpanded: expanded,
+      fromPlaylist,
+      retargeted: Boolean(opts?.retargeted),
     };
-    handle.setPointerCapture(event.pointerId);
+    try {
+      handle.setPointerCapture(event.pointerId);
+    } catch {
+      // Pointer may already be released (lost capture / synthetic).
+    }
+  };
+
+  handle?.addEventListener('pointerdown', (event) => {
+    if (!phoneMq.matches || !handle) return;
+    // Close About / Discography / Tour / socials / Info on the same gesture as the swipe.
+    dismissPhoneContentForPlayer();
+    armHandlePointer(event);
   });
 
   handle?.addEventListener('pointermove', (event) => {
@@ -1446,6 +1780,7 @@ export function initPlayerDock(): void {
     const now = performance.now();
     const dt = now - drag.lastT;
     if (dt > 0) drag.velocity = (event.clientY - drag.lastY) / dt;
+    drag.lastX = event.clientX;
     drag.lastY = event.clientY;
     drag.lastT = now;
     const travel = Math.abs(event.clientY - drag.startY);
@@ -1454,21 +1789,48 @@ export function initPlayerDock(): void {
     if (!drag.moved) {
       drag.moved = true;
       beginSheetDrag(drag.startH, drag.collapsedH, drag.openH);
-      drag.openH = measureOpenHeightPx(drag.collapsedH);
+      drag.openH = measureDragOpenPx(drag.collapsedH, drag.fromPlaylist);
     }
     const height = applyDragHeight(rawH, drag.collapsedH, drag.openH);
     syncCollapseChrome(height, drag.openH, drag.fromExpanded);
     setSheetHeight(height, drag.collapsedH, drag.openH);
   });
 
-  const finishHandleDrag = (event: PointerEvent) => {
+  const finishHandleDrag = (
+    event: Pick<PointerEvent, 'pointerId' | 'type' | 'clientY'> & { clientX?: number },
+  ) => {
     if (!drag || event.pointerId !== drag.pointerId) return;
     const session = drag;
     drag = undefined;
     if (handle?.hasPointerCapture(session.pointerId)) {
       handle.releasePointerCapture(session.pointerId);
     }
-    if (!session.moved) return;
+    if (!session.moved) {
+      // pointercancel / blur abort — not a tap. Click still handles 015 single-tap.
+      if (event.type === 'pointercancel') return;
+
+      const now = performance.now();
+      const viewH = window.innerHeight || 0;
+      const inView = event.clientY >= 0 && event.clientY <= viewH;
+      const useEventPoint = event.type === 'pointerup' && inView;
+      const endX = useEventPoint && event.clientX != null ? event.clientX : session.lastX;
+      const endY = useEventPoint ? event.clientY : session.lastY;
+      const travel = Math.hypot(endX - session.startX, endY - session.startY);
+      const duration = now - session.startT;
+      if (!isHandlePointerTap(travel, duration)) return;
+
+      const consumed = consumeHandlePointerTap(now, lastPointerTapAt);
+      lastPointerTapAt = consumed.nextLastPointerTapMs;
+      // Click still single-taps (015). When click never fires (capture +
+      // touchstart preventDefault), two pointerups inside 450ms toggle once.
+      // Retargeted first tap has no click — toggle immediately.
+      // Echo lock after a successful toggle stops the extra half from undoing.
+      if (consumed.paired || session.retargeted) {
+        suppressClickAfterPointerToggle();
+        toggleFromHandleTap();
+      }
+      return;
+    }
 
     // Swallow the click that follows a real drag. pointercancel has no click.
     if (event.type === 'pointerup') {
@@ -1477,7 +1839,12 @@ export function initPlayerDock(): void {
         suppressHandleClick = false;
       }, 50);
     }
-    const deltaUp = session.startY - event.clientY;
+    // lostpointercapture / pointercancel often report clientY 0. Pointerup
+    // outside the viewport can too. Snap from the last in-view sample.
+    const viewH = window.innerHeight || 0;
+    const inView = event.clientY >= 0 && event.clientY <= viewH;
+    const endY = event.type === 'pointerup' && inView ? event.clientY : session.lastY;
+    const deltaUp = session.startY - endY;
     const height = applyDragHeight(
       session.startH + deltaUp,
       session.collapsedH,
@@ -1497,6 +1864,13 @@ export function initPlayerDock(): void {
   handle?.addEventListener('pointerup', finishHandleDrag);
   handle?.addEventListener('pointercancel', finishHandleDrag);
   handle?.addEventListener('lostpointercapture', finishHandleDrag);
+  // Capture can drop when the pointer leaves the window; still finish the gesture.
+  window.addEventListener('pointerup', finishHandleDrag);
+  window.addEventListener('pointercancel', finishHandleDrag);
+  window.addEventListener('blur', () => {
+    if (!drag) return;
+    finishHandleDrag({ pointerId: drag.pointerId, type: 'pointercancel', clientY: drag.lastY });
+  });
 
   socialsBtn?.addEventListener('click', (event) => {
     event.preventDefault();
@@ -1516,17 +1890,49 @@ export function initPlayerDock(): void {
       // not collapse the Info sheet (or V-Flip) sitting behind it.
       if (isLegalOverlayOpen()) return;
       if (target.closest('#legal-overlay, [data-legal-panel]')) return;
+
+      const onHandle = Boolean(target.closest('[data-player-handle]'));
+      const overHandle = pointHitsHandle(event.clientX, event.clientY);
+      const onHudIcon = Boolean(
+        target.closest('[data-stage-panel-trigger], [data-socials-trigger], [data-stage-panel-icons]'),
+      );
+      // Open sheet may paint over the handle. First pointer on that strip
+      // closes the bar and continues as a player swipe — no second gesture.
+      if ((onHandle || overHandle) && !onHudIcon) {
+        dismissPhoneContentForPlayer();
+        if (!onHandle && overHandle && handle) {
+          event.preventDefault();
+          event.stopPropagation();
+          armHandlePointer(event, { retargeted: true });
+          swallowNextClick();
+        }
+        return;
+      }
+
       // Sheet, dock icons, socials links: stay open (icons still exclusive-switch).
       if (target.closest('[data-stage-panels]')) return;
       if (target.closest('#stage-socials') || target.closest('.stage__socials')) return;
 
       if (sheetCtl?.isOpen()) sheetCtl.close({ animated: true });
 
+      // Pointer left the viewport without pointerup: empty-space press must
+      // settle the sheet (lastY), not restack the HUD pill above it.
+      if (drag) {
+        const moved = drag.moved;
+        finishHandleDrag({
+          pointerId: drag.pointerId,
+          type: 'pointercancel',
+          clientY: drag.lastY,
+        });
+        if (moved) return;
+      }
+      if (html.hasAttribute('data-player-sheet-dragging')) return;
+
       // V-Flip collapses on backdrop too, unless the tap is on the player pill.
       const onPlayer = Boolean(target.closest('[data-player-dock], [data-jukebox]'));
       if (expanded && !onPlayer) applyExpanded(false);
     },
-    true,
+    { capture: true, passive: false },
   );
 
   document.addEventListener('phone-player-playlist', (event) => {
@@ -1551,13 +1957,16 @@ export function initPlayerDock(): void {
   phoneMq.addEventListener('change', (event) => {
     parkPhoneTransport();
     parkPhoneSocials();
+    pendingPlaylist = null;
+    window.cancelAnimationFrame(settleRaf);
+    window.clearTimeout(sheetMorphTimer);
+    sheetMorphGen += 1;
+    stopPlaylistPin();
+    removePlaceholders();
+    dock?.style.removeProperty('--player-playlist-viewport-h');
+    endSheetDragStyles();
+    endSheetMorphStyles();
     if (event.matches) {
-      window.cancelAnimationFrame(settleRaf);
-      window.clearTimeout(sheetMorphTimer);
-      sheetMorphGen += 1;
-      stopPlaylistPin();
-      endSheetDragStyles();
-      endSheetMorphStyles();
       const nowPlaying = document.querySelector<HTMLElement>('[data-now-playing]');
       nowPlaying?.removeAttribute('title');
       const vflipOpen = Boolean(dock?.classList.contains('is-open'));
@@ -1583,6 +1992,18 @@ export function initPlayerDock(): void {
   });
 
   endSheetDragStyles();
+  applyPlaylistFixture();
+  const themeList = playlistList();
+  if (themeList) {
+    new MutationObserver(() => {
+      if (!phoneMq.matches) return;
+      rewindowIfNeeded();
+    }).observe(themeList, {
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['data-discog-active'],
+    });
+  }
   if (phoneMq.matches) {
     document.querySelector<HTMLElement>('[data-now-playing]')?.removeAttribute('title');
     window.requestAnimationFrame(refreshSoloCardPx);
