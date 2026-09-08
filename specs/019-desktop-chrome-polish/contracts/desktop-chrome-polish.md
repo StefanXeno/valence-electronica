@@ -42,22 +42,30 @@ No V-Flip / vinyl button. No collapse toggle for the player chrome.
 | Slot | Content |
 |------|---------|
 | Face | Boxed player, already visible after intro. |
-| Track | **Currently playing** visitor-facing label (same string as the jukebox list row). Always readable. |
-| Toolbar L→R | **Playlist**, **Shuffle**, **Play/pause**, **Mute** (if mute is mounted). |
+| Track | **Phone now-playing card** (theme-track card: title, year/kind, listen-on — same as `015` / `018`). Not a name-only row. |
+| Toolbar L→R | **Playlist** (soundwave while jukebox is open — exclusive, never stacked), **Shuffle**, **Play/pause**, **Mute** (if mute is mounted). Box width is static (slider reserved). Unmute shows the slider in that space. |
 
-**Forbidden in this chrome:** vinyl / V-Flip toggle, Loop, volume slider.
+**Forbidden in this chrome:** vinyl / V-Flip toggle, Loop. Slider is **hidden while muted**.
 
 ### Playlist on
 
-The **list** grows from this player (existing laptop theme-track list +
-inline track info from `011`). Not the phone `018` three-row window.
+The box **switches** to the **phone theme-track card window**
+(background-available tracks only; same cards as the rest-state
+now-playing card). Not the `011` TrackInfoPanel list.
 
-| Motion (motion allowed) | Stages |
-|-------------------------|--------|
-| Open | Grow in place: **wider right**, then **taller up**. |
-| Close | Shrink in place: **down**, then **left**. Player chrome (track + toolbar) stays. |
+| Motion | Behavior |
+|--------|----------|
+| Open | **018 row morph**: now-playing card merges into the list, stays selected and in view. **No** width grow. Height MAY grow **up only**. |
+| Close | Reverse morph back to the solo card. Player chrome (track + toolbar) stays. |
 
-Whole player MUST NOT slide. Reduced motion: both faces without required travel.
+Header at rest: **CURRENTLY PLAYING** + soundwave **vertically
+centered** with that text, on the right (not on the solo card). Playlist view: first toolbar control
+is the **soundwave only**; **no** header wave on the jukebox / V-Flip
+title; the **active** card shows the now-playing EQ.
+**No** HUD tooltips on those header titles.
+
+Whole player MUST NOT slide or two-stage-widen. Reduced motion: both
+faces without required travel.
 
 ## Content bar
 
@@ -83,7 +91,7 @@ stay open at the same time.
 
 | Slot | Content |
 |------|---------|
-| Top-right of the open box | `© {year} {artist}` (Valence) — same as phone Info |
+| Top-right of the open box | `© {year} {artist}` (Valence) — **same row height** as the Info heading |
 | Body | English **Imprint** / **Privacy Policy** pills (`imprintButton` / `privacyButton`) |
 | Pills | Open the existing fullscreen legal overlay (`002`) |
 
@@ -94,7 +102,7 @@ open, that interaction MUST NOT collapse Info behind it.
 
 | Control | Meaning |
 |---------|---------|
-| Mute | On/off in the right-hand slot. **No slider.** Unmute uses in-memory level (default 0.7). Device volume is loudness. |
+| Mute | On/off in the right-hand slot. Box width is **static** from first paint (slider space reserved). **Muted:** no slider. **Unmuted:** full `011` slider in that space. No-sound tracks keep mute (disabled OK) and the same width. Unmute level default 0.7. |
 | Play/pause | Atmosphere video play/pause (same as phone `015`). Fallback / missing video MUST NOT count as a visitor pause. |
 | Shuffle | Existing `011` toggle. Loop is **off** on desktop (no control). |
 
@@ -110,9 +118,9 @@ open, that interaction MUST NOT collapse Info behind it.
 
 ## Resize
 
-Crossing **1023px / 1024px** MUST tear down in-flight desktop two-stage
-motion and MUST NOT leave an always-open desktop player on the phone
-HUD (or a phone pill mid-morph on laptop).
+Crossing **1023px / 1024px** MUST tear down in-flight desktop **bar**
+two-stage motion and MUST NOT leave an always-open desktop player on
+the phone HUD (or a phone pill mid-morph on laptop).
 
 ## Out of this contract
 

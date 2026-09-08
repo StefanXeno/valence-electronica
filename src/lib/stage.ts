@@ -3,12 +3,15 @@ import { getCollection, getEntry } from 'astro:content';
 import { resolveHudIcon, type HudIconToken } from './hud-icons';
 import { berlinToday, collectUpcomingShows, type ShowEntryInput } from './stage-upcoming';
 
+export { resolveShowTitle } from './stage-upcoming';
+
 export interface UiChrome {
   aboutTitle: string;
   discographyTitle: string;
   tourTitle: string;
   stageButtonLabel: string;
   currentlyPlayingLabel: string;
+  currentlyPausingLabel: string;
   emptyReleases: string;
   emptyShows: string;
   jukeboxLabel: string;
@@ -26,6 +29,7 @@ export interface UiChrome {
   playerCollapseLabel: string;
   comingSoon: string;
   ticketLabel: string;
+  venueInfoLabel: string;
   introLead: string;
   introName: string;
   jukeboxIcon: HudIconToken;
@@ -62,6 +66,7 @@ const CHROME_FALLBACK: UiChrome = {
   tourTitle: 'Tour',
   stageButtonLabel: 'Play on V-Flip',
   currentlyPlayingLabel: 'Currently playing',
+  currentlyPausingLabel: 'Currently pausing',
   emptyReleases: 'No releases yet',
   emptyShows: 'No upcoming dates',
   jukeboxLabel: 'V-Flip',
@@ -77,6 +82,7 @@ const CHROME_FALLBACK: UiChrome = {
   playerCollapseLabel: 'Hide player controls',
   comingSoon: 'coming soon',
   ticketLabel: 'Tickets',
+  venueInfoLabel: 'Information',
   introLead: "Hi I'm",
   introName: 'Valence',
   jukeboxIcon: 'jukebox',
@@ -105,7 +111,9 @@ export interface ShowItem {
   date: Date;
   city: string;
   venue: string;
+  title?: string;
   ticketUrl?: string;
+  venueUrl?: string;
 }
 
 export async function getChrome(): Promise<UiChrome> {
@@ -121,6 +129,8 @@ export async function getChrome(): Promise<UiChrome> {
     stageButtonLabel: entry.data.stageButtonLabel?.trim() || CHROME_FALLBACK.stageButtonLabel,
     currentlyPlayingLabel:
       entry.data.currentlyPlayingLabel?.trim() || CHROME_FALLBACK.currentlyPlayingLabel,
+    currentlyPausingLabel:
+      entry.data.currentlyPausingLabel?.trim() || CHROME_FALLBACK.currentlyPausingLabel,
     emptyReleases: entry.data.emptyReleases?.trim() || CHROME_FALLBACK.emptyReleases,
     emptyShows: entry.data.emptyShows?.trim() || CHROME_FALLBACK.emptyShows,
     jukeboxLabel: entry.data.jukeboxLabel?.trim() || CHROME_FALLBACK.jukeboxLabel,
@@ -137,6 +147,7 @@ export async function getChrome(): Promise<UiChrome> {
       entry.data.playerCollapseLabel?.trim() || CHROME_FALLBACK.playerCollapseLabel,
     comingSoon: entry.data.comingSoon?.trim() || CHROME_FALLBACK.comingSoon,
     ticketLabel: entry.data.ticketLabel?.trim() || CHROME_FALLBACK.ticketLabel,
+    venueInfoLabel: entry.data.venueInfoLabel?.trim() || CHROME_FALLBACK.venueInfoLabel,
     introLead: entry.data.introLead?.trim() || CHROME_FALLBACK.introLead,
     introName: entry.data.introName?.trim() || CHROME_FALLBACK.introName,
     ...(() => {
@@ -198,7 +209,7 @@ export async function getUpcomingShows(): Promise<ShowItem[]> {
 
   for (const entry of raw) {
     if (entry.id.startsWith('__empty__')) continue;
-    const { date, city, venue, ticketUrl } = entry.data;
+    const { date, city, venue, title, ticketUrl, venueUrl } = entry.data;
     if (!date || !city?.trim() || !venue?.trim()) {
       console.warn(`[stage] omitted show "${entry.id}" (missing date, city, or venue)`);
       continue;
@@ -208,7 +219,9 @@ export async function getUpcomingShows(): Promise<ShowItem[]> {
       date,
       city,
       venue,
+      title,
       ticketUrl,
+      venueUrl,
     });
   }
 

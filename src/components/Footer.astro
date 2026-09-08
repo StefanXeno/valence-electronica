@@ -34,7 +34,8 @@ const year = new Date().getFullYear();
     padding: 0.45rem 0 0.55rem;
     border: 0;
     background: transparent;
-    display: flex;
+    /* Legal is Info on every HUD width — do not paint a bottom-center cluster. */
+    display: none;
     flex-wrap: wrap;
     align-items: center;
     justify-content: center;
@@ -65,12 +66,5 @@ const year = new Date().getFullYear();
 
   p {
     margin: 0;
-  }
-
-  /* Phone: legal lives in the Info content sheet — do not duplicate above the docks. */
-  @media (max-width: 1023px) {
-    footer {
-      display: none;
-    }
   }
 </style>

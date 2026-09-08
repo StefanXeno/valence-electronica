@@ -20,7 +20,7 @@ const {
   data-sound="off"
   data-unmute-tooltip={unmuteTooltip}
   data-mute-tooltip={muteTooltip}
-  hidden
+  hidden={!inJukebox}
 >
   <button
     type="button"
@@ -163,26 +163,32 @@ const {
 
       const fallback = root.getAttribute('data-bg-state') === 'fallback' || reduceMotion.matches;
       const hasAudio = root.getAttribute('data-has-audio') === 'true';
-      if (fallback) {
-        setMuteSlotVisible(false);
-        hoverGlitch.stop();
-        applySoundUi(true);
-        wasMuted = true;
-        return;
-      }
-      // Laptop: hide mute when the entry has no audio.
-      // Phone: keep the speaker in the floor row so the pill chrome
-      // (wave | title | mute) does not collapse on no-audio tracks.
-      if (!hasAudio && !phoneHud.matches) {
-        setMuteSlotVisible(false);
-        hoverGlitch.stop();
-        applySoundUi(true);
-        wasMuted = true;
-        return;
-      }
-      setMuteSlotVisible(true);
+      const desktop = !phoneHud.matches;
 
-      control.hidden = false;
+      // Desktop: mute chrome stays mounted. No-audio / fallback = disabled, same width.
+      if (desktop) {
+        setMuteSlotVisible(true);
+        control.hidden = false;
+        const usable = !fallback && hasAudio;
+        button.disabled = !usable;
+        if (!usable) {
+          hoverGlitch.stop();
+          applySoundUi(true);
+          wasMuted = true;
+          return;
+        }
+      } else if (fallback) {
+        setMuteSlotVisible(false);
+        hoverGlitch.stop();
+        applySoundUi(true);
+        wasMuted = true;
+        return;
+      } else {
+        // Phone: keep the speaker in the floor row on no-audio tracks.
+        setMuteSlotVisible(true);
+        control.hidden = false;
+        button.disabled = false;
+      }
 
       const muted = video.muted || video.volume === 0;
       const turningOn = wasMuted && !muted;
@@ -228,6 +234,7 @@ const {
 
     button.addEventListener('click', (event) => {
       event.stopPropagation();
+      if (button.disabled) return;
       const video = getVideo();
       if (!video) return;
 
@@ -388,6 +395,15 @@ const {
       visibility 0s linear 280ms;
   }
 
+  /* Desktop 019: slider appears in place. No slide / width ease. */
+  @media (min-width: 1024px) {
+    html:not([data-hud-glitch='true']) .volume-control--in-jukebox,
+    html:not([data-hud-glitch='true']) .volume-control--in-jukebox .volume-control__slider-wrap,
+    html:not([data-hud-glitch='true']) .volume-control--in-jukebox .volume-control__slider {
+      transition: none;
+    }
+  }
+
   /* Nightmare: stepped shell so the glitch morph owns the shape change */
   html[data-hud-glitch='true'] .volume-control {
     transition:
@@ -430,6 +446,20 @@ const {
     display: none;
   }
 
+  /* Desktop jukebox: paint mute on first frame; JS must not unmount it. */
+  @media (min-width: 1024px) {
+    .volume-control--in-jukebox,
+    .volume-control--in-jukebox[hidden] {
+      display: block !important;
+    }
+
+    .volume-control--in-jukebox .volume-control__toggle:disabled {
+      opacity: 0.45;
+      cursor: default;
+    }
+  }
+
+  /* Phone: toggle only. Desktop 019 restores 011 unmute-to-slider. */
   @media (max-width: 1023px) {
     .volume-control__slider-wrap,
     .volume-control--in-jukebox[data-sound='on'] .volume-control__slider-wrap,

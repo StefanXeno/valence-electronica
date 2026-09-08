@@ -13,6 +13,9 @@ icons (About, Discography, Tour only — no Lyrics / Track info dock icons).
 (viewport width ≤ 1023px). This contract is authority from **1024px** up. The page MUST still
 load at 320px.
 
+**Superseded for desktop floor chrome** (player, bar, footer) by
+[`019/contracts/desktop-chrome-polish.md`](../../019-desktop-chrome-polish/contracts/desktop-chrome-polish.md).
+
 ## Layout (desktop)
 
 Chrome scale: `--hud-scale: 1.5` (unchanged unless plan tasks tune dock spacing).

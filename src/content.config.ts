@@ -93,7 +93,12 @@ const shows = defineCollection({
     date: z.coerce.date(),
     city: filledText,
     venue: filledText,
+    /** Event title on the tour card. Omit to fall back to venue. */
+    title: filledText.optional(),
+    /** Ticket shop / RSVP. Omit to hide the Tickets pill. */
     ticketUrl: z.url().optional(),
+    /** Venue or place info page. Omit to hide the Information pill. */
+    venueUrl: z.url().optional(),
   }),
 });
 
@@ -105,6 +110,7 @@ const ui = defineCollection({
     tourTitle: z.string().optional(),
     stageButtonLabel: z.string().optional(),
     currentlyPlayingLabel: z.string().optional(),
+    currentlyPausingLabel: z.string().optional(),
     emptyReleases: z.string().optional(),
     emptyShows: z.string().optional(),
     jukeboxLabel: z.string().optional(),
@@ -120,6 +126,7 @@ const ui = defineCollection({
     playerCollapseLabel: z.string().optional(),
     comingSoon: z.string().optional(),
     ticketLabel: z.string().optional(),
+    venueInfoLabel: z.string().optional(),
     introLead: z.string().optional(),
     introName: z.string().optional(),
     jukeboxIcon: z.string().optional(),

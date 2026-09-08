@@ -4,6 +4,7 @@ discographyTitle: Discography
 tourTitle: Tour
 stageButtonLabel: Play on V-Flip
 currentlyPlayingLabel: Currently playing
+currentlyPausingLabel: Currently pausing
 emptyReleases: No releases yet
 emptyShows: No upcoming dates
 jukeboxLabel: V-Flip
@@ -19,6 +20,7 @@ playerExpandLabel: Show player controls
 playerCollapseLabel: Hide player controls
 comingSoon: coming soon
 ticketLabel: Tickets
+venueInfoLabel: Information
 introLead: "Hi I'm"
 introName: Valence
 trackInfoTitle: Track info

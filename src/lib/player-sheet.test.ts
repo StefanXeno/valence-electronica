@@ -1,9 +1,15 @@
 import { describe, expect, it } from 'vitest';
 import {
   applyDragHeight,
+  DISCOG_PANEL_ROW_GAP_REM,
+  DISCOG_PANEL_WINDOW_SLOTS,
   dragFaceOpenPx,
   pickSoloOpenPx,
   playlistStackPx,
+  playlistViewportPx,
+  morphBoxPx,
+  PLAYLIST_ROW_GAP_REM,
+  PLAYLIST_WINDOW_SLOTS,
   plausibleRowPx,
   resolvePlaylistGapPx,
   sheetProgress,
@@ -48,6 +54,28 @@ describe('playlistStackPx', () => {
   });
 });
 
+describe('playlistViewportPx', () => {
+  it('is three rows + two gaps for the player playlist', () => {
+    expect(PLAYLIST_WINDOW_SLOTS).toBe(3);
+    expect(playlistViewportPx([80, 80, 80], 8, PLAYLIST_WINDOW_SLOTS)).toBe(240 + 16);
+    expect(playlistViewportPx([80], 8, PLAYLIST_WINDOW_SLOTS)).toBe(240 + 16);
+  });
+
+  it('is 2.5 rows + two gaps for the Discography bar panel', () => {
+    expect(DISCOG_PANEL_WINDOW_SLOTS).toBe(2.5);
+    expect(DISCOG_PANEL_ROW_GAP_REM).toBe(0.75);
+    // 80 + 80 + 40 + 8 + 8
+    expect(playlistViewportPx([80, 80, 80], 8, DISCOG_PANEL_WINDOW_SLOTS)).toBe(216);
+    expect(playlistViewportPx([80], 8, DISCOG_PANEL_WINDOW_SLOTS)).toBe(216);
+  });
+});
+
+describe('PLAYLIST_ROW_GAP_REM', () => {
+  it('is the settled theme-track gap, not the page discog 0.75rem', () => {
+    expect(PLAYLIST_ROW_GAP_REM).toBe(0.55);
+  });
+});
+
 describe('resolvePlaylistGapPx', () => {
   it('uses the token when solo CSS has zeroed computed gap', () => {
     expect(resolvePlaylistGapPx(8.8, 0, 8.8)).toBe(8.8);
@@ -75,5 +103,20 @@ describe('plausibleRowPx', () => {
     expect(plausibleRowPx(680, 88, 200)).toBe(88);
     expect(plausibleRowPx(90, 88, 200)).toBe(90);
     expect(plausibleRowPx(0, 88, 200)).toBe(88);
+  });
+});
+
+describe('morphBoxPx', () => {
+  it('keeps chrome and only swaps the track well', () => {
+    // 280 box, 120 solo well → 3-slot 360 well = 520. Close is the reverse.
+    expect(morphBoxPx(280, 120, 360)).toBe(520);
+    expect(morphBoxPx(520, 360, 120)).toBe(280);
+    expect(morphBoxPx(280, 120, 216)).toBe(376);
+    expect(morphBoxPx(376, 216, 120)).toBe(280);
+  });
+
+  it('does not go negative when a well is missing', () => {
+    expect(morphBoxPx(200, 0, 80)).toBe(280);
+    expect(morphBoxPx(200, 240, 0)).toBe(0);
   });
 });

@@ -1,13 +1,15 @@
 import { initEqFlatten } from './eq-flatten';
-import { isIntroActive, setPlayerPaused } from './playback';
+import { isIntroActive, isPlayerPaused, setPlayerPaused, watchPlayerPause } from './playback';
 import { PHONE_PANEL_PHASE_MS } from './panel-motion';
 import {
   applyDragHeight as clampDragHeight,
   dragFaceOpenPx,
   OVERSCROLL_PX_MAX,
+  morphBoxPx,
   pickSoloOpenPx,
   PLAYLIST_ROW_GAP_REM,
   playlistStackPx,
+  playlistViewportPx,
   PLAYLIST_WINDOW_SLOTS,
   plausibleRowPx,
   resolvePlaylistGapPx,
@@ -45,6 +47,22 @@ export function prefersReducedMotion(): boolean {
 
 export function isPhoneHud(): boolean {
   return window.matchMedia(PHONE_MQ).matches;
+}
+
+/**
+ * Desktop rest header copy only (CURRENTLY PLAYING / PAUSING).
+ * Phone keeps currentlyPlayingLabel. No HUD floater on the title.
+ */
+export function syncDesktopNowTitle(): void {
+  if (isPhoneHud()) return;
+  const title = document.querySelector<HTMLElement>('.jukebox__title');
+  const nowSpan = document.querySelector<HTMLElement>('.jukebox__title-phone--now');
+  if (!title || !nowSpan) return;
+  const playingLabel = title.dataset.playingLabel?.trim() || 'Currently playing';
+  const pausingLabel = title.dataset.pausingLabel?.trim() || 'Currently pausing';
+  nowSpan.textContent = isPlayerPaused() ? pausingLabel : playingLabel;
+  title.removeAttribute('data-hud-label');
+  title.removeAttribute('title');
 }
 
 type CatalogRow = { id: string; label: string };
@@ -777,7 +795,7 @@ export function initPlayerDock(): void {
     const fallback = PLAYLIST_ROW_GAP_REM * rem * hud;
     if (!list) return fallback;
     // Token first — solo `gap: 0` and parseFloat("calc(...)") both miss the
-    // settled `--discog-row-gap` (0.55rem * --hud-scale).
+    // settled `--discog-row-gap` (0.55rem * --hud-scale, not page 0.75rem).
     return resolvePlaylistGapPx(
       cssVarPx(list, '--discog-row-gap', 0),
       Number.parseFloat(getComputedStyle(list).gap) || 0,
@@ -1167,13 +1185,7 @@ export function initPlayerDock(): void {
 
   const setPlaylistViewportVar = () => {
     const heights = measureThreeSlotHeights();
-    const gap = playlistGapPx();
-    const typical = heights.find((height) => height > 1) ?? 0;
-    const slots = heights.map((height) => (height > 1 ? height : typical));
-    while (slots.length < PLAYLIST_WINDOW_SLOTS) slots.push(typical);
-    const viewport =
-      slots.slice(0, PLAYLIST_WINDOW_SLOTS).reduce((sum, height) => sum + height, 0) +
-      (PLAYLIST_WINDOW_SLOTS - 1) * gap;
+    const viewport = playlistViewportPx(heights, playlistGapPx(), PLAYLIST_WINDOW_SLOTS);
     dock?.style.setProperty('--player-playlist-viewport-h', `${Math.max(0, viewport)}px`);
   };
 
@@ -1214,7 +1226,6 @@ export function initPlayerDock(): void {
   const rewindowIfNeeded = () => {
     if (!dock?.classList.contains('is-theme-tracks')) return;
     if (dock.classList.contains('is-playlist-morphing')) return;
-    if (!phoneMq.matches) return;
     const rows = realPlaylistRows();
     const next = currentRowIndex(rows);
     if (!shouldRewindow(visibleRealIndices(), next)) return;
@@ -1342,11 +1353,16 @@ export function initPlayerDock(): void {
   };
 
   morphPlaylist = (open: boolean) => {
-    if (!dock || !phoneMq.matches) return;
+    if (!dock) return;
+    const phone = phoneMq.matches;
     const already = dock.classList.contains('is-theme-tracks');
     if (already === open) return;
-    // Open/close owns the sheet — queue last-committed playlist until it settles.
-    if (dock.classList.contains('is-sheet-morphing') && !dock.classList.contains('is-playlist-morphing')) {
+    // Phone open/close owns the sheet — queue last-committed playlist until it settles.
+    if (
+      phone &&
+      dock.classList.contains('is-sheet-morphing') &&
+      !dock.classList.contains('is-playlist-morphing')
+    ) {
       pendingPlaylist = open;
       return;
     }
@@ -1365,14 +1381,16 @@ export function initPlayerDock(): void {
       );
       if (open) {
         setPlaylistViewportVar();
-        const collapsedH = collapsedHeightPx();
-        const toH = openHeightPx();
-        html.setAttribute('data-player-sheet-sized', '');
-        setSheetHeight(toH, collapsedH, toH);
+        if (phone) {
+          const collapsedH = collapsedHeightPx();
+          const toH = openHeightPx();
+          html.setAttribute('data-player-sheet-sized', '');
+          setSheetHeight(toH, collapsedH, toH);
+        }
         scrollWindowIntoView();
       } else {
         dock.style.removeProperty('--player-playlist-viewport-h');
-        fitSheetToSoloCard();
+        if (phone) fitSheetToSoloCard();
       }
       return;
     }
@@ -1382,6 +1400,8 @@ export function initPlayerDock(): void {
     const fromH = readDockHeight() || openHeightPx();
     const list = playlistList();
     const section = playlistSection();
+    // Capture the well before morph classes / max-height can snap it.
+    const fromSectionH = section?.getBoundingClientRect().height ?? 0;
 
     if (open) {
       applyPlaceholders();
@@ -1482,8 +1502,13 @@ export function initPlayerDock(): void {
     const gapPx = playlistGapPx();
     if (list) list.style.gap = `${gapPx}px`;
 
+    if (!phone) {
+      // Lock the box now so is-playlist-morphing cannot pop max-height.
+      dock.style.overflow = 'hidden';
+      dock.style.height = `${fromH}px`;
+    }
     dock.classList.add('is-playlist-morphing');
-    startSheetMorph(fromH, collapsedH);
+    if (phone) startSheetMorph(fromH, collapsedH);
     void dock.offsetHeight;
 
     const typicalPlaylist = playing
@@ -1506,7 +1531,9 @@ export function initPlayerDock(): void {
         new CustomEvent('phone-player-playlist-apply', { detail: { open, phase: 'apply' } }),
       );
     };
-    if (open) {
+    // Desktop: flip faces with the morph (no leftover CURRENTLY PLAYING).
+    // Phone open still waits a frame so dest-height rows cannot flash.
+    if (open && phone) {
       window.requestAnimationFrame(() => {
         if (token !== sheetMorphGen) return;
         applyPlaylistClass();
@@ -1521,7 +1548,7 @@ export function initPlayerDock(): void {
       ? measurePlaylistOpenPx(collapsedH, measureThreeSlotHeights(), gapPx)
       : measureSoloOpenPx(collapsedH);
 
-    startSheetMorph(fromH, collapsedH);
+    if (phone) startSheetMorph(fromH, collapsedH);
 
     const ease = 'cubic-bezier(0.22, 1, 0.36, 1)';
     const duration = PLAYLIST_MORPH_MS;
@@ -1531,9 +1558,19 @@ export function initPlayerDock(): void {
     // push the current card into TOP/MIDDLE/BOTTOM. Pre-translate by
     // extraTo[0] * slot yanked the solo card and scaled with blown row clones.
 
+    if (!phone && open) setPlaylistViewportVar();
+    const desktopDestSection = open
+      ? Number.parseFloat(dock.style.getPropertyValue('--player-playlist-viewport-h')) || playingH
+      : playingH;
+    const desktopToH = morphBoxPx(fromH, fromSectionH, desktopDestSection);
+
     const sheetAnim = dock.animate(
-      [{ height: `${fromH}px` }, { height: `${toH}px` }],
-      { duration, easing: ease, fill: 'forwards' },
+      [{ height: `${fromH}px` }, { height: `${phone ? toH : desktopToH}px` }],
+      {
+        duration,
+        easing: ease,
+        fill: 'forwards',
+      },
     );
 
     // Close interpolates gap away with the shrink so solo settle does not
@@ -1605,7 +1642,7 @@ export function initPlayerDock(): void {
         for (const row of rows) {
           row.style.removeProperty('visibility');
         }
-        setPlaylistViewportVar();
+        if (phone) setPlaylistViewportVar();
       } else {
         for (const row of extraTo) {
           if (!row.el.hasAttribute('data-playlist-placeholder')) {
@@ -1618,10 +1655,20 @@ export function initPlayerDock(): void {
         if (section) section.scrollTop = 0;
         if (list) list.scrollTop = 0;
       }
-      setSheetHeight(toH, collapsedH, Math.max(toH, fromH, collapsedH + 1));
+      if (phone) {
+        setSheetHeight(toH, collapsedH, Math.max(toH, fromH, collapsedH + 1));
+      }
       sheetAnim.cancel();
       listAnim?.cancel();
       for (const anim of playingAnims) anim.cancel();
+      if (!phone) {
+        dock.style.removeProperty('height');
+        dock.style.removeProperty('overflow');
+        dock.classList.remove('is-playlist-morphing');
+        cancelPlaylistRowAnims();
+        if (open) scrollWindowIntoView();
+        return;
+      }
       if (open) {
         endSheetMorphStyles({ keepHeight: true });
         scrollWindowIntoView();
@@ -1644,13 +1691,18 @@ export function initPlayerDock(): void {
     };
 
     void Promise.all([
-      sheetAnim.finished.catch(() => undefined),
+      sheetAnim?.finished.catch(() => undefined),
       listAnim?.finished.catch(() => undefined),
       ...playingAnims.map((anim) => anim.finished.catch(() => undefined)),
       ...rowAnims.map((anim) => anim.finished.catch(() => undefined)),
     ]).then(finishOnce);
     const waitMs = PLAYLIST_MORPH_MS + 48;
-    afterSheetMorph(token, finishOnce, open, waitMs);
+    if (phone) {
+      afterSheetMorph(token, finishOnce, open, waitMs);
+    } else {
+      window.clearTimeout(sheetMorphTimer);
+      sheetMorphTimer = window.setTimeout(finishOnce, waitMs);
+    }
   };
 
   const settleSheet = (fromH: number, toOpen: boolean, collapsedH: number, openH: number) => {
@@ -1936,7 +1988,6 @@ export function initPlayerDock(): void {
   );
 
   document.addEventListener('phone-player-playlist', (event) => {
-    if (!phoneMq.matches) return;
     const open = Boolean((event as CustomEvent<{ open?: boolean }>).detail?.open);
     morphPlaylist?.(open);
   });
@@ -2012,18 +2063,20 @@ export function initPlayerDock(): void {
   if (!isIntroActive()) scheduleHint();
 
   initBgVideoToggle();
+  watchPlayerPause(syncDesktopNowTitle, syncDesktopNowTitle);
+  syncDesktopNowTitle();
 }
 
 /**
- * Phone transport: play/pause the hero/stage `<video>` (that *is* the music).
+ * Play/pause the hero/stage `<video>` (that *is* the music) on phone and desktop.
  * Writes `html[data-player-paused]` so the soundwave + shuffle clock freeze together.
  */
 function initBgVideoToggle(): void {
   const btn = document.querySelector<HTMLButtonElement>('[data-bg-play-toggle]');
   if (!btn) return;
 
-  const playLabel = btn.dataset.playLabel ?? 'Play video';
-  const pauseLabel = btn.dataset.pauseLabel ?? 'Pause video';
+  const playLabel = btn.dataset.playLabel ?? 'Play';
+  const pauseLabel = btn.dataset.pauseLabel ?? 'Pause';
   const playIcon = btn.querySelector<HTMLElement>('[data-bg-play-icon="play"]');
   const pauseIcon = btn.querySelector<HTMLElement>('[data-bg-play-icon="pause"]');
   const atmosphere = document.querySelector<HTMLElement>('[data-atmosphere]');
@@ -2048,6 +2101,7 @@ function initBgVideoToggle(): void {
     } else {
       setPlayerPaused(!playing);
     }
+    syncDesktopNowTitle();
   };
 
   const bindVideoEvents = () => {
@@ -2063,7 +2117,7 @@ function initBgVideoToggle(): void {
   btn.addEventListener('click', (event) => {
     event.preventDefault();
     event.stopPropagation();
-    if (!isPhoneHud()) return;
+    // Same atmosphere <video> as phone — do not phone-gate (019 desktop toolbar).
     const video = getVideo();
     if (!video || atmosphere?.getAttribute('data-bg-state') === 'fallback') return;
     if (video.paused) {

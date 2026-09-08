@@ -43,7 +43,11 @@ const panels = [
     {
       panels.map((panel) => (
         <details
-          class:list={['stage-panel', panel.body === 'discography' && 'stage-panel--discography']}
+          class:list={[
+            'stage-panel',
+            panel.body === 'discography' && 'stage-panel--discography',
+            panel.body === 'tour' && 'stage-panel--tour',
+          ]}
           id={`stage-panel-${panel.body}`}
           data-stage-panel={panel.body}
         >
@@ -81,12 +85,17 @@ const panels = [
         <span class="visually-hidden">{chrome.infoTitle}</span>
         <HudIcon token={chrome.infoIcon} emoji={chrome.infoIconEmoji} />
         <span class="stage-panel__label">{chrome.infoTitle}</span>
+        <span class="stage-panel__sheet-copy stage-panel__sheet-copy--summary glitch-hit"
+          >© {year} {site.artist.name}</span
+        >
       </summary>
       <div class="stage-panel__body">
         <h2 class="stage-panel__sheet-title">
           <HudIcon token={chrome.infoIcon} emoji={chrome.infoIconEmoji} />
           <span class="stage-panel__sheet-title-text">{chrome.infoTitle}</span>
-          <span class="stage-panel__sheet-copy glitch-hit">© {year} {site.artist.name}</span>
+          <span class="stage-panel__sheet-copy stage-panel__sheet-copy--sheet glitch-hit"
+            >© {year} {site.artist.name}</span
+          >
         </h2>
         <div class="stage-panel__scroll">
           <LegalSheet />
@@ -137,8 +146,10 @@ const panels = [
 
 <script>
   import { isGlitchThemeActive, playElementGlitch } from '../lib/glitch';
-  import { panelCloseDelayMs } from '../lib/panel-motion';
+  import { createTwoStageMotion } from '../lib/panel-motion';
   import { isPhoneHud, requestPhoneContent, type PhoneContentSheet } from '../lib/player-dock';
+
+  const desktopPanelMotion = new Map<HTMLDetailsElement, ReturnType<typeof createTwoStageMotion>>();
 
   function initExclusivePanels() {
     const cluster = document.querySelector('[data-stage-panels]');
@@ -152,7 +163,10 @@ const panels = [
         const target = event.target;
         if (!(target instanceof HTMLDetailsElement) || !target.open) return;
         cluster.querySelectorAll('details[open]').forEach((node) => {
-          if (node instanceof HTMLDetailsElement && node !== target) node.open = false;
+          if (!(node instanceof HTMLDetailsElement) || node === target) return;
+          const motion = desktopPanelMotion.get(node);
+          if (motion) motion.request(false);
+          else node.open = false;
         });
       },
       true,
@@ -177,33 +191,29 @@ const panels = [
       }, dur + 80);
     };
 
+    const motion = createTwoStageMotion(panel, {
+      reducedMotion: () => reduceMotion.matches,
+      applySemanticOpen: (open) => {
+        panel.open = open;
+        if (!open) panel.classList.remove('is-panel-closing');
+      },
+    });
+    desktopPanelMotion.set(panel, motion);
+
     summary.addEventListener('click', (event) => {
       // Phone: icon row drives open/close (native open + delayed close).
       if (isPhoneHud()) return;
 
-      // Native open — width + max-height run together from t=0.
-      if (!panel.open) return;
-
       event.preventDefault();
-      if (panel.classList.contains('is-glitching') || panel.classList.contains('is-panel-closing')) {
-        return;
+      const next = !motion.getTarget();
+      if (isGlitchThemeActive() && !reduceMotion.matches) {
+        playMorph(next ? 'in' : 'out');
       }
-
-      if (isGlitchThemeActive()) {
-        playMorph('out');
-      } else if (!reduceMotion.matches) {
-        panel.classList.add('is-panel-closing');
-      }
-
-      window.setTimeout(() => {
-        panel.open = false;
-        panel.classList.remove('is-panel-closing');
-      }, panelCloseDelayMs(reduceMotion.matches));
+      motion.request(next);
     });
 
-    panel.addEventListener('toggle', () => {
-      if (isPhoneHud()) return;
-      if (panel.open) playMorph('in');
+    window.matchMedia('(max-width: 1023px)').addEventListener('change', (event) => {
+      if (event.matches) motion.snap(false);
     });
   }
 
@@ -249,6 +259,8 @@ const panels = [
   }
 
   function bootStagePanels() {
+    const cluster = document.querySelector('[data-stage-panels]');
+    cluster?.setAttribute('data-two-stage-js', '');
     initExclusivePanels();
     initPhoneIconTriggers();
     document.querySelectorAll<HTMLDetailsElement>('[data-stage-panel]').forEach(initStagePanelGlitch);
@@ -284,6 +296,7 @@ const panels = [
 
   .stage-panel {
     --stage-panel-inset: calc(0.65rem * var(--hud-scale));
+    --stage-panel-body-open-h: min(30svh, calc(11rem * var(--hud-scale)));
 
     position: relative;
     overflow: visible;
@@ -299,6 +312,12 @@ const panels = [
   .stage-panel--socials,
   .stage-panel--info {
     display: none;
+  }
+
+  @media (min-width: 1024px) {
+    .stage-panel--info {
+      display: block;
+    }
   }
 
   .stage-panel--socials .stage-panel__summary {
@@ -376,13 +395,67 @@ const panels = [
     max-width: min(calc(18rem * var(--hud-scale)), calc(100vw - 2 * var(--hud-inset)));
   }
 
-  .stage-panel--discography[open] {
+  .stage-panel--discography[open],
+  .stage-panel--tour[open] {
     width: min(calc(22rem * var(--hud-scale)), calc(100vw - 2 * var(--hud-inset)));
     max-width: min(calc(22rem * var(--hud-scale)), calc(100vw - 2 * var(--hud-inset)));
   }
 
   /* Laptop only — phone pill stays full dock width while height reverses. */
   @media (min-width: 1024px) {
+    /* Two full discog cards + a peek of the third (page gap 0.75rem). */
+    .stage-panel--discography {
+      --discog-panel-row-h: calc(7rem * var(--hud-scale));
+      --discog-panel-gap: calc(0.75rem * var(--hud-scale));
+      --discog-panel-viewport-h: calc(
+        2.5 * var(--discog-panel-row-h) + 2 * var(--discog-panel-gap)
+      );
+      --stage-panel-body-open-h: min(50svh, var(--discog-panel-viewport-h));
+    }
+
+    .stage-panel--discography[open] .stage-panel__body {
+      max-height: var(--stage-panel-body-open-h);
+    }
+
+    /* Two tour cards (title / date·place / pills) without clipping the footer. */
+    .stage-panel--tour {
+      --stage-panel-body-open-h: min(50svh, calc(16rem * var(--hud-scale)));
+    }
+
+    /* Sequential two-stage: width ([open]) first, height after is-two-stage-height.
+       No-JS: omit [data-two-stage-js] so native [open] still paints the body. */
+    .stage-panels[data-two-stage-js] .stage-panel[open]:not(.is-two-stage-height) .stage-panel__body {
+      max-height: 0;
+      opacity: 0;
+      pointer-events: none;
+      padding-top: 0;
+      padding-bottom: 0;
+    }
+
+    .stage-panel--info[open] .stage-panel__summary {
+      align-items: center;
+    }
+
+    .stage-panel--info[open] .stage-panel__sheet-copy--summary {
+      display: block;
+      margin-left: auto;
+      flex: 0 0 auto;
+      align-self: center;
+      font-family: var(--font-body);
+      font-size: calc(0.72rem * var(--hud-scale));
+      font-weight: 400;
+      line-height: 1;
+      letter-spacing: 0.02em;
+      text-transform: none;
+      color: var(--color-text-muted);
+      text-shadow: none;
+      white-space: nowrap;
+    }
+
+    .stage-panel--info .stage-panel__sheet-copy--sheet {
+      display: none;
+    }
+
     html:not([data-hud-glitch='true']) .stage-panel[open].is-panel-closing,
     html:not([data-hud-glitch='true']) .stage-panel--discography[open].is-panel-closing {
       width: var(--control-size);
@@ -493,11 +566,18 @@ const panels = [
   }
 
   .stage-panel[open] .stage-panel__body {
-    max-height: min(30svh, calc(11rem * var(--hud-scale)));
+    max-height: var(--stage-panel-body-open-h);
     opacity: 1;
     overflow: auto;
     pointer-events: auto;
     padding: 0 var(--stage-panel-inset) var(--stage-panel-inset);
+  }
+
+  /* After the generic open body — desktop Discography must not inherit 11rem. */
+  @media (min-width: 1024px) {
+    .stage-panel--discography[open] .stage-panel__body {
+      max-height: min(50svh, var(--discog-panel-viewport-h, var(--stage-panel-body-open-h)));
+    }
   }
 
   .stage-panel.is-glitching[data-glitch='in'] .stage-panel__body {
@@ -515,19 +595,19 @@ const panels = [
       animation-timing-function: steps(1, end);
     }
     35% {
-      max-height: min(30svh, calc(11rem * var(--hud-scale)));
+      max-height: var(--stage-panel-body-open-h);
       opacity: 1;
       animation-timing-function: steps(1, end);
     }
     100% {
-      max-height: min(30svh, calc(11rem * var(--hud-scale)));
+      max-height: var(--stage-panel-body-open-h);
       opacity: 1;
     }
   }
 
   @keyframes stage-panel-body-out {
     0% {
-      max-height: min(30svh, calc(11rem * var(--hud-scale)));
+      max-height: var(--stage-panel-body-open-h);
       opacity: 1;
       animation-timing-function: steps(1, end);
     }
@@ -548,6 +628,10 @@ const panels = [
 
   /* Phone sheet header only — desktop already titles the open summary. */
   .stage-panel__sheet-title {
+    display: none;
+  }
+
+  .stage-panel__sheet-copy--summary {
     display: none;
   }
 

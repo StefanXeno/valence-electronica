@@ -44,31 +44,50 @@ npm run build
    Top-right socials still list every active channel.
 3. **Expect**: **0** bottom-center copyright / Impressum /
    Datenschutzerklärung footer cluster.
-4. Open **Info**. **Expect**: `©` + Valence in the **top-right** of the
-   Info box; Imprint and Privacy Policy pills; each pill opens the
-   existing legal overlay.
+4. Open **Info**. **Expect**: `©` + Valence in the **top-right**, **on
+   the same row height as the Info heading**; Imprint and Privacy Policy
+   pills; each pill opens the existing legal overlay.
 5. Open About or Discography. **Expect**: no social icons inside the
    open bar.
 
 ## Scenario 2 — Always-open player (P1, SC-002)
 
 1. Same viewport after intro. Do **not** click the player first.
-2. **Expect**: bottom-left player already visible; **currently playing**
-   track name readable.
+2. **Expect**: bottom-left player already visible; **full now-playing
+   card** (title, year/kind, listen-on — same as phone), not a name-only
+   row.
 3. **Expect** toolbar left → right: **Playlist**, **Shuffle**,
    **Play/pause**, **Mute**.
 4. **Expect**: **0** V-Flip/vinyl buttons, **0** Loop buttons, **0**
-   volume sliders, **0** ways to collapse the player chrome.
-5. Toggle mute, play/pause, shuffle. **Expect**: mute does not reveal a
-   slider; play/pause pauses/resumes the atmosphere video.
+   ways to collapse the player chrome. **0** sliders while muted.
+5. Reload. **Expect**: first paint is already the **final** box
+   width (**0** small→large jump).
+6. Toggle mute, play/pause, shuffle. **Expect**: unmute shows the
+   **full** volume slider **instantly** in reserved space to the
+   right of mute (**0** box-width change, **0** push right); mute
+   hides the slider in that same space; play/pause pauses/resumes
+   the atmosphere video.
+7. Switch to a **no-sound** track (e.g. Show Me How). **Expect**:
+   mute stays visible (may look disabled); box width **unchanged**.
 
-## Scenario 3 — Playlist grow (P1, SC-003)
+## Scenario 3 — Playlist morph (P1, SC-003)
 
-1. Motion allowed. Turn **Playlist** on, then off, **3 times**.
-2. **Expect (each open)**: list grows **in place** from the player —
-   wider **right**, then taller **up**. Track + toolbar stay.
-3. **Expect (each close)**: shrink **down**, then **left**. Player
-   chrome still visible.
+1. Turn **Playlist** on, then off, **3 times**.
+2. **Expect (each open)**: the currently-playing card **merges** into
+   the phone theme-track list (same 018 pluck as mobile). It stays
+   **selected** (round EQ on the card, not a dots pill) and **in view**.
+   Other card play buttons are **circles**. **0** hard cuts.
+   **0** rightward width grow. Height rises **up only**, same 380ms
+   ease as the row morph — **0** second pop after the cards finish.
+   Header switches to the jukebox / V-Flip title with the morph (**0**
+   leftover CURRENTLY PLAYING over the list). First toolbar control is
+   the **soundwave only**. Card + toolbar stay.
+3. **Expect (each close)**: switch back to the currently-playing card.
+   Height shrinks down on the same 380ms ease (**0** early collapse
+   pop). First toolbar control is the **Playlist** icon only. Header is
+   **CURRENTLY PLAYING** with the soundwave **vertically centered**
+   with that text, on the right. **0** HUD tooltips on those titles.
+   Header-rule ↔ toolbar padding matches the jukebox well.
 4. **Expect**: **0** slides of the whole player.
 5. Prefer reduced motion and repeat once. **Expect**: both faces
    without required travel.
@@ -103,7 +122,7 @@ npm run build
 1. Open `docs/artist-guide.md`.
 2. **Expect**: laptop legal is **Info**, not the footer; laptop player
    is always-open Playlist / Shuffle / Play/pause / Mute (not vinyl /
-   loop / slider).
+   loop); slider is unmute-only.
 
 ## Out of this quickstart
 

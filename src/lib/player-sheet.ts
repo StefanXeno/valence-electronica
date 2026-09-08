@@ -1,9 +1,17 @@
-/** Pure phone-player sheet math (drag progress, solo vs 3-row caps). */
+/** Phone sheet + shared playlist viewport math (solo vs 3-row caps). */
 
+/** Phone 018 / desktop player playlist — exactly three rows. */
 export const PLAYLIST_WINDOW_SLOTS = 3;
+/** Desktop Discography bar panel — two full cards + a peek of the third. */
+export const DISCOG_PANEL_WINDOW_SLOTS = 2.5;
+/** Page / bar discog `--discog-row-gap` (not the player 0.55rem token). */
+export const DISCOG_PANEL_ROW_GAP_REM = 0.75;
 export const RUBBER = 0.78;
 export const OVERSCROLL_PX_MAX = 40;
-/** Phone playlist `--discog-row-gap` (Discography `.discog[data-theme-tracks]`). */
+/**
+ * Playlist `--discog-row-gap` (phone + desktop theme-tracks).
+ * Page discog stays 0.75rem — do not let that token drive the morph.
+ */
 export const PLAYLIST_ROW_GAP_REM = 0.55;
 
 /**
@@ -54,19 +62,42 @@ export function applyDragHeight(
   return rawH;
 }
 
-/** Chrome + exactly `slots` rows + `slots - 1` gaps. */
+/**
+ * Visible track well. Fractional `slots` keep a peek of the next card
+ * (2.5 = two rows + half of the third + two gaps). Player playlist stays at 3.
+ */
+export function playlistViewportPx(
+  rowHeights: number[],
+  gapPx: number,
+  slots: number,
+): number {
+  const count = Number.isFinite(slots) && slots > 0 ? slots : 0;
+  if (count <= 0) return 0;
+  const typical = rowHeights.find((height) => height > 1) ?? 0;
+  const filled = rowHeights.map((height) => (height > 1 ? height : typical));
+  const needed = Math.ceil(count);
+  while (filled.length < needed) filled.push(typical);
+  const whole = Math.floor(count);
+  let rowsH = 0;
+  for (let i = 0; i < whole; i += 1) {
+    rowsH += Math.max(0, filled[i] ?? typical);
+  }
+  const frac = count - whole;
+  if (frac > 0) {
+    rowsH += Math.max(0, filled[whole] ?? typical) * frac;
+  }
+  const gaps = Math.max(0, needed - 1) * Math.max(0, gapPx);
+  return rowsH + gaps;
+}
+
+/** Chrome + visible well (`slots` rows + `ceil(slots) - 1` gaps). */
 export function playlistStackPx(
   chromePx: number,
   rowHeights: number[],
   gapPx: number,
   slots = PLAYLIST_WINDOW_SLOTS,
 ): number {
-  const counted = rowHeights.slice(0, slots);
-  const typical = counted.find((height) => height > 1) ?? 0;
-  while (counted.length < slots) counted.push(typical);
-  const rowsH = counted.reduce((sum, height) => sum + Math.max(0, height), 0);
-  const gaps = Math.max(0, slots - 1) * Math.max(0, gapPx);
-  return chromePx + rowsH + gaps;
+  return Math.max(0, chromePx) + playlistViewportPx(rowHeights, gapPx, slots);
 }
 
 /**
@@ -96,4 +127,13 @@ export function plausibleRowPx(px: number, typical: number, capPx: number): numb
   if (bounded < 1) return typical > 1 ? Math.min(typical, cap) : 0;
   if (typical > 1 && bounded > typical * 1.85) return Math.min(typical, cap);
   return bounded;
+}
+
+/**
+ * Desktop playlist chrome stays put; only the track well changes.
+ * `fromBox - fromSection + destSection` interpolates height with the row morph
+ * (same duration/ease) so max-height cannot pop after the cards finish.
+ */
+export function morphBoxPx(fromBox: number, fromSection: number, destSection: number): number {
+  return Math.max(0, fromBox - Math.max(0, fromSection) + Math.max(0, destSection));
 }

@@ -11,12 +11,13 @@
     mobile-style bar on desktop but omit social icons from that bar —
     socials already sit top-right on desktop. (2) Restyle the bottom-left
     player so it looks more like the mobile player. (3) Desktop open/close
-    motion: grow in place; bar left then up; player-side grow right then
-    up. (4) Legal footer lives in the bar as Info. (5) Operator
+    motion: grow in place; bar left then up; playlist is a view-switch
+    (height may grow up only). (4) Legal footer lives in the bar as Info. (5) Operator
     2026-09-08 later: desktop player is always open — no V-Flip toggle;
-    show the currently playing track; controls left to right are
-    Playlist, Shuffle, Play/pause (replaces Loop), Mute; Info copyright
-    sits top-right of the Info box like mobile."
+    show the currently playing **mobile card**; controls left to right
+    are Playlist, Shuffle, Play/pause (replaces Loop), Mute (unmute
+    reveals the volume slider); Info copyright sits top-right of the
+    Info box, baseline-aligned with the Info heading."
 
 ## Design Direction *(basic)*
 
@@ -36,16 +37,54 @@ differences. It does **not** change the phone HUD.
 | ------------ | ------------------ |
 | **Top-right socials** | Stay. They remain the only social-icon home on desktop. |
 | **Content bar** | Boxed icon bar: **About**, **Discography**, **Tour**, **Info**. No social icons. |
-| **Info box** | Same as phone: Imprint + Privacy Policy pills; **© Valence** (copyright + artist name) in the **top-right** of the open Info box. |
+| **Info box** | Same as phone: Imprint + Privacy Policy pills; **© Valence** in the **top-right**, **baseline-aligned** with the Info heading. |
 | **Bottom-center legal footer** | **Hidden.** Legal lives in Info only. |
-| **Bottom-left player** | **Always open.** No V-Flip / vinyl collapse toggle. Always shows the **currently playing track**. Toolbar left → right: **Playlist**, **Shuffle**, **Play/pause**, **Mute**. |
-| **Player motion** | Playlist (the expandable player surface) **grows in place** from that always-visible player: wider right, then taller up. Close shrinks down, then left. The player chrome itself does not open/close. |
-| **Bar motion** | Grow in place: wider left, then taller up. Close shrinks down, then right. |
+| **Bottom-left player** | **Always open.** No V-Flip / vinyl collapse toggle. Always shows the **same now-playing card as phone** (full card, not a name-only row). Toolbar left → right: **Playlist** (soundwave while the jukebox is open — **never both**), **Shuffle**, **Play/pause**, **Mute**. Box width is **static** (sized for the slider). Unmute reveals the slider in reserved space. |
+| **Player motion** | Playlist **switches the view** from the currently-playing card to the jukebox card list. **No** width grow, **no** two-stage right-then-up. Height **may** grow **up only** so the list fits, then shrink down on close. Instant or a subtle height-only change. The player chrome itself does not open/close. |
+| **Bar motion** | Grow in place: wider left, then taller up. Close shrinks down, then right. **Unchanged** two-stage. |
 
 Desktop keeps a **left / right floor split** (player left, bar right). It
 does **not** stack two full-width docks the way the phone does.
 
 ## Clarifications
+
+### Session 2026-09-09 (desktop player revisions)
+
+- Q: Keep the desktop playlist two-stage grow/extend (right then up)?
+  → A: **No width grow.** Playlist reuses the phone **018 row morph**
+  (currently-playing card merges into the list, stays selected and
+  in view). Height MAY grow **up only**. Bar two-stage stays.
+- Q: Phone header soundwave? → A: **No.** Phone header / title row
+  has no wave. Floor pill wave and playlist **card** EQ stay.
+- Q: Where does the playing soundwave live on desktop? → A: **Off the
+  card.** Put it to the **right of “CURRENTLY PLAYING”** in the header
+  row. Hide it (or switch header copy) in the jukebox / playlist view.
+  Phone floor soundwave stays.
+- Q: Keep HUD hover tooltips on Currently Playing / Jukebox titles?
+  → A: **No.** Visitors already see those titles. Keep tooltips on
+  other HUD controls (Playlist, Shuffle, Play/pause, Mute, About,
+  etc.).
+- Q: Playlist button vs soundwave on desktop? → A: **Same toolbar
+  slot, two faces.** Closed: Playlist / stacked-notes icon opens the
+  jukebox. Open: that control becomes the **soundwave** and returns
+  to currently-playing. Header MAY keep the wave in the jukebox view.
+  Phone playlist icon stays.
+- Q: Does unmute slide the slider / box out? → A: **No.** Size the
+  desktop box **once** for the full chrome including the slider.
+  Muted: hide the slider in that reserved space. Unmuted: slider
+  appears there. **No** width change, **no** push to the right. Phone
+  still hides the slider.
+- Q: Playlist icon and soundwave stacked in one toolbar slot? → A:
+  **Never.** Exclusive swap only. Header wave is CURRENTLY PLAYING
+  only (vertically centered with the label, toward the right).
+  Jukebox title line has **no** header wave. Active card in the
+  jukebox list **does** show the now-playing EQ.
+- Q: Box jumps small → large on reload? → A: **No.** First paint MUST
+  already be the final desktop width (CSS reserves the slider hole;
+  mute slot is not `[hidden]` waiting on JS).
+- Q: No-sound track (e.g. Show Me How) hides mute and shrinks the
+  box? → A: **No on desktop.** Mute stays; width stays. Disabled is
+  OK. Phone MAY still hide mute.
 
 ### Session 2026-09-08
 
@@ -64,10 +103,10 @@ does **not** stack two full-width docks the way the phone does.
 - Q: When the desktop player opens “to the right, then up” (and the bar
   opens “to the left, then up”), should each box grow from its corner,
   or should the whole control slide? → A: **Grow in place** (still
-  current). Reinterpreted for the always-open player: the **playlist
-  surface** grows from the always-visible player; the player chrome
-  itself does not open or close. Bar still grows from the bottom-right
-  corner. Not a slide. Not slide-then-grow.
+  current **for the bar**). Reinterpreted for the always-open player:
+  playlist is a **view-switch** (optionally height-up only). The player
+  chrome itself does not open or close. Bar still grows from the
+  bottom-right corner. Not a slide. Not slide-then-grow.
 - Q: Is the desktop player a collapsible V-Flip box, or always open?
   → A: **Always open.** Remove the V-Flip / vinyl button. There is no
   collapse/expand toggle for the player chrome. Desktop has the space,
@@ -79,12 +118,32 @@ does **not** stack two full-width docks the way the phone does.
   button. No vinyl button.
 - Q: Where does copyright sit in desktop Info? → A: **Top-right corner
   of the open Info box**, same as the phone Info sheet (`©` + artist
-  name Valence).
-- Q: Do vinyl and the unmute-to-slider stay? → A: **No, not in this
-  desktop player chrome.** Mute is a **simple on/off toggle** in that
-  slot. No vinyl disc UI. No volume slider expanding from unmute.
-  Visitors use the mute toggle and device/OS volume. Loop stays off on
-  desktop because there is no Loop control.
+  name Valence). **T028 follow-up:** © Valence MUST sit on the **same
+  baseline / row height** as the Info heading text.
+- Q: Do vinyl and the unmute-to-slider stay? → A: **Superseded** by the
+  T028 review later this session. Vinyl and Loop stay **out**. The
+  unmute-to-slider **returns** on desktop (see below).
+
+### Session 2026-09-08 (T028 visual review)
+
+- Q: Is desktop now-playing a name-only row? → A: **No.** Rest state
+  MUST show the **same now-playing card as phone** (title, year/kind,
+  listen-on, same card chrome). Reuse `015` / `018` theme-track card
+  logic. Do not invent a second card.
+- Q: What is the desktop Playlist list? → A: The **phone playlist card
+  window** of **background-available** (theme / stage) tracks — same
+  set and card as the now-playing card. **Not** the `011` laptop
+  TrackInfoPanel / full discography list.
+- Q: Does unmute show a slider? → A: **Yes on desktop.** Muted: no
+  slider. Unmuted: the **full** volume slider (`011` unmute-to-expand).
+  The player box takes more width **to the right** so the slider is
+  not clipped (**instant** as of 2026-09-09 — no slide).
+  Card width is **dynamic** with that mute+slider cluster.
+- Q: Vinyl / Loop / always-open / bar / footer / two-stage grow? → A:
+  **Unchanged.** Always-open player; no V-Flip/vinyl/loop; no socials
+  in the bar; footer hidden; playlist is a view-switch (height-up
+  only if the list needs room); bar grow left-then-up; 1024px; phone
+  HUD unchanged.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -141,27 +200,33 @@ Imprint / Privacy Policy pills.
 ### User Story 2 - Always-open desktop player (Priority: P1)
 
 A visitor on a typical laptop looks at the bottom-left. The player is
-**already open**. They see **what is currently playing**. There is **no**
-V-Flip / vinyl button and **no** way to collapse the player chrome.
+**already open**. They see the **same now-playing card as phone** (not
+a name-only label). There is **no** V-Flip / vinyl button and **no**
+way to collapse the player chrome.
 
 The control row, **left to right**, is:
 
 1. **Playlist**
 2. **Shuffle**
 3. **Play/pause** (this slot replaces Loop)
-4. **Mute** (same right-hand slot as today’s mute; on/off only)
+4. **Mute** (same right-hand slot as today’s mute; unmute shows the
+   **full volume slider** in reserved space; box width stays put)
 
-They can turn playlist on to see the track list, shuffle, pause or resume
-the atmosphere video, and mute or unmute. They cannot loop a track from
-this chrome. They cannot open or close the player itself.
+They can turn playlist on to see the **phone-style card window** of
+background-available tracks, shuffle, pause or resume the atmosphere
+video, and mute or unmute (with slider when unmuted). They cannot loop
+a track from this chrome. They cannot open or close the player itself.
 
 **Why this priority**: The owner replaced the old collapsible V-Flip box
 with an always-visible player. This is what every laptop visit shows.
 
 **Independent Test**: On ~1280×800 after intro, confirm the bottom-left
-player is visible without tapping anything, shows the current track, and
-the toolbar reads Playlist → Shuffle → Play/pause → Mute. Confirm **0**
-V-Flip/vinyl buttons, **0** Loop buttons, and **0** volume sliders.
+player is visible without tapping anything, shows the **full now-playing
+card**, and the toolbar reads Playlist → Shuffle → Play/pause → Mute
+(Playlist becomes the soundwave while the jukebox is open).
+Confirm **0** V-Flip/vinyl buttons and **0** Loop buttons. Confirm the
+slider is **hidden while muted** and the **full slider** appears
+**instantly** when unmuted (reserved space; **0** box-width change).
 Toggle playlist, shuffle, play/pause, and mute.
 
 **Acceptance Scenarios**:
@@ -169,14 +234,16 @@ Toggle playlist, shuffle, play/pause, and mute.
 1. **Given** the landing on a viewport **1024px** wide or wider after
    intro, **When** the visitor looks at the bottom-left without
    activating anything, **Then** the player is **already showing** and
-   the **currently playing track** is readable.
+   the **now-playing card** is readable (title / year / listen-on).
 2. **Given** that player, **When** the visitor reads the control row
-   left to right, **Then** they see **Playlist**, then **Shuffle**, then
+   left to right,    **Then** they see **Playlist**, then **Shuffle**, then
    **Play/pause**, then **Mute** — and **no** V-Flip/vinyl control and
-   **no** Loop control.
-3. **Given** an audio-eligible track, **When** the visitor uses Mute,
-   **Then** sound toggles on or off in that same right-hand slot and
-   **no** volume slider appears.
+   **no** Loop control. **When** playlist is on, that first control
+   is the **soundwave** (not the stacked-notes icon).
+3. **Given** an audio-eligible track, **When** the visitor unmutes,
+   **Then** the **full** volume slider appears **instantly** in the
+   already-reserved space to the right of mute. The player box width
+   MUST NOT change. Muting hides the slider in that same space.
 4. **Given** the atmosphere video is playing, **When** the visitor
    activates Play/pause, **Then** the video pauses (same meaning as the
    phone play/pause control) and activating it again resumes.
@@ -186,24 +253,23 @@ Toggle playlist, shuffle, play/pause, and mute.
 
 ---
 
-### User Story 3 - Playlist and bar grow in two stages (Priority: P1)
+### User Story 3 - Playlist view-switch; bar grows in two stages (Priority: P1)
 
 A visitor on a typical laptop opens playlist from the always-visible
 player, and opens About / Discography / Tour / Info from the
-bottom-right bar. When motion is allowed, each expand is a **smooth
-two-stage grow in place**, and each close is the **exact reverse
-shrink**. The whole control MUST NOT slide.
+bottom-right bar. Playlist **switches the view** (currently-playing
+card ↔ jukebox list). The bar still uses **two-stage grow in place**.
+The whole control MUST NOT slide.
 
-The **player chrome stays put**. Only the **playlist surface** (or
-another expandable player surface) grows from that always-visible
-player.
+The **player chrome stays put**. Playlist does **not** grow/extend
+the box to the right.
 
-**Playlist** (grows from the always-visible bottom-left player)
+**Playlist** (018-style morph on the always-visible bottom-left player)
 
-| Action | Stage 1 | Stage 2 |
-| ------ | ------- | ------- |
-| **Open** | Grows **wider to the right** | then grows **taller up** |
-| **Close** | Shrinks **down** | then shrinks **left** back to the always-open player |
+| Action | Motion |
+| ------ | ------ |
+| **Open** | The currently-playing card **merges into the list** (same row morph as phone). It stays **selected / now-playing** (EQ on the card) and **in the visible 3-slot window**. Extra cards grow in around it. Height **may** grow **up only**. **No** width grow. |
+| **Close** | Reverse: extras collapse; the box returns to the solo currently-playing card. |
 
 **Bottom-right bar** (stays anchored bottom-right)
 
@@ -212,31 +278,33 @@ player.
 | **Open / expand** | Grows **wider to the left** | then grows **taller up** |
 | **Close / collapse** | Shrinks **down** | then shrinks **right** back to the corner |
 
-The two stages are **sequential** and **smooth**, not a diagonal, not a
-slide, and not slide-then-grow.
+Bar stages are **sequential** and **smooth**, not a diagonal, not a
+slide, and not slide-then-grow. Playlist MUST NOT reuse that two-stage
+width-then-height path.
 
-**Why this priority**: Q2 grow-in-place still applies; the player-side
-path now means playlist, because the player itself no longer opens or
-closes.
+**Why this priority**: Q2 grow-in-place still applies to the **bar**.
+Playlist is a view-switch because the operator rejected the player-side
+grow/extend.
 
-**Independent Test**: On ~1280×800 with motion allowed, toggle playlist
-and watch it grow wider right then taller up from the always-visible
-player (close shrinks down then left). The always-visible track +
-toolbar stay. Open and close a bar control (including Info) and watch
-left-then-up / down-then-right. Confirm nothing slides as a whole.
-Reduced motion: both surfaces still toggle without required travel.
+**Independent Test**: On ~1280×800, toggle playlist and confirm the
+view switches (currently-playing card ↔ jukebox list) with **0**
+rightward width grow and **0** two-stage slides. Height may rise up
+only. Toolbar stays. Open and close a bar control (including Info) and
+watch left-then-up / down-then-right. Confirm nothing slides as a
+whole. Reduced motion: both surfaces still toggle without required
+travel.
 
 **Acceptance Scenarios**:
 
 1. **Given** the always-open player on a viewport **1024px** wide or
-   wider and motion is allowed, **When** the visitor turns playlist on,
-   **Then** the playlist surface **grows in place** from that player:
-   **wider to the right, then taller up** — not a slide, not opening
-   the whole player from a closed pill.
-2. **Given** playlist is on and motion is allowed, **When** the visitor
-   turns playlist off, **Then** the playlist surface **shrinks in
-   place**: **down, then left**, back to the always-open player (track
-   + toolbar still visible).
+   wider, **When** the visitor turns playlist on, **Then** the box
+   **switches** to the jukebox card list — **not** a two-stage
+   wider-right then taller-up grow, **not** a slide, **not** opening
+   the whole player from a closed pill. Height MAY grow **up only**.
+2. **Given** playlist is on, **When** the visitor turns playlist off,
+   **Then** the box **switches** back to the currently-playing card
+   (track + toolbar still visible). Height MAY shrink down. **No**
+   leftward width shrink.
 3. **Given** the bottom-right bar is at rest and motion is allowed,
    **When** the visitor expands About, Discography, Tour, or Info,
    **Then** the bar **grows in place**: **wider to the left, then
@@ -286,20 +354,21 @@ overlay, a discography stage action, and a resize across 1023px / 1024px.
 ### Edge Cases
 
 - **Reduced motion**: Playlist and bar open/close MUST still work.
-  Two-stage travel MUST NOT be required.
+  Two-stage **bar** travel MUST NOT be required. Playlist view-switch
+  stays instant.
 - **Mid-motion interrupt**: A second playlist or bar toggle while travel
   is running MUST end in a real open or closed state — not a stuck
-  half-grown playlist or bar. The always-open player chrome MUST remain
-  visible.
+  half-grown **bar**. Playlist has no in-flight width stage. The
+  always-open player chrome MUST remain visible.
 - **Resize across 1024px**: Crossing the phone / laptop line MUST tear
-  down in-flight desktop two-stage travel and MUST NOT leave a desktop
-  always-open player on the phone HUD (phone still uses the `015` /
-  `018` collapsible pill).
+  down in-flight desktop **bar** two-stage travel and MUST NOT leave a
+  desktop always-open player on the phone HUD (phone still uses the
+  `015` / `018` collapsible pill).
 - **Intro still showing**: No bar or playlist travel runs on hidden
   chrome.
 - **No scripting**: The always-open player chrome and the collapsed bar
-  still paint. Playlist grow and bar grow are not required. Native
-  disclosure MAY still reveal Info / legal links.
+  still paint. Playlist view-switch and bar grow are not required.
+  Native disclosure MAY still reveal Info / legal links.
 - **Glitch theme**: Existing glitch flavor MAY still play on HUD
   controls. It MUST NOT invert or skip the required direction order
   when motion is allowed.
@@ -317,10 +386,14 @@ overlay, a discography stage action, and a resize across 1023px / 1024px.
   unless a later clarification changes that.
 - **No duplicate legal**: Desktop MUST NOT show both Info-in-bar and
   the old bottom-center footer at once.
-- **No slide**: Playlist and bar MUST grow or shrink in place.
-- **No audio / mute hidden**: If mute is not mounted (no audio-eligible
-  catalog, same mount rule as today), the row is Playlist → Shuffle →
-  Play/pause. Layout MUST NOT leave a dead vinyl or loop gap.
+- **No slide**: Bar MUST grow or shrink in place. Playlist MUST NOT
+  slide or two-stage-widen; height MAY change **up / down only**.
+- **No audio / mute chrome**: If the catalog has **no** audio-eligible
+  tracks, mute is not mounted and the row is Playlist → Shuffle →
+  Play/pause. If mute **is** mounted, desktop MUST keep that chrome
+  (and the reserved slider width) on **no-sound** tracks — disabled
+  is OK. MUST NOT shrink the box. Phone MAY still hide mute on
+  fallback / no-audio as today.
 - **Loop without a control**: On desktop, loop stays **off**. Shuffle
   and stay rules from `011` run as if loop is off. Phone is unchanged.
 - **Play/pause vs fallback**: If atmosphere video cannot play, Play/pause
@@ -341,8 +414,9 @@ overlay, a discography stage action, and a resize across 1023px / 1024px.
   content exists), Discography, Tour, and **Info**. Info MUST match
   the phone Info sheet (`015`): circled-i (existing `info` chrome
   icon), English **Imprint** / **Privacy Policy** pills that open the
-  existing legal overlay, and **copyright** (`©` + artist name
-  Valence) in the **top-right corner of the open Info box**. German
+   existing legal overlay, and **copyright** (`©` + artist name
+  Valence) in the **top-right** of the open Info box, **aligned to
+  the same row height / baseline as the Info heading text**. German
   legal markdown titles remain on the overlay.
 - **FR-003a**: On viewports **1024px and wider**, the always-visible
   **bottom-center legal footer** MUST be **hidden**. Legal MUST live
@@ -350,27 +424,48 @@ overlay, a discography stage action, and a resize across 1023px / 1024px.
 - **FR-004**: On those viewports, the **bottom-left player MUST be
   always open**. There MUST be **no** V-Flip / vinyl button and **no**
   collapse/expand toggle for the player chrome. The **currently
-  playing track** MUST be visible without opening anything.
+  playing** face MUST be the **same theme-track card as phone** (full
+  card, not a name-only row), visible without opening anything.
 - **FR-004a**: The desktop player control row MUST be, left to right:
-  **Playlist**, **Shuffle**, **Play/pause**, **Mute** (when mute is
-  mounted). Play/pause occupies the slot that is Loop on today’s
-  laptop toolbar. Loop MUST NOT appear. Vinyl MUST NOT appear.
-- **FR-004b**: Mute on desktop MUST be a **simple on/off toggle** in
-  that same right-hand slot. A volume **slider** MUST NOT expand from
-  unmute. Fine loudness is the device/OS volume.
+  **Playlist / now-playing toggle**, **Shuffle**, **Play/pause**,
+  **Mute** (when mute is mounted). **Playlist closed:** that first
+  control is the Playlist (stacked-notes) icon and opens the jukebox.
+  **Playlist open:** the **same slot** shows the **soundwave** and
+  returns to the currently-playing view. Labels MUST match the face
+  (Playlist vs Currently playing). Play/pause occupies the slot that
+  is Loop on today’s laptop toolbar. Loop MUST NOT appear. Vinyl MUST
+  NOT appear. Phone MUST keep the Playlist icon in that slot.
+- **FR-004b**: Mute on desktop MUST stay in that right-hand slot
+  whenever the catalog mounted mute (at least one audio-eligible
+  track). The player box width MUST be that full chrome **on first
+  paint** (SSR/CSS reserves the slider hole — not after JS). **Muted:**
+  the slider MUST NOT be visible, but the reserved width MUST remain.
+  **Unmuted:** the **full** slider MUST appear in that space. Mute /
+  unmute / **no-sound track changes** MUST NOT change box width, MUST
+  NOT hide the mute control, and MUST NOT animate
+  `--jukebox-slider-extra`. A no-sound track MAY disable mute. Phone
+  still hides the slider and MAY hide mute when there is no audio.
+- **FR-004c**: Opening Playlist on desktop MUST show the **phone
+  playlist card window** of **background-available** theme/stage
+  tracks (same card logic as the rest-state now-playing card). It MUST
+  NOT use the `011` laptop TrackInfoPanel / full discography list.
 - **FR-005**: Shuffle, play/pause, mute, playlist membership (theme /
   stage tracks), and discography stage actions MUST keep their
   existing meaning (`011` / `015` as applicable). Play/pause MUST
   pause or resume the atmosphere video the same way the phone control
   does. This feature MUST NOT change phone playback rules. Desktop
   MUST NOT expose a Loop control; loop remains off on desktop.
-- **FR-006**: When motion is allowed on viewports **1024px and wider**,
-  turning **playlist** on MUST **grow in place** from the always-visible
-  player in two sequential stages: first **wider to the right**, then
-  **taller up**. Turning playlist off MUST **shrink in place**:
-  **down**, then **left**, back to the always-open player. The player
-  chrome MUST stay visible. The whole player MUST NOT slide. A
-  diagonal shortcut MUST NOT replace the two stages.
+- **FR-006**: On viewports **1024px and wider**, turning **playlist**
+  on MUST reuse the phone (`018`) playlist **row morph**: the
+  currently-playing card becomes a list row, stays **selected** (EQ
+  badge), and stays **in the visible playlist window**. Extra cards
+  grow in around it. It MUST NOT grow or extend the box to the right,
+  MUST NOT run a two-stage width-then-height morph, and MUST NOT
+  slide. Height MAY grow **up only**. Turning playlist off MUST
+  reverse that morph back to the solo card. Reduced motion MAY snap.
+  Phone playlist motion (`015` / `018`) is unchanged except the
+  phone **header** MUST NOT show a soundwave (floor wave + card EQ
+  stay).
 - **FR-007**: When motion is allowed on viewports **1024px and wider**,
   expanding bottom-right bar controls (including Info) MUST **grow in
   place** in two sequential stages: first **wider to the left**, then
@@ -386,7 +481,7 @@ overlay, a discography stage action, and a resize across 1023px / 1024px.
   bar panel in a coherent open or closed end state matching the last
   committed action. The always-open player MUST NOT disappear.
 - **FR-011**: Crossing **1023px / 1024px** MUST NOT leave a mixed HUD
-  or an in-flight desktop playlist grow on the phone docks.
+  or an in-flight desktop **bar** grow on the phone docks.
 - **FR-012**: Viewports **below 1024px** MUST keep the `015` / `018`
   phone HUD. This feature MUST NOT change phone layout or phone motion.
 - **FR-013**: Identity (top), top-right socials, intro hide/show,
@@ -398,13 +493,27 @@ overlay, a discography stage action, and a resize across 1023px / 1024px.
   cookies, tracking, or new artist-editable files. Artist-facing docs
   MUST be updated in the same change set: laptop legal is Info (not
   the footer); laptop player is always-open Playlist / Shuffle /
-  Play/pause / Mute (not vinyl / loop / slider) (constitution VII).
+  Play/pause / Mute (not vinyl / loop); the volume slider is desktop
+  chrome **only while unmuted** (constitution VII).
 - **FR-015**: The landing MUST remain usable from 320px width with no
   horizontal scrolling. Visual success for **this** feature is a
   typical laptop (~1280×800).
 - **FR-016**: New motion MUST stay justified as necessary for the
-  named two-stage paths (constitution IV). When scripting is
+  named **bar** two-stage path (constitution IV). Desktop playlist
+  MUST NOT add a second two-stage sequencer. When scripting is
   unavailable, the always-open player and collapsed bar still paint.
+- **FR-017**: On the desktop currently-playing view, the playing
+  soundwave MUST sit on the **right** of the header row, **vertically
+  centered** with the “CURRENTLY PLAYING” text. It MUST NOT appear on
+  the rest-state solo card. In
+  the jukebox / playlist view: **no** soundwave on the V-Flip /
+  jukebox **title** line; the first toolbar control MUST be the
+  soundwave (see FR-004a); the **active** theme-track card MUST show
+  the now-playing EQ badge. Other cards MUST NOT show a wave.
+- **FR-018**: HUD hover tooltips MUST NOT appear on the currently-
+  playing or jukebox / playlist **header titles**. Other HUD controls
+  (Playlist, Shuffle, Play/pause, Mute, About, etc.) keep their
+  labels.
 
 ### Key Entities
 
@@ -414,13 +523,13 @@ overlay, a discography stage action, and a resize across 1023px / 1024px.
   **top-right**; Imprint / Privacy Policy pills → existing overlay.
 - **Top-right socials**: Only social-icon home on viewports 1024px+.
 - **Always-open desktop player**: Bottom-left player chrome that does
-  not collapse. Shows the currently playing track plus the toolbar.
+  not collapse. Shows the phone now-playing **card** plus the toolbar.
 - **Player toolbar**: Left → right: Playlist, Shuffle, Play/pause,
-  Mute (if mounted). No vinyl. No loop. No volume slider.
-- **Playlist surface**: The expandable list that grows from the
-  always-open player (grow in place, right then up).
-- **Two-stage grow / shrink**: Width first, then height, from the
-  surface’s floor corner. Reverse on close. Not a slide.
+  Mute (if mounted). No vinyl. No loop. Volume slider only when unmuted.
+- **Playlist surface**: Phone-style **card window** of background-
+  available tracks. Desktop: view-switch + optional height-up only.
+- **Two-stage grow / shrink**: **Bar only.** Width first, then height,
+  from the bottom-right corner. Reverse on close. Not a slide.
 - **Laptop viewport**: Width **1024px and up**. Review ~1280×800.
 - **Phone viewport**: Width **below 1024px**. Out of visual scope here.
 
@@ -434,15 +543,22 @@ overlay, a discography stage action, and a resize across 1023px / 1024px.
   **1** unchanged top-right social cluster.
 - **SC-002**: On the same viewport after intro, a reviewer reports the
   bottom-left player is **visible without a click**, shows the
-  **currently playing track**, and the toolbar is **Playlist → Shuffle
-  → Play/pause → Mute**. **0** V-Flip/vinyl buttons, **0** Loop
-  buttons, **0** volume sliders, **0** ways to collapse the player
-  chrome.
-- **SC-003**: With motion allowed on ~1280×800, a reviewer can toggle
-  playlist **3 times** and report **0** opens that are not grow-in-place
-  wider-right then taller-up from the always-open player, **0** closes
-  that are not shrink-down then left, **0** slides, and **0** cases
-  where the always-open track + toolbar disappear.
+  **full now-playing card** (not a name-only row), and the toolbar is
+  **Playlist → Shuffle → Play/pause → Mute** at rest (**soundwave**
+  in the Playlist slot while the jukebox is open). **0** V-Flip/vinyl
+  buttons, **0** Loop buttons, **0** ways to collapse the player
+  chrome. **0** sliders while muted; **1** full slider when unmuted
+  (**0** box-width changes; **0** slider slides).
+- **SC-003**: On ~1280×800, a reviewer can toggle playlist **3 times**
+  and report **0** rightward width grows, **0** two-stage
+  right-then-up / down-then-left playlist morphs, **0** slides, and
+  **0** cases where the always-open **card** + toolbar disappear.
+  Each open **switches** to the jukebox list and the first toolbar
+  control becomes the **soundwave**; each close **switches** back to
+  currently-playing and restores the Playlist icon. Height MAY change
+  **up / down only**.
+  Playlist cards are the phone theme-track cards (background-available
+  set), not the `011` laptop list.
 - **SC-004**: With motion allowed on ~1280×800, a reviewer can expand
   and collapse a bottom-right bar control **3 times** (at least once
   Info) and report **0** expands that are not grow-in-place wider-left
@@ -463,9 +579,10 @@ overlay, a discography stage action, and a resize across 1023px / 1024px.
   states after a resize settle.
 - **SC-009**: No new third-party embeds, cookies, or tracking.
 - **SC-010**: On ~1280×800, opening Info shows **© Valence** (copyright
-  + artist name) in the **top-right** of the Info box plus both legal
-  pills; each pill opens the existing overlay. At rest: **0**
-  always-visible bottom-center legal footer clusters.
+  + artist name) in the **top-right**, **on the same row height as the
+  Info heading**, plus both legal pills; each pill opens the existing
+  overlay. At rest: **0** always-visible bottom-center legal footer
+  clusters.
 
 ## Assumptions
 
@@ -478,31 +595,31 @@ overlay, a discography stage action, and a resize across 1023px / 1024px.
   with artist name **Valence**, **top-right**.
 - Desktop keeps a **left / right floor split**.
 - **Q1 “restyle only / closed vs open V-Flip” is superseded.** The
-  desktop player is always open. Vinyl, Loop, and unmute-to-slider are
-  **out of this desktop player chrome**.
-- Playlist contents on desktop reuse the existing laptop **theme-track
-  list** from `011` (not the phone `018` three-row window) unless a
-  later clarification copies the phone playlist layout.
-- “Currently playing track” means the visitor-facing track name is
-  always readable; a card treatment is allowed if it still fits the
-  always-open player, but is not required.
+  desktop player is always open. Vinyl and Loop stay **out**. The
+  T028 review **restored** unmute-to-slider on desktop.
+- Playlist contents on desktop are the **phone theme-track card
+  window** (`015` / `018` card logic; background-available / stage
+  tracks only). The `011` laptop TrackInfoPanel list is **not** the
+  desktop playlist.
+- “Currently playing” on desktop is the **full phone now-playing
+  card**, not a name-only row.
 - Play/pause is the existing phone **atmosphere video** play/pause
   (`015`), brought onto desktop in the old Loop slot.
-- Mute is on/off only. Unmute restores a usable level without a slider
-  (device/OS volume is the loudness control, same idea as phone).
+- Mute is a toggle. The desktop box is sized for the slider. Unmute
+  shows the **full** `011` slider in reserved space; mute hides it.
+  Device/OS volume remains available.
 - Loop stays **off** on desktop with no visitor control. Shuffle still
   hops when on. Phone loop remains absent as today.
 - Handle-drag and the phone handle-idle nod are **not** required on
   desktop.
 - Exclusive-open among About / Discography / Tour / Info stays.
   Playlist MAY stay open while a content panel is open.
-- Two-stage **grow in place** (Q2) still applies. Player-side path =
-  **playlist surface**, not opening/closing the player chrome. Duration
-  and easing are plan-time.
+- Two-stage **grow in place** (Q2) still applies to the **bar**.
+  Desktop playlist is a **view-switch** + optional height-up only.
 - Breakpoint stays **below 1024px = phone**, **1024px and up = laptop**.
 - Intro (`006`) still hides chrome until dismissed.
 - Artist guide must stop saying laptop legal is the footer and laptop
-  player is vinyl / loop / slider.
+  player is vinyl / loop (slider is unmute-only on laptop).
 - Visual review is **operator-led**. Agents do not install browser
   automation or add packages for this feature.
 
@@ -514,8 +631,8 @@ overlay, a discography stage action, and a resize across 1023px / 1024px.
 - `009-desktop-stage-ui` — identity, socials, labels; this spec hides
   the desktop footer and replaces the left player chrome.
 - `011-vflip-now-playing` — shuffle / track-pick / mute-eligibility
-  meaning; this spec **removes** vinyl, loop, and the volume slider
-  from desktop chrome.
+  meaning; this spec **removes** vinyl and loop from desktop chrome
+  and **keeps** the unmute-to-slider (T028).
 - `002-themed-background-video` — legal overlay; play/pause of the
   atmosphere video.
 - `006-landing-intro` — chrome hidden until intro is dismissed.
@@ -531,10 +648,12 @@ overlay, a discography stage action, and a resize across 1023px / 1024px.
 - Changing the legal overlay itself (`002`) or legal markdown
 - A V-Flip / vinyl collapse toggle on desktop
 - A Loop button or loop-on behavior on desktop
-- A volume slider or unmute-to-slider expansion on desktop
-- Copying the phone `018` three-row playlist onto desktop (unless a
-  later clarification asks for it)
+- Showing the volume slider while **muted**
+- Using the `011` laptop TrackInfoPanel list as the desktop playlist
+  (desktop playlist is the phone theme-track **card** window)
 - Sliding the whole player or bar, or slide-then-grow
+- Two-stage **width-then-height** grow on desktop playlist (bar
+  two-stage stays)
 - Opening/closing the whole desktop player chrome (it stays open)
 - Spec shrink or overhaul of `015` / `009` / `011` (IDEA-025)
 - New routes, embeds, cookies, or new artist-editable files

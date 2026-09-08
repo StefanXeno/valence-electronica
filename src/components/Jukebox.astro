@@ -79,17 +79,22 @@ const defaultLabel =
         <div class="jukebox__drawer-inner">
           <div class="jukebox__panel">
             <header class="jukebox__header">
-              <h2 class="jukebox__title">
-                <span
-                  class="jukebox__title-laptop"
-                  data-hud-label={chrome.jukeboxPanelTooltip}
-                  data-hud-label-anchor="above"
-                  data-desktop-title={chrome.jukeboxPanelTooltip}
-                  title={chrome.jukeboxPanelTooltip}
-                >{chrome.jukeboxPanelTitle}</span>
+              <h2
+                class="jukebox__title"
+                data-playing-label={chrome.currentlyPlayingLabel}
+                data-pausing-label={chrome.currentlyPausingLabel}
+              >
+                <span class="jukebox__title-laptop">{chrome.jukeboxPanelTitle}</span>
                 <span class="jukebox__title-phone jukebox__title-phone--now">{chrome.currentlyPlayingLabel}</span>
                 <span class="jukebox__title-phone jukebox__title-phone--playlist">{chrome.jukeboxPanelTitle}</span>
               </h2>
+              <div class="jukebox__header-wave player-dock__soundwave" aria-hidden="true">
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
             </header>
 
             <section class="jukebox__section jukebox__section--list" aria-label={chrome.jukeboxLabel}>
@@ -113,16 +118,28 @@ const defaultLabel =
         <div class="player-dock__transport" data-player-transport>
         <button
           type="button"
-          class="jukebox__tool jukebox__tool--vinyl glitch-hit"
-          data-jukebox-toggle
+          class="jukebox__tool jukebox__tool--playlist glitch-hit"
+          data-playlist-toggle
           data-glitch-live
-          data-hud-label={chrome.jukeboxLabel}
-          data-hud-label-anchor="above"
+          aria-pressed="false"
           aria-expanded="false"
-          aria-controls="jukebox-drawer"
-          aria-label={chrome.jukeboxLabel}
+          aria-controls="jukebox-theme-tracks"
+          aria-label={chrome.playlistLabel}
+          data-hud-label={chrome.playlistLabel}
+          data-hud-label-anchor="above"
+          data-playlist-label={chrome.playlistLabel}
+          data-now-playing-label={chrome.currentlyPlayingLabel}
         >
-          <HudIcon token={chrome.jukeboxIcon} emoji={chrome.jukeboxIconEmoji} />
+          <span class="jukebox__playlist-icon" aria-hidden="true">
+            <HudIcon token="playlist" />
+          </span>
+          <span class="jukebox__playlist-wave player-dock__soundwave" aria-hidden="true" hidden>
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+          </span>
         </button>
 
         <button
@@ -140,27 +157,14 @@ const defaultLabel =
 
         <button
           type="button"
-          class="jukebox__tool jukebox__tool--loop glitch-hit"
-          data-loop-toggle
-          data-glitch-live
-          aria-pressed={chrome.loopDefault ? 'true' : 'false'}
-          aria-label={chrome.loopLabel}
-          data-hud-label={chrome.loopLabel}
-          data-hud-label-anchor="above"
-        >
-          <HudIcon token={chrome.loopIcon} emoji={chrome.loopIconEmoji} />
-        </button>
-
-        <button
-          type="button"
           class="jukebox__tool jukebox__tool--video-play glitch-hit"
           data-bg-play-toggle
           data-glitch-live
-          data-play-label="Play video"
-          data-pause-label="Pause video"
-          data-hud-label="Pause video"
+          data-play-label="Play"
+          data-pause-label="Pause"
+          data-hud-label="Pause"
           data-hud-label-anchor="above"
-          aria-label="Pause video"
+          aria-label="Pause"
         >
           <span class="player-dock__video-icon" data-bg-play-icon="play" hidden>
             <HudIcon token="play" />
@@ -172,22 +176,34 @@ const defaultLabel =
 
         <button
           type="button"
-          class="jukebox__tool jukebox__tool--playlist glitch-hit"
-          data-playlist-toggle
+          class="jukebox__tool jukebox__tool--vinyl glitch-hit"
+          data-jukebox-toggle
           data-glitch-live
-          aria-pressed="false"
+          data-hud-label={chrome.jukeboxLabel}
+          data-hud-label-anchor="above"
           aria-expanded="false"
-          aria-controls="jukebox-theme-tracks"
-          aria-label={chrome.playlistLabel}
-          data-hud-label={chrome.playlistLabel}
+          aria-controls="jukebox-drawer"
+          aria-label={chrome.jukeboxLabel}
+        >
+          <HudIcon token={chrome.jukeboxIcon} emoji={chrome.jukeboxIconEmoji} />
+        </button>
+
+        <button
+          type="button"
+          class="jukebox__tool jukebox__tool--loop glitch-hit"
+          data-loop-toggle
+          data-glitch-live
+          aria-pressed={chrome.loopDefault ? 'true' : 'false'}
+          aria-label={chrome.loopLabel}
+          data-hud-label={chrome.loopLabel}
           data-hud-label-anchor="above"
         >
-          <HudIcon token="playlist" />
+          <HudIcon token={chrome.loopIcon} emoji={chrome.loopIconEmoji} />
         </button>
         </div>
 
         {showMute && (
-          <div class="jukebox__tool jukebox__tool--mute" data-jukebox-mute-slot hidden>
+          <div class="jukebox__tool jukebox__tool--mute" data-jukebox-mute-slot>
             <MuteControl
               unmuteTooltip={chrome.unmuteTooltip}
               muteTooltip={chrome.muteTooltip}
@@ -205,7 +221,7 @@ const defaultLabel =
   import { createContinuousGlitch, isGlitchThemeActive, playElementGlitch } from '../lib/glitch';
   import { panelCloseDelayMs, runSmoothPanelOpen, shouldSmoothPanelOpen } from '../lib/panel-motion';
   import { initStageSwitch, STAGE_SELECT_EVENT, type StageCatalogEntry } from '../lib/stage-switch';
-  import { initPlayerDock } from '../lib/player-dock';
+  import { initPlayerDock, syncDesktopNowTitle } from '../lib/player-dock';
   import type { StageSchedule } from '../lib/stage-schedule';
 
   function bootStageSwitch() {
@@ -258,6 +274,7 @@ const defaultLabel =
         if (btn.matches('[data-mute-control]')) {
           const slot = btn.closest('[data-jukebox-mute-slot]');
           if (slot?.hasAttribute('hidden')) return false;
+          if (btn instanceof HTMLButtonElement && btn.disabled) return false;
         }
         return true;
       });
@@ -288,27 +305,38 @@ const defaultLabel =
       playlistBtn?.setAttribute('aria-pressed', next ? 'true' : 'false');
       playlistBtn?.setAttribute('aria-expanded', next ? 'true' : 'false');
       const phone = window.matchMedia('(max-width: 1023px)').matches;
+      if (playlistBtn) {
+        const listLabel = playlistBtn.dataset.playlistLabel?.trim() || 'Playlist';
+        const nowLabel = playlistBtn.dataset.nowPlayingLabel?.trim() || 'Currently playing';
+        const label = !phone && next ? nowLabel : listLabel;
+        playlistBtn.setAttribute('aria-label', label);
+        playlistBtn.setAttribute('data-hud-label', label);
+        // Exclusive faces: never stack icon + wave in the same slot.
+        const icon = playlistBtn.querySelector<HTMLElement>('.jukebox__playlist-icon');
+        const wave = playlistBtn.querySelector<HTMLElement>('.jukebox__playlist-wave');
+        const showWave = !phone && next;
+        if (icon) icon.hidden = showWave;
+        if (wave) wave.hidden = !showWave;
+      }
       if (phase === 'prepare') {
-        // Phone: one discog list. Keep it mounted — never display:none mid-morph.
+        // Keep the discog list mounted — never display:none mid-morph.
         if (themePanel) themePanel.hidden = false;
         return;
       }
       root.classList.toggle('is-theme-tracks', next);
+      syncDesktopNowTitle();
       if (!themePanel) return;
-      if (phone) {
-        themePanel.hidden = false;
-        if (phase !== 'apply') {
-          root.querySelectorAll<HTMLElement>('.discog[data-theme-tracks] .discog__item').forEach((item) => {
-            const on = item.dataset.discogActive === 'true';
-            item.classList.toggle('is-playlist-collapsed', !next && !on);
-            if (next || on) item.removeAttribute('aria-hidden');
-            else item.setAttribute('aria-hidden', 'true');
-          });
-        }
-        return;
+      // Desktop rest always shows the solo card; phone unhides when expanded.
+      themePanel.hidden = false;
+      if (phase !== 'apply') {
+        root.querySelectorAll<HTMLElement>('.discog[data-theme-tracks] .discog__item').forEach((item) => {
+          const on = item.dataset.discogActive === 'true';
+          item.classList.toggle('is-playlist-collapsed', !next && !on);
+          if (next || on) item.removeAttribute('aria-hidden');
+          else item.setAttribute('aria-hidden', 'true');
+        });
       }
-      if (next) themePanel.hidden = false;
-      else if (phase !== 'apply') themePanel.hidden = true;
+      if (!phone && !next) themePanel.hidden = false;
     };
 
     const setOpen = (next: boolean) => {
@@ -385,11 +413,14 @@ const defaultLabel =
       else closeVflip(true);
     });
 
+    if (!window.matchMedia('(max-width: 1023px)').matches && themePanel) {
+      themePanel.hidden = false;
+    }
+
     playlistBtn?.addEventListener('click', (event) => {
       event.preventDefault();
       event.stopPropagation();
-      if (!window.matchMedia('(max-width: 1023px)').matches) return;
-      // Last committed playlist request — player-dock queues if open/close is in flight.
+      // Same morph as phone (018): extras grow around the now-playing card.
       const next = !root.classList.contains('is-theme-tracks');
       document.dispatchEvent(new CustomEvent('phone-player-playlist', { detail: { open: next } }));
     });
@@ -417,7 +448,9 @@ const defaultLabel =
     });
 
     window.matchMedia('(max-width: 1023px)').addEventListener('change', (event) => {
-      if (!event.matches) setPlaylistOpen(false);
+      setOpen(false);
+      setPlaylistOpen(false);
+      if (!event.matches && themePanel) themePanel.hidden = false;
     });
 
     setOpen(false);
@@ -538,7 +571,12 @@ const defaultLabel =
     overflow: hidden;
     text-overflow: ellipsis;
     color: var(--color-text);
-    cursor: help;
+    cursor: default;
+  }
+
+  /* Desktop header wave only. Phone header must never show this (015 floor wave stays). */
+  .jukebox__header-wave.player-dock__soundwave {
+    display: none;
   }
 
   /* Phone header: currentlyPlayingLabel at rest, jukeboxPanelTitle in playlist. */
@@ -555,9 +593,24 @@ const defaultLabel =
     display: none;
   }
 
-  /* Laptop: vinyl/V-Flip is the list — no extra playlist control. */
+  /* Default hide playlist; desktop 019 and phone 015 unhide it. */
   .jukebox__tool--playlist {
     display: none;
+  }
+
+  /* Desktop playlist-open face. Phone always keeps the stacked-notes icon. */
+  .jukebox__playlist-icon {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Beat .player-dock__soundwave { display:flex } — same slot, one face. */
+  .jukebox__tool--playlist .jukebox__playlist-wave.player-dock__soundwave,
+  .jukebox__playlist-icon[hidden],
+  .jukebox__playlist-wave[hidden] {
+    display: none !important;
   }
 
   .jukebox__panel {
@@ -688,7 +741,7 @@ const defaultLabel =
     flex: 0 0 auto;
   }
 
-  /* Laptop keeps vinyl + loop; play/pause + playlist are phone-only. */
+  /* Default hide play/pause; desktop 019 and phone 015 unhide it. */
   .jukebox__tool--video-play {
     display: none;
   }
@@ -1043,6 +1096,215 @@ const defaultLabel =
     }
   }
 
+  /*
+   * Desktop always-open player (019 / T028). CSS-first: paints with no JS.
+   * Rest = phone now-playing card + toolbar. Playlist is a view-switch.
+   */
+  @media (min-width: 1024px) {
+    .jukebox {
+      --jukebox-rest-base: min(calc(18rem * var(--hud-scale)), var(--jukebox-open-width));
+      --jukebox-slider-extra: 0px;
+      /* Same air under the header rule and above the toolbar (both faces). */
+      --jukebox-well-y: calc(0.5rem * var(--hud-scale));
+      --desktop-playlist-viewport-h: calc(
+        3 * (4.8rem * var(--hud-scale)) + 2 * (0.55rem * var(--hud-scale))
+      );
+      --player-playlist-morph-dur: 380ms;
+      width: calc(var(--jukebox-rest-base) + var(--jukebox-slider-extra));
+      max-width: min(
+        calc(var(--jukebox-open-width) + var(--jukebox-slider-extra)),
+        calc(100vw - 2 * var(--hud-inset, 0.75rem))
+      );
+      border-radius: calc(0.85rem * var(--hud-scale));
+    }
+
+    /* First paint: reserve slider hole whenever mute exists in the DOM. Not JS-gated. */
+    .jukebox:has(.jukebox__tool--mute) {
+      --jukebox-slider-extra: calc(
+        var(--jukebox-toolbar-gap) + var(--jukebox-volume-slider-size) + var(--jukebox-slider-thumb-inset)
+      );
+      --jukebox-mute-width: calc(
+        var(--control-size) + var(--jukebox-toolbar-gap) + var(--jukebox-volume-slider-size) +
+          var(--jukebox-slider-thumb-inset)
+      );
+    }
+
+    .jukebox__tool--mute,
+    .jukebox__tool--mute[hidden] {
+      display: block !important;
+      visibility: visible;
+      pointer-events: auto;
+    }
+
+    /* Playlist is a view-switch. Unmute takes space instantly — no width ease. */
+    html:not([data-hud-glitch='true']) .jukebox,
+    html[data-hud-glitch='true'] .jukebox {
+      transition: none;
+    }
+
+    html:not([data-hud-glitch='true']) .jukebox__tool--mute {
+      transition: none;
+    }
+
+    .player-dock__now-playing {
+      display: none;
+    }
+
+    .jukebox__title-laptop {
+      display: none;
+    }
+
+    .jukebox__title-phone--now,
+    .jukebox__title-phone--playlist {
+      display: block;
+      transition: opacity var(--player-playlist-morph-dur, 380ms)
+        cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .jukebox__title-phone--playlist {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+    }
+
+    /* Faces flip with is-theme-tracks (applied at morph start on desktop). */
+    .jukebox.is-theme-tracks .jukebox__title-phone--now {
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    .jukebox.is-theme-tracks .jukebox__title-phone--playlist {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .jukebox__section--list {
+      display: none;
+    }
+
+    .jukebox__section--theme-tracks,
+    .jukebox__section--theme-tracks[hidden] {
+      display: block !important;
+    }
+
+    .jukebox__tool--vinyl,
+    .jukebox__tool--loop {
+      display: none;
+    }
+
+    .jukebox__tool--playlist,
+    .jukebox__tool--video-play {
+      display: inline-grid;
+    }
+
+    .jukebox__drawer-inner,
+    .jukebox.is-open:not(.is-panel-opening) .jukebox__drawer-inner {
+      position: relative;
+      padding: var(--jukebox-well-y) calc(0.55rem * var(--hud-scale)) 0;
+    }
+
+    .jukebox__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex: 0 0 auto;
+      gap: calc(0.4rem * var(--hud-scale));
+      margin: 0 0 var(--jukebox-well-y);
+      padding-bottom: calc(0.28rem * var(--hud-scale));
+      overflow: hidden;
+      position: relative;
+      z-index: 2;
+    }
+
+    .jukebox__header .jukebox__title {
+      position: relative;
+      flex: 1 1 auto;
+      min-width: 0;
+      overflow: hidden;
+      pointer-events: auto;
+      cursor: default;
+    }
+
+    /* CURRENTLY PLAYING: wave on the right, vertically centered with the label.
+       Hug the bars — a --control-size slot + leftover margin made the right
+       inset larger than the title's left inset (drawer pad 0.55rem). */
+    .jukebox:not(.is-theme-tracks) .jukebox__header-wave.player-dock__soundwave {
+      position: static;
+      display: flex;
+      flex: 0 0 auto;
+      align-self: center;
+      width: auto;
+      margin: 0;
+    }
+
+    .jukebox.is-theme-tracks .jukebox__header-wave.player-dock__soundwave {
+      display: none;
+    }
+
+    /* Same slot: playlist icon at rest, soundwave in the jukebox view. */
+    .jukebox.is-theme-tracks .jukebox__playlist-icon:not([hidden]) {
+      display: none;
+    }
+
+    .jukebox.is-theme-tracks .jukebox__tool--playlist .jukebox__playlist-wave.player-dock__soundwave:not([hidden]) {
+      display: flex !important;
+    }
+
+    .jukebox.is-theme-tracks .jukebox__tool--playlist[aria-pressed='true'] {
+      border-color: transparent;
+      background: transparent;
+      color: inherit;
+    }
+
+    /* Rest: hide the card EQ (header has the wave). Morph/list: badge grows in. */
+
+    .jukebox__panel,
+    .jukebox.is-open:not(.is-panel-opening) .jukebox__panel {
+      max-height: none;
+      opacity: 1;
+      overflow: hidden;
+      pointer-events: auto;
+      padding-bottom: var(--jukebox-well-y);
+    }
+
+    .jukebox__toolbar {
+      border-top-color: color-mix(in srgb, var(--color-border) 45%, transparent);
+    }
+
+    /* Collapsed extras must not leave flex gaps (the empty air above/below the card). */
+    .jukebox:not(.is-theme-tracks) :global(.discog[data-theme-tracks]) {
+      gap: 0;
+    }
+
+    .jukebox.is-theme-tracks :global(.discog[data-theme-tracks]),
+    .jukebox.is-playlist-morphing :global(.discog[data-theme-tracks]) {
+      gap: var(--discog-row-gap, calc(0.55rem * var(--hud-scale)));
+    }
+
+    .jukebox.is-playlist-morphing {
+      overflow: hidden;
+    }
+
+    /* Same scrollport rest → morph → settled. Gutter reserved before the bar paints. */
+    .jukebox__section--theme-tracks,
+    .jukebox__section--theme-tracks[hidden],
+    .jukebox.is-playlist-morphing .jukebox__section--theme-tracks,
+    .jukebox.is-playlist-morphing .jukebox__section--theme-tracks[hidden] {
+      max-height: none;
+      overflow-x: hidden;
+      overflow-y: auto;
+      scrollbar-gutter: stable;
+    }
+
+    .jukebox.is-theme-tracks:not(.is-playlist-morphing) .jukebox__section--theme-tracks,
+    .jukebox.is-theme-tracks:not(.is-playlist-morphing) .jukebox__section--theme-tracks[hidden] {
+      max-height: var(--player-playlist-viewport-h, var(--desktop-playlist-viewport-h));
+      overflow-x: hidden;
+      overflow-y: auto;
+      scrollbar-gutter: stable;
+    }
+  }
+
   @media (max-width: 1023px) {
     .jukebox,
     .jukebox *,
@@ -1152,6 +1414,12 @@ const defaultLabel =
 
     .jukebox__title {
       position: relative;
+    }
+
+    /* Phone header is text only — floor row keeps the pill soundwave. */
+    .jukebox__header-wave,
+    .jukebox__header-wave.player-dock__soundwave {
+      display: none !important;
     }
 
     /* Crossfade with the playlist morph — an 80ms swap read as a title pop. */
@@ -1475,6 +1743,15 @@ const defaultLabel =
     .jukebox__tool--video-play,
     .jukebox__tool--playlist {
       display: inline-grid;
+    }
+
+    .jukebox__playlist-wave,
+    .jukebox.is-theme-tracks .jukebox__playlist-wave {
+      display: none !important;
+    }
+
+    .jukebox.is-theme-tracks .jukebox__playlist-icon {
+      display: grid;
     }
 
     /* Phone sheet: one discog list. TrackInfoPanel is laptop-only. */
@@ -1816,6 +2093,7 @@ const defaultLabel =
   @media (prefers-reduced-motion: reduce) {
     .jukebox,
     .jukebox__panel,
+    .jukebox__section--theme-tracks,
     .jukebox__tool,
     .jukebox__title-phone,
     .player-dock__transport {

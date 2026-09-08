@@ -41,7 +41,8 @@
 - Remaining assumed defaults (clarify can flip): left/right floor
   split; playlist list = existing laptop theme-track list (not `018`
   three-row); playlist may stay open while a bar panel is open; mute
-  is on/off only (no slider; device volume for loudness).
+  unmute-to-slider is **back** on desktop (T028). Playlist is the phone
+  theme-track **card window**. Now-playing is the full phone card.
 - Validation 2026-09-08 (iteration 3): operator superseded Q1. Desktop
   player is **always open** (no V-Flip toggle). Toolbar is Playlist →
   Shuffle → Play/pause → Mute. Loop, vinyl, and unmute-to-slider are

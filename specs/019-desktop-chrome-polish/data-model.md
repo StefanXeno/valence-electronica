@@ -15,12 +15,12 @@ No `localStorage`, no cookies.
 | Field | Values | Default | Notes |
 | ----- | ------ | ------- | ----- |
 | `chrome` | `open` | `open` | Always open. No collapsed vinyl state. |
-| `currentTrackLabel` | string | Scheduled / default stage label | Visitor-facing jukebox list label (`data-now-playing`). |
-| `playlistOpen` | `true` / `false` | `false` | Theme-track **list** grown from the player. |
+| `currentTrackLabel` | string | Scheduled / default stage label | Visitor-facing card title (theme-track card, same as phone). |
+| `playlistOpen` | `true` / `false` | `false` | Theme-track **card window** view-switched from the player. |
 | `shuffleOn` | `true` / `false` | `chrome.shuffleDefault` | Existing visit-only toggle. |
 | `loopOn` | `false` | `false` | No Loop control; MUST stay off on desktop. |
 | `videoPaused` | `true` / `false` | `false` (after intro, if video can play) | Play/pause of atmosphere video. |
-| `muted` | `true` / `false` | muted until visitor unmutes (as-built) | Toggle only; no slider UI. |
+| `muted` | `true` / `false` | muted until visitor unmutes (as-built) | Slider visible only when unmuted. |
 | `unmuteLevel` | 0–1 | `0.7` (today’s laptop default) | In-memory only; not shown. |
 
 **Validation**
@@ -53,7 +53,7 @@ Open face of `openPanel === info`. Same data as phone Info.
 
 | Field | Source | Placement |
 | ----- | ------ | --------- |
-| `copyright` | `© {year} {site.artist.name}` (Valence) | **Top-right** of the open Info box |
+| `copyright` | `© {year} {site.artist.name}` (Valence) | **Top-right**, same row height as the Info heading |
 | `imprintPill` | `chrome.imprintButton` | Opens existing legal overlay (`imprint`) |
 | `privacyPill` | `chrome.privacyButton` | Opens existing legal overlay (`privacy`) |
 
@@ -64,28 +64,44 @@ Open face of `openPanel === info`. Same data as phone Info.
 
 ## Entity: TwoStageGrow
 
-Visit-only motion state for **playlist** and **bar panels**.
+Visit-only motion state for **bar panels only**. Desktop playlist is
+not a two-stage surface.
 
 | Field | Values | Notes |
 | ----- | ------ | ----- |
-| `surface` | `playlist` / `bar` | Playlist anchors bottom-left; bar bottom-right. |
+| `surface` | `bar` | Bottom-right content bar. |
 | `phase` | `idle` / `width` / `height` | Sequential. Open: width then height. Close: height then width. |
-| `directionOpen` | playlist: right then up; bar: left then up | Grow in place. |
-| `directionClose` | playlist: down then left; bar: down then right | Reverse shrink. |
+| `directionOpen` | bar: left then up | Grow in place. |
+| `directionClose` | bar: down then right | Reverse shrink. |
 | `stageMs` | `280` | `SMOOTH_PANEL_PHASE_MS`. `0` if reduced motion. |
 
 **Validation**
 
-- MUST NOT slide the whole player or bar.
+- MUST NOT slide the whole bar.
 - MUST NOT run a single diagonal instead of two stages (unless
   reduced motion skips travel).
 - Interrupt → settle to last committed open or closed; player chrome
   stays visible.
+- Desktop playlist MUST NOT attach this sequencer.
+
+## Entity: PlaylistViewSwitch
+
+Visit-only desktop playlist face.
+
+| Field | Values | Notes |
+| ----- | ------ | ----- |
+| `face` | `now-playing` / `jukebox` | Header + card list swap. |
+| `height` | rest / grow-up | Height MAY rise **up only** so the list fits. No width animation. |
+
+**Validation**
+
+- MUST NOT grow/extend to the right.
+- MUST NOT two-stage width-then-height.
 
 ## Relationships
 
 ```text
-DesktopPlayer ──playlistOpen──► TwoStageGrow (playlist)
+DesktopPlayer ──playlistOpen──► PlaylistViewSwitch
 DesktopContentBar ──openPanel──► TwoStageGrow (bar)
 DesktopContentBar.openPanel=info ──► InfoBox
 DesktopPlayer.currentTrackLabel ◄── active stage (007 / 011)

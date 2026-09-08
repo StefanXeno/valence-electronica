@@ -57,29 +57,32 @@ phone HUD (`015` / `018`) in the **same DOM**, split by
 
 ## R4: Currently playing on desktop
 
-- **Decision**: Show the existing `data-now-playing` track label (visitor-
-  facing jukebox list label) in the always-open desktop player. Do not
-  require the phone solo card or 018 three-row window. Laptop
-  `TrackInfoPanel` remains the **playlist** list (`011`).
-- **Rationale**: Spec assumption “name always visible; card optional.”
-  The now-playing span already updates with stage changes.
+- **Decision**: Show the existing phone **theme-track card** (Discography
+  `themeTracksOnly` / `015`–`018` solo card) in the always-open desktop
+  player. Do not use a name-only `data-now-playing` row as the rest
+  face. Laptop `TrackInfoPanel` is **not** the desktop now-playing face.
+- **Rationale**: T028 review — full card, same logic as mobile.
 - **Alternatives considered**:
-  - Copy 018 solo card onto desktop — not asked; extra layout risk.
-  - Only show the name inside the open playlist — fails “always
-    visible without a click.”
+  - Name-only row — rejected after visual review.
+  - A new desktop-only card — rejected; reuse the phone card.
 
-## R5: Playlist surface is the laptop list, grown in two stages
+## R5: Playlist surface is a view-switch (height-up only)
 
-- **Decision**: Desktop playlist on = grow the existing laptop drawer
-  list (`jukebox__section--list` / `TrackInfoPanel`) from the always-
-  open player. Two-stage: **width right, then height up**. Close:
-  **height down, then width left**. Do not use `018` `playlist-window.ts`
-  on desktop.
-- **Rationale**: Spec assumption + Out of Scope (no 018 three-row on
-  desktop). 011 list already has inline track info.
+- **Decision**: Desktop playlist on = **switch the view** to the phone
+  **theme-track card window** (`jukebox__section--theme-tracks`, same
+  cards as the solo now-playing card; background-available set only).
+  **No** width grow. **No** two-stage right-then-up. Height MAY grow
+  **up only** so the list is not clipped. Close switches back to the
+  currently-playing card (height MAY shrink down). Do **not** use the
+  `011` `TrackInfoPanel` list. Three-row-tall viewport + scroll; do
+  not run phone `player-dock` on laptop. Bar two-stage stays in
+  `panel-motion.ts`.
+- **Rationale**: Operator 2026-09-09 — remove the playlist
+  grow/extend; just switch the view.
 - **Alternatives considered**:
-  - Phone theme-track cards on desktop — rejected unless operator
-    later copies 018.
+  - Two-stage width-then-height (019 first pass) — rejected after
+    visual review.
+  - `011` TrackInfoPanel list — rejected after visual review.
   - Vinyl-era “open V-Flip = list” without a Playlist button —
     superseded.
 
@@ -91,29 +94,28 @@ phone HUD (`015` / `018`) in the **same DOM**, split by
   Reduced motion: both stages instant. Glitch theme MAY keep morph
   glitch **flavor**; direction order still width-then-height (open)
   and height-then-width (close). Extend `panel-motion.ts` (or a small
-  sibling helper) so StagePanels **and** the desktop playlist share
-  one sequencer. Do not invent leftover-jank springs.
-- **Rationale**: Spec Q2 + plan-time duration. 009 already used 280ms
-  desktop motion. Phone content-pill stays 320ms (`PHONE_PANEL_PHASE_MS`).
+  sibling helper) so StagePanels owns the **bar** sequencer. Desktop
+  playlist MUST NOT share that sequencer. Do not invent leftover-jank
+  springs.
+- **Rationale**: Spec Q2 + plan-time duration still apply to the bar.
+  009 already used 280ms desktop motion. Phone content-pill stays
+  320ms (`PHONE_PANEL_PHASE_MS`). Playlist FR-006 is now view-switch.
 - **Alternatives considered**:
   - Keep today’s simultaneous width+height (current
-    `runSmoothPanelOpen` is a no-op) — fails sequential FR-006 / FR-007.
+    `runSmoothPanelOpen` is a no-op) — fails sequential **bar** FR-007.
   - 320ms to match phone — extra feel change not asked on desktop.
   - New animation library — rejected (constitution IV).
 
 ## R7: Mute is a toggle; slider hidden on desktop too
 
-- **Decision**: At ≥1024px, hide `.volume-control__slider-wrap` the same
-  way phone already hides it ≤1023px. Mute button stays. Unmute uses
-  the existing in-memory level (slider default **0.7**); do not add a
-  new chrome field. Device/OS volume is visitor loudness.
-- **Rationale**: Spec FR-004b. Smallest change: extend the existing
-  phone slider-hide media query to all widths, or add a matching
-  `min-width: 1024px` hide (phone block already covers ≤1023).
+- **Decision**: At ≥1024px, restore `011` unmute-to-slider. Size the
+  box once with `--jukebox-slider-extra` reserved whenever mute is
+  showing. Muted: hide the slider in that space. Unmuted: show the
+  **full** slider there. **No** width change on mute toggle. Unmute
+  level stays **0.7**. Phone still hides the slider.
+- **Rationale**: T028 review restored the slider.
 - **Alternatives considered**:
-  - Keep slider on desktop — rejected; operator dropped it.
-  - Force phone 50% on desktop unmute — unnecessary; 0.7 is the
-    current laptop default and stays invisible.
+  - Toggle-only / device volume — superseded by T028.
 
 ## R8: Info on desktop; footer gone everywhere on landing
 
@@ -146,8 +148,8 @@ phone HUD (`015` / `018`) in the **same DOM**, split by
 - **Decision**: Update `docs/artist-guide.md` in the same change set:
   laptop legal is **Info**, not the footer; laptop player is always-
   open **Playlist / Shuffle / Play/pause / Mute**; vinyl, loop, and
-  volume slider are not desktop chrome; `loopDefault` / slider tooltip
-  remain documented as unused-on-laptop or phone-only where true.
+  volume slider is unmute-only on laptop; `loopDefault` stays unused
+  on laptop.
 - **Rationale**: Constitution VII / spec FR-014.
 - **Alternatives considered**:
   - Skip docs because no new files — rejected; visitor-facing legal
