@@ -154,14 +154,17 @@ site. Use jukebox (stage) or tracks (catalog-only) instead.
 
 **Folder:** [`src/content/shows/`](../src/content/shows/)
 
-**Controls:** Gig rows: `date`, `city`, `venue` (all required), optional `ticketUrl`. Past dates
-(Europe/Berlin) are hidden automatically.
+**Controls:** Gig cards: `date`, `city`, `venue` (all required), optional `title` (card
+headline; falls back to `venue`), optional `ticketUrl` (Tickets pill) and optional
+`venueUrl` (Information pill). Past dates (Europe/Berlin) are hidden automatically.
 
 **Tips:**
 
 - A row missing `date`, `city`, or `venue` **fails the build** and names the file — nothing
   disappears silently. Fix the file and push again.
-- `ticketUrl` must be a full address including `https://`.
+- `title` is the event name on the card. Leave it out and the venue name is used.
+- `ticketUrl` and `venueUrl` must be full addresses including `https://`. Leave either out
+  to hide that pill. Both can be set on the same gig.
 - You can ship with no show files — the site shows empty-state copy.
 
 ---
@@ -171,33 +174,44 @@ site. Use jukebox (stage) or tracks (catalog-only) instead.
 **File:** [`src/content/ui/chrome.md`](../src/content/ui/chrome.md)
 
 **Controls:** Region titles, empty-state strings, jukebox/social labels, stage-button label,
-landing intro copy (`introLead`, `introName`), and optional **HUD icon overrides**
+landing intro copy (`introLead`, `introName`), tour pill labels (`ticketLabel`,
+`venueInfoLabel`), and optional **HUD icon overrides**
 (`jukeboxIcon`, `aboutIcon`, `discographyIcon`, `tourIcon`, `trackInfoIcon`, `shuffleIcon`,
 `loopIcon`, `socialsIcon`, `infoIcon`).
 
-**V-Flip player chrome (optional):**
+**Laptop player chrome (1024px up):** always-open boxed player — **phone now-playing
+card** + **Playlist**, **Shuffle**, **Play/pause**, **Mute**. No vinyl / V-Flip toggle,
+no Loop control. Unmute shows the **volume slider** and widens the player; mute hides
+it. Playlist is the phone **theme-track card** list (background-available tracks),
+not the old laptop text list. `loopDefault` stays off on laptop. Legal is the
+**Info** icon in the bottom-right bar (not the footer).
 
-- `shuffleLabel` / `loopLabel` — transport toggle labels (default: Shuffle / Loop)
+**Phone / shared player chrome (optional):**
+
+- `shuffleLabel` / `loopLabel` — transport toggle labels (default: Shuffle / Loop). Loop is
+  phone-only; laptop hides Loop.
 - `shuffleDefault` — `true` (default) or `false` for load-time shuffle
-- `loopDefault` — `false` (default) or `true` for load-time loop
-- `unmuteTooltip` / `muteTooltip` — mute button hint when collapsed or open
-- `volumeSliderTooltip` — hint on the volume slider (default: Drag to adjust volume)
+- `loopDefault` — `false` (default) or `true` for load-time loop (phone only; laptop stays off)
+- `unmuteTooltip` / `muteTooltip` — mute button hint
+- `volumeSliderTooltip` — laptop slider hint when unmuted (phone hides the slider)
 - `playerExpandLabel` / `playerCollapseLabel` — accessible names for the **phone player
-  handle** (arrow on top of the pill). Phone HUD is below 1024px; laptop HUD is unchanged.
+  handle** (arrow on top of the pill). Phone HUD is below 1024px.
 - `socialsIcon` — optional token or emoji for the phone socials trigger (default token:
   `socials`, a connected-nodes / share glyph — not a chevron)
-- `infoTitle` / `infoIcon` — phone Info sheet (© top-right + English **Imprint** /
-  **Privacy Policy** pills that open the existing legal overlay). Default title:
-  Info. Default token: `info` (circled i). Laptop still uses the footer.
+- `infoTitle` / `infoIcon` — Info sheet on **phone and laptop** (© top-right + English
+  **Imprint** / **Privacy Policy** pills that open the existing legal overlay). Default
+  title: Info. Default token: `info` (circled i). Laptop does **not** use a footer.
 
 **Track info in V-Flip (optional):**
 
 - `trackInfoTitle` — section heading inside open V-Flip (default: Track info)
 - `releasedLabel` — label before the release date (default: Released)
 - `stageButtonLabel` — accessible name for the discography play control (icon-only; not shown as button text)
-- `currentlyPlayingLabel` — discography now-playing indicator name; on phone also
-  the expanded player header while playlist is off (visible). Playlist on uses
-  `jukeboxPanelTitle` (`V-Flip aka. Jukebox`). `jukeboxPanelTooltip` is laptop-only.
+- `currentlyPlayingLabel` — discography now-playing indicator name; on **phone
+  and laptop** the player header while playlist is off (visible). Playlist on
+  uses `jukeboxPanelTitle` (`V-Flip aka. Jukebox`). Those header titles do
+  **not** show HUD hover tooltips. `jukeboxPanelTooltip` is unused on the
+  player chrome.
 - `listenOnLabel` — label before streaming platform icons (default: Listen On)
 - `emptyTrackLinks` — when a track has no `listenLinks`
 
@@ -208,12 +222,13 @@ landing intro copy (`introLead`, `introName`), and optional **HUD icon overrides
   `catalog`, `info`, `shuffle`, `loop`, `socials`, `play`, `pause`, or `playlist`.
 
 **Label reveal (visitor-facing):** On **laptop** (1024px up), dock icons show a floating
-label **above** the control on hover/focus. Mute/volume inside V-Flip uses the same floater.
-Social icons show the label **below**. On **phone** (viewport below 1024px) those floaters
-are **off** (no hover tooltips, no “pick a track” title). Phone HUD: floor-pinned player
-pill (expand **is** V-Flip; shuffle + play/pause + playlist; no loop) + one **five-icon**
-content pill (About, Discography, Tour, Socials, Info). Socials open **inside** that pill.
-Legal is Info, not the footer.
+label **above** the control on hover/focus. Mute inside the always-open player uses the
+same floater. **Currently Playing / Jukebox header titles do not.** Social icons show
+the label **below**. On **phone** (viewport below 1024px)
+those floaters are **off** (no hover tooltips, no “pick a track” title). Phone HUD:
+floor-pinned player pill (expand **is** V-Flip; shuffle + play/pause + playlist; no loop)
++ one **five-icon** content pill (About, Discography, Tour, Socials, Info). Socials open
+**inside** that pill. Legal is Info on both phone and laptop (no landing footer).
 
 **Do not break:** Region title fields still control readable labels and accessibility.
 Track metadata (blurb, credits, mentions, listen links) appears **inside open V-Flip**, not
@@ -233,8 +248,9 @@ longer stage videos.
 **Files:** `imprint.md` (Impressum), `privacy.md` (Datenschutzerklärung)
 
 **Controls:** Legally required texts for a German public presence. Write the content in
-**German** where the law requires it; this guide stays in English. Laptop visitors open these
-from the footer; on phone they live in the **Info** sheet (circled-i icon on the content bar).
+**German** where the law requires it; this guide stays in English. Laptop and phone
+visitors open these from the **Info** sheet (circled-i icon on the content bar). The
+landing footer is hidden.
 
 **Important:** Both files are currently placeholders. **Replace them with real information
 before you promote the site publicly.** This is not legal advice — ask a lawyer if you are
@@ -261,7 +277,9 @@ syntax and examples. Here: edit **only** this JSON file to retime defaults; run
 
 **Controls:** Short hooks under the Valence wordmark. The site rotates through **normal**
 lines every **15 seconds** (fade out, then fade in). **Easter-egg** lines with schedule
-rules can replace the normal pool on matching days or times (Europe/Berlin).
+rules join on matching days or times (Europe/Berlin): **two or more** matching eggs replace
+the normal pool; **exactly one** matching egg is mixed into the normal rotation so a lone
+late-night line (e.g. “Still awake?”) cannot sit unchanged for hours.
 
 **Fallback:** If nothing matches, the site shows `artist.tagline` from
 [`src/data/site.json`](../src/data/site.json) (also used when JavaScript is off).

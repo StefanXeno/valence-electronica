@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { berlinToday, collectUpcomingShows } from './stage-upcoming';
+import { berlinToday, collectUpcomingShows, resolveShowTitle } from './stage-upcoming';
 
 describe('berlinToday', () => {
   it('returns a UTC midnight date for the Berlin calendar day', () => {
@@ -109,5 +109,57 @@ describe('collectUpcomingShows', () => {
 
     expect(items[0]?.ticketUrl).toBe('https://tickets.example.com');
     expect(items[1]?.ticketUrl).toBeUndefined();
+  });
+
+  it('accepts https venue info URLs only', () => {
+    const items = collectUpcomingShows(
+      [
+        {
+          id: 'venue-info',
+          date: new Date(Date.UTC(2026, 9, 5)),
+          city: 'Berlin',
+          venue: 'Venue',
+          ticketUrl: 'https://tickets.example.com',
+          venueUrl: 'https://venue.example.com',
+        },
+        {
+          id: 'bad-venue-url',
+          date: new Date(Date.UTC(2026, 9, 6)),
+          city: 'Berlin',
+          venue: 'Venue',
+          venueUrl: 'not-a-url',
+        },
+      ],
+      today,
+    );
+
+    expect(items[0]?.venueUrl).toBe('https://venue.example.com');
+    expect(items[0]?.ticketUrl).toBe('https://tickets.example.com');
+    expect(items[1]?.venueUrl).toBeUndefined();
+  });
+
+  it('keeps an optional event title when provided', () => {
+    const items = collectUpcomingShows(
+      [
+        {
+          id: 'named',
+          date: new Date(Date.UTC(2026, 9, 7)),
+          city: 'Berlin',
+          venue: 'Example Club',
+          title: '  Example Night  ',
+        },
+      ],
+      today,
+    );
+
+    expect(items[0]?.title).toBe('Example Night');
+  });
+});
+
+describe('resolveShowTitle', () => {
+  it('uses the event title when present and falls back to venue', () => {
+    expect(resolveShowTitle('Example Night', 'Example Club')).toBe('Example Night');
+    expect(resolveShowTitle('   ', 'Example Club')).toBe('Example Club');
+    expect(resolveShowTitle(undefined, 'Example Venue')).toBe('Example Venue');
   });
 });

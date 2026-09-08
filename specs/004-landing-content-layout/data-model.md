@@ -23,7 +23,8 @@ File: `src/content/ui/chrome.md` — exactly one instance (frontmatter; body unu
 | `jukeboxLabel` | string | yes | Accessible name for the vinyl control (shipped: `V-Flip`) |
 | `socialsLabel` | string | yes | Nav accessible name (icons have per-channel labels) |
 | `comingSoon` | string | yes | Appended to inactive channel accessible names |
-| `ticketLabel` | string | yes | Tour row ticket link text |
+| `ticketLabel` | string | yes | Tour row ticket icon accessible name |
+| `venueInfoLabel` | string | no | Tour row venue-info icon accessible name |
 | `introLead` | string | no | Landing intro first line (feature `006`) |
 | `introName` | string | no | Landing intro portal name; empty → intro off (`006`) |
 
@@ -94,8 +95,10 @@ Files: `src/content/shows/<slug>.md`
 |-------|------|----------|--------------------------|
 | `date` | date (calendar) | yes | Interpret in Europe/Berlin |
 | `city` | string | yes | |
-| `venue` | string | yes | |
-| `ticketUrl` | string (URL) | no | Omit link if missing |
+| `venue` | string | yes | Card title fallback |
+| `title` | string | no | Event title on the tour card; omit → venue |
+| `ticketUrl` | string (URL) | no | Tickets pill; omit if missing |
+| `venueUrl` | string (URL) | no | Information pill; omit if missing |
 
 Omit if `date`, `city`, or `venue` missing. Stage list: `date` ≥ today (Berlin) only,
 soonest first. Past dates in files are allowed but not shown as upcoming.

@@ -27,6 +27,7 @@ jukeboxLabel: V-Flip
 socialsLabel: Socials
 comingSoon: coming soon
 ticketLabel: Tickets
+venueInfoLabel: Information
 introLead: "Hi I'm"
 introName: Valence
 ---
@@ -138,7 +139,9 @@ Rules:
 date: 2026-12-05
 city: Augsburg
 venue: Example Venue
+title: Example Night
 ticketUrl: https://valenceelectronica.bandcamp.com/
+venueUrl: https://www.visitberlin.de/en
 ---
 
 EXAMPLE PLACEHOLDER SHOW — replace with a real date.
@@ -147,6 +150,8 @@ EXAMPLE PLACEHOLDER SHOW — replace with a real date.
 Rules:
 
 - `date`, `city`, `venue` required or the show is omitted.
+- `title` optional — card headline; omit to use `venue`.
+- `ticketUrl` optional — Tickets pill. `venueUrl` optional — Information pill.
 - Timezone for “upcoming”: Europe/Berlin, calendar date.
 - Past dates are not listed on the stage.
 - v1 ships `example-augsburg.md` (clearly marked EXAMPLE). Zero `.md` files in

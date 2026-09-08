@@ -46,6 +46,13 @@ const { token, emoji } = Astro.props;
         d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z"
       />
     </svg>
+  ) : token === 'ticket' ? (
+    <svg class="hud-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path
+        fill="currentColor"
+        d="M20 8V6c0-1.1-.9-2-2-2H6C4.9 4 4 4.9 4 6v2c1.1 0 2 .9 2 2s-.9 2-2 2v2c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-2c-1.1 0-2-.9-2-2s.9-2 2-2zm-7 7.15h-2v-1.7h2v1.7zm0-3.8h-2v-1.7h2v1.7zm0-3.8h-2V5.85h2v1.7z"
+      />
+    </svg>
   ) : token === 'catalog' ? (
     <svg class="hud-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
       <path fill="currentColor" d="M4 6h16v2H4zm0 5h16v2H4zm0 5h10v2H4z" />

@@ -1,5 +1,7 @@
 ---
-import { getUpcomingShows, type UiChrome } from '../lib/stage';
+import '../styles/stage-card.css';
+import { getUpcomingShows, resolveShowTitle, type UiChrome } from '../lib/stage';
+import HudIcon from './HudIcon.astro';
 
 interface Props {
   chrome: UiChrome;
@@ -17,56 +19,82 @@ const dateFmt = new Intl.DateTimeFormat('en-GB', {
 
 {
   shows.length === 0 ? (
-    <p>{chrome.emptyShows}</p>
+    <p class="tour__empty">{chrome.emptyShows}</p>
   ) : (
     <ul class="tour">
-      {shows.map((show) => (
-        <li>
-          <time datetime={show.date.toISOString().slice(0, 10)}>{dateFmt.format(show.date)}</time>
-          <span>
-            {show.city} · {show.venue}
-          </span>
-          {show.ticketUrl && (
-            <a href={show.ticketUrl} target="_blank" rel="noopener noreferrer">
-              {chrome.ticketLabel}
-            </a>
-          )}
-        </li>
-      ))}
+      {shows.map((show) => {
+        const eventTitle = resolveShowTitle(show.title, show.venue);
+        const dateLabel = dateFmt.format(show.date);
+        return (
+          <li class="stage-card tour__card">
+            <div class="stage-card__head">
+              <span class="stage-card__title">{eventTitle}</span>
+              <p class="stage-card__meta">
+                <time datetime={show.date.toISOString().slice(0, 10)}>{dateLabel}</time>
+                {' · '}
+                {show.city}
+              </p>
+            </div>
+            {(show.ticketUrl || show.venueUrl) && (
+              <div class="stage-card__footer">
+                {show.ticketUrl && (
+                  <a
+                    class="stage-card__pill"
+                    href={show.ticketUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={chrome.ticketLabel}
+                    data-hud-label={chrome.ticketLabel}
+                    data-hud-label-anchor="above"
+                  >
+                    <HudIcon token="ticket" />
+                    <span>{chrome.ticketLabel}</span>
+                  </a>
+                )}
+                {show.venueUrl && (
+                  <a
+                    class="stage-card__pill"
+                    href={show.venueUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={chrome.venueInfoLabel}
+                    data-hud-label={chrome.venueInfoLabel}
+                    data-hud-label-anchor="above"
+                  >
+                    <HudIcon token="info" />
+                    <span>{chrome.venueInfoLabel}</span>
+                  </a>
+                )}
+              </div>
+            )}
+          </li>
+        );
+      })}
     </ul>
   )
 }
 
 <style>
   .tour {
+    --discog-row-gap: calc(0.75rem * var(--hud-scale));
     list-style: none;
     margin: 0;
     padding: 0;
     display: flex;
     flex-direction: column;
-    gap: 0.65rem;
+    gap: var(--discog-row-gap);
   }
 
-  li {
+  .tour__empty {
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: calc(0.8rem * var(--hud-scale));
+  }
+
+  .tour__card {
     display: flex;
     flex-direction: column;
-    gap: 0.15rem;
-  }
-
-  time {
-    font-family: var(--font-display);
-    font-size: calc(0.8rem * var(--hud-scale));
-    color: var(--color-accent-alt);
-  }
-
-  a {
-    color: var(--color-text);
-    text-decoration: underline;
-    text-underline-offset: 0.15em;
-    font-size: 0.85rem;
-  }
-
-  a:hover {
-    color: var(--color-accent-alt);
+    /* Rule spacing lives on the footer (margin-top = padding-top). */
+    gap: 0;
   }
 </style>

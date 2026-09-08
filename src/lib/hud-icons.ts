@@ -4,6 +4,7 @@ export type HudIconToken =
   | 'lyrics'
   | 'discography'
   | 'tour'
+  | 'ticket'
   | 'catalog'
   | 'info'
   | 'shuffle'
@@ -19,6 +20,7 @@ const KNOWN: HudIconToken[] = [
   'lyrics',
   'discography',
   'tour',
+  'ticket',
   'catalog',
   'info',
   'shuffle',

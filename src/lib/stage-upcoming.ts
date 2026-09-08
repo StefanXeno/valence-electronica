@@ -3,7 +3,9 @@ export type ShowEntryInput = {
   date: Date;
   city: string;
   venue: string;
+  title?: string;
   ticketUrl?: string;
+  venueUrl?: string;
 };
 
 export interface UpcomingShowItem {
@@ -11,7 +13,14 @@ export interface UpcomingShowItem {
   date: Date;
   city: string;
   venue: string;
+  title?: string;
   ticketUrl?: string;
+  venueUrl?: string;
+}
+
+/** Tour card title: optional event name, otherwise the venue. */
+export function resolveShowTitle(title: string | undefined, venue: string): string {
+  return title?.trim() || venue.trim();
 }
 
 function dateKey(value: Date): number {
@@ -57,7 +66,9 @@ export function collectUpcomingShows(
       date: entry.date,
       city: entry.city.trim(),
       venue: entry.venue.trim(),
+      title: entry.title?.trim() || undefined,
       ticketUrl: isHttpUrl(entry.ticketUrl) ? entry.ticketUrl : undefined,
+      venueUrl: isHttpUrl(entry.venueUrl) ? entry.venueUrl : undefined,
     });
   }
 
