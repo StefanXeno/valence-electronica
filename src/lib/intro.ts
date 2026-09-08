@@ -4,6 +4,8 @@ export const INTRO_REPLAY_QUERY = 'replay-intro';
 /** Dev-only preview route (see src/pages/dev/intro.astro). Not used in production builds. */
 export const INTRO_DEV_PREVIEW_PATH = '/dev/intro';
 
+/** Viewport timings/scale: `desktopIntro` / `mobileIntro` in `intro-config.ts`. */
+
 export function prefersReducedMotion(): boolean {
   if (typeof window === 'undefined') return false;
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
