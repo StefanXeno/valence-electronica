@@ -100,9 +100,11 @@ const { token, emoji } = Astro.props;
     </svg>
   ) : token === 'playlist' ? (
     <svg class="hud-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <rect x="2.4" y="3.4" width="3" height="17.2" rx="1.15" fill="currentColor" />
+      <rect x="7.35" y="3.4" width="3" height="17.2" rx="1.15" fill="currentColor" />
       <path
         fill="currentColor"
-        d="M15 6H3v2h12V6zm0 4H3v2h12v-2zM3 16v2h8v-2H3zm14-10v8.18c-.31-.11-.65-.18-1-.18-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3V8h3V6h-5z"
+        d="M13.2 3.55c-.58-.33-1.3.08-1.3.75v15.4c0 .67.72 1.08 1.3.75l7.35-4.15a1.05 1.05 0 0 0 .55-.91V8.61c0-.38-.2-.73-.55-.91l-7.35-4.15z"
       />
     </svg>
   ) : (
