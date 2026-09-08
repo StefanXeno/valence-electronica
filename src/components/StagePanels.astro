@@ -590,14 +590,15 @@ const panels = [
       min-width: 0;
       padding-top: var(--phone-bar-pad);
       padding-bottom: var(--phone-bar-pad);
-      padding-left: var(--phone-inline-pad);
-      padding-right: var(--phone-inline-pad);
+      padding-left: var(--phone-bar-pad);
+      padding-right: var(--phone-bar-pad);
       border: 1px solid var(--color-border);
       /* Constant collapsed-bar radius — 999px→0.85rem looked more circular mid-flight. */
       border-radius: var(--phone-pill-radius);
       background: color-mix(in srgb, var(--color-surface) 92%, transparent);
       backdrop-filter: blur(10px);
-      box-shadow: var(--phone-pill-shadow, 0 0.4rem 1.2rem color-mix(in srgb, black 45%, transparent));
+      /* Pill drop shadow lives on .stage-dock__right — backdrop-filter here
+         drops box-shadow in Chromium. Do not zero it on open. */
       box-sizing: border-box;
       overflow: visible;
       /* padding + gap only — do not interpolate border-radius */

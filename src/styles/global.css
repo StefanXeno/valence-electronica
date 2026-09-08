@@ -206,8 +206,8 @@ a.channel-btn:focus-visible {
     --player-sheet-h: var(--phone-player-h);
     /* Open sheet / socials: equal top+bottom, visibly roomier than collapsed. */
     --phone-open-pad: 0.65rem;
-    /* Shared L/R inset inside the content pill and the socials row (left === right). */
-    --phone-inline-pad: 0.45rem;
+    /* Shared L/R inset: same as collapsed T/B so stadium end caps match the vertical pad. */
+    --phone-inline-pad: var(--phone-bar-pad);
     /* Vertical air between sheet/socials row and the 5 dock icons. Grows the pill — do not steal chrome pad. */
     --phone-body-gap: 0.65rem;
     --phone-tray-gap: var(--phone-body-gap);
@@ -223,6 +223,8 @@ a.channel-btn:focus-visible {
        Keep the token so content-dock / socials calcs stay in lockstep. */
     --phone-dock-lift: 0px;
     --phone-pill-shadow: 0 0.4rem 1.2rem color-mix(in srgb, black 45%, transparent);
+    /* Upward only — a downward shadow paints a fake gap under the floor. */
+    --phone-player-shadow: 0 -0.45rem 1.2rem color-mix(in srgb, black 45%, transparent);
     --phone-rise-ease: cubic-bezier(0.4, 0, 0.2, 1);
     /* Shared morph timing (width/height/chrome) — not a scale bloom. */
     --phone-bloom-dur: 280ms;
@@ -232,6 +234,14 @@ a.channel-btn:focus-visible {
     --phone-chrome-pad: 0.65rem;
     /* Shared left/right gutter for player + content + socials + footer. */
     --phone-dock-inset: clamp(1rem, 5vw, 1.25rem);
+    /* Phone HUD stacking: player must beat the icon pill whenever it overlaps. */
+    --z-phone-pill: 2;
+    --z-phone-pill-sheet: 3;
+    --z-phone-player: 5;
+    /* Collapsed rest only — icons win the transparent handle hitbox. */
+    --z-phone-pill-hit: 6;
+    /* Expanded / drag / morph — above --z-phone-pill-hit. */
+    --z-phone-player-front: 7;
   }
 
   .stage {
@@ -302,29 +312,65 @@ a.channel-btn:focus-visible {
      Height-0 floor anchor: the pill is position:absolute; bottom:0 inside this. */
   .stage-dock__left {
     bottom: 0;
-    z-index: 5;
+    z-index: var(--z-phone-player);
     overflow: visible;
     overscroll-behavior: none;
   }
 
+  /*
+   * Collapsed player shadow — must not live on .jukebox.
+   * That box has backdrop-filter + isolation:isolate, which drops box-shadow
+   * (Chromium). This pseudo is overflow:visible and has no filter, so it
+   * still paints when the HUD sheet is open (player z=5 over pill z=3).
+   */
+  html:not([data-player-dock-expanded]):not([data-player-sheet-dragging]):not([data-player-sheet-morphing])
+    .stage-dock__left:not(:has(.is-player-expanded)):not(:has(.is-open)):not(:has(.is-sheet-dragging)):not(:has(.is-sheet-morphing))::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: var(--phone-player-h);
+    border-radius: var(--phone-dock-radius, 14px) var(--phone-dock-radius, 14px) 0 0;
+    box-shadow: var(--phone-player-shadow);
+    pointer-events: none;
+  }
+
   .stage-dock__right {
     bottom: calc(var(--phone-player-h) + var(--phone-dock-gap) + var(--phone-dock-lift));
-    z-index: 2;
+    z-index: var(--z-phone-pill);
     /* stretch is not valid on justify-content — keep the pill full dock width. */
     align-items: stretch;
     justify-content: flex-start;
+    /* Shadow here — .stage-panels backdrop-filter drops box-shadow in Chromium. */
+    border-radius: var(--phone-pill-radius);
+    box-shadow: var(--phone-pill-shadow);
   }
 
-  /* Collapsed: icon buttons win any slight overlap with the transparent handle. */
-  html:not([data-player-dock-expanded]):not([data-socials-open]):not([data-sheet-open])
+  /*
+   * Collapsed rest only: icon buttons win slight overlap with the transparent
+   * handle. Never while the player is expanded, mid-drag, or morphing — click-
+   * outside / lost capture must not restack the pill over a still-tall sheet.
+   */
+  html:not([data-player-dock-expanded]):not([data-player-sheet-dragging]):not([data-player-sheet-morphing]):not([data-socials-open]):not([data-sheet-open])
     .stage-dock__right {
-    z-index: 6;
+    z-index: var(--z-phone-pill-hit);
   }
 
   html[data-socials-open] .stage-dock__right,
   html[data-sheet-open] .stage-dock__right,
   .stage-dock__right:has([data-stage-panel][open]) {
-    z-index: 3;
+    z-index: var(--z-phone-pill-sheet);
+  }
+
+  /* Open / drag / morph: player paints above the pill even if hit z-index is on. */
+  html[data-player-dock-expanded] .stage-dock__left,
+  html[data-player-sheet-dragging] .stage-dock__left,
+  html[data-player-sheet-morphing] .stage-dock__left,
+  .stage-dock__left:has(.is-player-expanded),
+  .stage-dock__left:has(.is-sheet-dragging),
+  .stage-dock__left:has(.is-sheet-morphing) {
+    z-index: var(--z-phone-player-front);
   }
 
   /*
