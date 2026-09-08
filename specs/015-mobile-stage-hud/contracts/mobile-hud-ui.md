@@ -63,6 +63,12 @@ Shuffle, play/pause, and playlist MUST NOT show in this row.
 | Top of pill | Same handle slot; arrow points **down**. Pill **grows**; floor stays pinned. |
 | Header | `currentlyPlayingLabel` until playlist is on, then `jukeboxPanelTitle` (`V-Flip aka. Jukebox`). Never `jukeboxPanelTooltip`. |
 | Body | Theme / stage track **cards** (not the full discography catalog). Solo = the current card only. Playlist = that card stays; others add in; list **scrolls**. |
+
+**018 playlist sheet:** Below 1024px, the open playlist face is no longer
+the 015 full-list unfold. [`018/contracts/phone-player-polish.md`](../../018-player-animation-polish/contracts/phone-player-polish.md)
+wins for that sheet (three-slot window, 3-row height, tighter drag
+overshoot, pending playlist after settle). Docks, exclusive-open, mute,
+handle placement, content pill, and laptop HUD stay this file.
 | Transport (settled open) | Shuffle, play/pause (background video), playlist. **No vinyl. No loop.** |
 | Floor | Same `wave \| title \| mute` row. |
 
