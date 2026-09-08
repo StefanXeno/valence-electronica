@@ -52,3 +52,12 @@
   No `[NEEDS CLARIFICATION]` markers.
 - Ready for `/speckit-plan` (or a short follow-up clarify on playlist
   list layout / exclusive-open if the operator wants it).
+- Validation 2026-09-09 (as-built sync): always-open player; Playlist
+  ↔ soundwave toggle; view-switch + 018 morph (not two-stage player
+  grow); header wave on CURRENTLY PLAYING only; header copy
+  Currently playing / **Currently pausing**; no HUD labels on those
+  titles; mute reserved width; no-sound tracks keep mute; Discography
+  **bar** is the 2.5-row well (player playlist stays 3); Info in bar;
+  footer hidden. Earlier “unmute-to-slider out” / “playlist two-stage
+  grow” notes in this checklist are **superseded**. No
+  `[NEEDS CLARIFICATION]` markers.

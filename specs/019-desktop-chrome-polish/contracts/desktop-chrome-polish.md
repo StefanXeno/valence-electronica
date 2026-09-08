@@ -43,6 +43,7 @@ No V-Flip / vinyl button. No collapse toggle for the player chrome.
 |------|---------|
 | Face | Boxed player, already visible after intro. |
 | Track | **Phone now-playing card** (theme-track card: title, year/kind, listen-on — same as `015` / `018`). Not a name-only row. |
+| Header | `currentlyPlayingLabel` while the atmosphere plays; `currentlyPausingLabel` (**Currently pausing**) while paused. Soundwave on the **right** of this row only (not on the solo card). **No** HUD tooltip on the title. |
 | Toolbar L→R | **Playlist** (soundwave while jukebox is open — exclusive, never stacked), **Shuffle**, **Play/pause**, **Mute** (if mute is mounted). Box width is static (slider reserved). Unmute shows the slider in that space. |
 
 **Forbidden in this chrome:** vinyl / V-Flip toggle, Loop. Slider is **hidden while muted**.
@@ -58,9 +59,10 @@ now-playing card). Not the `011` TrackInfoPanel list.
 | Open | **018 row morph**: now-playing card merges into the list, stays selected and in view. **No** width grow. Height MAY grow **up only**. |
 | Close | Reverse morph back to the solo card. Player chrome (track + toolbar) stays. |
 
-Header at rest: **CURRENTLY PLAYING** + soundwave **vertically
-centered** with that text, on the right (not on the solo card). Playlist view: first toolbar control
-is the **soundwave only**; **no** header wave on the jukebox / V-Flip
+Header at rest: **Currently playing** or **Currently pausing** +
+soundwave **vertically centered** with that text, on the right (not
+on the solo card). Playlist view: first toolbar control is the
+**soundwave only**; **no** header wave on the jukebox / V-Flip
 title; the **active** card shows the now-playing EQ.
 **No** HUD tooltips on those header titles.
 
@@ -75,8 +77,8 @@ closed icons (`009`). Opening grows **the same bar**.
 | Control | Open body |
 |---------|-----------|
 | About | Existing bio (hidden if no content) |
-| Discography | Existing catalog; scrolls inside the sheet if long |
-| Tour | Existing dates |
+| Discography | Existing catalog in a **2.5-row** well (two full cards + peek of the third). Scrolls for the rest. **Not** the player playlist window (that stays **3** rows). |
+| Tour | Existing upcoming **cards** (`004`: title or venue, date · city, Tickets / Information pills) |
 | Info | See below |
 
 | Motion (motion allowed) | Stages |
@@ -124,7 +126,7 @@ the phone HUD (or a phone pill mid-morph on laptop).
 
 ## Out of this contract
 
-- Phone docks, handle drag, 018 three-slot window
+- Phone docks, handle drag, 018 three-slot **player** window
+- Applying the Discography 2.5-row well to the player playlist
 - New routes, embeds, cookies
-- New chrome / legal files
 - Changing shuffle hop timing or legal overlay copy

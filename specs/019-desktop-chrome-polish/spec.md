@@ -4,7 +4,7 @@
 
 **Created**: 2026-09-08
 
-**Status**: Draft
+**Status**: As-built (synced to code 2026-09-09)
 
 **Input**: User description: "Basic desktop website UI changes, using the
     mobile website as the visual/interaction reference. (1) Keep the
@@ -36,7 +36,7 @@ differences. It does **not** change the phone HUD.
 | Desktop zone | After this feature |
 | ------------ | ------------------ |
 | **Top-right socials** | Stay. They remain the only social-icon home on desktop. |
-| **Content bar** | Boxed icon bar: **About**, **Discography**, **Tour**, **Info**. No social icons. |
+| **Content bar** | Boxed icon bar: **About**, **Discography**, **Tour**, **Info**. No social icons. Open **Discography** is a **2.5-row** card well (two full cards + peek of the third). Player playlist stays **3** rows. |
 | **Info box** | Same as phone: Imprint + Privacy Policy pills; **© Valence** in the **top-right**, **baseline-aligned** with the Info heading. |
 | **Bottom-center legal footer** | **Hidden.** Legal lives in Info only. |
 | **Bottom-left player** | **Always open.** No V-Flip / vinyl collapse toggle. Always shows the **same now-playing card as phone** (full card, not a name-only row). Toolbar left → right: **Playlist** (soundwave while the jukebox is open — **never both**), **Shuffle**, **Play/pause**, **Mute**. Box width is **static** (sized for the slider). Unmute reveals the slider in reserved space. |
@@ -85,6 +85,13 @@ does **not** stack two full-width docks the way the phone does.
 - Q: No-sound track (e.g. Show Me How) hides mute and shrinks the
   box? → A: **No on desktop.** Mute stays; width stays. Disabled is
   OK. Phone MAY still hide mute.
+- Q: When the atmosphere video is paused, what does the desktop
+  player header say? → A: **Currently pausing**
+  (`currentlyPausingLabel`). Playing uses **Currently playing**.
+  Phone expanded header stays `currentlyPlayingLabel` (015).
+- Q: Is the player playlist a 2.5-row well? → A: **No.** Player
+  playlist stays **three** full rows (`018`). The **Discography bar
+  panel** is the 2.5-row well (two full cards + a peek of the third).
 
 ### Session 2026-09-08
 
@@ -191,6 +198,10 @@ Imprint / Privacy Policy pills.
 5. **Given** the content bar is visible, **When** the visitor opens About,
    Discography, or Tour, **Then** the bar expands to show that content
    and still does **not** insert social icons into the open bar.
+   **When** Discography is open and more than two releases exist,
+   **Then** the catalog well shows **two full cards plus a peek of
+   the third** (2.5 rows). The player playlist MUST NOT use that
+   2.5-row well (it stays three full rows).
 6. **Given** a viewport **below 1024px**, **When** the visitor uses the
    phone content dock, **Then** Socials and Info still live in that phone
    bar (this story does not restyle phone).
@@ -203,6 +214,10 @@ A visitor on a typical laptop looks at the bottom-left. The player is
 **already open**. They see the **same now-playing card as phone** (not
 a name-only label). There is **no** V-Flip / vinyl button and **no**
 way to collapse the player chrome.
+
+The rest-state header reads **Currently playing**, or **Currently
+pausing** while the atmosphere video is paused. The playing soundwave
+sits to the right of that header copy (not on the solo card).
 
 The control row, **left to right**, is:
 
@@ -233,8 +248,11 @@ Toggle playlist, shuffle, play/pause, and mute.
 
 1. **Given** the landing on a viewport **1024px** wide or wider after
    intro, **When** the visitor looks at the bottom-left without
-   activating anything, **Then** the player is **already showing** and
-   the **now-playing card** is readable (title / year / listen-on).
+   activating anything, **Then** the player is **already showing**,
+   the **now-playing card** is readable (title / year / listen-on),
+   and the header reads **Currently playing** (or **Currently
+   pausing** if the atmosphere is paused) with the soundwave on that
+   header row only.
 2. **Given** that player, **When** the visitor reads the control row
    left to right,    **Then** they see **Playlist**, then **Shuffle**, then
    **Play/pause**, then **Mute** — and **no** V-Flip/vinyl control and
@@ -504,8 +522,10 @@ overlay, a discography stage action, and a resize across 1023px / 1024px.
   unavailable, the always-open player and collapsed bar still paint.
 - **FR-017**: On the desktop currently-playing view, the playing
   soundwave MUST sit on the **right** of the header row, **vertically
-  centered** with the “CURRENTLY PLAYING” text. It MUST NOT appear on
-  the rest-state solo card. In
+  centered** with the header copy. That copy MUST be
+  `currentlyPlayingLabel` while the atmosphere is playing, and
+  `currentlyPausingLabel` (**Currently pausing**) while it is paused.
+  The wave MUST NOT appear on the rest-state solo card. In
   the jukebox / playlist view: **no** soundwave on the V-Flip /
   jukebox **title** line; the first toolbar control MUST be the
   soundwave (see FR-004a); the **active** theme-track card MUST show
@@ -514,16 +534,23 @@ overlay, a discography stage action, and a resize across 1023px / 1024px.
   playing or jukebox / playlist **header titles**. Other HUD controls
   (Playlist, Shuffle, Play/pause, Mute, About, etc.) keep their
   labels.
+- **FR-019**: The desktop **Discography** bar panel MUST use a
+  **2.5-row** card well (two full release cards + a peek of the
+  third, plus the two gaps). The desktop **player playlist** MUST
+  stay a **three**-row window (`018`). MUST NOT apply the 2.5-row
+  well to the player playlist.
 
 ### Key Entities
 
 - **Desktop content bar**: Boxed icon bar, bottom-right. About (if
-  present), Discography, Tour, Info. No Socials.
+  present), Discography, Tour, Info. No Socials. Discography open
+  well is **2.5** theme-track-style catalog cards (peek of the next).
 - **Info (in-bar)**: Desktop legal home. Open box: © Valence
   **top-right**; Imprint / Privacy Policy pills → existing overlay.
 - **Top-right socials**: Only social-icon home on viewports 1024px+.
 - **Always-open desktop player**: Bottom-left player chrome that does
   not collapse. Shows the phone now-playing **card** plus the toolbar.
+  Rest header: Currently playing / Currently pausing.
 - **Player toolbar**: Left → right: Playlist, Shuffle, Play/pause,
   Mute (if mounted). No vinyl. No loop. Volume slider only when unmuted.
 - **Playlist surface**: Phone-style **card window** of background-
@@ -543,7 +570,9 @@ overlay, a discography stage action, and a resize across 1023px / 1024px.
   **1** unchanged top-right social cluster.
 - **SC-002**: On the same viewport after intro, a reviewer reports the
   bottom-left player is **visible without a click**, shows the
-  **full now-playing card** (not a name-only row), and the toolbar is
+  **full now-playing card** (not a name-only row), header copy is
+  **Currently playing** (or **Currently pausing** when paused) with
+  the wave on that header only, and the toolbar is
   **Playlist → Shuffle → Play/pause → Mute** at rest (**soundwave**
   in the Playlist slot while the jukebox is open). **0** V-Flip/vinyl
   buttons, **0** Loop buttons, **0** ways to collapse the player
@@ -583,6 +612,10 @@ overlay, a discography stage action, and a resize across 1023px / 1024px.
   Info heading**, plus both legal pills; each pill opens the existing
   overlay. At rest: **0** always-visible bottom-center legal footer
   clusters.
+- **SC-011**: On ~1280×800 with more than two releases, opening
+  Discography shows a **2.5-row** well (two full cards + peek of the
+  third). Opening the player playlist still shows **three** full
+  theme-track rows, not 2.5.
 
 ## Assumptions
 

@@ -2,10 +2,11 @@
 
 **Date**: 2026-09-08 | **Plan**: [plan.md](./plan.md) | **Spec**: [spec.md](./spec.md)
 
-No new content collections and no new `chrome.md` fields. Shuffle
-**advance**, mute eligibility, theme-track membership, and legal
-overlay stay `002` / `011` / `015`. This feature adds visit-only
-**desktop chrome state** on the existing HUD.
+No new content collections. Desktop rest header uses existing chrome
+`currentlyPlayingLabel` plus `currentlyPausingLabel` (Currently
+pausing). Shuffle **advance**, mute eligibility, theme-track
+membership, and legal overlay stay `002` / `011` / `015`. This
+feature adds visit-only **desktop chrome state** on the existing HUD.
 
 ## Entity: DesktopPlayer
 
@@ -19,7 +20,7 @@ No `localStorage`, no cookies.
 | `playlistOpen` | `true` / `false` | `false` | Theme-track **card window** view-switched from the player. |
 | `shuffleOn` | `true` / `false` | `chrome.shuffleDefault` | Existing visit-only toggle. |
 | `loopOn` | `false` | `false` | No Loop control; MUST stay off on desktop. |
-| `videoPaused` | `true` / `false` | `false` (after intro, if video can play) | Play/pause of atmosphere video. |
+| `videoPaused` | `true` / `false` | `false` (after intro, if video can play) | Play/pause of atmosphere video. Header copy follows this (`currentlyPausingLabel` when true). |
 | `muted` | `true` / `false` | muted until visitor unmutes (as-built) | Slider visible only when unmuted. |
 | `unmuteLevel` | 0–1 | `0.7` (today’s laptop default) | In-memory only; not shown. |
 
@@ -39,6 +40,7 @@ Bottom-right boxed icon bar (viewport **≥ 1024px**).
 | ----- | ------ | ------- | ----- |
 | `icons` | About? , Discography, Tour, Info | About omitted if no content | No Socials. |
 | `openPanel` | `none` / `about` / `discography` / `tour` / `info` | `none` | Exclusive among these four. |
+| `discogWindowSlots` | `2.5` | `2.5` | Two full catalog cards + peek of the third. Player playlist stays `3`. |
 
 **Validation**
 
@@ -115,7 +117,7 @@ InfoBox pills ──► Legal overlay (002)
 | Artist name in © | `src/data/site.json` | Still one place |
 | Info / legal pills | `src/content/ui/chrome.md` | `infoTitle`, `imprintButton`, `privacyButton` |
 | Legal bodies | `src/content/legal/` | Overlay copy |
-| Player labels | `src/content/ui/chrome.md` | `playlistLabel`, `shuffleLabel`, mute tooltips |
+| Player labels | `src/content/ui/chrome.md` | `playlistLabel`, `shuffleLabel`, `currentlyPlayingLabel`, `currentlyPausingLabel`, mute tooltips |
 
-No new fields. `loopLabel` / `volumeSliderTooltip` remain in chrome
-but are **not shown** on desktop.
+`loopLabel` remains in chrome but is **not shown** on desktop.
+`volumeSliderTooltip` is desktop-only while unmuted.

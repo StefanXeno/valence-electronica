@@ -18,11 +18,10 @@ click-outside, intro hide, laptop at ≥ 1024px.
 others add in”; full-list height; stretchier rubber-band), **this file
 wins**.
 
-Laptop HUD remains
-[`009/contracts/desktop-hud-ui.md`](../../009-desktop-stage-ui/contracts/desktop-hud-ui.md)
-as amended by
-[`011/contracts/vflip-player-ui.md`](../../011-vflip-now-playing/contracts/vflip-player-ui.md).
-**0** intentional player-motion or layout changes at ≥ 1024px.
+Laptop floor chrome is
+[`019/contracts/desktop-chrome-polish.md`](../../019-desktop-chrome-polish/contracts/desktop-chrome-polish.md).
+This feature makes **0** intentional player-motion or layout changes
+at ≥ 1024px.
 
 Visual review is **operator-led**. Agents do not install browser
 automation or add packages for this feature.
@@ -35,6 +34,7 @@ automation or add packages for this feature.
 | Floor (open or dragging) | Soundwave, playing name, mute — bottom, visible. No slider. |
 | Transport (settled open) | Shuffle, play/pause, playlist — **above** the floor row. No vinyl. No loop. |
 | Labels | Existing chrome strings. No new artist-editable fields. |
+| Header | Currently playing / V-Flip title. **No soundwave on this line.** Floor wave + card EQ stay. |
 | Expand | Still **is** V-Flip. Collapse turns playlist off. |
 
 ## Solo open face
@@ -142,7 +142,8 @@ Playlist turns off when the viewport becomes laptop (as-built).
 
 ## Out of contract
 
-- Desktop / laptop HUD restyle (IDEA-024)
+- Desktop / laptop HUD restyle (IDEA-024 / `019`)
+- Phone player **header-line** soundwave (floor + card EQ stay)
 - Spec shrink of 015 / 009 / 011 (IDEA-025)
 - Content-dock morph, handle idle nod, vinyl, loop, mute slider
 - New routes, embeds, cookies, artist-guide surfaces

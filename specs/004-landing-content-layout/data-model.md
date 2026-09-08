@@ -103,9 +103,11 @@ Files: `src/content/shows/<slug>.md`
 Omit if `date`, `city`, or `venue` missing. Stage list: `date` ≥ today (Berlin) only,
 soonest first. Past dates in files are allowed but not shown as upcoming.
 
-Shipped example: `example-augsburg.md` (2026-12-05, Augsburg, Example Venue, Bandcamp
-ticket URL), clearly marked EXAMPLE. Zero files in the folder is a valid empty
-catalog (`emptyShows`); the collection must still exist in the content store.
+Shipped examples: `example-augsburg.md` (2026-12-05, Augsburg, Example
+Venue, Bandcamp ticket URL) and `example-berlin.md` (titled card +
+Tickets + Information). Clearly marked EXAMPLE. Zero files in the folder
+is a valid empty catalog (`emptyShows`); the collection must still exist
+in the content store.
 
 ## Relationships
 

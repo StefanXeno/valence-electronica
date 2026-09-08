@@ -15,6 +15,7 @@ load at 320px.
 
 **Superseded for desktop floor chrome** (player, bar, footer) by
 [`019/contracts/desktop-chrome-polish.md`](../../019-desktop-chrome-polish/contracts/desktop-chrome-polish.md).
+Rows below that describe vinyl / footer / Lyrics are **historical**.
 
 ## Layout (desktop)
 

@@ -15,6 +15,9 @@ with easter-egg messages that only appear on certain days or times of day."
 
 - Q: How often should the subtext change? → A: **Every 60 seconds** while the visitor keeps
   the page open (continuous rotation, not once per day).
+  **Superseded 2026-09-09 (as-built):** production cadence is **15 seconds**
+  (`TAGLINE_ROTATION_MS_PRODUCTION`). Dev default is **10 seconds**, with
+  optional `?tagline-interval=` override (ignored in production).
 - Q: What happens when the line changes? → A: **Sequential fade** — the current line fades
   to fully transparent, **then** the next line fades in at the same position (not a
   crossfade overlap).
@@ -29,32 +32,38 @@ with easter-egg messages that only appear on certain days or times of day."
   line look frozen because same-line skip never found a different next line. Should a
   singleton egg lock the subtext for the whole window? → A: **No.** If **exactly one**
   easter-egg line matches, **mix that egg with the weight-expanded normal pool** (egg first,
-  then normals in file order) so the 60-second cadence still produces a visible change. If
+  then normals in file order) so the cadence still produces a visible change. If
   **two or more** eggs match (e.g. Friday night), keep rotating **only** among those eggs
   (normal pool excluded), as in Session 2026-08-28. Same-line skip still applies when the
   mixed set has only one distinct line (singleton egg and no usable normals).
+  Walk is **sequential file order** (weight-expanded normals), **not** a random pick.
+
+- Q: What is the shipped rotation interval? → A: **15 seconds** in production.
+  The earlier 60-second default is superseded. Dev stays **10 seconds** unless
+  `?tagline-interval=` is set.
 
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Visitors see rotating identity subtext (Priority: P1)
 
 A visitor opens a page with the identity chrome. Instead of a fixed hook under the artist
-name, they see short lines from a curated pool that **advance every 60 seconds** while they
-stay on the page. Each change uses a calm transition: the outgoing line fades out completely,
-then the incoming line fades in at the same spot.
+name, they see short lines from a curated pool that **advance every 15 seconds** (production)
+while they stay on the page. Each change uses a calm transition: the outgoing line fades out
+completely, then the incoming line fades in at the same spot. The next line is the **next
+entry in file order** (weight-expanded), never a random pick.
 
 **Why this priority**: Rotating copy with a deliberate transition is the core product intent.
 
-**Independent Test**: Configure at least two normal pool lines, load the page, wait ≥60 seconds
-twice, confirm two transitions with fade-out then fade-in.
+**Independent Test**: Configure at least two normal pool lines, load the page, wait ≥15 seconds
+twice, confirm two transitions with fade-out then fade-in in file order.
 
 **Acceptance Scenarios**:
 
 1. **Given** the tagline pool contains multiple normal lines and no easter egg matches now,
    **When** a visitor stays on the page with scripting enabled, **Then** the subtext advances
-   to the next eligible line **every 60 seconds** in pool file order (weighted lines consume
-   proportionally more steps — see FR-007).
-2. **Given** the subtext is about to change, **When** the 60-second interval elapses,
+   to the next eligible line **every 15 seconds** in pool file order (weighted lines consume
+   proportionally more steps — see FR-007). MUST NOT pick a random next line.
+2. **Given** the subtext is about to change, **When** the 15-second interval elapses,
    **Then** the current line fades to **fully transparent**, **then** the next line fades
    in from transparent to opaque at the same layout position (sequential, not crossfade).
 3. **Given** the next line equals the current line (only one eligible line), **When** the
@@ -140,13 +149,13 @@ confirm new or updated copy appears in rotation without component edits.
 ### User Story 4 - Site stays usable without scripting and with reduced motion (Priority: P2)
 
 Visitors without scripting still see readable identity chrome. Visitors who prefer reduced
-motion still get rotating copy on the same 60-second cadence but **without** fade animations.
+motion still get rotating copy on the same 15-second production cadence but **without** fade animations.
 
 **Why this priority**: The identity subtext is always visible chrome; accessibility paths must
 hold.
 
 **Independent Test**: Disable scripting → static fallback tagline. Enable reduced motion →
-60s rotation with instant text swap, no opacity transition.
+15 s production rotation with instant text swap, no opacity transition.
 
 **Acceptance Scenarios**:
 
@@ -157,7 +166,7 @@ hold.
    applied after load, **Then** the update completes promptly without leaving the subtext
    indefinitely blank (SSR may show fallback until the first client line appears).
 3. **Given** `prefers-reduced-motion: reduce` is active, **When** the subtext advances every
-   60 seconds, **Then** copy changes with an **instant** swap (no opacity fade-out or fade-in).
+   15 seconds, **Then** copy changes with an **instant** swap (no opacity fade-out or fade-in).
 4. **Given** any displayed subtext line, **When** a visitor reads the identity chrome, **Then**
    no legally required or safety-critical information is conveyed **only** through easter-egg
    lines.
@@ -207,8 +216,9 @@ hold.
   eligible is the weight-expanded normal pool in file order. A singleton matching egg MUST
   NOT be the sole eligible line when usable normal lines exist.
 - **FR-006**: While scripting is available and the eligible set has at least one line, the
-  site MUST advance the displayed subtext **every 60 seconds** to the next entry in the
-  eligible rotation sequence (wrap after the last entry).
+  site MUST advance the displayed subtext **every 15 seconds** (production) to the **next**
+  entry in the eligible rotation sequence (file order; wrap after the last entry). MUST
+  NOT pick a random next line. Dev MAY use a shorter default (10 s) or a query override.
 - **FR-007**: Normal lines MAY specify optional positive integer **weight** (default `1`);
   the rotation sequence MUST expand each normal line to `weight` consecutive steps before
   advancing to the next line. **Weight applies to normal lines only**; ignore `weight` on
@@ -227,19 +237,19 @@ hold.
 - **FR-013**: Subtext rotation MUST NOT alter jukebox selection, intro playback, theme packs,
   or other stage behavior from features `002`–`011`.
 - **FR-014**: Artist-facing documentation MUST be updated when this feature ships to describe
-  the tagline pool file, 60-second rotation, fade behavior, rule types, and fallback
+  the tagline pool file, 15-second production rotation, fade behavior, rule types, and fallback
   (constitution VII).
 - **FR-015**: When motion is allowed and the displayed text changes, the outgoing line MUST
   animate opacity to **0**, then the incoming line MUST animate opacity from **0** to **1** at
   the same layout position. The two phases MUST NOT overlap (no crossfade).
 - **FR-016**: When `prefers-reduced-motion: reduce` is active, FR-015 MUST be skipped;
-  subtext changes MUST use an instant swap while preserving the 60-second cadence (FR-006).
+  subtext changes MUST use an instant swap while preserving the 15-second production cadence (FR-006).
 - **FR-017**: When the next line equals the current line, the site MUST skip FR-015 and leave
   the subtext visible unchanged.
 - **FR-018**: Total fade-out plus fade-in duration SHOULD stay short (target roughly 0.6–1.2 s
-  combined) so rotation feels responsive. The next 60-second rotation step MUST be scheduled
+  combined) so rotation feels responsive. The next 15-second rotation step MUST be scheduled
   **after** the previous transition completes (fade included), so fades never compress the
-  minute cadence.
+  cadence.
 
 ### Key Entities
 
@@ -261,9 +271,9 @@ hold.
 ### Measurable Outcomes
 
 - **SC-001**: With at least two eligible normal lines and motion allowed, testers who stay on
-  the page observe a subtext change at least every 60 seconds with fade-out then fade-in on
-  100% of observed transitions (excluding same-line skips).
-- **SC-002**: With at least two easter-egg lines matching “now”, 100% of 60-second rotation
+  the page observe a subtext change at least every 15 seconds with fade-out then fade-in on
+  100% of observed transitions (excluding same-line skips), in **file order** (not random).
+- **SC-002**: With at least two easter-egg lines matching “now”, 100% of 15-second rotation
   cycles include only those easter eggs (normal pool excluded) until rules stop matching.
 - **SC-002b**: With exactly one matching easter-egg line and at least one distinct normal
   line, testers who stay on the page observe a visible subtext change within one rotation
@@ -287,9 +297,11 @@ hold.
 - `artist.tagline` in `site.json` remains the canonical default and no-JS fallback.
 - Calendar and weekday rule shapes mirror feature `007` so editors learn one scheduling
   vocabulary.
-- Rotation and eligibility require **client-side** evaluation (Berlin clock, 60 s timer,
-  fade). SSR shows the fallback until the client controller starts.
-- The 60-second cadence applies per open page; reload resets the rotation index and timer.
+- Rotation and eligibility require **client-side** evaluation (Berlin clock, 15 s
+  production timer, fade). SSR shows the fallback until the client controller starts.
+- The 15-second production cadence applies per open page; reload resets the rotation index
+  and timer. The earlier 60-second default is superseded (2026-09-09 as-built).
+- Next-line selection is **sequential file order** (weight-expanded), never random.
 - Easter-egg lines are marketing flavor, not sole carriers of legal or safety-critical info.
 - Optional dev-only interval override (e.g. faster rotation in dev) MAY be added in planning
   but is not required for v1 visitor behavior.

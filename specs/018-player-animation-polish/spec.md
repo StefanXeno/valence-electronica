@@ -34,9 +34,10 @@ On viewports **below 1024px**, the landing player is one floor-pinned pill:
 
 
 **Unchanged from 015 (not this feature):** exclusive-open, mute-only volume,
-no vinyl / no loop on phone, handle idle nod (3× / 60s), handle on the **top**
-edge of the pill, content-dock morph, laptop HUD from 1024px up, shuffle /
-pause / playlist **membership** meaning.
+no vinyl / no loop on phone, **no header-line soundwave** on the phone
+player (floor wave + card EQ stay), handle idle nod (3× / 60s), handle
+on the **top** edge of the pill, content-dock morph, laptop floor chrome
+(`019`), shuffle / pause / playlist **membership** meaning.
 
 **This feature does change (vs earlier 018 “motion only” text):** the open
 player **layout and interaction** for the solo card and the playlist face —
@@ -151,8 +152,8 @@ reduced motion: still toggles, without requiring travel animation.
    without drag and without being required to wait through travel
    animation.
 4. **Given** a viewport **1024px** wide or wider, **When** the visitor
-   uses V-Flip, **Then** the laptop player motion and layout from `009` /
-   `011` are unchanged.
+   uses the laptop player, **Then** this feature does not restyle it
+   (`019` owns desktop floor chrome).
 5. **Given** open/close motion is still running, **When** the visitor
    turns playlist on, **Then** the playlist face is applied **after**
    that open/close settles (last committed action) — not mid-travel
@@ -369,7 +370,9 @@ visual order unchanged.
   (floor-row toggle, no slider), handle **placement** (top edge of the
   pill), control **set** (floor: soundwave / name / mute; transport:
   shuffle / play/pause / playlist), playlist **membership** (theme /
-  stage tracks only), chrome label strings, or the 1024px laptop HUD.
+  stage tracks only), chrome label strings, or the 1024px laptop HUD
+  (`019`). The phone expanded **header** MUST NOT grow a soundwave
+  (floor wave + card EQ stay).
 - **FR-002**: The three surfaces in scope MUST be: **(1)** player
   open/close to the solo current card, **(2)** handle drag, **(3)**
   Currently Playing ↔ V-Flip (playlist on/off) three-slot morph.
@@ -546,9 +549,9 @@ visual order unchanged.
   collapse, read the current track name, and toggle playlist when
   shown. Real playlist rows remain operable; placeholder rows do not
   start playback.
-- **SC-006**: On a 1280×800 viewport, a side-by-side check against
-  current `009` / `011` finds **0** intentional player-motion or layout
-  changes.
+- **SC-006**: On a 1280×800 viewport, this feature finds **0**
+  intentional desktop player-motion or layout changes (`019` owns
+  that chrome).
 - **SC-007**: On a 320px-wide viewport, **0** new horizontal scrolling
   and **0** newly clipped dock buttons.
 - **SC-008**: No new third-party embeds, cookies, or tracking.
@@ -569,8 +572,11 @@ visual order unchanged.
 
 ## Assumptions
 
-- IDEA-023 is **phone player only**. Laptop HUD stays `009` / `011`.
-  Lifting phone HUD ideas onto desktop is **IDEA-024**, not this spec.
+- IDEA-023 is **phone player only**. Laptop floor chrome is `019`.
+  Lifting phone HUD ideas onto desktop was **IDEA-024** (`019`), not
+  this spec.
+- Phone player **header** has no soundwave. Floor wave + playlist
+  card EQ stay.
 - Shrinking or overhauling player/HUD specs is **IDEA-025**, not this
   spec. This spec does not reopen 015 implementation or the 2026-09-01
   mock.
@@ -638,7 +644,8 @@ visual order unchanged.
   (playback rules unchanged).
 - `010-track-catalog` / `014-discography-only-tracks` — newest-first
   release order; player list is theme / stage tracks only.
-- `009-desktop-stage-ui` — laptop HUD must stay untouched.
+- `009-desktop-stage-ui` / `019-desktop-chrome-polish` — laptop HUD
+  must stay untouched by this feature.
 - `006-landing-intro` — chrome hidden until intro is dismissed.
 
 ## Out of Scope

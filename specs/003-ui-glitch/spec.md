@@ -4,7 +4,9 @@
 
 **Created**: 2026-08-10
 
-**Status**: As-built (base language; HUD hit-set expanded by `004`, enable gate by `005`)
+**Status**: As-built (base language; HUD hit-set expanded by `004`, enable
+gate by `005`). Collapsed **vinyl** as a glitch target is **historical**
+— desktop player chrome is `019` (no vinyl toggle).
 
 **Input**: User description: "Extract the press/hover glitch motion language from the
 themed background video work into its own feature. Interactive controls (channel links,
@@ -19,9 +21,11 @@ a separate idea)."
 
 - Q: Is the hit-target set still only channels / legal / exit / mute? → A: No. Feature
   `004` amended the closed set to also include jukebox vinyl/options and on-demand stage
-  panels. Continuous hover is allowed on mute (while muted) **and** on the collapsed
-  jukebox vinyl. Enable gate is pack `hudGlitch` → `data-hud-glitch`, not a hard-coded
-  Nightmare `data-theme` check. See `contracts/glitch-ui.md`.
+  panels. Continuous hover is allowed on mute (while muted) **and** was
+  allowed on the collapsed jukebox vinyl (`011`). Desktop no longer has
+  that vinyl control (`019`). Enable gate is pack `hudGlitch` →
+  `data-hud-glitch`, not a hard-coded Nightmare `data-theme` check. See
+  `contracts/glitch-ui.md`.
 
 ### Session 2026-08-12
 

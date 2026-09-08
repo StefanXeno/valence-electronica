@@ -41,3 +41,6 @@
 - Re-checked 2026-09-05 after the as-built sync: no `[NEEDS CLARIFICATION]`
   markers; leftover visual polish (open overshoot / playlist jump) is **not**
   specified as required work.
+- As-built 2026-09-09: phone player **header** has no soundwave (floor
+  wave + card EQ stay). Laptop floor chrome is `019`, not vinyl / loop
+  / V-Flip. No `[NEEDS CLARIFICATION]` markers.

@@ -39,16 +39,17 @@
 
 - **Decision**: Walk eligible list in file order; for normal lines, repeat each line `weight`
   times (default 1) before the next. Maintain `index`; advance `(index + 1) % length` every
-  60 s after transition completes. Rebuild eligible list each tick (handles rule boundaries).
+  15 s (production) after transition completes. Rebuild eligible list each tick (handles rule boundaries).
 - **Rationale**: FR-006/007; predictable order for editors; weight = airtime share per cycle.
-- **Alternatives considered**: Daily hash pick (superseded by owner 60 s rotation); random per minute (harder to QA).
+- **Alternatives considered**: Daily hash pick (superseded); random per tick (rejected —
+  walk is file order). Earlier 60 s cadence superseded 2026-09-09 as-built (15 s prod).
 
-## R6: 60-second cadence
+## R6: Production cadence (15 seconds)
 
-- **Decision**: `setInterval` equivalent: schedule next step **60 s after** the previous
+- **Decision**: Schedule next step **15 s after** the previous
   transition finishes (fade-out + fade-in). First line shown immediately on rotator start
-  (after eligibility computed); first **change** ≥60 s later.
-- **Rationale**: FR-006/FR-018; avoids stacking fades if animation runs long.
+  (after eligibility computed); first **change** ≥15 s later in production. Dev default 10 s.
+- **Rationale**: FR-006/FR-018 as-built 2026-09-09; avoids stacking fades if animation runs long.
 - **Alternatives considered**: Wall-clock aligned to `:00` seconds (unnecessary complexity);
   interval during fade (would overlap FR-015).
 
@@ -94,16 +95,17 @@
 ## R12: Testing strategy
 
 - **Decision**: Vitest for `buildEligibleSet()`, `nextRotationIndex()`, rule matching;
-  manual quickstart for 60 s wait, fade visually, reduced motion, easter-egg set switch.
+  manual quickstart for 15 s wait, fade visually, reduced motion, easter-egg set switch.
 - **Rationale**: Timer/fade need human or browser QA; pure logic unit-tested.
 
 ## R13: Artist documentation
 
-- **Decision**: Update `docs/artist-guide.md` — pool file, 60 s rotation, fade behavior,
+- **Decision**: Update `docs/artist-guide.md` — pool file, 15 s production rotation, fade behavior,
   eligible-set rules, link to contract.
 - **Rationale**: FR-014 / VII.
 
 ## R14: Dev interval override
 
-- **Decision**: **Deferred**. Optional `?tagline-interval=5` dev-only in tasks if QA painful.
-- **Rationale**: YAGNI for v1; quickstart can use browser devtools to mock timers in impl phase if needed.
+- **Decision**: **Shipped.** Dev default **10 s**; `?tagline-interval=` (1–3600) in
+  development only. Production is always **15 s**.
+- **Rationale**: As-built 2026-09-09; earlier “deferred YAGNI” is superseded.

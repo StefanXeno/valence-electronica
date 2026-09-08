@@ -4,13 +4,26 @@
 
 **Created**: 2026-08-28
 
-**Status**: Implemented (as-built sync 2026-08-28)
+**Status**: Implemented (as-built sync 2026-08-28). **Floor chrome
+(player, bar, footer) superseded by `019`** (2026-09-09).
 
 **Input**: User description: "Redesign the desktop landing HUD for a more minimal,
 symmetric stage. Use compact icon-first controls with hover label reveal. Move copyright
 and legal links to bottom center. Fix glitch split animations so the full control hit area
 stays clickable. Per-track streaming links and a chronological track catalog are out of
 scope (IDEA-021). Mobile composition stays on IDEA-013."
+
+## Successor *(2026-09-09)*
+
+`019-desktop-chrome-polish` **supersedes** this spec’s desktop **floor**
+chrome: always-open player (no vinyl cluster), content bar with **Info**
+and **no socials**, **hidden** bottom-center footer. Identity, top-right
+socials, icon-first labels (except player header titles), and glitch
+hit-targets from this spec **stay**.
+
+FR-006 (bottom-center legal footer) and the collapsed vinyl left dock
+are **historical**. Legal lives in Info. Lyrics dock was already removed
+(`011` / `013`).
 
 ## Design Direction *(owner review before plan)*
 
@@ -255,8 +268,9 @@ motion (shell then body on open; reverse on close). On glitch packs, morph glitc
 open/close is preserved.
 - **FR-005**: When reduced motion is preferred, label reveal MUST NOT require travel
 animation.
-- **FR-006**: Copyright, Impressum, and Datenschutzerklärung MUST appear together in a
-bottom-center footer cluster on the landing page.
+- **FR-006**: *(historical — superseded by `019`.)* Copyright, Impressum, and
+  Datenschutzerklärung **no longer** sit in a bottom-center footer. Legal
+  lives in the desktop **Info** bar box. This FR MUST NOT be rebuilt.
 - **FR-007**: Legal link behavior MUST remain compatible with the existing in-page legal
 overlay contract from feature `002`.
 - **FR-008**: During any glitch animation on HUD controls, the full layout bounding box of
@@ -302,8 +316,8 @@ horizontal center third of the viewport contains no persistent text chrome (visu
 or screenshot checklist).
 - **SC-002**: 100% of HUD icon controls (jukebox + four on-demand + active socials) show
 a readable label on hover and keyboard focus in manual testing.
-- **SC-003**: Copyright and both legal links appear in the bottom-center cluster on desktop
-without overlapping mute or jukebox hit targets at default scale.
+- **SC-003**: *(historical — superseded by `019`.)* Desktop legal is **Info**
+  in the bar; **0** always-visible bottom-center footer clusters.
 - **SC-004**: In glitch-enabled theme testing, 0 failed click activations when clicking
 arbitrary points inside control bounds during active glitch (test each on-demand summary
 and jukebox toggle at least 5 times).
@@ -320,8 +334,9 @@ animation and remains readable at the anchored position.
 `004` remains the visual target.
 - Icons may use a bundled icon font, inline SVG, or Unicode emoji; the plan will pick one
 approach that avoids extra tracking and stays lightweight (constitution IV).
-- Label reveal anchors **above** dock controls and **below** social icons (implementation
-decision — avoids collision with open panels and footer).
+- Label reveal anchors **above** dock controls and **below** social icons.
+  `019` removes HUD labels from player header titles.
+- Desktop footer / vinyl player from this feature are **superseded by `019`**.
 - Social icons may keep platform brand icons rather than generic emoji where recognition
 is higher.
 - Feature `003` glitch contracts remain authoritative except for the hit-target amendment

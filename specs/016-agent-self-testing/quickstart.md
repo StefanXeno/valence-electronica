@@ -69,8 +69,8 @@ names the mise-first / `playwright install chromium` step.
 
 ### US3 — Cheap laptop
 
-7. Open the laptop artifact (~1280×800). Confirm `009`/`011` HUD, not
-   phone docks.
+7. Open the laptop artifact (~1280×800). Confirm `019` HUD (always-open
+   player, no vinyl toggle), not phone docks.
 
 ### US4 — Declared tools only
 

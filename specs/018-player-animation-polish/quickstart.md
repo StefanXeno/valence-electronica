@@ -149,8 +149,9 @@ content. Omit the flag for the live four-track catalog.
 ## Scenario 8 — Laptop + 320px (P2, SC-006 / SC-007)
 
 1. Width **1024** (or 1280×800).
-2. **Expect**: `009` / `011` laptop player unchanged (vinyl / V-Flip
-   box, volume slider rules, no phone three-slot sheet).
+2. **Expect**: laptop floor chrome is `019` (always-open player, no
+   vinyl / V-Flip toggle). This feature does not restyle it. No phone
+   three-slot sheet on desktop.
 3. Width **320**.
 4. **Expect**: **0** new horizontal scrolling; **0** newly clipped
    dock buttons. Three-row height fits under the sheet cap or scrolls

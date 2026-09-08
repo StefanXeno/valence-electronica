@@ -31,11 +31,11 @@
 
 ## Notes
 
-- Updated 2026-08-28 (session clarifications): **60 s rotation**, sequential **fade out
-  then fade in**, eligible set = all matching easter eggs else normal pool.
+- Updated 2026-08-28 (session clarifications): sequential **fade out then fade in**.
 - Updated 2026-09-09: singleton matching egg is **mixed** with the normal pool; 2+ matching
-  eggs stay exclusive.
+  eggs stay exclusive. Walk is **file order**, not random. Production cadence is
+  **15 s** (earlier 60 s default superseded). Dev default 10 s.
 - Reduced motion: instant swap, same cadence.
-- Post-analyze remediation: FR-018 locked to **60 s after transition completes**; FR-005/007
-  weight wording aligned; T028 adds FR-013 stage smoke.
-- Ready for `/speckit-implement`.
+- Post-analyze remediation: FR-018 locked to **interval after transition completes**;
+  FR-005/007 weight wording aligned.
+- Ready for `/speckit-implement`. No `[NEEDS CLARIFICATION]` markers.

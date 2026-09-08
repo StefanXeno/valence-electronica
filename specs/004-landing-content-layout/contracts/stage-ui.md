@@ -2,11 +2,13 @@
 
 **Date**: 2026-08-14 (as-built sync 2026-08-24) | **Plan**: [../plan.md](../plan.md) | **Spec**: [../spec.md](../spec.md)
 
-> **Desktop layout supersession**: After feature `009-desktop-stage-ui` ships, **laptop
-> HUD slot layout** (corners, dock, footer position, icon-first chrome) is defined in
-> [`specs/009-desktop-stage-ui/contracts/desktop-hud-ui.md`](../../009-desktop-stage-ui/contracts/desktop-hud-ui.md).
-> This file remains authoritative for jukebox, discography, tour, exclusive-open, and
-> glitch behavior unless `009` explicitly amends a row below.
+> **Desktop layout supersession**: Laptop **floor chrome** is
+> [`019/contracts/desktop-chrome-polish.md`](../../019-desktop-chrome-polish/contracts/desktop-chrome-polish.md).
+> Identity / socials / label-reveal language still traces to
+> [`009/contracts/desktop-hud-ui.md`](../../009-desktop-stage-ui/contracts/desktop-hud-ui.md).
+> This file remains authoritative for discography, **tour cards**, exclusive-open,
+> and content meaning unless a successor amends a row below. Lyrics dock is gone
+> (`013`). Vinyl collapsed jukebox is **historical** (`019`).
 
 Behavior contract for the landing HUD as built. Complements `002` atmosphere UI
 (mute, reduced motion, legal overlay) and `003` glitch. Glitch on HUD chrome runs
@@ -74,9 +76,18 @@ Deep per-theme type/motion packs (IDEA-002) stay out of scope.
 
 ## Tour
 
-Upcoming shows only (Europe/Berlin, soonest first). Empty folder or no upcoming
-rows → `emptyShows`. Control stays. No “collection does not exist” warning.
-v1 ships at least one clearly marked EXAMPLE show.
+Upcoming shows only (Europe/Berlin, soonest first) as **track-style
+cards** (same chrome family as discography / theme-track cards):
+
+| Slot | Content |
+|------|---------|
+| Title | `title` if set, otherwise `venue` |
+| Meta | Formatted date · `city` |
+| Pills | **Tickets** if `ticketUrl`; **Information** if `venueUrl`. Omit a pill when the URL is missing or invalid. |
+
+Empty folder or no upcoming rows → `emptyShows`. Control stays. No
+“collection does not exist” warning. v1 ships at least one clearly
+marked EXAMPLE show.
 
 ## About / Lyrics
 

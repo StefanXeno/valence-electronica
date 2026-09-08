@@ -4,9 +4,8 @@
 
 **As-built sync**: 2026-09-05.
 
-**Authority below 1024px** (viewport width ≤ 1023px). Laptop HUD remains
-[`009/contracts/desktop-hud-ui.md`](../../009-desktop-stage-ui/contracts/desktop-hud-ui.md)
-as amended by [`011/contracts/vflip-player-ui.md`](../../011-vflip-now-playing/contracts/vflip-player-ui.md).
+**Authority below 1024px** (viewport width ≤ 1023px). Laptop floor chrome is
+[`019/contracts/desktop-chrome-polish.md`](../../019-desktop-chrome-polish/contracts/desktop-chrome-polish.md).
 
 Visual annex `docs/mockups/mobile-stage-hud.jpg` is **historical**. Where it
 conflicts with this file (detached socials tray, loop, four icons, always-
@@ -61,14 +60,15 @@ Shuffle, play/pause, and playlist MUST NOT show in this row.
 | Slot | Content |
 |------|---------|
 | Top of pill | Same handle slot; arrow points **down**. Pill **grows**; floor stays pinned. |
-| Header | `currentlyPlayingLabel` until playlist is on, then `jukeboxPanelTitle` (`V-Flip aka. Jukebox`). Never `jukeboxPanelTooltip`. |
+| Header | `currentlyPlayingLabel` until playlist is on, then `jukeboxPanelTitle` (`V-Flip aka. Jukebox`). Never `jukeboxPanelTooltip`. **No soundwave on this header line** (floor pill wave + playlist **card** EQ stay). |
 | Body | Theme / stage track **cards** (not the full discography catalog). Solo = the current card only. Playlist = that card stays; others add in; list **scrolls**. |
 
 **018 playlist sheet:** Below 1024px, the open playlist face is no longer
 the 015 full-list unfold. [`018/contracts/phone-player-polish.md`](../../018-player-animation-polish/contracts/phone-player-polish.md)
 wins for that sheet (three-slot window, 3-row height, tighter drag
 overshoot, pending playlist after settle). Docks, exclusive-open, mute,
-handle placement, content pill, and laptop HUD stay this file.
+handle placement, and content pill stay this file. Laptop floor chrome
+is `019`.
 | Transport (settled open) | Shuffle, play/pause (background video), playlist. **No vinyl. No loop.** |
 | Floor | Same `wave \| title \| mute` row. |
 
@@ -95,8 +95,8 @@ target: at least **44px** wide and **24px** tall along the top of the pill.
 ### Mute
 
 Below 1024px: button only; unmuted level **50%**. ≥ 1024px: unmute may
-reveal slider inside the V-Flip box. Phone keeps the floor speaker when
-the current track has no audio.
+reveal the slider in reserved space (`019`). Phone keeps the floor
+speaker when the current track has no audio.
 
 ### Play / pause
 
@@ -157,7 +157,8 @@ V-Flip unless the tap is on the player pill. Legal overlay: skip.
 Open sheet: docks stay on screen; long bodies scroll inside; not a new
 route. Reduced motion: no travel animation required.
 
-≥ 1024px: `011` exclusive-open (panels among themselves; V-Flip independent).
+≥ 1024px: `019` / `011` exclusive-open (bar panels among themselves;
+playlist MAY stay independently open).
 
 ## Identity and legal
 
@@ -178,7 +179,8 @@ clickable during glitch. Phone content-pill morph stays the 320ms ease
 
 ## Playback
 
-Laptop shuffle / loop / dwell / crossfade: `011` contracts unchanged.
+Laptop shuffle / dwell / crossfade: `011` meaning. Desktop chrome
+(no vinyl / no loop control) is `019`.
 Phone omits loop from transport and adds play/pause + theme-track
 playlist. Pause holds the shuffle clock.
 

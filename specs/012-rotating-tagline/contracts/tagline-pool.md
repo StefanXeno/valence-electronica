@@ -23,7 +23,7 @@ Other values are rejected at build in v1.
 
 | Type | How to define | When it shows |
 |------|---------------|---------------|
-| **Normal** | `{ "text": "…" }` only (optional `weight`) | Rotates every **60 s** when **no** easter egg matches, and also when **exactly one** egg matches (mixed after that egg) |
+| **Normal** | `{ "text": "…" }` only (optional `weight`) | Rotates every **15 s** (production) when **no** easter egg matches, and also when **exactly one** egg matches (mixed after that egg). Walk is file order, not random. |
 | **Easter egg** | `{ "text": "…", "rules": [ … ] }` | Joins rotation when **every** rule matches. **Two or more** matching eggs rotate together (normal pool excluded). **Exactly one** matching egg is mixed with the normal pool so the line still changes. |
 
 **Eligible set** (recomputed each tick):
@@ -35,8 +35,9 @@ Other values are rejected at build in v1.
 
 A singleton egg MUST NOT lock the subtext for the whole window when usable normal lines
 exist (otherwise same-line skip makes e.g. “Still awake?” look frozen from 22:00–04:00).
-Subtext advances every 60 seconds through that set with a fade-out then fade-in (see
-[../plan.md](../plan.md)).
+Subtext advances every **15 seconds** (production) through that set in **file order**
+(not random) with a fade-out then fade-in. The earlier 60-second default is superseded
+(2026-09-09 as-built). Dev default is 10 s (`?tagline-interval=` override).
 
 ## Example file (starter shape)
 
@@ -75,7 +76,8 @@ Subtext advances every 60 seconds through that set with a fade-out then fade-in 
 
 Interpretation:
 
-- When no easter egg matches → the three normal lines **rotate every 60 seconds**.
+- When no easter egg matches → the three normal lines **rotate every 15 seconds**
+  (production) in file order.
 - **31 Oct** (Berlin) → Halloween line matches alone in this example → **mixed** with the
   normal pool (egg first). Add a second 31 Oct egg if you want an exclusive Halloween-only
   rotation.
@@ -190,10 +192,10 @@ Error messages SHOULD name the line index and rule index (e.g. `lines[2].rules[0
 | Condition | Subtext shown |
 |-----------|---------------|
 | Scripting off | `site.json` → `artist.tagline` (no rotation) |
-| Eligible pool non-empty | Rotates every **60 s** through eligible lines |
+| Eligible pool non-empty | Rotates every **15 s** (production) through eligible lines in **file order** (not random) |
 | Eligible pool empty | `artist.tagline` fallback; rotation paused |
 | Motion allowed | Fade out → swap → fade in on each change |
-| `prefers-reduced-motion: reduce` | Same 60 s cadence; **instant** swap, no fade |
+| `prefers-reduced-motion: reduce` | Same 15 s production cadence; **instant** swap, no fade |
 
 Initial HTML includes the fallback tagline; the rotator replaces it when the first eligible
 line is applied.

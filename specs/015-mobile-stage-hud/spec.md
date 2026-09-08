@@ -48,9 +48,14 @@ ring for on/pressed (for example shuffle). Icon-first. Center stage stays
 atmosphere. No extra routes. **No phone HUD hover tooltips** and no native
 “pick a track” `title` on the now-playing label.
 
-**Desktop / typical laptop** (**1024px and up**): HUD from `009` / `011`
-**does not change**, including the volume slider inside the V-Flip box when
-unmuted. Visual review target for that HUD remains ~1280×800.
+**Desktop / typical laptop** (**1024px and up**): floor chrome is
+`019` (always-open player, socials-free bar + Info, footer hidden).
+This feature MUST NOT restyle that HUD. Visual review target for
+desktop remains ~1280×800.
+
+**Phone player header:** the expanded **Currently playing / V-Flip**
+title line MUST NOT show a soundwave. The **floor pill** wave and
+playlist **card** EQ stay.
 
 ## Clarifications
 
@@ -70,8 +75,9 @@ unmuted. Visual review target for that HUD remains ~1280×800.
 ### Session 2026-09-02 *(breakpoint still current)*
 
 - Q: On how wide a screen should this phone HUD replace the laptop layout?
-  → A: **Phone HUD below 1024px. Laptop HUD (`009` / `011`) from 1024px up.**
-  No third tablet-only layout.
+  → A: **Phone HUD below 1024px. Laptop HUD from 1024px up.**
+  No third tablet-only layout. Laptop **floor chrome** is now `019`
+  (this breakpoint answer stays).
 - Q: When someone taps About, Discography, or Tour on a phone, how should
   that content show up? → A *(original)*: a sheet rises from the content dock.
   **As-built:** the **content pill itself grows** (320ms morph). Socials and
@@ -100,6 +106,8 @@ unmuted. Visual review target for that HUD remains ~1280×800.
   the shuffle clock (no hop).
 - Handle hint **3× / 60s including expanded**.
 - No phone HUD hover tooltips / “pick a track” title.
+- **No header-line soundwave** on the phone player. Floor pill wave
+  and playlist **card** EQ stay. Desktop header wave is `019` only.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -134,8 +142,8 @@ story only requires the **stack**.
 3. **Given** a 320px-wide viewport, **When** the page loads, **Then** there is
    no horizontal scrolling and every control in the two docks remains reachable.
 4. **Given** the same page at **1024px** width or wider, **When** the visitor
-   looks at the HUD, **Then** the existing `009` / `011` laptop composition is
-   still what they get (this story does not restyle desktop).
+   looks at the HUD, **Then** they get the laptop HUD (`019` floor chrome
+   on top of `009` / `011` meaning). This story does not restyle desktop.
 
 ---
 
@@ -182,7 +190,8 @@ mute without a slider; confirm the 3×/60s arrow hint when motion is allowed
    snaps back.
 4. **Given** the player dock is expanded, **When** the visitor looks at the
    sheet, **Then** the header reads the **Currently playing** chrome string
-   (not “pick a track”), the current theme-track **card** is visible, and
+   (not “pick a track”), **no soundwave sits on that header line**, the
+   current theme-track **card** is visible (card EQ OK when current), and
    the transport shows **shuffle**, **play/pause**, and **playlist**. Vinyl
    and loop are **not** visible.
 5. **Given** the player dock is expanded, **When** the visitor activates
@@ -307,7 +316,7 @@ open plus About open at once.
 **Independent Test**: Open each mobile sheet in turn and confirm the previous
 one closes. Check identity, Info → legal overlay, intro hide/show,
 discography “play on V-Flip”, click-outside, and a laptop-width screenshot
-that still matches `009` / `011`.
+that still matches `019`.
 
 **Acceptance Scenarios**:
 
@@ -332,8 +341,9 @@ that still matches `009` / `011`.
 6. **Given** the intro is showing, **When** the visitor has not dismissed it,
    **Then** the mobile docks stay hidden the same way today’s chrome does.
 7. **Given** a viewport **1024px** wide or wider, **When** the visitor uses
-   V-Flip, **Then** unmute may still reveal a loudness slider inside the
-   V-Flip box (`011` unchanged).
+   the laptop player, **Then** unmute may still reveal a loudness slider
+   in reserved space (`019`). Vinyl / loop / V-Flip toggle are **not**
+   current desktop chrome.
 8. **Given** a discography row with a stage action, **When** the visitor
    uses it on a phone, **Then** the stage still switches to that track.
 
@@ -389,7 +399,7 @@ that still matches `009` / `011`.
 - **Many social channels**: Channel row wraps or clips **inside the sheet**;
   it must not force the page to scroll sideways.
 - **Tablet / in-between widths**: Viewport **below 1024px** uses this phone
-  HUD (typical tablet portrait). **1024px and up** uses `009` / `011` (typical
+  HUD (typical tablet portrait). **1024px and up** uses `019` (typical
   tablet landscape and laptops). No third layout.
 - **Visitor muted**: Mute toggle still works; no slider on phone; unmute
   restores **50%**.
@@ -413,7 +423,7 @@ that still matches `009` / `011`.
   control. The page MUST NOT show a loudness slider. Mute MUST stay on the
   **right** of the now-playing floor row, **including** when the current
   track has `hasAudio: false` (if mute is mounted). Unmuted phone volume
-  MUST be **50%**. Desktop unmute-to-slider behavior from `011` MUST remain
+  MUST be **50%**. Desktop unmute-to-slider (reserved width) is `019`
   on viewports **1024px and up**.
 - **FR-004**: Activating the handle, or dragging it up, MUST **expand** the
   pill (height grows from `bottom: 0`; it MUST NOT translate off the
@@ -484,8 +494,14 @@ that still matches `009` / `011`.
   Imprint and Privacy Policy MUST be English HUD pills (`imprintButton` /
   `privacyButton`) that open the existing in-page legal overlay. German
   legal markdown titles remain on that overlay.
-- **FR-015**: Viewports **1024px wide and up** MUST keep the `009` / `011`
-  HUD (placement, hover labels, V-Flip box with optional volume slider).
+- **FR-015**: Viewports **1024px wide and up** MUST keep the laptop HUD.
+  Floor chrome (always-open player, bar, footer) is **`019`**. This
+  feature MUST NOT restyle that desktop chrome. Hover labels and
+  unmute-to-slider remain laptop-only.
+- **FR-015a**: Below 1024px the expanded player **header** (Currently
+  playing / V-Flip title) MUST NOT show a soundwave. The collapsed
+  **floor** five-line wave and the playlist **card** now-playing EQ
+  MUST remain. Desktop header wave is `019` only.
 - **FR-016**: Shuffle, track picking, intro hide / show, discography stage
   action, and visit-only shuffle/loop defaults MUST keep their existing
   meaning. Phone relocates chrome and **omits loop** from the phone
@@ -499,6 +515,7 @@ that still matches `009` / `011`.
 - **FR-016b**: Expanded player header MUST show `currentlyPlayingLabel`
   until playlist is open, then `jukeboxPanelTitle` (V-Flip aka. Jukebox).
   It MUST NOT show `jukeboxPanelTooltip` (“pick a track”) on phone.
+  It MUST NOT attach a header-line soundwave (FR-015a).
 - **FR-017**: Visitor-facing labels, the socials-trigger name, Info /
   Imprint / Privacy Policy strings, playlist label, and the handle
   arrow’s accessible name (expand / collapse) MUST remain editable in
@@ -548,8 +565,8 @@ that still matches `009` / `011`.
   Policy pills → Legal overlay. Phone footer hidden.
 - **Small / phone viewport**: Viewport **width below 1024px** (CSS
   `@media (max-width: 1023px)`). This HUD is the visual target there
-  (phones and typical tablet portrait). **1024px and up** keeps the `009` /
-  `011` HUD. Phone portrait (~390×844) remains the review target. There is
+  (phones and typical tablet portrait). **1024px and up** keeps the `019`
+  laptop HUD. Phone portrait (~390×844) remains the review target. There is
   no third layout.
 
 ## Success Criteria *(mandatory)*
@@ -580,10 +597,10 @@ that still matches `009` / `011`.
 - **SC-006**: In scripted phone testing, opening a second surface (About,
   Discography, Tour, Socials, Info, or V-Flip) leaves **at most one** of
   those extra surfaces visible.
-- **SC-007**: On a 1280×800 laptop viewport, a side-by-side check against
-  current `009` / `011` behavior finds **0** intentional layout changes
-  (volume slider still available after unmute). At **1023px** width the
-  phone HUD is in effect; at **1024px** width the laptop HUD is in effect.
+- **SC-007**: On a 1280×800 laptop viewport, this feature finds **0**
+  intentional phone-HUD layout leaks. Laptop floor chrome is `019`.
+  At **1023px** width the phone HUD is in effect; at **1024px** width
+  the laptop HUD is in effect.
 - **SC-008**: Keyboard-only visitors on a narrow viewport can: expand and
   collapse the player pill with the handle, read the current track name,
   toggle mute/shuffle/play-pause/playlist when shown, open About or
@@ -603,8 +620,9 @@ that still matches `009` / `011`.
   it conflicts with this as-built spec (detached socials tray, loop in the
   expanded dock, four icons, always-visible footer, V-Flip as a vinyl
   button inside the pill), **the code wins**.
-- Loop remains a **laptop** `011` control. Phone transport is shuffle +
-  play/pause + playlist.
+- Loop remains **off** on laptop (`019` removed the Loop control). Phone
+  transport is shuffle + play/pause + playlist.
+- Phone player **header** has no soundwave. Floor wave + card EQ stay.
 - Mobile volume is mute/unmute only at **50%** when unmuted; device
   hardware volume is the loudness control.
 - Default rest is the **collapsed** pill (now-playing + up arrow).
@@ -618,7 +636,7 @@ that still matches `009` / `011`.
   seconds**, after intro (if any), when motion is allowed, **collapsed or
   expanded**.
 - “Small / phone viewport” means **width below 1024px**, implemented as CSS
-  `@media (max-width: 1023px)`. From **1024px** up, `009` / `011` remains.
+  `@media (max-width: 1023px)`. From **1024px** up, `019` owns floor chrome.
 - Identity stays a compact top mark; tagline rotation (`012`) MAY remain
   under that mark if it still fits — this feature does not redesign the
   wordmark.
@@ -642,10 +660,11 @@ that still matches `009` / `011`.
 ## Dependencies
 
 - `004-landing-content-layout` — stage content, on-demand panels, channels.
-- `009-desktop-stage-ui` — icon language, boxed clusters, glitch hit targets;
-  remains the laptop HUD.
-- `011-vflip-now-playing` — V-Flip toolbar meaning and playback rules
-  (laptop still has vinyl + loop + slider).
+- `009-desktop-stage-ui` — icon language, boxed clusters, glitch hit targets.
+- `011-vflip-now-playing` — shuffle / mute-eligibility / hop meaning.
+- `019-desktop-chrome-polish` — laptop floor chrome (always-open player,
+  bar + Info, footer hidden). Vinyl / loop / V-Flip toggle are **not**
+  current desktop chrome.
 - `002-themed-background-video` — atmosphere, mute eligibility, legal overlay.
 - `006-landing-intro` — chrome hidden during intro.
 - `008-artist-docs` — artist guide update if HUD surfaces move.
@@ -654,7 +673,7 @@ that still matches `009` / `011`.
 
 ## Out of Scope
 
-- Desktop / typical laptop HUD redesign (`009` / `011` stay)
+- Desktop / typical laptop HUD redesign (`019` owns floor chrome)
 - Loudness slider on phone
 - Loop control on phone
 - Separate vinyl / V-Flip button on phone (handle expand is V-Flip)

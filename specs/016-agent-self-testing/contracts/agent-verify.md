@@ -48,7 +48,9 @@ Default: phone + cheap laptop + existing unit/type checks.
 ## Laptop viewport (cheap path)
 
 - Width **≥ 1024px**. Review size **~1280×800**.
-- Expected: `009` / `011` laptop HUD. Unmute MAY show a slider.
+- Expected: `019` laptop HUD (always-open player, Info in bar, footer
+  hidden). Unmute MAY show a slider in reserved space. **0** vinyl /
+  V-Flip collapse toggles.
 
 ## Flow actions the harness MUST drive
 

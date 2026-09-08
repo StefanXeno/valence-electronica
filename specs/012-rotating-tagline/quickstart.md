@@ -26,11 +26,12 @@ npm run preview
 
 ## Validation scenarios
 
-1. **US1 — 60 s rotation**: ≥2 normal lines, no matching easter eggs. Stay on page ≥2 minutes.
-   Expect at least two changes, **~60 s apart** (after fade completes).
+1. **US1 — 15 s rotation**: ≥2 normal lines, no matching easter eggs. Stay on page ≥45 s
+   (or use dev `?tagline-interval=`). Expect at least two changes, **~15 s apart** in
+   production (after fade completes), **file order** (not random).
 2. **US1 — sequential fade**: With motion allowed, watch a change. Expect old line fades to
    **invisible**, **then** new line fades in (no overlap).
-3. **US1 — same-line skip**: Pool with one eligible line. Wait 60 s. Expect **no** fade flash.
+3. **US1 — same-line skip**: Pool with one eligible line. Wait 15 s. Expect **no** fade flash.
 4. **US1 — typography / 320px**: ` for ` nbsp rule; no horizontal scroll at 320px.
 5. **US2 — easter-egg set**: Two eggs matching today. Expect rotation **only** between those
    lines (normal pool excluded).
@@ -42,12 +43,12 @@ npm run preview
 7. **US2 — AND rules**: Weekday + time on one line; both required.
 8. **US3 — editor / build**: Edit pool only; invalid `02-30` fails build with line index.
 9. **US4 — no-JS**: Scripting off → `site.json` tagline, no rotation.
-10. **US4 — reduced motion**: OS reduced motion on → 60 s changes with **instant** swap, no opacity animation.
+10. **US4 — reduced motion**: OS reduced motion on → 15 s production changes with **instant** swap, no opacity animation.
 11. **Legal route**: Same rotator behavior on legal overlay with identity chrome.
 
 ## Timing note
 
-Production interval is **60 seconds** (FR-006). In dev, the default is **10 seconds** for faster
+Production interval is **15 seconds** (FR-006; earlier 60 s default superseded). In dev, the default is **10 seconds** for faster
 QA. Override with a query param (dev only, ignored in production builds):
 
 ```

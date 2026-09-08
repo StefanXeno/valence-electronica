@@ -125,7 +125,7 @@ not the 2026-09-01 mock and not the pre-sync spec text.
 | Content | **Same pill grows** (~320ms); About / Discography / Tour / Socials / **Info**; exclusive-open |
 | Legal | Info → English Imprint / Privacy pills → existing overlay |
 | Pause | Video pauses; **soundwave flattens** (`eq-flatten.ts`); shuffle does not hop |
-| Laptop | ≥1024px keeps `009`/`011` (slider after unmute allowed) |
+| Laptop | ≥1024px keeps `019` (always-open player; slider after unmute allowed) |
 
 `015` marks leftover overshoot / playlist-jump **polish as unspecified
 work**. This feature still **detects** leftover overshoot and playlist

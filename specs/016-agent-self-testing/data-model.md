@@ -46,7 +46,7 @@ One named HUD behavior the agent can score.
 | `phone-mute-center` | phone | Mute right of floor row, vertically centered; no slider |
 | `phone-content-info` | phone | Growing pill: About / Discography / Tour / Socials / Info; Info → legal overlay |
 | `phone-pause-flatten` | phone | Video paused; soundwave flattened |
-| `laptop-rest` | laptop | `009`/`011` HUD; no phone docks (cheap path) |
+| `laptop-rest` | laptop | `019` HUD; no phone docks (cheap path) |
 
 ### Result values
 

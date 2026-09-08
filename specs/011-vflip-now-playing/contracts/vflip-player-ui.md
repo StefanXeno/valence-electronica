@@ -2,7 +2,12 @@
 
 **Date**: 2026-08-28 (updated 2026-08-28) | **Plan**: [../plan.md](../plan.md) | **Spec**: [../spec.md](../spec.md)
 
-**Amends (desktop)**: left cluster and on-demand row in
+**Desktop chrome superseded (2026-09-09)** by
+[`019/contracts/desktop-chrome-polish.md`](../../019-desktop-chrome-polish/contracts/desktop-chrome-polish.md)
+(always-open player; no vinyl / loop / V-Flip toggle). This file remains
+authority for **shuffle hop / mute-eligibility / visit-only defaults**.
+
+**Amends (desktop, historical)**: left cluster and on-demand row in
 [`specs/009-desktop-stage-ui/contracts/desktop-hud-ui.md`](../../009-desktop-stage-ui/contracts/desktop-hud-ui.md).
 
 **Supersedes (desktop)**: Track info as a separate dock icon / now-playing popover

@@ -4,7 +4,7 @@
 
 **Created**: 2026-08-28
 
-**Status**: Draft
+**Status**: As-built for playback meaning; **desktop chrome superseded by `019`** (2026-09-09)
 
 **Input**: User description: "I want to do another ui-change. Now i want to include
 the mute-button, as well as the Track-name/info and lyrics to display in the V-Flip.
@@ -49,6 +49,23 @@ can disable. Add a loop button so the visitor can keep the current track looping
 - Q: V-Flip vs About exclusive-open? → A: **No change.** Keep today’s behavior:
   on-demand panels exclusive among themselves; V-Flip **may stay open** while a
   panel is open.
+
+## Successor *(2026-09-09)*
+
+On viewports **1024px and up**, the visitor-facing player chrome in this
+spec is **superseded by `019-desktop-chrome-polish`**:
+
+- Always-open player (no V-Flip / vinyl collapse toggle)
+- Toolbar: Playlist ↔ soundwave, Shuffle, Play/pause, Mute (reserved
+  slider width; no-sound tracks keep mute)
+- **No Loop control**; loop stays off
+- Playlist is a view-switch + 018 morph, not a two-stage grow
+- Now-playing is the phone theme-track **card**, not a name-only row
+
+**Still current from this spec:** shuffle on/off, hop timing (video
+duration vs 45s), mute eligibility meaning, exclusive-open among
+on-demand panels, visit-only toggle defaults. Phone chrome is `015` /
+`018`.
 
 ## Design Direction *(approved 2026-08-28)*
 
@@ -526,8 +543,9 @@ center stays free.
 - Open V-Flip MAY grow wider than today’s list-only panel so inline track info
   and the list are readable; it MUST still attach to the dock edge and leave the
   center free.
-- Desktop / typical laptop is the visual target; phone composition stays
-  IDEA-013.
+- Desktop / typical laptop **chrome** is now `019`. This spec’s vinyl /
+  loop / collapsed-box composition is **historical** for desktop.
+- Phone composition is `015` / `018`.
 - No new content types: lyrics, dates, and listen links already exist.
 - Volume adjustment, already part of today’s mute control, stays with mute
   inside the V-Flip box.

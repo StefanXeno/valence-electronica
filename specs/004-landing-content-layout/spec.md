@@ -4,7 +4,8 @@
 
 **Created**: 2026-08-14
 
-**Status**: As-built (synced to code 2026-08-24; successors `005`–`008` landed)
+**Status**: As-built (synced to code 2026-08-24; successors `005`–`013`,
+`015`, `019` landed). Tour cards synced 2026-09-09.
 
 **Input**: User description: "Add landing content (lyrics, discography, tour dates,
 About me, existing socials, and a theme switcher presented as a jukebox that plays
@@ -14,8 +15,15 @@ must be editable by a non-programmer the same way the legal pages already are."
 ## Clarifications
 
 HUD slots, jukebox chrome, glitch, atmosphere video, and phone visual success in
-the **as-built HUD** session below are authoritative. Earlier answers in this
-file still hold unless they conflict with that session.
+the **as-built HUD** session below were authoritative **for 2026-08-14**.
+Successors **supersede** that chrome:
+
+- Laptop floor: `019` (always-open player, Info-in-bar, footer hidden)
+- Phone HUD: `015` / `018`
+- Lyrics dock: removed (`011` / `013`)
+- Tour list: **track-style cards** (Session 2026-09-09 below)
+
+Earlier answers still hold unless they conflict with those successors.
 
 ### Session 2026-08-14
 
@@ -95,6 +103,16 @@ file still hold unless they conflict with that session.
   MUST NOT look like a broken content config (Astro’s default glob loader omits
   empty folders from the store and warns on `getCollection`; this feature keeps
   those collections addressable).
+
+### Session 2026-09-09 (tour cards — as-built)
+
+- Q: How do upcoming shows present in the Tour panel? → A: **Track-style
+  cards** (same chrome family as discography / theme-track cards). Each
+  card shows an event **title** (optional `title`; omit → `venue`),
+  **date · city** meta, and optional **Tickets** / **Information** pills
+  (`ticketUrl` / `venueUrl`). Not a plain date / city / venue text list.
+- Q: Are `venueUrl` and `title` new artist fields? → A: **Yes, optional.**
+  `date`, `city`, `venue` stay required. Invalid URLs are omitted.
 
 ### Session 2026-08-14 (content editing)
 
@@ -295,10 +313,11 @@ empty message. Center stays open.
 ### User Story 6 - Visitor checks tour dates (Priority: P2)
 
 A visitor wants to know if they can see Valence live. From the periphery they open
-upcoming dates (date, city, venue, optional ticket link). The shipped content
-includes at least one clearly marked EXAMPLE show so the list is demonstrable.
-If nothing is booked, the region still exists and says that no dates are
-announced — so it does not look like a missing page.
+upcoming **cards** (event title or venue, date · city, optional Tickets and
+Information pills). The shipped content includes at least one clearly marked
+EXAMPLE show so the list is demonstrable. If nothing is booked, the region
+still exists and says that no dates are announced — so it does not look like
+a missing page.
 
 **Why this priority**: Tour info is requested, but it can be empty for long
 stretches. The empty state is part of the product.
@@ -310,9 +329,15 @@ dates, confirm the “no dates announced” state. Center stays free.
 **Acceptance Scenarios**:
 
 1. **Given** upcoming dates exist, **When** the visitor opens tour dates, **Then**
-   they see date, city, and venue for each, ordered soonest first.
-2. **Given** a date has a ticket link, **When** the visitor activates it, **Then**
-   it opens in a new tab.
+   they see a **card** per show: event **title** (or venue if `title` is omitted),
+   **date · city**, ordered soonest first, using the same card chrome as
+   discography / theme-track cards.
+2. **Given** a date has a `ticketUrl`, **When** the visitor activates the
+   **Tickets** pill, **Then** it opens in a new tab.
+2b. **Given** a date has a `venueUrl`, **When** the visitor activates the
+   **Information** pill, **Then** it opens in a new tab.
+2c. **Given** a date has neither URL, **When** the visitor looks at the card,
+   **Then** no dead Tickets / Information pills appear.
 3. **Given** no upcoming dates exist, **When** the visitor opens tour dates,
    **Then** they see a clear “no upcoming dates” message rather than a blank or
    missing control.
@@ -470,12 +495,17 @@ and that they did not edit layout or program files.
   jukebox. Releases with no jukebox entry MUST NOT show that button. If the
   catalog is empty, the discography control MUST still be available and MUST show
   a clear “no releases yet” (or equivalent) message — it MUST NOT be hidden.
-- **FR-011**: Tour dates MUST list upcoming shows only (date, city, venue,
-  optional ticket link), soonest first, from structured content. Past dates MUST
-  NOT appear as upcoming. When none are upcoming — including when the shows
-  folder has zero Markdown files — the region MUST show that no dates are
-  announced. That empty folder MUST NOT fail the build or surface a “collection
-  does not exist or is empty” error.
+- **FR-011**: Tour dates MUST list upcoming shows only as **track-style
+  cards**, soonest first, from structured content. Each card MUST show an
+  event **title** (`title` if set, otherwise `venue`) and **date · city**.
+  Optional `ticketUrl` MUST render a **Tickets** pill; optional `venueUrl`
+  MUST render an **Information** pill; missing or invalid URLs MUST omit
+  that pill. `date`, `city`, and `venue` remain required on the file or
+  the show is omitted. Past dates MUST NOT appear as upcoming. When none
+  are upcoming — including when the shows folder has zero Markdown files
+  — the region MUST show that no dates are announced. That empty folder
+  MUST NOT fail the build or surface a “collection does not exist or is
+  empty” error.
 - **FR-012**: Every visitor-facing text on the landing stage MUST live in plain
   content files, separate from layout and program files, in the same editing
   style as the existing Impressum and privacy pages (open a file, change the
@@ -490,9 +520,10 @@ and that they did not edit layout or program files.
   is the only allowed near-fullscreen reading surface, and only for Impressum and
   privacy.
 - **FR-014**: New controls MUST NOT block mute (when shown) or legal links.
-  Copyright and legal links MUST sit together as transparent footer chrome on the
-  bottom-left (no opaque bar). Legal overlay open/dismiss behavior MUST keep
-  working.
+  Legal overlay open/dismiss behavior MUST keep working. **Footer
+  placement is superseded:** phone and laptop hide the landing footer;
+  legal lives in **Info** (`015` / `019`). Do not rebuild a
+  bottom-left or bottom-center footer cluster.
 - **FR-015**: This feature MUST ship with a few clearly marked example
   discography entries (at least two) in content files so the catalog is
   demonstrable: at least one bound to a jukebox entry (stage button visible) and
@@ -549,8 +580,10 @@ and that they did not edit layout or program files.
   link). May be bound to a jukebox entry; if so, the row may offer a small
   stage-switch button. Binding is optional. Selecting the row itself does not
   switch the stage.
-- **Show date**: One upcoming live appearance (date, city, venue, optional ticket
-  link). Past dates are not landing-stage upcoming shows.
+- **Show date**: One upcoming live appearance. Required in the file: date,
+  city, venue. Optional: `title` (card headline; omit → venue), `ticketUrl`
+  (Tickets pill), `venueUrl` (Information pill). Visitor card: title,
+  date · city, pills. Past dates are not landing-stage upcoming shows.
 - **Artist profile**: Name, short hook/tagline, location, About bio.
 - **Channel link**: Existing listen/follow socials; placement changes, data model
   stays.
@@ -615,8 +648,12 @@ and that they did not edit layout or program files.
   clip. A small stage-switch button appears only on rows that are bound to a
   jukebox entry; the catalog list itself does not act as a second jukebox.
 - Tour dates use a single obvious timezone for display (Europe/Berlin, the
-  artist’s home). Exact clock times are optional; calendar date + city + venue is
-  enough.
+  artist’s home). Exact clock times are optional. Visitor card is **title +
+  date · city** plus Tickets / Information pills. `venue` is the title
+  fallback and a required file field.
+- Laptop vinyl / lyrics dock / always-visible footer in this spec are
+  **historical**. Current chrome is `015` / `018` (phone) and `019`
+  (desktop).
 - Laptop HUD slots are frozen as of 2026-08-14 (see as-built clarifications and
   Key Entities). A dedicated phone/small-screen composition is a later idea
   (IDEA-013), not a shrink-the-desktop pass.

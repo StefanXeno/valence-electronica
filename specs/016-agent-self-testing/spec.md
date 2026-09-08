@@ -160,10 +160,11 @@ tell which named flow failed from that output alone.
 ### User Story 3 - Laptop HUD stays cheaply testable (Priority: P2)
 
 Phone is the painful surface, but a HUD change must not silently wreck the
-laptop stage (`009` / `011`) from **1024px** up. If a second viewport pass
+laptop stage (`019`) from **1024px** up. If a second viewport pass
 is cheap, the same command (or a documented flag) covers ~1280×800: identity
-and socials on the top edge, V-Flip box, unmute may show a loudness slider,
-no phone growing-pill docks.
+and socials on the top edge, **always-open** player (no vinyl / V-Flip
+toggle), unmute may show a loudness slider in reserved space, Info in the
+bar, no phone growing-pill docks.
 
 **Why this priority**: Phone-only verification would trade one blind spot
 for another. Laptop is in scope only when it stays cheap.
@@ -175,7 +176,7 @@ what the artifacts show — without a new filmed recap.
 **Acceptance Scenarios**:
 
 1. **Given** a running landing at **1024px** or wider, **When** the
-   verification runs, **Then** artifacts or checks show the `009` / `011`
+   verification runs, **Then** artifacts or checks show the `019`
    laptop HUD, not the phone docks.
 2. **Given** a run that already covers phone, **When** laptop is included,
    **Then** it uses the **same** approved agent browser package — not a
@@ -270,7 +271,7 @@ for that exact extra tool exists.
   **theme-track playlist** (not the full discography catalog) as the
   expected design.
 - **FR-006**: Laptop coverage MUST be available when cheap and MUST confirm
-  the `009` / `011` composition is still in effect at 1024px and up.
+  the `019` composition is still in effect at 1024px and up.
 - **FR-007**: Implementation MUST use the **operator-approved Playwright**
   package as the default agent verification tool, installed **mise-first**
   (toolchain owned by `017`). Implementation MUST NOT add other undeclared
@@ -376,8 +377,9 @@ for that exact extra tool exists.
 ## Dependencies
 
 - `015-mobile-stage-hud` — as-built phone HUD (expected outcomes).
-- `009-desktop-stage-ui` / `011-vflip-now-playing` — laptop HUD when the
-  cheap second viewport is included.
+- `019-desktop-chrome-polish` — laptop HUD when the cheap second
+  viewport is included (`009` / `011` meaning still applies under that
+  chrome).
 - `006-landing-intro` — chrome hidden until intro is dismissed.
 - `017-mise-toolchain` — committed mise config that pins Node and
   Playwright; `016` verify assumes those tools. `017` may land as a spec

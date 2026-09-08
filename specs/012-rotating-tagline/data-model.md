@@ -50,11 +50,11 @@ Output: ordered array of `{ text }` entries (expanded for weight).
 | Field | Description |
 |-------|-------------|
 | `index` | Current position in eligible sequence |
-| `timerId` | 60 s scheduling handle |
+| `timerId` | 15 s production scheduling handle (10 s in dev unless query override) |
 | `phase` | `idle` \| `out` \| `in` |
 | `currentText` | Last displayed formatted string |
 
-Each **tick** (60 s after previous transition completes):
+Each **tick** (15 s production after previous transition completes):
 
 1. Recompute eligible set for `now`.
 2. If empty → show fallback; stop timer.
@@ -64,7 +64,8 @@ Each **tick** (60 s after previous transition completes):
 6. Else run sequential fade to new text (FR-015) or instant swap if reduced motion.
 
 **Initial load**: compute eligible set; show `eligible[0]` (fade-in from SSR fallback if
-different); start 60 s timer to first advance.
+different); start 15 s production timer to first advance. Index walks file order
+(`(index + 1) % length`), never a random pick.
 
 ## Entity: DefaultTagline
 
