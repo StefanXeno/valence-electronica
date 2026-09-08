@@ -23,6 +23,17 @@ with easter-egg messages that only appear on certain days or times of day."
   order); otherwise the **normal** pool rotates. When the eligible set has only one line,
   the timer still runs but no visible change occurs until eligibility or index advances.
 
+### Session 2026-09-09
+
+- Q: A single matching easter egg (e.g. late-night “Still awake?” for 22:00–04:00) made the
+  line look frozen because same-line skip never found a different next line. Should a
+  singleton egg lock the subtext for the whole window? → A: **No.** If **exactly one**
+  easter-egg line matches, **mix that egg with the weight-expanded normal pool** (egg first,
+  then normals in file order) so the 60-second cadence still produces a visible change. If
+  **two or more** eggs match (e.g. Friday night), keep rotating **only** among those eggs
+  (normal pool excluded), as in Session 2026-08-28. Same-line skip still applies when the
+  mixed set has only one distinct line (singleton egg and no usable normals).
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Visitors see rotating identity subtext (Priority: P1)
@@ -60,8 +71,9 @@ twice, confirm two transitions with fade-out then fade-in.
 
 On special days or times, **matching easter-egg lines** join (or replace) the rotation set —
 for example Halloween lines on 31 October, holiday copy during a date range, Friday-only
-quips, or late-night messages between 22:00 and 04:00 Berlin time. When no easter egg
-matches, rotation uses the normal pool only.
+quips, or late-night messages between 22:00 and 04:00 Berlin time. **Two or more** matching
+eggs replace the normal pool. **Exactly one** matching egg is mixed into the normal pool so
+the line still changes. When no easter egg matches, rotation uses the normal pool only.
 
 **Why this priority**: Scheduled surprises were an explicit owner request and differentiate
 this from a generic rotator.
@@ -71,9 +83,13 @@ cycles through those eggs and not the normal pool until rules stop matching.
 
 **Acceptance Scenarios**:
 
-1. **Given** one or more easter-egg lines match the current Berlin calendar and clock,
-   **When** rotation runs, **Then** only **matching** easter-egg lines are eligible (normal
-   pool is excluded until no easter egg matches).
+1. **Given** **two or more** easter-egg lines match the current Berlin calendar and clock,
+   **When** rotation runs, **Then** only those **matching** easter-egg lines are eligible
+   (normal pool is excluded until fewer than two eggs match).
+1b. **Given** **exactly one** easter-egg line matches and the normal pool has at least one
+   usable line, **When** rotation runs, **Then** the eligible set is that egg **followed by**
+   the weight-expanded normal pool, and the subtext advances to a different line on the next
+   interval (a singleton egg MUST NOT lock the line for the whole window).
 2. **Given** an easter-egg line has a calendar **date** rule matching today in
    Europe/Berlin, **When** rotation is eligible, **Then** that line is included in the
    easter-egg rotation set.
@@ -161,6 +177,9 @@ hold.
   behavior MUST be documented and consistent.
 - Only easter-egg lines exist, none match now: fall back to `artist.tagline` default (no
   rotation until pool has eligible lines).
+- Exactly one easter egg matches and the normal pool is empty: eligible set is that one
+  line; same-line skip applies and no visible rotation occurs until another line becomes
+  eligible.
 - Normal pool has weighted entries: higher weight → more steps per full rotation cycle (see
   FR-007).
 - Tab backgrounded / timer throttling: rotation MAY drift while hidden; MUST catch up or
@@ -181,9 +200,12 @@ hold.
 - **FR-004**: Easter-egg rule types MUST include: **date** (`MM-DD` yearly or `YYYY-MM-DD`
   one-off), **range** (inclusive `from` / `to` full dates), **weekday** (ISO weekday
   integers 1–7), and **time** (inclusive `HH:MM` windows, including cross-midnight ranges).
-- **FR-005**: At each rotation tick, the site MUST build an **eligible set**: all easter-egg
-  lines whose rules all match now, in file order; if that set is empty, all **normal** lines
-  expanded per **FR-007** weight rules, in file order.
+- **FR-005**: At each rotation tick, the site MUST build an **eligible set** from easter-egg
+  lines whose rules all match now (file order) and **normal** lines expanded per **FR-007**:
+  if **two or more** eggs match, eligible is those eggs only; if **exactly one** egg matches,
+  eligible is that egg followed by the weight-expanded normal pool; if **no** egg matches,
+  eligible is the weight-expanded normal pool in file order. A singleton matching egg MUST
+  NOT be the sole eligible line when usable normal lines exist.
 - **FR-006**: While scripting is available and the eligible set has at least one line, the
   site MUST advance the displayed subtext **every 60 seconds** to the next entry in the
   eligible rotation sequence (wrap after the last entry).
@@ -224,9 +246,10 @@ hold.
 - **Tagline pool**: Structured list of subtext lines plus timezone (`Europe/Berlin`); the
   single editor-maintained source for rotating copy.
 - **Normal line**: Short hook text; optional weight; joins the rotation when no easter egg
-  matches.
+  matches, and also when **exactly one** easter egg matches (mixed after that egg).
 - **Easter-egg line**: Short hook text; required non-empty `rules` array; joins rotation when
-  every rule on that entry matches the current Berlin calendar and clock.
+  every rule on that entry matches the current Berlin calendar and clock. A lone matching
+  egg is mixed with the normal pool; two or more matching eggs replace the normal pool.
 - **Eligible set**: Derived list of pool lines that may rotate at the current moment.
 - **Schedule rule**: Typed constraint (`date`, `range`, `weekday`, `time`) on easter-egg
   lines; semantics aligned with feature `007` where types overlap, plus **time** windows.
@@ -242,6 +265,9 @@ hold.
   100% of observed transitions (excluding same-line skips).
 - **SC-002**: With at least two easter-egg lines matching “now”, 100% of 60-second rotation
   cycles include only those easter eggs (normal pool excluded) until rules stop matching.
+- **SC-002b**: With exactly one matching easter-egg line and at least one distinct normal
+  line, testers who stay on the page observe a visible subtext change within one rotation
+  interval (the singleton egg MUST NOT remain the only line for the whole window).
 - **SC-003**: With scripting disabled, 100% of page loads show the `site.json` default
   tagline with no blank subtext and no rotation.
 - **SC-004**: With `prefers-reduced-motion: reduce`, 100% of subtext advances use instant swap

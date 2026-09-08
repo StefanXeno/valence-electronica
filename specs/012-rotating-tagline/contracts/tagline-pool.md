@@ -23,10 +23,18 @@ Other values are rejected at build in v1.
 
 | Type | How to define | When it shows |
 |------|---------------|---------------|
-| **Normal** | `{ "text": "…" }` only (optional `weight`) | Rotates every **60 s** when **no** easter egg matches now |
-| **Easter egg** | `{ "text": "…", "rules": [ … ] }` | Joins rotation when **every** rule matches; **all** matching eggs rotate together |
+| **Normal** | `{ "text": "…" }` only (optional `weight`) | Rotates every **60 s** when **no** easter egg matches, and also when **exactly one** egg matches (mixed after that egg) |
+| **Easter egg** | `{ "text": "…", "rules": [ … ] }` | Joins rotation when **every** rule matches. **Two or more** matching eggs rotate together (normal pool excluded). **Exactly one** matching egg is mixed with the normal pool so the line still changes. |
 
-**Eligible set**: matching easter eggs (file order) **or**, if none match, the normal pool.
+**Eligible set** (recomputed each tick):
+
+1. Collect matching easter eggs (file order).
+2. If **2+** eggs match → those eggs only.
+3. If **exactly 1** egg matches → that egg, then the weight-expanded normal pool.
+4. If **none** match → the weight-expanded normal pool.
+
+A singleton egg MUST NOT lock the subtext for the whole window when usable normal lines
+exist (otherwise same-line skip makes e.g. “Still awake?” look frozen from 22:00–04:00).
 Subtext advances every 60 seconds through that set with a fade-out then fade-in (see
 [../plan.md](../plan.md)).
 
@@ -68,10 +76,15 @@ Subtext advances every 60 seconds through that set with a fade-out then fade-in 
 Interpretation:
 
 - When no easter egg matches → the three normal lines **rotate every 60 seconds**.
-- **31 Oct** (Berlin) → Halloween line in the easter-egg rotation set (normal pool excluded).
-- **24–26 Dec 2026** → holiday line eligible each day in range.
+- **31 Oct** (Berlin) → Halloween line matches alone in this example → **mixed** with the
+  normal pool (egg first). Add a second 31 Oct egg if you want an exclusive Halloween-only
+  rotation.
+- **24–26 Dec 2026** → holiday line eligible each day in range; mixed with normals unless
+  another egg also matches that day.
 - **Fridays** → Friday line eligible on Fridays (with any other matching eggs).
-- **22:00–04:00 Berlin** → late-night line eligible inside the window only.
+- **22:00–04:00 Berlin** → late-night line eligible inside the window. If it is the **only**
+  matching egg, it is mixed with the normal pool (do not expect it to stay on screen all
+  night). If Friday night adds more eggs, those eggs rotate exclusively.
 
 ## Rule reference
 

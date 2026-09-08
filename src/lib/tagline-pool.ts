@@ -208,10 +208,18 @@ export function buildEligibleSet(pool: TaglinePool, now: Date = new Date()): Eli
     }
   }
 
-  if (easterEggs.length > 0) return easterEggs;
-
   const normalLines = pool.lines.filter((line) => !isEasterEggLine(line));
-  return expandNormalLines(normalLines);
+  const normals = expandNormalLines(normalLines);
+
+  // Two or more matching eggs: rotate among those eggs only (exclusive window).
+  if (easterEggs.length > 1) return easterEggs;
+
+  // A single matching egg must not lock the line for the whole window
+  // (same-line skip would otherwise freeze e.g. "Still awake?" from 22:00–04:00).
+  // Mix egg-first with the weight-expanded normal pool so the cadence still changes copy.
+  if (easterEggs.length === 1) return [...easterEggs, ...normals];
+
+  return normals;
 }
 
 export function nextRotationIndex(current: number, length: number): number {

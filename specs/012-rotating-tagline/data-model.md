@@ -35,10 +35,13 @@ Input: pool, `now` (Date).
 
 1. Berlin calendar + clock parts from `now`.
 2. Collect every easter-egg line where all rules match → `eggEligible[]` (file order).
-3. If `eggEligible.length > 0`, return `eggEligible`.
-4. Else build `normalEligible[]` from lines without rules, expanding each to `weight` entries:
+3. Build `normalEligible[]` from lines without rules, expanding each to `weight` entries:
    - e.g. `[{text:A,w:2},{text:B,w:1}]` → `[A, A, B]`
-5. If `normalEligible` empty, return `[]` (use fallback, stop rotator).
+4. If `eggEligible.length > 1`, return `eggEligible` (exclusive multi-egg window).
+5. If `eggEligible.length === 1`, return `[...eggEligible, ...normalEligible]` so a
+   singleton egg cannot freeze the line (same-line skip) for the whole window.
+6. If `eggEligible` is empty, return `normalEligible`.
+7. If the result is empty, return `[]` (use fallback, stop rotator).
 
 Output: ordered array of `{ text }` entries (expanded for weight).
 

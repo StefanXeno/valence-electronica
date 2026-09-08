@@ -23,11 +23,17 @@
 ## R4: Eligible set (replaces “first easter egg wins”)
 
 - **Decision**: On each tick, compute:
-  - If any easter-egg lines match (all rules AND) → eligible = **all** matching eggs in file order.
-  - Else → eligible = all normal lines (expanded by weight — R5).
+  - Collect matching easter eggs (all rules AND) in file order.
+  - If **2+** eggs match → eligible = those eggs only (normal pool excluded).
+  - If **exactly 1** egg matches → eligible = that egg followed by weight-expanded normals
+    (Session 2026-09-09: a singleton egg must not freeze the line via same-line skip).
+  - If none match → eligible = all normal lines (expanded by weight — R5).
   - If eligible empty → show `site.json` fallback; pause rotation.
-- **Rationale**: Session 2026-08-28 + FR-005/007; rotation needs a set, not a single winner.
-- **Alternatives considered**: First match only (incompatible with minute rotation through multiple eggs).
+- **Rationale**: Session 2026-08-28 + FR-005/007 for multi-egg exclusive windows; Session
+  2026-09-09 for singleton mix-in so late-night “Still awake?” still rotates.
+- **Alternatives considered**: First match only (incompatible with minute rotation through
+  multiple eggs); exclusive singleton egg (looks frozen for the whole window); adding more
+  late-night eggs instead of mixing (heavier content change than the product ask).
 
 ## R5: Rotation sequence and weight
 

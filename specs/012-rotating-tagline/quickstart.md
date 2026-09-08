@@ -34,6 +34,9 @@ npm run preview
 4. **US1 — typography / 320px**: ` for ` nbsp rule; no horizontal scroll at 320px.
 5. **US2 — easter-egg set**: Two eggs matching today. Expect rotation **only** between those
    lines (normal pool excluded).
+5b. **US2 — singleton egg mix**: One matching egg (e.g. Wed 22:00–04:00 “Still awake?”).
+   Expect the egg first, then a **normal** line on the next interval — not the same line
+   for the whole window.
 6. **US2 — rule boundary**: Late-night egg `22:00–04:00`. Test inside vs outside window;
    eligibility switches on next tick without reload.
 7. **US2 — AND rules**: Weekday + time on one line; both required.

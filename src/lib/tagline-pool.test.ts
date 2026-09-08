@@ -47,6 +47,30 @@ describe('buildEligibleSet', () => {
     ]);
   });
 
+  it('mixes a single matching easter egg with the weight-expanded normal pool', () => {
+    const lines = pool(
+      { text: 'Heavy.', weight: 2 },
+      { text: 'Light.' },
+      { text: 'Late night.', rules: [{ type: 'time', from: '22:00', to: '04:00' }] },
+    );
+    expect(buildEligibleSet(lines, new Date('2026-08-28T21:30:00Z'))).toEqual([
+      { text: 'Late night.' },
+      { text: 'Heavy.' },
+      { text: 'Heavy.' },
+      { text: 'Light.' },
+    ]);
+  });
+
+  it('keeps a singleton egg alone when the normal pool is empty', () => {
+    const lines = pool({
+      text: 'Late night.',
+      rules: [{ type: 'time', from: '22:00', to: '04:00' }],
+    });
+    expect(buildEligibleSet(lines, new Date('2026-08-28T21:30:00Z'))).toEqual([
+      { text: 'Late night.' },
+    ]);
+  });
+
   it('requires every rule on an easter-egg line to match', () => {
     const lines = pool({
       text: 'Friday night.',
@@ -68,8 +92,19 @@ describe('buildEligibleSet', () => {
     );
     expect(buildEligibleSet(lines, new Date('2026-08-28T21:30:00Z'))).toEqual([
       { text: 'Late night.' },
+      { text: 'Daily.' },
     ]);
     expect(buildEligibleSet(lines, new Date('2026-08-28T10:00:00Z'))).toEqual([{ text: 'Daily.' }]);
+  });
+
+  it('mixes the shipped late-night egg on a Wednesday night, not Friday night', () => {
+    const shipped = loadTaglinePool();
+    const wednesdayNight = new Date('2026-09-08T22:30:00Z'); // 00:30 Europe/Berlin, Wed 9 Sep
+    const eligible = buildEligibleSet(shipped, wednesdayNight);
+    expect(eligible[0]).toEqual({ text: 'Still awake?' });
+    expect(eligible.some((line) => line.text === "Something's coming for you.")).toBe(true);
+    expect(eligible.some((line) => line.text === 'Friday night mode.')).toBe(false);
+    expect(eligible.length).toBeGreaterThan(2);
   });
 });
 

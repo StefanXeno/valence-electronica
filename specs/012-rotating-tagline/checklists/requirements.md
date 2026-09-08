@@ -33,6 +33,8 @@
 
 - Updated 2026-08-28 (session clarifications): **60 s rotation**, sequential **fade out
   then fade in**, eligible set = all matching easter eggs else normal pool.
+- Updated 2026-09-09: singleton matching egg is **mixed** with the normal pool; 2+ matching
+  eggs stay exclusive.
 - Reduced motion: instant swap, same cadence.
 - Post-analyze remediation: FR-018 locked to **60 s after transition completes**; FR-005/007
   weight wording aligned; T028 adds FR-013 stage smoke.
