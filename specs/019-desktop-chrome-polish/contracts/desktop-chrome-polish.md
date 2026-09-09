@@ -115,7 +115,7 @@ open, that interaction MUST NOT collapse Info behind it.
 | Stage duration | **280ms** (`SMOOTH_PANEL_PHASE_MS`) |
 | Easing | `cubic-bezier(0.4, 0, 0.2, 1)` |
 | Reduced motion | Instant; no required travel |
-| Glitch packs | MAY overlay morph flavor; MUST NOT invert or skip stage order |
+| Glitch packs | MUST overlay morph flavor on playlist height + bar two-stage; MUST NOT invert or skip stage order. Other themes: smooth only. |
 | Phone motion | Unchanged (`015` / `018`, including 320ms content-pill) |
 
 ## Resize

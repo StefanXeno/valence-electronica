@@ -19,7 +19,10 @@ Not stored in JSON — markup identity on the live page.
 | Mute button | `MuteControl.astro` | Toggle only — **not** the volume slider; `data-glitch-live` | Continuous pointer hover while muted; keyboard-visible focus one-shot; **no** separate press glitch (morph owns click) |
 | Jukebox vinyl toggle | `Jukebox.astro` | Collapsed vinyl; `data-glitch-live` | Continuous pointer hover while collapsed; morph on expand/collapse |
 | Jukebox option | `Jukebox.astro` | Buttons in open list | One-shot hover, keyboard-visible focus, press |
-| On-demand panel | `StagePanels.astro` | `<details class="glitch-hit">` | Closed: hover one-shot; click summary glitches box; open: no hover |
+| On-demand panel | `StagePanels.astro` | `<summary class="glitch-hit">` + phone icon buttons | Closed: hover one-shot; click summary glitches box; open: no hover; ambient idle |
+| Listen-on / discog play | `Discography.astro` | `a.glitch-hit` / `button.discog__stage.glitch-hit` | One-shot + ambient |
+| Tour pills | `TourDates.astro` | `a.stage-card__pill.glitch-hit` | One-shot + ambient |
+| Player toolbar / handle | `Jukebox.astro` | `button.glitch-hit` | Hover owned by toolbar binders; ambient idle |
 
 ### Explicitly out of set
 
@@ -27,8 +30,10 @@ Not stored in JSON — markup identity on the live page.
 |---------|------|
 | Volume slider | No glitch on hover/focus/press/drag |
 | Placeholder channel chips | No glitch |
-| Hero text, headings, non-interactive chrome | No glitch |
-| Any future control | Out of scope until spec amendment (FR-011) |
+| Identity wordmark, tagline, copyright, static copy | No glitch (tagline rotator may still swap-glitch the line) |
+| About / prose links | No glitch |
+| Non-button cards | No glitch |
+| Any future **non-clickable** chrome | Out of scope until spec amendment (FR-011) |
 
 ## Entity: GlitchTreatment
 
@@ -37,6 +42,8 @@ Ephemeral visual disturbance applied to one hit target (or mute/jukebox shell fo
 | Aspect | Rule |
 |--------|------|
 | One-shot | Brief; completes in under 1 s; non-looping while idle (SC-004) |
+| Ambient idle | Staggered live-safe one-shots on visible clickables; ≤2 concurrent; irregular cadence |
+| Transition flavor | Live-safe overlay on bar/player/playlist chrome for the existing morph duration |
 | Continuous hover | Mute (while muted) **or** collapsed jukebox vinyl; ends on pointer-out (and unmute for mute) |
 | Mute / jukebox morph | Expand/collapse shell treatment; replaces press glitch for that click |
 | Visual character | Displacement / tear / color-fringing style; tinted by existing theme accent/text tokens |
@@ -49,7 +56,7 @@ Ephemeral visual disturbance applied to one hit target (or mute/jukebox shell fo
 | Aspect | Rule |
 |--------|------|
 | Source | Visitor/OS `prefers-reduced-motion` |
-| When reduce | No hover, focus, press, continuous hover, or morph glitch (FR-006) |
+| When reduce | No hover, focus, press, continuous hover, morph, or ambient idle glitch (FR-006) |
 | Layout | Mute / jukebox may still change compact ↔ expanded for clarity without glitch language |
 
 ## Relationships

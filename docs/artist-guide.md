@@ -320,7 +320,7 @@ matching registry and CSS in the codebase — do not invent new ids.
 | `themeId` | Mood (short) |
 |-----------|----------------|
 | `default` | Neutral fallback |
-| `nightmare-crimson` | Red / horror loop (video + audio + HUD glitch) |
+| `nightmare-crimson` | Red / horror loop (video + audio + HUD glitch on **almost every clickable** — pills, player tools, listen-on, tour, socials, legal; not static copy) |
 | `cyan-pulse` | Cyan still / pulse (no video loop) |
 | `electric-cyan` | Teal glitch loop — Show Me How (video) |
 | `steel-slate` | Muted steel loop — Infinite (video + audio) |

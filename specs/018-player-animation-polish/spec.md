@@ -628,9 +628,11 @@ visual order unchanged.
 - Placeholder **art** is not directed here. Acceptance is behavioral:
   inert, no play control, not startable. Visual treatment is a plan /
   implement choice as long as SC-010 holds.
-- Content-dock ~320ms morph, handle idle nod, soundwave motion, and
-  glitch treatments are **out of scope** unless the operator expands
-  IDEA-023 later.
+- Content-dock ~320ms morph, handle idle nod, and soundwave motion stay
+  **018-owned**. **Exception (operator 2026-09-09):** Nightmare
+  (`data-hud-glitch`) MAY overlay existing glitch language on the
+  content-dock and player-sheet morphs; it MUST NOT replace the 018
+  path or run on other themes. Reduced motion stays snap / no glitch.
 - Reduced-motion and no-JS degradation stay as in 015.
 - Visual review is **operator-led**. Agents do not install browser
   automation or add packages for this feature.

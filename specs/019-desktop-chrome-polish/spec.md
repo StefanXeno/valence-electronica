@@ -388,8 +388,10 @@ overlay, a discography stage action, and a resize across 1023px / 1024px.
   still paint. Playlist view-switch and bar grow are not required.
   Native disclosure MAY still reveal Info / legal links.
 - **Glitch theme**: Existing glitch flavor MAY still play on HUD
-  controls. It MUST NOT invert or skip the required direction order
-  when motion is allowed.
+  controls **and** MUST overlay the Currently Playing ↔ Playlist
+  morph (including height WAAPI) plus the bar two-stage grow. It MUST
+  NOT invert or skip the required direction order when motion is
+  allowed. Other themes stay smooth-only.
 - **Very wide monitors / 320px**: Desktop polish is judged on ~1280×800.
   The page MUST still load from 320px without horizontal scroll.
 - **Many social channels**: Top-right socials wrap or stay compact.

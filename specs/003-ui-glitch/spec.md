@@ -6,7 +6,12 @@
 
 **Status**: As-built (base language; HUD hit-set expanded by `004`, enable
 gate by `005`). Collapsed **vinyl** as a glitch target is **historical**
-— desktop player chrome is `019` (no vinyl toggle).
+— desktop player chrome is `019` (no vinyl toggle). **Nightmare contract
+(2026-09-09):** almost every clickable control participates (hover/press
+plus staggered ambient idle), still gated by `data-hud-glitch`.
+**Transition flavor (same day):** phone bar/player morphs and desktop
+playlist height grow overlay the same glitch language — they are not
+smooth-only on Nightmare.
 
 **Input**: User description: "Extract the press/hover glitch motion language from the
 themed background video work into its own feature. Interactive controls (channel links,
@@ -16,6 +21,44 @@ never block clicks or keyboard use. Seravek typeface adoption stays out of scope
 a separate idea)."
 
 ## Clarifications
+
+### Session 2026-09-09 (Nightmare — panel/player transitions)
+
+- Q: Phone bar and player stay smooth 018 morphs on Nightmare? → A: No.
+  Keep the existing dock-grow path (320ms sheet / 380ms playlist) but
+  **flavor** the animating chrome (`.stage-panels` bar, `[data-jukebox]`
+  player sheet) with `playTransitionGlitch` for that duration. Not a
+  second morph. Live-safe keyframes so hits stay solid.
+- Q: Desktop Currently Playing ↔ Playlist? → A: Same overlay on the
+  dock, including the height WAAPI when the box grows. Desktop bar
+  two-stage already glitched the panel; duration now covers both stages
+  (~560ms).
+- Q: Other themes? → A: Smooth 018/019 only — no glitch overlay.
+- Q: Reduced motion? → A: No extra glitch; snap as today.
+
+### Session 2026-09-09 (Nightmare — almost every clickable)
+
+- Q: Should only the original closed HUD set glitch on Nightmare? → A: No.
+  When HUD glitch is on (Nightmare pack `hudGlitch` → `data-hud-glitch='true'`),
+  **almost every clickable** participates: HUD pills (About, Discography, Tour,
+  Info), player toolbar (Playlist/wave, Shuffle, Play/pause, Mute), listen-on
+  icons, tour Tickets/Information pills, socials, legal pills, overlay Exit,
+  player handle. Primary-action links count. Static copy, non-button cards,
+  wordmark/tagline (not clickable), copyright lines, volume slider, and
+  placeholder chips MUST NOT.
+- Q: Idle motion or hover-only? → A: Both. Hover / keyboard-visible focus /
+  press keep the existing one-shot language. In addition, a **staggered ambient
+  field** fires live-safe one-shots on visible clickable `.glitch-hit` controls
+  so they glitch “all over the place” without one global CSS blink. Max two
+  ambient hits at once; hover/press/continuous supersede ambient.
+- Q: New visual language? → A: No. Reuse `playElementGlitch` presets (RGB
+  split, jitter, scan, clip families). Ambient uses the **live-safe** keyframe
+  family so clip-path does not punch dead zones. Intensity matches current
+  Nightmare HUD one-shots (soft bar FR-012).
+- Q: Gate by `data-theme='nightmare-crimson'`? → A: No. Keep `data-hud-glitch`
+  (only Nightmare ships that capability today). Other packs MUST stay still.
+- Q: Reduced motion? → A: Existing 003 behavior — no hover, press, continuous,
+  morph, or ambient glitch.
 
 ### Session 2026-08-24 (as-built sync)
 
@@ -215,7 +258,8 @@ confirm no glitch animations run and actions still work.
   the click treatment for mute/unmute (no additional press glitch required on the same
   click).
 - **FR-006**: When the visitor prefers reduced motion, the site MUST NOT play glitch
-  treatments on hover, keyboard-visible focus, press, continuous mute hover, or mute morph.
+  treatments on hover, keyboard-visible focus, press, continuous mute hover, mute morph,
+  ambient idle, or chrome transition flavor (phone bar/player, desktop playlist / two-stage).
 - **FR-007**: Glitch treatments MUST NOT introduce tracking, third-party scripts, or
   persistent visitor storage.
 - **FR-008**: This feature MUST NOT change the site’s primary typeface, add a visitor-facing
@@ -229,22 +273,32 @@ confirm no glitch animations run and actions still work.
   background audio is muted, and (b) the collapsed jukebox vinyl toggle. Continuous mute
   hover MUST stop when audio is playing. Other in-scope hit targets MUST remain one-shot
   on hover.
-- **FR-011**: The closed set of glitch hit targets (as-built, including `004` HUD expansion)
-  is exactly: active channel links, legal footer links, legal-panel exit, mute button
-  (with mute shell morph), jukebox vinyl toggle (with expand/collapse morph), jukebox
-  option buttons, and on-demand stage `<details>` panels. Treatments run only while
-  `data-hud-glitch='true'`. Volume slider and placeholder channel chips remain out of
-  set. No other elements are in scope unless this spec is amended.
+- **FR-011**: When `data-hud-glitch='true'` (Nightmare pack), **almost every
+  clickable** control is a glitch hit target: HUD pills (About, Discography,
+  Tour, Info — summary or phone icon trigger), player toolbar (Playlist/wave,
+  Shuffle, Play/pause, Mute), player handle, listen-on icons, discography stage
+  play buttons, tour Tickets/Information pills, social channel links, legal
+  pills, legal-panel Exit, jukebox option / track-select buttons, and on-demand
+  stage panel summaries. Treatments: existing hover / keyboard-visible focus /
+  press one-shots **plus** staggered ambient idle one-shots (live-safe
+  keyframes, ≤2 concurrent, irregular 520–1280ms cadence). Chrome
+  **transitions** (phone content bar, phone player sheet, desktop
+  playlist height, desktop two-stage bar) MUST overlay the same language
+  for the existing morph duration via `playTransitionGlitch`. MUST NOT glitch:
+  volume slider, placeholder channel chips, static copy, non-button cards,
+  identity wordmark, tagline (rotator owns its own swap glitch), copyright
+  lines, About prose links. Other theme packs (`data-hud-glitch` not `true`)
+  MUST stay still.
 - **FR-012**: Glitch treatments (including continuous mute hover) MUST stay within a soft
   safety bar of roughly ≤3 distinct visual flashes per second and MUST NOT use large
   full-viewport flashes. Final intensity within that bar is owner-approved by eye (no
   automated photosensitivity tooling required for this feature).
 - **FR-013**: A control MUST present at most one active glitch treatment at a time. When
-  triggers overlap, press supersedes hover/keyboard-focus; a new one-shot MUST NOT stack
-  on an in-flight one-shot. Mute continuous hover (FR-010) and mute morph (FR-005) keep
-  their special rules: on mute/unmute click, morph supersedes continuous hover; continuous
-  hover may resume only if the pointer remains over the mute button, audio is muted, and
-  morph has ended.
+  triggers overlap, press supersedes hover/keyboard-focus; hover/press/continuous
+  supersede ambient idle; a new one-shot MUST NOT stack on an in-flight one-shot. Mute
+  continuous hover (FR-010) and mute morph (FR-005) keep their special rules: on
+  mute/unmute click, morph supersedes continuous hover; continuous hover may resume only
+  if the pointer remains over the mute button, audio is muted, and morph has ended.
   Treatments MUST NOT leave the control unusable or stuck glitching after the interaction
   ends.
 - **FR-014**: Focus glitch MUST fire only for keyboard-visible focus. Pointer users rely on
@@ -253,13 +307,14 @@ confirm no glitch animations run and actions still work.
 
 ### Key Entities
 
-- **Glitch hit target**: One of the closed-set interactive controls: active channel link,
-  legal link, legal exit, mute button, jukebox vinyl/options, or on-demand stage panel
-  (shell morph is a mute/jukebox-specific treatment, not a separate hit target).
+- **Glitch hit target**: A clickable control marked `glitch-hit` that matches
+  `button, a, [role=button], summary` (FR-011). Shell morph is a mute/jukebox/
+  stage-panel treatment, not a separate hit target. Static copy is not a target.
 - **Glitch treatment**: A short, one-shot visual disturbance (displacement / tear / color
-  fringing character) triggered by pointer hover, keyboard-visible focus, press, or shell
-  morph — except continuous hover glitch, which is allowed on the mute button while muted
-  and on the collapsed jukebox vinyl while the pointer remains over it.
+  fringing character) triggered by pointer hover, keyboard-visible focus, press,
+  staggered ambient idle, or shell morph — except continuous hover glitch, which
+  is allowed on the mute button while muted, on held shuffle/loop, and on the
+  collapsed jukebox vinyl while the pointer remains over it.
 - **Motion preference**: Visitor/OS preference for reduced motion; when set, all glitch
   treatments (including continuous hover) are omitted.
 - **Enable gate**: Active theme pack `hudGlitch` capability → `data-hud-glitch` on
@@ -272,8 +327,8 @@ confirm no glitch animations run and actions still work.
 - **SC-001**: With motion allowed, at least 90% of informal testers notice a glitch on
   hover or press of a primary control within 5 seconds of interacting with it.
 - **SC-002**: With reduced motion preferred, 0 glitch treatments play across hover,
-  keyboard-visible focus, press, continuous mute hover, and mute morph on a full
-  walkthrough of landing + legal exit + mute (if shown).
+  keyboard-visible focus, press, continuous mute hover, mute morph, and ambient idle
+  on a full walkthrough of landing + legal exit + mute (if shown).
 - **SC-003**: During an active glitch, 100% of deliberate click/tap attempts on that
   control register on the first try in a short manual check (no “dead” frames).
 - **SC-004**: A one-shot glitch treatment for a single hover or press completes in under 1
@@ -300,7 +355,8 @@ confirm no glitch animations run and actions still work.
 - Client-side behavior required for triggering treatments will be justified in the feature
   plan against the constitution’s lightweight-by-default principle.
 - No new tracking, cookies, or third-party motion libraries are introduced.
-- Adding glitch to new controls later requires an explicit spec amendment; open-ended
-  “mark anything” opt-in is not part of this feature.
+- New **chrome** clickables should join the Nightmare field via `glitch-hit` on
+  the interactive element. About-body / prose links stay out unless they are a
+  primary HUD action. Open-ended “glitch every `<a>` in copy” is not in scope.
 - Photosensitivity is gated by the soft safety bar (FR-012) plus project-owner taste;
   this is not a claim of automated WCAG 2.3.1 certification.
