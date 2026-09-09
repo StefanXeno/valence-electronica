@@ -218,7 +218,12 @@ const defaultLabel =
 }
 
 <script>
-  import { createContinuousGlitch, isGlitchThemeActive, playElementGlitch } from '../lib/glitch';
+  import {
+    clearTransitionGlitch,
+    createContinuousGlitch,
+    isGlitchThemeActive,
+    playTransitionGlitch,
+  } from '../lib/glitch';
   import { panelCloseDelayMs, runSmoothPanelOpen, shouldSmoothPanelOpen } from '../lib/panel-motion';
   import { initStageSwitch, STAGE_SELECT_EVENT, type StageCatalogEntry } from '../lib/stage-switch';
   import { initPlayerDock, syncDesktopNowTitle } from '../lib/player-dock';
@@ -358,12 +363,11 @@ const defaultLabel =
       vinylHoverGlitch.stop();
       root.dataset.glitch = direction;
       window.clearTimeout(morphTimer);
-      const dur = playElementGlitch(root, 'is-glitching');
+      const dur = playTransitionGlitch(root, 560);
       morphTimer = window.setTimeout(() => {
-        root.classList.remove('is-glitching');
-        delete root.dataset.glitch;
+        clearTransitionGlitch(root);
         vinylHoverGlitch.start();
-      }, dur + 80);
+      }, (dur || 560) + 80);
     };
 
     const openVflip = (animated = true) => {

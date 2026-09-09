@@ -1,4 +1,5 @@
 import { initEqFlatten } from './eq-flatten';
+import { clearTransitionGlitch, playTransitionGlitch } from './glitch';
 import { isIntroActive, isPlayerPaused, setPlayerPaused, watchPlayerPause } from './playback';
 import { PHONE_PANEL_PHASE_MS } from './panel-motion';
 import {
@@ -212,6 +213,15 @@ function createPhoneSheetController(): PhoneSheetController {
   let active: PhoneContentSheet | null = null;
   let morphTimer = 0;
   let morphGen = 0;
+  let barGlitchTimer = 0;
+
+  const flavorBarGlitch = () => {
+    if (!cluster) return;
+    window.clearTimeout(barGlitchTimer);
+    const dur = playTransitionGlitch(cluster, PHONE_PANEL_PHASE_MS);
+    if (!dur) return;
+    barGlitchTimer = window.setTimeout(() => clearTransitionGlitch(cluster), dur + 80);
+  };
 
   const panelEl = (kind: PhoneContentSheet) =>
     kind === 'socials'
@@ -361,6 +371,7 @@ function createPhoneSheetController(): PhoneSheetController {
       // Lock 0px as the from-value, then interpolate to the measured sheet.
       void cluster.offsetHeight;
       setSheetHeight(h, kind);
+      flavorBarGlitch();
     }
     // Invalidate a pending close/cross so it cannot drop this open.
     afterMorph(() => undefined);
@@ -391,6 +402,7 @@ function createPhoneSheetController(): PhoneSheetController {
     syncTriggers(to);
     closeVflipList();
     setSheetHeight(targetHeight(to), to);
+    if (!reduceMq.matches) flavorBarGlitch();
 
     afterMorph(() => {
       if (fromPanel) {
@@ -440,6 +452,7 @@ function createPhoneSheetController(): PhoneSheetController {
     if (!closingSocials) setSocialsOpen(false);
     setChrome(true, true);
     setSheetHeight(0);
+    flavorBarGlitch();
     afterMorph(() => {
       if (panel) {
         panel.open = false;
@@ -956,7 +969,16 @@ export function initPlayerDock(): void {
 
   let sheetMorphTimer = 0;
   let sheetMorphGen = 0;
+  let chromeGlitchTimer = 0;
   let playlistPinRaf = 0;
+
+  const flavorDockGlitch = (durationMs: number) => {
+    if (!dock) return;
+    window.clearTimeout(chromeGlitchTimer);
+    const dur = playTransitionGlitch(dock, durationMs);
+    if (!dur) return;
+    chromeGlitchTimer = window.setTimeout(() => clearTransitionGlitch(dock), dur + 80);
+  };
 
   const playlistList = () =>
     dock?.querySelector<HTMLElement>('.discog[data-theme-tracks]') ?? null;
@@ -1319,6 +1341,7 @@ export function initPlayerDock(): void {
     stopPlaylistPin();
     dock.classList.remove('is-playlist-morphing');
     dock.classList.toggle('is-sheet-collapsing', !toOpen);
+    flavorDockGlitch(PHONE_PANEL_PHASE_MS);
     const collapsedH = collapsedHeightPx();
     // First open must start from the CSS floor token, not a bloated first-paint box.
     const fromH =
@@ -1396,6 +1419,7 @@ export function initPlayerDock(): void {
     }
 
     const token = ++sheetMorphGen;
+    flavorDockGlitch(PLAYLIST_MORPH_MS);
     const collapsedH = collapsedHeightPx();
     const fromH = readDockHeight() || openHeightPx();
     const list = playlistList();
@@ -1736,6 +1760,7 @@ export function initPlayerDock(): void {
       commit();
       return;
     }
+    flavorDockGlitch(SETTLE_MS);
     const start = performance.now();
     const tick = (now: number) => {
       const t = Math.min(1, (now - start) / SETTLE_MS);

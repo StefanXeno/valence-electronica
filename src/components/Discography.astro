@@ -50,6 +50,7 @@ const releases = themeTracksOnly
                     {release.listenLinks.map((link) => (
                       <li>
                         <a
+                          class="glitch-hit"
                           href={link.url}
                           target="_blank"
                           rel="noopener noreferrer"
@@ -69,7 +70,7 @@ const releases = themeTracksOnly
               <div class="discog__stage-slot">
                 <button
                   type="button"
-                  class="discog__stage"
+                  class="discog__stage glitch-hit"
                   data-stage-button={stageId}
                   aria-pressed={isActive ? 'true' : 'false'}
                   aria-label={chrome.stageButtonLabel}
@@ -512,6 +513,7 @@ const releases = themeTracksOnly
   }
 
   .discog__listen-links a {
+    overflow: visible;
     display: inline-grid;
     place-items: center;
     width: calc(2.35rem * var(--hud-scale));

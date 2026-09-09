@@ -2,6 +2,11 @@
 ---
 
 <script>
+  import {
+    createAmbientGlitchField,
+    isAmbientGlitchTarget,
+    isOpenStagePanelChrome,
+  } from '../lib/glitch-ambient';
   import { isGlitchThemeActive, playElementGlitch } from '../lib/glitch';
 
   function prefersReducedMotion(): boolean {
@@ -17,9 +22,12 @@
     ) {
       return true;
     }
+    // Toolbar / mute / vinyl / stage-panel shells own hover+press. Playlist
+    // listen/play links inside the jukebox are regular one-shot hits.
     return (
-      el.matches('[data-mute-control], [data-volume-control], [data-jukebox-toggle], [data-stage-panel]') ||
-      Boolean(el.closest('[data-volume-control], [data-jukebox]'))
+      el.matches(
+        '[data-mute-control], [data-volume-control], [data-jukebox-toggle], [data-stage-panel], [data-playlist-toggle], [data-shuffle-toggle], [data-loop-toggle], [data-bg-play-toggle]',
+      ) || Boolean(el.closest('[data-volume-control]'))
     );
   }
 
@@ -27,11 +35,6 @@
     return el.matches(
       '[data-mute-control], [data-jukebox-toggle], [data-shuffle-toggle][aria-pressed="true"], [data-loop-toggle][aria-pressed="true"]',
     );
-  }
-
-  function isOpenStagePanel(el: Element): boolean {
-    const box = el.closest('[data-stage-panels] details');
-    return box instanceof HTMLDetailsElement && box.open;
   }
 
   function runGlitch(el: HTMLElement, className: 'is-glitching' | 'is-glitch-hover') {
@@ -43,7 +46,7 @@
       if (el.classList.contains('is-glitch-continuous')) return;
     }
 
-    // Press supersedes in-flight hover
+    // Press supersedes in-flight hover; both supersede ambient idle
     if (className === 'is-glitching') {
       el.classList.remove('is-glitch-hover');
     }
@@ -63,19 +66,45 @@
 
   function bindGlitchPress() {
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const ambient = createAmbientGlitchField();
 
     const clearAllGlitchClasses = () => {
-      document.querySelectorAll('.is-glitching, .is-glitch-hover, .is-glitch-continuous').forEach((node) => {
-        node.classList.remove('is-glitching', 'is-glitch-hover', 'is-glitch-continuous');
-      });
+      document
+        .querySelectorAll('.is-glitching, .is-glitch-hover, .is-glitch-continuous, .is-glitch-ambient')
+        .forEach((node) => {
+          node.classList.remove(
+            'is-glitching',
+            'is-glitch-hover',
+            'is-glitch-continuous',
+            'is-glitch-ambient',
+          );
+        });
+    };
+
+    const syncAmbient = () => {
+      if (reduceMotion.matches || !isGlitchThemeActive()) {
+        ambient.stop();
+        return;
+      }
+      ambient.start();
     };
 
     reduceMotion.addEventListener('change', () => {
-      if (reduceMotion.matches) clearAllGlitchClasses();
+      if (reduceMotion.matches) {
+        clearAllGlitchClasses();
+        ambient.stop();
+        return;
+      }
+      syncAmbient();
     });
 
     new MutationObserver(() => {
-      if (!isGlitchThemeActive()) clearAllGlitchClasses();
+      if (!isGlitchThemeActive()) {
+        clearAllGlitchClasses();
+        ambient.stop();
+        return;
+      }
+      syncAmbient();
     }).observe(document.documentElement, {
       attributes: true,
       attributeFilter: ['data-theme', 'data-hud-glitch'],
@@ -88,11 +117,11 @@
         const target = event.target;
         if (!(target instanceof Element)) return;
         const hit = target.closest('.glitch-hit');
-        if (!(hit instanceof HTMLElement)) return;
+        if (!(hit instanceof HTMLElement) || !isAmbientGlitchTarget(hit)) return;
 
         // Mute button continuous hover is owned by MuteControl
         if (isLiveToggle(hit) || isMorphOwned(hit)) return;
-        if (isOpenStagePanel(hit)) return;
+        if (isOpenStagePanelChrome(hit)) return;
 
         const related = event.relatedTarget;
         if (related instanceof Node && hit.contains(related)) return;
@@ -107,9 +136,8 @@
       (event) => {
         if (prefersReducedMotion() || !isGlitchThemeActive()) return;
         const target = event.target;
-        if (!(target instanceof HTMLElement)) return;
-        if (!target.classList.contains('glitch-hit')) return;
-        if (isOpenStagePanel(target)) return;
+        if (!(target instanceof HTMLElement) || !isAmbientGlitchTarget(target)) return;
+        if (isOpenStagePanelChrome(target)) return;
         // Keyboard-visible focus only — mouse-click focus must not glitch
         if (!target.matches(':focus-visible')) return;
         runGlitch(target, 'is-glitch-hover');
@@ -124,14 +152,16 @@
         const target = event.target;
         if (!(target instanceof Element)) return;
         const hit = target.closest('.glitch-hit');
-        if (!(hit instanceof HTMLElement)) return;
+        if (!(hit instanceof HTMLElement) || !isAmbientGlitchTarget(hit)) return;
         // Morph-owned controls handle their own press / open-close glitch
         if (isMorphOwned(hit)) return;
-        if (isOpenStagePanel(hit)) return;
+        if (isOpenStagePanelChrome(hit)) return;
         runGlitch(hit, 'is-glitching');
       },
       true,
     );
+
+    syncAmbient();
   }
 
   bindGlitchPress();

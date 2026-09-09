@@ -67,7 +67,12 @@ export function initTaglineRotator(root: HTMLElement, fallbackText: string): () 
   };
 
   const clearGlitchState = () => {
-    root.classList.remove('is-glitching', 'is-glitch-hover', 'is-glitch-continuous');
+    root.classList.remove(
+      'is-glitching',
+      'is-glitch-hover',
+      'is-glitch-continuous',
+      'is-glitch-ambient',
+    );
     delete root.dataset.glitch;
   };
 

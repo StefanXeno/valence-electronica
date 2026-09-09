@@ -85,7 +85,7 @@ const panels = [
         <span class="visually-hidden">{chrome.infoTitle}</span>
         <HudIcon token={chrome.infoIcon} emoji={chrome.infoIconEmoji} />
         <span class="stage-panel__label">{chrome.infoTitle}</span>
-        <span class="stage-panel__sheet-copy stage-panel__sheet-copy--summary glitch-hit"
+        <span class="stage-panel__sheet-copy stage-panel__sheet-copy--summary"
           >© {year} {site.artist.name}</span
         >
       </summary>
@@ -93,7 +93,7 @@ const panels = [
         <h2 class="stage-panel__sheet-title">
           <HudIcon token={chrome.infoIcon} emoji={chrome.infoIconEmoji} />
           <span class="stage-panel__sheet-title-text">{chrome.infoTitle}</span>
-          <span class="stage-panel__sheet-copy stage-panel__sheet-copy--sheet glitch-hit"
+          <span class="stage-panel__sheet-copy stage-panel__sheet-copy--sheet"
             >© {year} {site.artist.name}</span
           >
         </h2>
@@ -145,8 +145,8 @@ const panels = [
 </div>
 
 <script>
-  import { isGlitchThemeActive, playElementGlitch } from '../lib/glitch';
-  import { createTwoStageMotion } from '../lib/panel-motion';
+  import { clearTransitionGlitch, isGlitchThemeActive, playTransitionGlitch } from '../lib/glitch';
+  import { createTwoStageMotion, SMOOTH_PANEL_PHASE_MS } from '../lib/panel-motion';
   import { isPhoneHud, requestPhoneContent, type PhoneContentSheet } from '../lib/player-dock';
 
   const desktopPanelMotion = new Map<HTMLDetailsElement, ReturnType<typeof createTwoStageMotion>>();
@@ -184,11 +184,10 @@ const panels = [
       if (reduceMotion.matches || !isGlitchThemeActive()) return;
       panel.dataset.glitch = direction;
       window.clearTimeout(morphTimer);
-      const dur = playElementGlitch(panel, 'is-glitching');
+      const dur = playTransitionGlitch(panel, SMOOTH_PANEL_PHASE_MS * 2);
       morphTimer = window.setTimeout(() => {
-        panel.classList.remove('is-glitching');
-        delete panel.dataset.glitch;
-      }, dur + 80);
+        clearTransitionGlitch(panel);
+      }, (dur || SMOOTH_PANEL_PHASE_MS * 2) + 80);
     };
 
     const motion = createTwoStageMotion(panel, {

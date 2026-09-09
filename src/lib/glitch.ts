@@ -252,15 +252,53 @@ export function isGlitchThemeActive(): boolean {
   return document.documentElement.dataset.hudGlitch === 'true';
 }
 
+const GLITCH_STATE_CLASSES = [
+  'is-glitching',
+  'is-glitch-hover',
+  'is-glitch-continuous',
+  'is-glitch-ambient',
+] as const;
+
 export function playElementGlitch(el: HTMLElement, className = 'is-glitching'): number {
   if (!isGlitchThemeActive()) return 0;
   const preset = applyGlitchPreset(el);
-  el.classList.remove('is-glitching', 'is-glitch-hover', 'is-glitch-continuous');
+  el.classList.remove(...GLITCH_STATE_CLASSES);
   el.style.animation = 'none';
   void el.offsetWidth;
   el.style.animation = '';
   el.classList.add(className);
   return preset.dur;
+}
+
+/** Stretch a preset to cover an existing morph window (phone 320 / playlist 380 / two-stage). */
+export function clampTransitionGlitchMs(durationMs: number): number {
+  return Math.round(Math.max(280, Math.min(durationMs, 900)));
+}
+
+export function prefersGlitchMotion(): boolean {
+  return isGlitchThemeActive() && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
+/**
+ * Flavor an in-flight chrome morph with the shared glitch language.
+ * Does not replace WAAPI / CSS height — only overlays live-safe keyframes.
+ */
+export function playTransitionGlitch(el: HTMLElement, durationMs: number): number {
+  if (!prefersGlitchMotion()) return 0;
+  applyGlitchPreset(el);
+  const dur = clampTransitionGlitchMs(durationMs);
+  el.style.setProperty('--g-dur', `${dur}ms`);
+  el.classList.remove(...GLITCH_STATE_CLASSES);
+  el.style.animation = 'none';
+  void el.offsetWidth;
+  el.style.animation = '';
+  el.classList.add('is-glitching');
+  return dur;
+}
+
+export function clearTransitionGlitch(el: HTMLElement): void {
+  el.classList.remove('is-glitching');
+  delete el.dataset.glitch;
 }
 
 export type ContinuousGlitch = {
@@ -289,7 +327,7 @@ export function createContinuousGlitch(
       el.removeEventListener('animationend', onEnd);
       onEnd = undefined;
     }
-    el.classList.remove('is-glitch-continuous', 'is-glitch-hover', 'is-glitching');
+    el.classList.remove(...GLITCH_STATE_CLASSES);
     el.style.animation = '';
   };
 

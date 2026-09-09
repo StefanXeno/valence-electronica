@@ -50,6 +50,7 @@
 }
 
 .stage-card__pill {
+  overflow: visible;
   display: inline-flex;
   align-items: center;
   gap: calc(0.35rem * var(--hud-scale));
