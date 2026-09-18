@@ -2,15 +2,11 @@
 import AboutPanel from './AboutPanel.astro';
 import ContactPanel from './ContactPanel.astro';
 import Discography from './Discography.astro';
-import LegalSheet from './LegalSheet.astro';
 import ShopComingSoon from './ShopComingSoon.astro';
 import TourDates from './TourDates.astro';
 import HudIcon from './HudIcon.astro';
-import site from '../data/site.json';
 import { getBackgroundConfig } from '../lib/background';
 import { getAboutEntry, getChrome, getSiteNavData } from '../lib/stage';
-
-const year = new Date().getFullYear();
 
 const [chrome, about, { defaultVideoId }] = await Promise.all([
   getChrome(),
@@ -41,7 +37,7 @@ const panels = [
 ].filter((panel): panel is NonNullable<typeof panel> => Boolean(panel));
 ---
 
-<div class="stage-panels stage-panels--nav-driven" data-stage-panels>
+<div class="stage-panels stage-panels--nav-driven" data-stage-panels id="stage-nav-overlay">
   <div class="stage-panels__sheet">
     {
       panels.map((panel) => (
@@ -182,50 +178,8 @@ const panels = [
         </div>
       </div>
     </details>
-    <details class="stage-panel stage-panel--info" id="stage-panel-info" data-stage-panel="info">
-      <summary class="stage-panel__summary stage-panel__summary--sr-only">
-        <span class="visually-hidden">{chrome.infoTitle}</span>
-      </summary>
-      <div class="stage-panel__body">
-        <header class="stage-panel__sheet-header">
-          <button
-            type="button"
-            class="stage-panel__exit glitch-hit"
-            data-stage-panel-exit
-            aria-label="Exit"
-            title="Exit"
-          >
-            <svg
-              class="stage-panel__exit-icon"
-              viewBox="0 0 24 24"
-              width="18"
-              height="18"
-              aria-hidden="true"
-              focusable="false"
-            >
-              <path
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                d="M6 6l12 12M18 6L6 18"></path>
-            </svg>
-          </button>
-          <h2 class="stage-panel__sheet-title">
-            <HudIcon token={chrome.infoIcon} emoji={chrome.infoIconEmoji} />
-            <span class="stage-panel__sheet-title-text">{chrome.infoTitle}</span>
-            <span class="stage-panel__sheet-copy stage-panel__sheet-copy--sheet"
-              >© {year} {site.artist.name}</span
-            >
-          </h2>
-        </header>
-        <div class="stage-panel__scroll">
-          <LegalSheet />
-        </div>
-      </div>
-    </details>
   </div>
-  <!-- Primary circular icon dock removed (020). Sheets open from SiteNav. -->
+  <!-- Primary circular icon dock removed (020). Sheets open from SiteNav; Imprint/Privacy via LegalOverlay. -->
 </div>
 
 <script>
@@ -306,7 +260,7 @@ const panels = [
   function initOverlayEscape() {
     document.addEventListener('keydown', (event) => {
       if (event.key !== 'Escape') return;
-      // Legal overlay owns Escape when it is open (Imprint/Privacy nested from Info).
+      // Legal overlay owns Escape when it is open (Imprint/Privacy from SiteNav).
       const legalOpen = document.querySelector(
         '#legal-overlay [data-legal-panel]:not([hidden]), [data-legal-panel]:not([hidden])',
       );
@@ -341,6 +295,25 @@ const panels = [
     gap: calc(0.35rem * var(--hud-scale));
   }
 
+  /*
+   * Body-level host (Base.astro). Stay out of document flow; open sheets are
+   * position:fixed like .legal-panel (inset 0, z-index 5).
+   */
+  .stage-panels--nav-driven {
+    position: fixed;
+    inset: 0;
+    z-index: 5;
+    display: block;
+    width: auto;
+    height: auto;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    pointer-events: none;
+    overflow: visible;
+  }
+
   /* 020: no circular resting pills — sheets open from SiteNav only */
   .stage-panels--nav-driven .stage-panel__summary--sr-only {
     position: absolute;
@@ -356,8 +329,8 @@ const panels = [
 
   /*
    * Nav content = LegalPanel presentation (fullscreen sheet), not a dock chip.
-   * Closed panels stay out of layout; open panel is a fixed stage-filling overlay.
-   * z-index above .site-nav (8) so the sheet paints over the top bar.
+   * Mounted on <body> next to #legal-overlay so fixed + z-index:5 covers SiteNav
+   * the same way Imprint does (page-shell is only z-index:1).
    */
   .stage-panels--nav-driven .stage-panel:not([open]) {
     display: none;
@@ -366,7 +339,7 @@ const panels = [
   .stage-panels--nav-driven .stage-panel[open] {
     position: fixed;
     inset: 0;
-    z-index: 10;
+    z-index: 5;
     display: grid;
     place-items: stretch;
     width: auto;
@@ -533,7 +506,7 @@ const panels = [
          height:0 dock so nav clicks looked like a no-op. */
       position: fixed !important;
       inset: 0 !important;
-      z-index: 10 !important;
+      z-index: 5 !important;
       display: grid !important;
       width: auto !important;
       max-width: none !important;

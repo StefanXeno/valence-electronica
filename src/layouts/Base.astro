@@ -8,6 +8,7 @@ import Footer from '../components/Footer.astro';
 import BackgroundAtmosphere from '../components/BackgroundAtmosphere.astro';
 import GlitchPress from '../components/GlitchPress.astro';
 import LegalOverlay from '../components/LegalOverlay.astro';
+import StagePanels from '../components/StagePanels.astro';
 import { getDefaultVideo } from '../lib/background';
 import { applyThemeAttributes, resolveThemePack } from '../lib/theme-packs';
 import { withBase } from '../lib/url';
@@ -66,6 +67,8 @@ const indexable = site.seo.indexable && !isPreview;
       </main>
       <Footer />
     </div>
+    {/* Body-level like LegalOverlay — escapes .stage-dock stacking so sheets cover SiteNav/vinyl. */}
+    <StagePanels />
     <LegalOverlay />
     <GlitchPress />
     <div id="hud-label-reveal" class="hud-label-reveal" aria-hidden="true" hidden></div>

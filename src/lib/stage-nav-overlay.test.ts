@@ -6,12 +6,14 @@ describe('isStageNavPanelId', () => {
     expect(isStageNavPanelId('about')).toBe(true);
     expect(isStageNavPanelId('discography')).toBe(true);
     expect(isStageNavPanelId('tour')).toBe(true);
-    expect(isStageNavPanelId('info')).toBe(true);
     expect(isStageNavPanelId('contact')).toBe(true);
     expect(isStageNavPanelId('shop')).toBe(true);
   });
 
-  it('rejects unknown ids', () => {
+  it('rejects legal and unknown ids (Imprint/Privacy use LegalOverlay)', () => {
+    expect(isStageNavPanelId('info')).toBe(false);
+    expect(isStageNavPanelId('imprint')).toBe(false);
+    expect(isStageNavPanelId('privacy')).toBe(false);
     expect(isStageNavPanelId('socials')).toBe(false);
     expect(isStageNavPanelId('')).toBe(false);
   });

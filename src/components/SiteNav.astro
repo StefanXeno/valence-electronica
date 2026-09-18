@@ -4,6 +4,7 @@ import site from '../data/site.json';
 import wordmark from '../assets/images/brand/valence-wordmark.png';
 import type { UiChrome } from '../lib/stage';
 import { getAboutEntry, getSiteNavData } from '../lib/stage';
+import { withBase } from '../lib/url';
 import ChannelIcon from './ChannelIcon.astro';
 
 interface Props {
@@ -80,8 +81,19 @@ const menuChannels = site.channels
       <a class="site-nav__item" href="#stage-panel-discography" data-site-nav-open="discography">
         {chrome.discographyTitle}
       </a>
-      <a class="site-nav__item" href="#stage-panel-info" data-site-nav-open="info">
-        {chrome.infoTitle}
+      <a
+        class="site-nav__item"
+        href={withBase('/legal/imprint')}
+        data-legal-slug="imprint"
+      >
+        {chrome.imprintButton}
+      </a>
+      <a
+        class="site-nav__item"
+        href={withBase('/legal/privacy')}
+        data-legal-slug="privacy"
+      >
+        {chrome.privacyButton}
       </a>
     </nav>
 
@@ -165,11 +177,19 @@ const menuChannels = site.channels
       </a>
       <a
         class="site-nav__menu-item"
-        href="#stage-panel-info"
-        data-site-nav-open="info"
+        href={withBase('/legal/imprint')}
+        data-legal-slug="imprint"
         data-site-nav-menu-close
       >
-        {chrome.infoTitle}
+        {chrome.imprintButton}
+      </a>
+      <a
+        class="site-nav__menu-item"
+        href={withBase('/legal/privacy')}
+        data-legal-slug="privacy"
+        data-site-nav-menu-close
+      >
+        {chrome.privacyButton}
       </a>
     </nav>
     {
@@ -208,6 +228,11 @@ const menuChannels = site.channels
 
   function goHome() {
     closeOpenStageNavPanels();
+    // Close legal sheet if open (same exit path as LegalOverlay).
+    const legalExit = document.querySelector<HTMLElement>(
+      '[data-legal-panel]:not([hidden]) [data-legal-exit]',
+    );
+    legalExit?.click();
     const stage = document.querySelector('#stage') ?? document.querySelector('.stage');
     stage?.scrollIntoView({ block: 'start' });
     window.scrollTo({ top: 0, behavior: 'smooth' });

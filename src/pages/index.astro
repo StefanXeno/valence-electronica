@@ -2,7 +2,6 @@
 import Base from '../layouts/Base.astro';
 import Channels from '../components/Channels.astro';
 import Jukebox from '../components/Jukebox.astro';
-import StagePanels from '../components/StagePanels.astro';
 import StageDock from '../components/StageDock.astro';
 import SiteNav from '../components/SiteNav.astro';
 import LandingIntro from '../components/LandingIntro.astro';
@@ -21,7 +20,6 @@ const chrome = await getChrome();
     </div>
     <StageDock>
       <Jukebox slot="jukebox" />
-      <StagePanels slot="panels" />
     </StageDock>
   </div>
 </Base>

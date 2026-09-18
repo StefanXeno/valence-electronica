@@ -1,13 +1,12 @@
 ---
 ---
+
+<!-- Right content pill removed (020) — nav sheets mount on body next to LegalOverlay. -->
 <div class="stage-dock">
   <div class="stage-dock__left">
     <div class="stage-dock__cluster">
       <slot name="jukebox" />
     </div>
-  </div>
-  <div class="stage-dock__right">
-    <slot name="panels" />
   </div>
 </div>
 
@@ -30,8 +29,7 @@
       overflow: visible;
     }
 
-    .stage-dock__left,
-    .stage-dock__right {
+    .stage-dock__left {
       width: auto;
       max-width: 100%;
       min-width: 0;

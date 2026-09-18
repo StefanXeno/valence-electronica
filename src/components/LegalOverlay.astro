@@ -90,6 +90,13 @@ const openSlug = pathWithoutBase.match(/^\/legal\/([^/]+)\/?$/)?.[1] ?? null;
       lastFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     }
 
+    // Close SiteNav content sheets (About/Tour/…) before showing legal.
+    document.querySelectorAll('[data-stage-panel][open]').forEach(function (node) {
+      if (!(node instanceof HTMLDetailsElement)) return;
+      node.open = false;
+      node.classList.remove('is-panel-closing', 'is-overlay-in');
+    });
+
     closeAll();
     panel.hidden = false;
 
