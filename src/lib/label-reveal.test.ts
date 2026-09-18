@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { hudLabelPosition } from './label-reveal';
+import { hudLabelPosition, visualToCssPx } from './label-reveal';
 
 const floater = { width: 180, height: 28 };
 const viewport = { width: 1280, height: 800 };
@@ -37,5 +37,18 @@ describe('hudLabelPosition', () => {
     });
     expect(placed.left - floater.width / 2).toBeGreaterThanOrEqual(8);
     expect(placed.transform).toBe('translate(-50%, -100%)');
+  });
+});
+
+describe('visualToCssPx', () => {
+  it('divides visual coords by site zoom so fixed tooltips align under --site-scale', () => {
+    // Visual center above a control at getBoundingClientRect left=80 with zoom 0.8
+    // must become CSS left=100 so html zoom paints it back at 80.
+    expect(visualToCssPx(80, 0.8)).toBe(100);
+    expect(visualToCssPx(640, 0.8)).toBe(800);
+  });
+
+  it('is a no-op when zoom is 1', () => {
+    expect(visualToCssPx(120, 1)).toBe(120);
   });
 });

@@ -18,6 +18,22 @@ export type LabelBox = {
   bottom?: number;
 };
 
+/**
+ * CSS `zoom` on `html` (`--site-scale`) scales layout visually.
+ * `getBoundingClientRect()` / visual viewport are in post-zoom pixels, but
+ * `position: fixed` left/top are pre-zoom CSS pixels — divide by zoom when placing.
+ */
+export function readDocumentZoom(root: Element = document.documentElement): number {
+  const raw = getComputedStyle(root).zoom;
+  const z = parseFloat(raw);
+  return Number.isFinite(z) && z > 0 ? z : 1;
+}
+
+/** Convert a visual (getBoundingClientRect) length into CSS px for fixed placement. */
+export function visualToCssPx(visualPx: number, zoom: number): number {
+  return zoom === 1 ? visualPx : visualPx / zoom;
+}
+
 function readAnchor(el: HTMLElement): LabelAnchor {
   const raw = el.dataset.hudLabelAnchor;
   if (raw === 'below') return 'below';
@@ -100,9 +116,11 @@ export function initLabelReveal(): void {
   };
 
   const positionFloater = (el: HTMLElement, label: string) => {
+    const zoom = readDocumentZoom();
     const rect = el.getBoundingClientRect();
     const volumeToggle = readVolumeLabelAnchor(el);
     const anchorRect = volumeToggle?.getBoundingClientRect() ?? rect;
+    // Math stays in visual pixels (matches getBoundingClientRect + visual viewport).
     const trigger = {
       left: rect.left,
       top: anchorRect.top,
@@ -118,14 +136,19 @@ export function initLabelReveal(): void {
     floater.style.top = '0px';
     floater.style.transform = 'none';
     const box = floater.getBoundingClientRect();
+    const vv = window.visualViewport;
     const placed = hudLabelPosition({
       trigger,
       floater: { width: box.width, height: box.height },
       anchor,
-      viewport: { width: window.innerWidth, height: window.innerHeight },
+      viewport: {
+        width: vv?.width ?? window.innerWidth,
+        height: vv?.height ?? window.innerHeight,
+      },
     });
-    floater.style.left = `${placed.left}px`;
-    floater.style.top = `${placed.top}px`;
+    // Fixed left/top are pre-zoom CSS pixels — undo the html zoom scale.
+    floater.style.left = `${visualToCssPx(placed.left, zoom)}px`;
+    floater.style.top = `${visualToCssPx(placed.top, zoom)}px`;
     floater.style.transform = placed.transform;
 
     floater.classList.add('is-visible');
