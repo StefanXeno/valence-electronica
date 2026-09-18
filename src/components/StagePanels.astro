@@ -231,26 +231,11 @@ const panels = [
 <script>
   import { clearTransitionGlitch, isGlitchThemeActive, playTransitionGlitch } from '../lib/glitch';
   import { SMOOTH_PANEL_PHASE_MS } from '../lib/panel-motion';
-
-  /**
-   * Nav content opens like LegalPanel (fullscreen sheet), not the old dock chip.
-   * Toggle [open] + CSS frame animation — no two-stage width/height grow.
-   */
-  function setPanelOpen(panel: HTMLDetailsElement, open: boolean) {
-    panel.open = open;
-    if (!open) panel.classList.remove('is-panel-closing', 'is-overlay-in');
-    else {
-      panel.classList.remove('is-panel-closing');
-      // Retrigger legal-style enter animation on each open.
-      panel.classList.remove('is-overlay-in');
-      void panel.offsetWidth;
-      panel.classList.add('is-overlay-in');
-    }
-  }
-
-  function closePanel(panel: HTMLDetailsElement) {
-    setPanelOpen(panel, false);
-  }
+  import {
+    closeOpenStageNavPanels,
+    closeStageNavPanel,
+    setStageNavPanelOpen,
+  } from '../lib/stage-nav-overlay';
 
   function initExclusivePanels() {
     const cluster = document.querySelector('[data-stage-panels]');
@@ -261,10 +246,7 @@ const panels = [
       (event) => {
         const target = event.target;
         if (!(target instanceof HTMLDetailsElement) || !target.open) return;
-        cluster.querySelectorAll('details[open]').forEach((node) => {
-          if (!(node instanceof HTMLDetailsElement) || node === target) return;
-          closePanel(node);
-        });
+        closeOpenStageNavPanels(target);
       },
       true,
     );
@@ -293,10 +275,13 @@ const panels = [
       if (isGlitchThemeActive() && !reduceMotion.matches) {
         playMorph(next ? 'in' : 'out');
       }
-      setPanelOpen(panel, next);
       if (next) {
+        closeOpenStageNavPanels(panel);
+        setStageNavPanelOpen(panel, true);
         const exit = panel.querySelector<HTMLElement>('[data-stage-panel-exit]');
         exit?.focus();
+      } else {
+        closeStageNavPanel(panel);
       }
     });
 
@@ -305,7 +290,7 @@ const panels = [
         event.preventDefault();
         event.stopPropagation();
         if (isGlitchThemeActive() && !reduceMotion.matches) playMorph('out');
-        closePanel(panel);
+        closeStageNavPanel(panel);
       });
     });
 
@@ -313,7 +298,7 @@ const panels = [
     panel.addEventListener('click', (event) => {
       if (event.target === panel && panel.open) {
         if (isGlitchThemeActive() && !reduceMotion.matches) playMorph('out');
-        closePanel(panel);
+        closeStageNavPanel(panel);
       }
     });
   }
@@ -321,7 +306,7 @@ const panels = [
   function initOverlayEscape() {
     document.addEventListener('keydown', (event) => {
       if (event.key !== 'Escape') return;
-      // Legal overlay owns Escape when it is open.
+      // Legal overlay owns Escape when it is open (Imprint/Privacy nested from Info).
       const legalOpen = document.querySelector(
         '#legal-overlay [data-legal-panel]:not([hidden]), [data-legal-panel]:not([hidden])',
       );
@@ -331,7 +316,7 @@ const panels = [
       );
       if (!open) return;
       event.preventDefault();
-      closePanel(open);
+      closeStageNavPanel(open);
     });
   }
 
@@ -372,6 +357,7 @@ const panels = [
   /*
    * Nav content = LegalPanel presentation (fullscreen sheet), not a dock chip.
    * Closed panels stay out of layout; open panel is a fixed stage-filling overlay.
+   * z-index above .site-nav (8) so the sheet paints over the top bar.
    */
   .stage-panels--nav-driven .stage-panel:not([open]) {
     display: none;
@@ -380,7 +366,7 @@ const panels = [
   .stage-panels--nav-driven .stage-panel[open] {
     position: fixed;
     inset: 0;
-    z-index: 5;
+    z-index: 10;
     display: grid;
     place-items: stretch;
     width: auto;
@@ -542,6 +528,20 @@ const panels = [
 
     .stage-panels--nav-driven .stage-panel[open] {
       pointer-events: auto;
+      /* Beat later phone `.stage-panels__sheet .stage-panel[open] { position:static }`
+         (equal specificity, source order) — that rule collapsed overlays into a
+         height:0 dock so nav clicks looked like a no-op. */
+      position: fixed !important;
+      inset: 0 !important;
+      z-index: 10 !important;
+      display: grid !important;
+      width: auto !important;
+      max-width: none !important;
+      overflow: visible !important;
+      background: transparent !important;
+      border: 0 !important;
+      border-radius: 0 !important;
+      backdrop-filter: none !important;
     }
   }
 
@@ -579,8 +579,8 @@ const panels = [
     display: none;
   }
 
-  /* Info rests hidden; nav-driven [open] overlay rule paints it like About. */
-  .stage-panel--info {
+  /* Info rests hidden; open overlay rule paints it like About. */
+  .stage-panel--info:not([open]) {
     display: none;
   }
 

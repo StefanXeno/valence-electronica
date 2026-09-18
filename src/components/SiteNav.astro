@@ -200,38 +200,14 @@ const menuChannels = site.channels
 </header>
 
 <script>
-  const PANEL_IDS = new Set(['about', 'discography', 'tour', 'info', 'contact', 'shop']);
-
-  function closeOpenPanels(except?: HTMLDetailsElement) {
-    document.querySelectorAll<HTMLDetailsElement>('[data-stage-panel][open]').forEach((node) => {
-      if (except && node === except) return;
-      const summary = node.querySelector<HTMLElement>(':scope > summary');
-      // Prefer summary click so overlay exit / exclusive close run.
-      if (summary) summary.click();
-      else node.open = false;
-    });
-  }
-
-  /**
-   * Open nav content like Imprint / Privacy (LegalPanel sheet), not the old
-   * bottom-right StagePanel chip. Click the native <summary> so StagePanels
-   * overlay JS applies is-overlay-in + focus the exit control.
-   */
-  function openNavOverlay(id: string) {
-    const panel = document.querySelector<HTMLDetailsElement>(`[data-stage-panel="${id}"]`);
-    const summary = panel?.querySelector<HTMLElement>(':scope > summary');
-    if (!panel || !summary) return;
-
-    if (panel.open && !panel.classList.contains('is-panel-closing')) {
-      summary.click();
-      return;
-    }
-
-    summary.click();
-  }
+  import {
+    closeOpenStageNavPanels,
+    isStageNavPanelId,
+    openStageNavOverlay,
+  } from '../lib/stage-nav-overlay';
 
   function goHome() {
-    closeOpenPanels();
+    closeOpenStageNavPanels();
     const stage = document.querySelector('#stage') ?? document.querySelector('.stage');
     stage?.scrollIntoView({ block: 'start' });
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -273,7 +249,7 @@ const menuChannels = site.channels
 
     root.querySelectorAll<HTMLElement>('[data-site-nav-menu-close]').forEach((el) => {
       el.addEventListener('click', () => {
-        // Close overlay after the open handler runs (capture opens first).
+        // Close menu after the open handler runs (bubble after capture opens).
         window.requestAnimationFrame(() => setMenuOpen(false));
       });
     });
@@ -291,11 +267,11 @@ const menuChannels = site.channels
     root.querySelectorAll<HTMLAnchorElement>('[data-site-nav-open]').forEach((el) => {
       el.addEventListener('click', (event) => {
         const id = el.dataset.siteNavOpen;
-        if (!id || !PANEL_IDS.has(id)) return;
+        if (!id || !isStageNavPanelId(id)) return;
         event.preventDefault();
         setMenuOpen(false);
-        // Phone + desktop: same LegalPanel-style sheet (not the content pill chip).
-        openNavOverlay(id);
+        // Phone + desktop: LegalPanel-style sheet (set open directly — no hidden summary.click).
+        openStageNavOverlay(id);
       });
     });
   }
