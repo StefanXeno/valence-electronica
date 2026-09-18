@@ -15,7 +15,10 @@
     display: flex;
     align-items: flex-end;
     gap: calc(0.35rem * var(--hud-scale));
-    width: 100%;
+    /* Desktop: hug the compact player — do not stretch a full-width hit box
+       under the decorative vinyl (clicks would land on the cluster). */
+    width: fit-content;
+    max-width: 100%;
   }
 
   @media (max-width: 1023px) {
