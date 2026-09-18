@@ -72,9 +72,6 @@ const menuChannels = site.channels
       <a class="site-nav__item" href={withBase('/tour')} data-legal-slug="tour">
         {chrome.tourTitle}
       </a>
-      <a class="site-nav__item" href={withBase('/contact')} data-legal-slug="contact">
-        {chrome.contactTitle}
-      </a>
       {
         about && (
           <a class="site-nav__item" href={withBase('/about')} data-legal-slug="about">
@@ -154,14 +151,6 @@ const menuChannels = site.channels
         data-site-nav-menu-close
       >
         {chrome.tourTitle}
-      </a>
-      <a
-        class="site-nav__menu-item"
-        href={withBase('/contact')}
-        data-legal-slug="contact"
-        data-site-nav-menu-close
-      >
-        {chrome.contactTitle}
       </a>
       {
         about && (
