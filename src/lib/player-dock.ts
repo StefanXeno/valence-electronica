@@ -150,25 +150,20 @@ function setSocialsOpen(open: boolean): void {
   btn?.setAttribute('aria-expanded', open ? 'true' : 'false');
 }
 
-/** Original `.stage__socials` slot — restore on laptop so the top-right HUD returns. */
+/** Original `.stage__socials` slot — keep socials in the page corner (bottom-right). */
 let socialsHome: { parent: Node; next: Node | null } | null = null;
 
 /**
- * Phone: park the one Channels tree inside the content sheet so Socials clips
- * with `--phone-sheet-h` (same icons-out-of-the-box morph as About).
- * Laptop: put it back. Never mount a second Channels list.
+ * Keep the one Channels tree in `.stage__socials` (bottom-right).
+ * 020 menu + corner placement — do not park into the content sheet.
  */
 function parkPhoneSocials(): void {
   const socials = document.querySelector<HTMLElement>('.stage__socials');
-  const sheet = document.querySelector<HTMLElement>('[data-stage-panels] .stage-panels__sheet');
   if (!socials) return;
   if (!socialsHome && socials.parentElement) {
     socialsHome = { parent: socials.parentElement, next: socials.nextSibling };
   }
-  if (window.matchMedia(PHONE_MQ).matches) {
-    if (sheet && socials.parentElement !== sheet) sheet.appendChild(socials);
-    return;
-  }
+  // Always restore home slot (undo any legacy in-sheet park from older builds).
   if (socialsHome && socials.parentElement !== socialsHome.parent) {
     socialsHome.parent.insertBefore(socials, socialsHome.next);
   }
@@ -1997,6 +1992,8 @@ export function initPlayerDock(): void {
       // not collapse the Info sheet (or V-Flip) sitting behind it.
       if (isLegalOverlayOpen()) return;
       if (target.closest('#legal-overlay, [data-legal-panel]')) return;
+      // Top nav / full-page menu opens content sheets — don't treat as backdrop.
+      if (target.closest('[data-site-nav]')) return;
 
       const onHandle = Boolean(target.closest('[data-player-handle]'));
       const overHandle = pointHitsHandle(event.clientX, event.clientY);

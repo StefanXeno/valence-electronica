@@ -4,6 +4,7 @@ import site from '../data/site.json';
 import wordmark from '../assets/images/brand/valence-wordmark.png';
 import type { UiChrome } from '../lib/stage';
 import { getAboutEntry, getSiteNavData } from '../lib/stage';
+import ChannelIcon from './ChannelIcon.astro';
 
 interface Props {
   chrome: UiChrome;
@@ -13,10 +14,25 @@ const { chrome } = Astro.props;
 const { shopUrl } = getSiteNavData();
 const about = await getAboutEntry();
 const artistName = site.artist.name;
+
+const menuChannels = site.channels
+  .map((channel) => {
+    const id =
+      'id' in channel && typeof channel.id === 'string'
+        ? channel.id
+        : channel.label.toLowerCase().replace(/\s+/g, '');
+    return {
+      id,
+      label: channel.label,
+      url: 'url' in channel ? channel.url : undefined,
+      active: channel.status === 'active' && 'url' in channel,
+    };
+  })
+  .filter((channel) => channel.active && channel.url);
 ---
 
 <header class="site-nav" data-site-nav>
-  <div class="site-nav__band">
+  <div class="site-nav__bar">
     <a class="site-nav__brand" href="#stage" data-site-nav-home aria-label={artistName}>
       <Image
         class="site-nav__wordmark"
@@ -29,8 +45,8 @@ const artistName = site.artist.name;
         fetchpriority="high"
       />
     </a>
+
     <nav class="site-nav__primary" aria-label="Primary">
-      <a class="site-nav__item" href="#stage" data-site-nav-home>{chrome.homeTitle}</a>
       {
         shopUrl ? (
           <a
@@ -54,36 +70,133 @@ const artistName = site.artist.name;
       <a class="site-nav__item" href="#stage-panel-contact" data-site-nav-open="contact">
         {chrome.contactTitle}
       </a>
+      {
+        about && (
+          <a class="site-nav__item" href="#stage-panel-about" data-site-nav-open="about">
+            {chrome.aboutTitle}
+          </a>
+        )
+      }
+      <a class="site-nav__item" href="#stage-panel-discography" data-site-nav-open="discography">
+        {chrome.discographyTitle}
+      </a>
+      <a class="site-nav__item" href="#stage-panel-info" data-site-nav-open="info">
+        {chrome.infoTitle}
+      </a>
     </nav>
-  </div>
-  <nav class="site-nav__secondary" aria-label="Secondary">
-    {
-      about && (
-        <a class="site-nav__secondary-item" href="#stage-panel-about" data-site-nav-open="about">
-          {chrome.aboutTitle}
-        </a>
-      )
-    }
-    <a
-      class="site-nav__secondary-item"
-      href="#stage-panel-discography"
-      data-site-nav-open="discography"
-    >
-      {chrome.discographyTitle}
-    </a>
-    <a class="site-nav__secondary-item" href="#stage-panel-info" data-site-nav-open="info">
-      {chrome.infoTitle}
-    </a>
+
     <button
       type="button"
-      class="site-nav__secondary-item site-nav__links-trigger"
-      data-socials-trigger
+      class="site-nav__menu-btn"
+      data-site-nav-menu-toggle
       aria-expanded="false"
-      aria-controls="stage-socials"
+      aria-controls="site-nav-menu"
+      aria-label="Open menu"
     >
-      {chrome.socialsLabel}
+      <span class="site-nav__menu-btn-bars" aria-hidden="true"></span>
     </button>
-  </nav>
+  </div>
+
+  <div
+    class="site-nav__menu"
+    id="site-nav-menu"
+    data-site-nav-menu
+    hidden
+  >
+    <nav class="site-nav__menu-primary" aria-label="Primary">
+      {
+        shopUrl ? (
+          <a
+            class="site-nav__menu-item"
+            href={shopUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            data-site-nav-shop="external"
+            data-site-nav-menu-close
+          >
+            {chrome.shopTitle}
+          </a>
+        ) : (
+          <a
+            class="site-nav__menu-item"
+            href="#stage-panel-shop"
+            data-site-nav-open="shop"
+            data-site-nav-menu-close
+          >
+            {chrome.shopTitle}
+          </a>
+        )
+      }
+      <a
+        class="site-nav__menu-item"
+        href="#stage-panel-tour"
+        data-site-nav-open="tour"
+        data-site-nav-menu-close
+      >
+        {chrome.tourTitle}
+      </a>
+      <a
+        class="site-nav__menu-item"
+        href="#stage-panel-contact"
+        data-site-nav-open="contact"
+        data-site-nav-menu-close
+      >
+        {chrome.contactTitle}
+      </a>
+      {
+        about && (
+          <a
+            class="site-nav__menu-item"
+            href="#stage-panel-about"
+            data-site-nav-open="about"
+            data-site-nav-menu-close
+          >
+            {chrome.aboutTitle}
+          </a>
+        )
+      }
+      <a
+        class="site-nav__menu-item"
+        href="#stage-panel-discography"
+        data-site-nav-open="discography"
+        data-site-nav-menu-close
+      >
+        {chrome.discographyTitle}
+      </a>
+      <a
+        class="site-nav__menu-item"
+        href="#stage-panel-info"
+        data-site-nav-open="info"
+        data-site-nav-menu-close
+      >
+        {chrome.infoTitle}
+      </a>
+    </nav>
+    {
+      menuChannels.length > 0 && (
+        <div class="site-nav__menu-socials">
+          <p class="site-nav__menu-socials-label">{chrome.socialsLabel}</p>
+          <ul class="site-nav__menu-channels">
+            {menuChannels.map((channel) => (
+              <li>
+                <a
+                  class="site-nav__menu-channel glitch-hit"
+                  href={channel.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={channel.label}
+                  data-site-nav-menu-close
+                >
+                  <ChannelIcon id={channel.id} label={channel.label} />
+                  <span>{channel.label}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )
+    }
+  </div>
 </header>
 
 <script>
@@ -103,34 +216,89 @@ const artistName = site.artist.name;
   function closeOpenPanels(except?: HTMLDetailsElement) {
     document.querySelectorAll<HTMLDetailsElement>('[data-stage-panel][open]').forEach((node) => {
       if (except && node === except) return;
-      node.open = false;
+      const summary = node.querySelector<HTMLElement>(':scope > summary');
+      // Prefer summary click so two-stage motion / exclusive close run.
+      if (summary && !isPhoneHud()) summary.click();
+      else node.open = false;
     });
   }
 
+  /**
+   * Open a desktop StagePanel the same way the old icon dock did: click the
+   * native <summary> so createTwoStageMotion applies is-two-stage-height.
+   * Setting panel.open alone leaves the body at max-height:0 (dead nav).
+   */
   function openDesktopPanel(id: string) {
     const panel = document.querySelector<HTMLDetailsElement>(`[data-stage-panel="${id}"]`);
-    if (!panel) return;
-    closeOpenPanels(panel);
-    panel.open = true;
+    const summary = panel?.querySelector<HTMLElement>(':scope > summary');
+    if (!panel || !summary) return;
+
+    if (panel.open && !panel.classList.contains('is-panel-closing')) {
+      // Already open — toggle closed via the same motion path.
+      summary.click();
+      return;
+    }
+
+    summary.click();
     panel.scrollIntoView({ block: 'nearest' });
   }
 
   function goHome() {
-    closeOpenPanels();
+    if (!isPhoneHud()) closeOpenPanels();
     const stage = document.querySelector('#stage') ?? document.querySelector('.stage');
     stage?.scrollIntoView({ block: 'start' });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   function initSiteNav() {
-    const root = document.querySelector('[data-site-nav]');
+    const root = document.querySelector<HTMLElement>('[data-site-nav]');
     if (!root) return;
+
+    const menu = root.querySelector<HTMLElement>('[data-site-nav-menu]');
+    const menuBtn = root.querySelector<HTMLButtonElement>('[data-site-nav-menu-toggle]');
+
+    const setMenuOpen = (open: boolean) => {
+      if (!menu || !menuBtn) return;
+      menu.hidden = !open;
+      root.classList.toggle('is-menu-open', open);
+      document.documentElement.classList.toggle('site-nav-menu-open', open);
+      menuBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      menuBtn.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+      if (open) {
+        const first = menu.querySelector<HTMLElement>('a, button');
+        first?.focus();
+      } else {
+        menuBtn.focus();
+      }
+    };
 
     root.querySelectorAll<HTMLElement>('[data-site-nav-home]').forEach((el) => {
       el.addEventListener('click', (event) => {
         event.preventDefault();
+        setMenuOpen(false);
         goHome();
       });
+    });
+
+    menuBtn?.addEventListener('click', () => {
+      setMenuOpen(!root.classList.contains('is-menu-open'));
+    });
+
+    root.querySelectorAll<HTMLElement>('[data-site-nav-menu-close]').forEach((el) => {
+      el.addEventListener('click', () => {
+        // Close overlay after the open handler runs (capture opens first).
+        window.requestAnimationFrame(() => setMenuOpen(false));
+      });
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && root.classList.contains('is-menu-open')) {
+        setMenuOpen(false);
+      }
+    });
+
+    window.matchMedia('(min-width: 1024px)').addEventListener('change', (event) => {
+      if (event.matches) setMenuOpen(false);
     });
 
     root.querySelectorAll<HTMLAnchorElement>('[data-site-nav-open]').forEach((el) => {
@@ -139,6 +307,7 @@ const artistName = site.artist.name;
         if (!id || !PANEL_IDS.has(id)) return;
         event.preventDefault();
         if (isPhoneHud() && CONTENT_SHEETS.has(id)) {
+          setMenuOpen(false);
           requestPhoneContent(id as PhoneContentSheet);
           return;
         }
@@ -154,37 +323,33 @@ const artistName = site.artist.name;
   .site-nav {
     pointer-events: auto;
     position: fixed;
-    z-index: 3;
+    z-index: 8;
     top: 0;
     left: 0;
     right: 0;
     display: flex;
     flex-direction: column;
-    gap: 0.2rem;
-    padding: 0.45rem clamp(0.65rem, 2vw, 1.1rem) 0.35rem;
-    background: linear-gradient(
-      180deg,
-      color-mix(in srgb, #0a0a0a 94%, transparent) 0%,
-      color-mix(in srgb, #0a0a0a 88%, transparent) 70%,
-      transparent 100%
-    );
+    padding: 0.55rem clamp(0.65rem, 2vw, 1.1rem) 0.35rem;
+    /* Transparent over stage — no solid black band. */
+    background: transparent;
   }
 
-  .site-nav__band {
+  .site-nav__bar {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     align-items: center;
     justify-content: space-between;
-    gap: 0.55rem 1rem;
-    padding: 0.45rem 0.75rem;
-    background: color-mix(in srgb, #050505 92%, var(--color-accent, #c8ff4a) 4%);
-    border-bottom: 1px solid color-mix(in srgb, #fff 12%, transparent);
+    gap: 0.75rem 1.25rem;
+    padding: 0.2rem 0;
+    background: transparent;
+    border: 0;
   }
 
   .site-nav__brand {
     display: block;
     line-height: 0;
     flex: 0 1 auto;
+    filter: drop-shadow(0 1px 10px color-mix(in srgb, #000 55%, transparent));
   }
 
   .site-nav__wordmark {
@@ -194,12 +359,13 @@ const artistName = site.artist.name;
   }
 
   .site-nav__primary {
-    display: flex;
+    display: none;
     flex-wrap: wrap;
     align-items: center;
-    gap: 0.15rem 0.85rem;
+    justify-content: flex-end;
+    gap: 0.2rem 0.95rem;
     font-family: var(--font-display);
-    font-size: clamp(0.72rem, 2.4vw, 0.88rem);
+    font-size: clamp(0.72rem, 1.5vw, 0.88rem);
     letter-spacing: 0.04em;
     text-transform: uppercase;
   }
@@ -208,6 +374,7 @@ const artistName = site.artist.name;
     color: color-mix(in srgb, #fff 88%, transparent);
     text-decoration: none;
     border-bottom: 1px solid transparent;
+    text-shadow: 0 1px 12px color-mix(in srgb, #000 70%, transparent);
   }
 
   .site-nav__item:hover,
@@ -217,49 +384,182 @@ const artistName = site.artist.name;
     outline: none;
   }
 
-  .site-nav__secondary {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.35rem 0.85rem;
-    padding: 0 0.75rem 0.15rem;
-    font-size: clamp(0.65rem, 2vw, 0.75rem);
-    letter-spacing: 0.03em;
-  }
-
-  .site-nav__secondary-item {
+  .site-nav__menu-btn {
     appearance: none;
-    background: none;
-    border: 0;
-    padding: 0;
+    display: inline-grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
     margin: 0;
-    font: inherit;
-    color: color-mix(in srgb, #fff 62%, transparent);
-    text-decoration: none;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: #fff;
     cursor: pointer;
+    flex: 0 0 auto;
+    filter: drop-shadow(0 1px 8px color-mix(in srgb, #000 60%, transparent));
   }
 
-  .site-nav__secondary-item:hover,
-  .site-nav__secondary-item:focus-visible {
-    color: color-mix(in srgb, #fff 92%, transparent);
+  .site-nav__menu-btn-bars,
+  .site-nav__menu-btn-bars::before,
+  .site-nav__menu-btn-bars::after {
+    display: block;
+    width: 1.35rem;
+    height: 2px;
+    background: currentColor;
+    border-radius: 1px;
+    transition:
+      transform 200ms ease,
+      opacity 200ms ease;
+  }
+
+  .site-nav__menu-btn-bars {
+    position: relative;
+  }
+
+  .site-nav__menu-btn-bars::before,
+  .site-nav__menu-btn-bars::after {
+    content: '';
+    position: absolute;
+    left: 0;
+  }
+
+  .site-nav__menu-btn-bars::before {
+    top: -0.4rem;
+  }
+
+  .site-nav__menu-btn-bars::after {
+    top: 0.4rem;
+  }
+
+  .site-nav.is-menu-open .site-nav__menu-btn-bars {
+    background: transparent;
+  }
+
+  .site-nav.is-menu-open .site-nav__menu-btn-bars::before {
+    top: 0;
+    transform: rotate(45deg);
+  }
+
+  .site-nav.is-menu-open .site-nav__menu-btn-bars::after {
+    top: 0;
+    transform: rotate(-45deg);
+  }
+
+  /* Full-viewport mobile menu (Nasaya-style). */
+  .site-nav__menu {
+    position: fixed;
+    inset: 0;
+    z-index: 9;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2.5rem;
+    padding: max(5.5rem, calc(env(safe-area-inset-top, 0px) + 4.5rem))
+      clamp(1.25rem, 6vw, 2.5rem)
+      max(2rem, env(safe-area-inset-bottom, 0px));
+    background: color-mix(in srgb, #050505 92%, transparent);
+    backdrop-filter: blur(16px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .site-nav__menu[hidden] {
+    display: none;
+  }
+
+  .site-nav__menu-primary {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    font-family: var(--font-display);
+    font-size: clamp(1.65rem, 8vw, 2.4rem);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    line-height: 1.15;
+  }
+
+  .site-nav__menu-item {
+    color: color-mix(in srgb, #fff 90%, transparent);
+    text-decoration: none;
+    padding: 0.2em 0;
+    border-bottom: 1px solid transparent;
+  }
+
+  .site-nav__menu-item:hover,
+  .site-nav__menu-item:focus-visible {
+    color: #fff;
+    border-bottom-color: color-mix(in srgb, var(--color-accent-alt, #c8ff4a) 55%, transparent);
     outline: none;
   }
 
-  /* Phone: Links lives in secondary row; laptop side socials own the Channels tree. */
+  .site-nav__menu-socials {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .site-nav__menu-socials-label {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, #fff 55%, transparent);
+  }
+
+  .site-nav__menu-channels {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem 1rem;
+  }
+
+  .site-nav__menu-channel {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    color: color-mix(in srgb, #fff 78%, transparent);
+    text-decoration: none;
+    font-family: var(--font-display);
+    font-size: 0.85rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .site-nav__menu-channel:hover,
+  .site-nav__menu-channel:focus-visible {
+    color: #fff;
+    outline: none;
+  }
+
+  .site-nav__menu-channel :global(.channel-icon) {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
   @media (min-width: 1024px) {
-    .site-nav__links-trigger {
-      display: none;
+    .site-nav__primary {
+      display: flex;
+      flex: 1 1 auto;
+    }
+
+    .site-nav__menu-btn,
+    .site-nav__menu {
+      display: none !important;
     }
   }
 
   @media (max-width: 1023px) {
-    .site-nav__band {
-      gap: 0.4rem;
-    }
-
     .site-nav__primary {
-      width: 100%;
-      justify-content: space-between;
+      display: none;
     }
+  }
+
+  :global(html.site-nav-menu-open),
+  :global(html.site-nav-menu-open) body {
+    overflow: hidden;
   }
 </style>

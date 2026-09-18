@@ -19,6 +19,7 @@ emptyShows: No upcoming dates
 jukeboxLabel: V-Flip
 jukeboxPanelTitle: V-Flip aka. Jukebox
 jukeboxPanelTooltip: Pick a track to switch stages—the site theme changes with each one.
+jukeboxIcon: jukebox
 socialsLabel: Links
 socialsIcon: socials
 infoTitle: Info

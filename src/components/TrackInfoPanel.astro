@@ -320,9 +320,11 @@ const tracks = trackOrder.map((id) => byId.get(id)).filter((track): track is Non
   }
 
   /*
-   * Phone V-Flip: current track only. Sibling rows stay in the DOM so
-   * laptop (≥1024) keeps the full playlist and syncStageUi can still
-   * move aria-pressed / [hidden] when the playing track changes.
+   * Phone rest: current track only (selection lives in theme-tracks).
+   * Sibling rows stay in the DOM so laptop (≥1024) keeps the full playlist
+   * and syncStageUi can still move aria-pressed / [hidden] on track change.
+   * When vinyl opens V-Flip (.jukebox.is-open), restore the full selectable
+   * TrackInfoPanel — same easter-egg surface as desktop (021).
    */
   @media (max-width: 1023px) {
     .jukebox__track-row:not(:has(.jukebox__track-select[aria-pressed='true'])) {
@@ -351,6 +353,33 @@ const tracks = trackOrder.map((id) => byId.get(id)).filter((track): track is Non
     .jukebox__track-meta {
       max-height: none;
       overflow: visible;
+    }
+
+    :global(.jukebox.is-open) .jukebox__track-row {
+      display: block;
+    }
+
+    :global(.jukebox.is-open) .jukebox__track-select {
+      pointer-events: auto;
+      cursor: pointer;
+      text-transform: none;
+      letter-spacing: 0.03em;
+    }
+
+    :global(.jukebox.is-open) .track-info__blurb,
+    :global(.jukebox.is-open) .track-info__credits,
+    :global(.jukebox.is-open) .track-info__mentions {
+      display: block;
+    }
+
+    :global(.jukebox.is-open) .track-info__credits {
+      display: flex;
+    }
+
+    :global(.jukebox.is-open) .jukebox__track-meta {
+      max-height: min(40vh, 14rem);
+      overflow-y: auto;
+      overflow-x: hidden;
     }
   }
 </style>

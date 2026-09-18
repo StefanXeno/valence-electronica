@@ -151,7 +151,7 @@ export function initLabelReveal(): void {
     if (!label) return;
     const panel = el.closest('details');
     if (panel instanceof HTMLDetailsElement && panel.open) return;
-    // Open V-Flip uses an inline track title — no floater on the vinyl toggle.
+    // Open V-Flip uses an inline track title — no floater on the vinyl FAB.
     if (
       el.matches('[data-jukebox-toggle]') &&
       el.closest('[data-jukebox]')?.classList.contains('is-open')

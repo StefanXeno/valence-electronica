@@ -16,14 +16,14 @@ const { token, emoji } = Astro.props;
     </span>
   ) : token === 'jukebox' ? (
     <svg class="hud-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-      <path
-        fill="currentColor"
-        fill-rule="evenodd"
-        d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 8.15a1.85 1.85 0 1 0 0 3.7 1.85 1.85 0 0 0 0-3.7z"
-      />
-      <circle cx="12" cy="12" r="7.45" fill="none" stroke="var(--color-bg)" stroke-width="0.55" opacity="0.5" />
-      <circle cx="12" cy="12" r="5.55" fill="none" stroke="var(--color-bg)" stroke-width="0.55" opacity="0.5" />
-      <circle cx="12" cy="12" r="3.7" fill="none" stroke="var(--color-bg)" stroke-width="0.55" opacity="0.5" />
+      <!-- Vinyl disc: outer platter + groove rings + spindle hole -->
+      <circle cx="12" cy="12" r="10" fill="currentColor" />
+      <circle cx="12" cy="12" r="8.35" fill="none" stroke="var(--color-bg)" stroke-width="0.45" opacity="0.45" />
+      <circle cx="12" cy="12" r="6.85" fill="none" stroke="var(--color-bg)" stroke-width="0.45" opacity="0.4" />
+      <circle cx="12" cy="12" r="5.35" fill="none" stroke="var(--color-bg)" stroke-width="0.45" opacity="0.4" />
+      <circle cx="12" cy="12" r="3.85" fill="none" stroke="var(--color-bg)" stroke-width="0.45" opacity="0.35" />
+      <circle cx="12" cy="12" r="2.55" fill="var(--color-bg)" opacity="0.92" />
+      <circle cx="12" cy="12" r="0.85" fill="currentColor" />
     </svg>
   ) : token === 'about' ? (
     <svg class="hud-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">

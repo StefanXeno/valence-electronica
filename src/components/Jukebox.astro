@@ -177,20 +177,6 @@ const defaultLabel =
 
         <button
           type="button"
-          class="jukebox__tool jukebox__tool--vinyl glitch-hit"
-          data-jukebox-toggle
-          data-glitch-live
-          data-hud-label={chrome.vinylLabel}
-          data-hud-label-anchor="above"
-          aria-expanded="false"
-          aria-controls="jukebox-drawer"
-          aria-label={chrome.vinylLabel}
-        >
-          <HudIcon token={chrome.jukeboxIcon} emoji={chrome.jukeboxIconEmoji} />
-        </button>
-
-        <button
-          type="button"
           class="jukebox__tool jukebox__tool--loop glitch-hit"
           data-loop-toggle
           data-glitch-live
@@ -214,6 +200,23 @@ const defaultLabel =
           </div>
         )}
       </div>
+
+      {/* Fixed bottom-left vinyl FAB — outside toolbar chrome (021 easter egg). */}
+      <button
+        type="button"
+        class="jukebox__vinyl-fab glitch-hit"
+        data-jukebox-toggle
+        data-glitch-live
+        data-hud-label={chrome.vinylLabel}
+        data-hud-label-anchor="above"
+        aria-expanded="false"
+        aria-controls="jukebox-drawer"
+        aria-label={chrome.vinylLabel}
+      >
+        <span class="jukebox__vinyl-disc" aria-hidden="true">
+          <HudIcon token="jukebox" />
+        </span>
+      </button>
     </div>
   )
 }
@@ -351,8 +354,10 @@ const defaultLabel =
       isOpen = next;
       root.classList.toggle('is-open', next);
       toggle.setAttribute('aria-expanded', next ? 'true' : 'false');
-      if (!next) setPlaylistOpen(false);
-      else if (window.matchMedia('(max-width: 1023px)').matches && themePanel) {
+      if (!next) {
+        // 021: closing V-Flip returns to selection-first home (not solo card).
+        setPlaylistOpen(true);
+      } else if (window.matchMedia('(max-width: 1023px)').matches && themePanel) {
         themePanel.hidden = false;
       }
       document.dispatchEvent(new CustomEvent('vflip-list-change', { detail: { open: next } }));
@@ -770,6 +775,84 @@ const defaultLabel =
   .jukebox__tool--video-play:disabled {
     opacity: 0.4;
     pointer-events: none;
+  }
+
+  /*
+   * Vinyl easter egg — fixed bottom-left disc (not buried in toolbar).
+   * Uses the historical jukebox vinyl glyph; button itself reads as a record.
+   */
+  .jukebox__vinyl-fab {
+    appearance: none;
+    position: fixed;
+    z-index: 4;
+    left: var(--hud-inset);
+    bottom: var(--hud-inset);
+    display: inline-grid;
+    place-items: center;
+    width: calc(3.5rem * var(--hud-scale));
+    height: calc(3.5rem * var(--hud-scale));
+    margin: 0;
+    padding: 0;
+    border: 1px solid color-mix(in srgb, var(--color-border) 55%, transparent);
+    border-radius: 50%;
+    background:
+      radial-gradient(
+        circle at 50% 50%,
+        color-mix(in srgb, var(--color-text) 18%, #2a2a2a) 0 14%,
+        #111 15% 16%,
+        #1a1a1a 17% 38%,
+        #0c0c0c 39% 40%,
+        #161616 41% 62%,
+        #090909 63% 64%,
+        #121212 65% 100%
+      );
+    color: color-mix(in srgb, var(--color-text-muted) 75%, #fff);
+    cursor: pointer;
+    box-shadow:
+      0 0.35rem 1.1rem color-mix(in srgb, black 48%, transparent),
+      inset 0 0 0 1px color-mix(in srgb, #fff 8%, transparent);
+    pointer-events: auto;
+    transition:
+      transform 160ms ease,
+      border-color 160ms ease,
+      color 160ms ease,
+      box-shadow 160ms ease;
+  }
+
+  .jukebox__vinyl-fab:hover,
+  .jukebox__vinyl-fab:focus-visible {
+    color: var(--color-accent-alt);
+    border-color: color-mix(in srgb, var(--color-accent) 45%, var(--color-border));
+    outline: none;
+    transform: scale(1.04);
+  }
+
+  .jukebox.is-open .jukebox__vinyl-fab {
+    border-color: color-mix(in srgb, var(--color-accent) 55%, var(--color-border));
+    color: var(--color-accent-alt);
+    box-shadow:
+      0 0.35rem 1.1rem color-mix(in srgb, black 48%, transparent),
+      0 0 0.85rem color-mix(in srgb, var(--color-accent) 28%, transparent),
+      inset 0 0 0 1px color-mix(in srgb, #fff 8%, transparent);
+  }
+
+  .jukebox__vinyl-disc {
+    display: grid;
+    place-items: center;
+    width: 72%;
+    height: 72%;
+  }
+
+  .jukebox__vinyl-disc :global(.hud-icon) {
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Desktop player clears the vinyl FAB corner. */
+  @media (min-width: 1024px) {
+    .jukebox {
+      margin-left: calc(3.75rem * var(--hud-scale));
+    }
   }
 
   .jukebox.is-glitching[data-glitch='in'] .jukebox__panel {
@@ -1207,10 +1290,6 @@ const defaultLabel =
     .jukebox__section--theme-tracks,
     .jukebox__section--theme-tracks[hidden] {
       display: block !important;
-    }
-
-    .jukebox__tool--vinyl {
-      display: inline-grid;
     }
 
     .jukebox__tool--loop {
@@ -1760,8 +1839,16 @@ const defaultLabel =
     }
 
     /* Vinyl easter egg stays available on phone (021); handle still expands player. */
-    .jukebox__tool--vinyl {
+    .jukebox__vinyl-fab {
       display: inline-grid;
+      left: var(--phone-dock-inset);
+      bottom: calc(
+        var(--hud-dock-bottom) + var(--phone-dock-lift) + var(--phone-player-h) + var(--phone-dock-gap) +
+          0.55rem
+      );
+      z-index: calc(var(--z-phone-player-front, 7) + 1);
+      width: 3.15rem;
+      height: 3.15rem;
     }
 
     .jukebox__tool--loop {
@@ -1782,12 +1869,25 @@ const defaultLabel =
       display: grid;
     }
 
-    /* Phone sheet: one discog list. TrackInfoPanel is laptop-only. */
-    .jukebox.is-player-expanded .jukebox__section--list,
-    .jukebox.is-open .jukebox__section--list,
-    .jukebox.is-sheet-morphing .jukebox__section--list,
-    .jukebox.is-sheet-dragging .jukebox__section--list {
+    /*
+     * Phone sheet: selection (theme-tracks) is the useful-open default.
+     * Vinyl easter egg (is-open) swaps in TrackInfoPanel / .jukebox__section--list
+     * — same surface as laptop V-Flip (021). Do not keep the old "list is
+     * laptop-only" rule when is-open; that made vinyl a no-op on phone.
+     */
+    .jukebox.is-player-expanded:not(.is-open) .jukebox__section--list,
+    .jukebox.is-sheet-morphing:not(.is-open) .jukebox__section--list,
+    .jukebox.is-sheet-dragging:not(.is-open) .jukebox__section--list {
       display: none;
+    }
+
+    .jukebox.is-open .jukebox__section--list {
+      display: block !important;
+    }
+
+    .jukebox.is-open:not(.is-panel-opening) .jukebox__section--theme-tracks,
+    .jukebox.is-open:not(.is-panel-opening) .jukebox__section--theme-tracks[hidden] {
+      display: none !important;
     }
 
     .jukebox.is-player-expanded .jukebox__panel,
@@ -1814,16 +1914,14 @@ const defaultLabel =
     }
 
     /* !important beats UA `[hidden] { display: none !important }`. */
-    .jukebox.is-player-expanded .jukebox__section--theme-tracks,
-    .jukebox.is-player-expanded .jukebox__section--theme-tracks[hidden],
-    .jukebox.is-open:not(.is-panel-opening) .jukebox__section--theme-tracks,
-    .jukebox.is-open:not(.is-panel-opening) .jukebox__section--theme-tracks[hidden],
-    .jukebox.is-sheet-dragging .jukebox__section--theme-tracks,
-    .jukebox.is-sheet-dragging .jukebox__section--theme-tracks[hidden],
-    .jukebox.is-sheet-morphing .jukebox__section--theme-tracks,
-    .jukebox.is-sheet-morphing .jukebox__section--theme-tracks[hidden],
-    .jukebox.is-playlist-morphing .jukebox__section--theme-tracks,
-    .jukebox.is-playlist-morphing .jukebox__section--theme-tracks[hidden] {
+    .jukebox.is-player-expanded:not(.is-open) .jukebox__section--theme-tracks,
+    .jukebox.is-player-expanded:not(.is-open) .jukebox__section--theme-tracks[hidden],
+    .jukebox.is-sheet-dragging:not(.is-open) .jukebox__section--theme-tracks,
+    .jukebox.is-sheet-dragging:not(.is-open) .jukebox__section--theme-tracks[hidden],
+    .jukebox.is-sheet-morphing:not(.is-open) .jukebox__section--theme-tracks,
+    .jukebox.is-sheet-morphing:not(.is-open) .jukebox__section--theme-tracks[hidden],
+    .jukebox.is-playlist-morphing:not(.is-open) .jukebox__section--theme-tracks,
+    .jukebox.is-playlist-morphing:not(.is-open) .jukebox__section--theme-tracks[hidden] {
       display: block !important;
       overflow-x: hidden;
     }

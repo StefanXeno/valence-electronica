@@ -110,7 +110,6 @@ a.channel-btn:focus-visible {
   pointer-events: none;
 }
 
-.stage__identity,
 .stage__socials,
 .stage-dock {
   pointer-events: auto;
@@ -118,33 +117,22 @@ a.channel-btn:focus-visible {
   z-index: 2;
 }
 
-.stage__identity {
-  /* Sit below SiteNav top band + secondary row */
-  top: calc(var(--hud-inset) + 4.75rem);
-  left: var(--hud-inset);
-  max-width: min(var(--tagline-max-width), calc(100vw - calc(6.5rem * var(--hud-scale))));
-}
-
+/* Bottom-right socials (020 feedback) — clear of the floor player chrome. */
 .stage__socials {
-  top: var(--hud-inset);
+  top: auto;
+  left: auto;
   right: var(--hud-inset);
+  bottom: calc(var(--hud-inset) + var(--control-size) + 0.85rem);
   max-width: min(calc(50vw - var(--hud-inset)), calc(100vw - 7.5rem));
+  transform: none;
 }
 
-/* Laptop: side socials along the right edge (Nasaya-like), not top-right cluster */
 @media (min-width: 1024px) {
-  .stage__socials {
-    top: 50%;
-    right: var(--hud-inset);
-    left: auto;
-    bottom: auto;
-    transform: translateY(-50%);
-    max-width: min(11rem, 18vw);
-  }
-
   .stage__socials .channels ul {
-    flex-direction: column;
-    align-items: flex-end;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
   }
 }
 
@@ -293,11 +281,6 @@ a.channel-btn:focus-visible {
     display: none;
   }
 
-  .stage__identity {
-    /* 100% of the fixed containing block — not 100vw (scrollbar / visual viewport). */
-    max-width: calc(100% - 2 * var(--hud-inset));
-  }
-
   .stage-dock {
     z-index: 3;
     left: var(--phone-dock-inset);
@@ -392,80 +375,30 @@ a.channel-btn:focus-visible {
   }
 
   /*
-   * No-JS fallback: overlay the one Channels tree in the dock's grown
-   * padding-top. JS parks the same node inside .stage-panels__sheet (below).
+   * Phone: persistent bottom-right socials above the player dock.
+   * Full-page SiteNav menu also lists links. Do not hide behind Links sheet.
    */
   .stage__socials {
     top: auto;
+    left: auto;
     right: var(--phone-dock-inset);
-    left: var(--phone-dock-inset);
     bottom: calc(
       var(--hud-dock-bottom) + var(--phone-dock-lift) + var(--phone-player-h) + var(--phone-dock-gap) +
-        var(--phone-bar-pad) + var(--control-size)
+        0.55rem
     );
-    max-width: none;
-    visibility: hidden;
-    pointer-events: none;
-    opacity: 0;
-    transform: none;
-    transition:
-      opacity 220ms var(--phone-bloom-ease, var(--phone-rise-ease)),
-      visibility 0s linear 280ms;
-  }
-
-  /* Keep socials parked on the icon row while the pill stays open (cross-switch). */
-  html[data-sheet-open] .stage__socials,
-  html[data-socials-open] .stage__socials {
-    bottom: calc(
-      var(--hud-dock-bottom) + var(--phone-dock-lift) + var(--phone-player-h) + var(--phone-dock-gap) +
-        var(--phone-open-pad) + var(--phone-body-gap) + var(--control-size)
-    );
-  }
-
-  html[data-socials-open] .stage__socials {
-    z-index: 4;
+    max-width: min(70vw, 16rem);
     visibility: visible;
     pointer-events: auto;
     opacity: 1;
-    transition:
-      opacity 220ms var(--phone-bloom-ease, var(--phone-rise-ease)),
-      visibility 0s;
-  }
-
-  /*
-   * JS-parked: in-sheet, clipped by --phone-sheet-h. Icons stay in
-   * .stage-panels__icons (z-index 2) so they ride the growing chrome.
-   */
-  .stage-panels__sheet .stage__socials {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: auto;
-    z-index: 1;
-    max-width: none;
     transform: none;
-  }
-
-  html[data-sheet-open] .stage-panels__sheet .stage__socials,
-  html[data-socials-open] .stage-panels__sheet .stage__socials {
-    bottom: auto;
-  }
-
-  /* Expand/close: reveal by sheet height only — don't fade in outside the pill. */
-  html[data-socials-open] .stage-panels.is-sheet-open:not(.is-cross-switching) .stage-panels__sheet .stage__socials,
-  html[data-socials-open] .stage-panels.is-sheet-closing .stage-panels__sheet .stage__socials {
-    opacity: 1;
-    visibility: visible;
-    transition: none;
+    z-index: 4;
   }
 
   .stage__socials .channels {
-    width: 100%;
+    width: auto;
     max-width: 100%;
     box-sizing: border-box;
-    /* Same L/R inset as .stage-panels — both rows share one chrome width. */
-    padding: 0 var(--phone-inline-pad);
+    padding: 0;
     border: 0;
     border-radius: 0;
     background: transparent;
@@ -475,12 +408,12 @@ a.channel-btn:focus-visible {
 
   .stage__socials .channels ul {
     display: flex;
-    flex-wrap: nowrap;
-    justify-content: space-between;
+    flex-wrap: wrap;
+    justify-content: flex-end;
     align-items: center;
-    width: 100%;
+    width: auto;
     max-width: 100%;
-    gap: 0;
+    gap: 0.45rem;
     max-height: none;
     overflow: visible;
   }
@@ -489,9 +422,16 @@ a.channel-btn:focus-visible {
     flex: 0 0 auto;
   }
 
-  .stage-panels__sheet .stage__socials .channels {
-    /* Pill already applies --phone-inline-pad. */
-    padding: 0;
+  /* Legacy park target — keep harmless if JS ever re-parents. */
+  .stage-panels__sheet .stage__socials {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: auto;
+    z-index: 1;
+    max-width: none;
+    transform: none;
   }
 }
 
