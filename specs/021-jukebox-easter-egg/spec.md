@@ -18,7 +18,7 @@
 | Spec | Relationship |
 | ---- | ------------ |
 | `020-site-nav-chrome` | Sibling. Owns top nav / side socials / removing circular side docks. This feature owns **player & song-select UX**. |
-| `022-stage-artist-polish` | Sibling. Shuffle **visual** redesign, mobile tap-vs-swipe preference, track atmosphere. This feature owns **default player surface** and V-Flip secrecy. |
+| `022-stage-artist-polish` | Sibling. Shuffle **visual** redesign, mobile tap-vs-swipe preference, track atmosphere, **dual mobile/desktop stage videos**. This feature owns **default player surface** and vinyl → V-Flip discovery. |
 | `011-vflip-now-playing` | **Superseded** for “V-Flip as primary visible jukebox chrome” and for any requirement that collapsed/expanded vinyl is the main song UI. Playback meanings (shuffle on/off, hop timing, mute eligibility) stay until explicitly replaced. |
 | `019-desktop-chrome-polish` | **Superseded** for desktop default of always-open **Currently playing** card as the primary look. Song selection becomes the default surface. |
 | `015-mobile-stage-hud` / `018-player-animation-polish` | **Superseded** for phone default expanded header **“Currently playing”** as the first thing fans see in the player. Song list / selection-first; transport may remain. Swipe-vs-tap detail → `022`. |
@@ -34,7 +34,7 @@ adds extra taps before they can change tracks.
 | ------- | ------ |
 | **Default player look** | Song selection panel / list (pick a track) — **not** “Currently playing” as the default. |
 | **Song switch cost** | Minimize taps/clicks from rest → hearing another catalog track. |
-| **V-Flip** | Remains a delightful discovery for people who find it; **not** labeled or placed as primary chrome. Bottom-left strength is remembered as easter-egg energy, not as the main CTA. |
+| **V-Flip** | Remains a delightful discovery via a quiet **vinyl** control (historical V-Flip entry — see `011`). Casual listeners change songs via selection-first chrome without needing V-Flip. Vinyl is **not** primary nav and **not** labeled as a main CTA. |
 | **Casual path** | Fan/casual listener changes songs without learning V-Flip lore. |
 
 ## User Scenarios & Testing *(mandatory)*
@@ -72,30 +72,39 @@ flow — new flow must use fewer obligatory steps.
 
 ---
 
-### User Story 2 - V-Flip is a discoverable easter egg (Priority: P1)
+### User Story 2 - V-Flip opens from a discoverable vinyl (Priority: P1)
 
-A curious visitor who explores the stage can still discover V-Flip as a
-hidden delight. It must not appear as a labeled primary control in the
-main chrome, and it must not be required for song changes.
+A curious visitor who notices a quiet **vinyl** brand object on the stage
+can click or tap it to open V-Flip as an easter egg. Vinyl is the
+discoverable entry point (same historical idea as early V-Flip in `011`:
+compact vinyl control → open jukebox experience). It must not appear as a
+labeled primary nav item, and it must not be required for song changes.
+Discovery is **not** unmarked corner hit-targets, konami-style sequences,
+or long-press-only gestures.
 
-**Why this priority**: Explicit Hendrik feedback — keep the strong idea,
-hide it.
+**Why this priority**: Explicit operator clarification — revert discovery
+UX to the vinyl control people can find and activate.
 
-**Independent Test**: Primary chrome review shows no “V-Flip” primary
-CTA; a documented discovery path still reveals it. [Discovery mechanism
-needs clarification.]
+**Independent Test**: Primary chrome review shows no “V-Flip” primary CTA
+in the `020` top menu; a visible vinyl control still opens V-Flip on
+click/tap; song selection works without ever using vinyl.
 
 **Acceptance Scenarios**:
 
 1. **Given** a first-time casual visitor, **When** they use only obvious
-   primary chrome, **Then** they are not required to open V-Flip to
-   change songs.
-2. **Given** a curious visitor follows the intended discovery path,
-   **When** they trigger it, **Then** V-Flip (or equivalent hidden
-   jukebox experience) becomes available as an easter egg.
-3. **Given** V-Flip is hidden at rest, **When** reviewers inspect primary
-   nav and primary player chrome, **Then** V-Flip is not advertised as a
-   main menu item or default player tab label.
+   primary chrome and song selection, **Then** they are not required to
+   open V-Flip to change songs.
+2. **Given** a curious visitor sees the vinyl control, **When** they
+   click or tap it, **Then** V-Flip (or the equivalent hidden jukebox
+   experience) opens as the easter egg.
+3. **Given** V-Flip is not advertised as primary chrome, **When**
+   reviewers inspect the `020` top menu and the default song-selection
+   player surface, **Then** V-Flip is not a main menu item or default
+   player tab label — the vinyl remains a quiet brand object, not
+   primary nav chrome.
+4. **Given** discovery expectations, **When** testers look for how to
+   open V-Flip, **Then** the path is the vinyl control — not an unmarked
+   corner, not a konami sequence, and not long-press-only.
 
 ---
 
@@ -129,8 +138,10 @@ action; returning or defaulting still lands on selection.
   mute/audio rules from existing playback meaning still apply.
 - Shuffle on while browsing selection — selecting a track still takes
   priority as an explicit visitor choice.
-- Easter egg discovered mid-session — song selection remains available;
-  easter egg does not trap the visitor.
+- Easter egg opened mid-session via vinyl — song selection remains
+  available; easter egg does not trap the visitor.
+- Vinyl undiscoverable due to chrome overlap — vinyl must remain
+  clickable/tappable and not covered by primary `020` nav.
 - Reduced motion — selection and easter egg remain usable without
   relying on motion-only cues.
 
@@ -148,10 +159,12 @@ action; returning or defaulting still lands on selection.
 - **FR-003**: V-Flip MUST NOT be required to change songs.
 - **FR-004**: V-Flip MUST NOT appear as labeled primary chrome (not in
   the `020` top menu; not as the default player title).
-- **FR-005**: V-Flip MUST remain available as a **hidden easter egg**
-  discoverable by curious visitors. [NEEDS CLARIFICATION: How should
-  visitors discover V-Flip — subtle unmarked control, gesture/long-press,
-  konami-style sequence, or content-configured secret?]
+- **FR-005**: V-Flip MUST remain available as an easter egg opened by
+  activating a **vinyl** control (click/tap). The vinyl is a quiet brand
+  object — discoverable but not primary nav chrome. Discovery MUST NOT
+  rely on unmarked corner hit-targets, konami-style sequences, or
+  long-press-only gestures. Historical reference: early V-Flip behavior
+  in `011` (compact vinyl control that opens the jukebox experience).
 - **FR-006**: An optional now-playing / current-track detail view MAY
   exist but MUST NOT be the default rest state.
 - **FR-007**: Existing playback meanings that are still desired MUST be
@@ -166,14 +179,20 @@ action; returning or defaulting still lands on selection.
   content-editable (constitution III).
 - **FR-010**: This feature MUST NOT reintroduce circular side button
   docks owned by `020`.
+- **FR-011**: Stage beds for tracks available in V-Flip / song selection
+  MUST support **dual atmosphere videos** (mobile vs desktop) as specified
+  in `022` — this feature does not redefine media binding, but MUST NOT
+  assume a single shared video per track across viewports.
 
 ### Key Entities
 
 - **Song Selection Surface**: Default player panel listing selectable
   stage/catalog tracks.
 - **Now-Playing Surface**: Optional detail for the active track.
-- **V-Flip Easter Egg**: Hidden alternate jukebox experience; discovery
-  trigger TBD by clarification.
+- **Vinyl Control**: Quiet brand object; click/tap opens the V-Flip
+  easter egg (historical open path from `011`).
+- **V-Flip Easter Egg**: Alternate jukebox experience revealed from the
+  vinyl control — not primary nav, not required for song changes.
 
 ## Success Criteria *(mandatory)*
 
@@ -185,9 +204,9 @@ action; returning or defaulting still lands on selection.
 - **SC-002**: In first-use tests, **≥ 90%** of casual participants change
   songs **without** discovering V-Flip.
 - **SC-003**: At least **50%** of participants prompted to “find something
-  hidden related to the old jukebox” discover V-Flip within **3 minutes**
-  once the chosen discovery method is implemented (validates easter-egg
-  findability without making it primary).
+  hidden related to the old jukebox / vinyl” discover and open V-Flip via
+  the vinyl control within **3 minutes** (validates easter-egg findability
+  without making vinyl primary nav).
 - **SC-004**: Preference test: **≥ 80%** prefer selection-first over
   currently-playing-first for “quickly try another song.”
 - **SC-005**: Default rest screenshots on phone and laptop show song
@@ -205,24 +224,32 @@ action; returning or defaulting still lands on selection.
   layout breakpoints.
 - Transport controls (shuffle, play/pause, mute) may sit with the player;
   shuffle **look** is owned by `022`.
-- Bottom-left “strong” energy of classic V-Flip informs the easter egg’s
-  *feel*, not a requirement to keep a permanent bottom-left vinyl control
-  visible.
+- V-Flip discovery reverts to the **vinyl** open path familiar from early
+  V-Flip (`011`): a vinyl control visitors can click/tap. It is easter-egg
+  energy (quiet brand object), not a `020` menu item and not the default
+  song-selection surface.
+- Dual mobile/desktop stage videos for V-Flip-available tracks are owned
+  by `022`; this feature only requires that player/jukebox UX not assume a
+  single video asset per track.
 
 ## Dependencies
 
 - `020-site-nav-chrome` for simplified page chrome (avoid designing player
   against doomed circular docks).
-- `022-stage-artist-polish` for shuffle appearance and mobile
-  tap-not-swipe on the bottom player.
-- Historical playback rules from `011` / `015` / `019` except where this
-  spec supersedes default surfaces.
+- `022-stage-artist-polish` for shuffle appearance, mobile tap-not-swipe
+  on the bottom player, and dual mobile/desktop stage videos for
+  V-Flip-available tracks.
+- Historical playback and vinyl→open behavior from `011` / `015` / `019`
+  except where this spec supersedes default surfaces (selection-first)
+  and primary-chrome placement of V-Flip.
 
 ## Out of Scope
 
 - Top menu Home / Shop / Tour / Contact (`020`).
-- NCS logo, Minecraft sprites, Taking Over brightness/cut, Show me How
-  audio asset completeness (`022`).
+- NCS logo, Minecraft sprites, Taking Over brightness, Show me How
+  audio asset completeness, dual mobile/desktop stage video assets
+  (`022`).
 - Full track-catalog panel feature (`010`) beyond using existing
   selectable stage entries.
 - Re-adding Loop as a primary control.
+- Unmarked-corner, konami, or long-press-only V-Flip discovery.

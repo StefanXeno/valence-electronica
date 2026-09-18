@@ -13,7 +13,7 @@
 
 ## Requirement Completeness
 
-- [ ] No [NEEDS CLARIFICATION] markers remain
+- [x] No [NEEDS CLARIFICATION] markers remain
 - [x] Requirements are testable and unambiguous
 - [x] Success criteria are measurable
 - [x] Success criteria are technology-agnostic (no implementation details)
@@ -31,11 +31,13 @@
 
 ## Notes
 
-- Validation 2026-09-18 (iteration 1): Content quality and readiness pass.
-  One intentional `[NEEDS CLARIFICATION]` remains on **FR-005** (how
-  visitors discover the V-Flip easter egg). Checklist item stays
-  unchecked until the operator answers.
+- Validation 2026-09-18 (iteration 2): Clarification encoded — V-Flip
+  discovery is the **vinyl** control (click/tap), historical open path
+  from `011`. Not unmarked corners, konami, or long-press-only. Dual
+  stage videos cross-linked to `022`. Zero `[NEEDS CLARIFICATION]`
+  markers remain.
 - Supersedes currently-playing-default in `019` / `015` and primary
-  visible V-Flip chrome in `011`.
-- **Next**: resolve clarification, then `/speckit-plan` (often after
-  `020` chrome direction is stable).
+  visible/labeled V-Flip chrome in `011`; restores vinyl as easter-egg
+  entry, not as selection-first default.
+- **Next**: `/speckit-plan` (often after `020` chrome direction is
+  stable).

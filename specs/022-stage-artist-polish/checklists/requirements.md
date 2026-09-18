@@ -13,7 +13,7 @@
 
 ## Requirement Completeness
 
-- [ ] No [NEEDS CLARIFICATION] markers remain
+- [x] No [NEEDS CLARIFICATION] markers remain
 - [x] Requirements are testable and unambiguous
 - [x] Success criteria are measurable
 - [x] Success criteria are technology-agnostic (no implementation details)
@@ -31,11 +31,10 @@
 
 ## Notes
 
-- Validation 2026-09-18 (iteration 1): Content quality and readiness pass.
-  One intentional `[NEEDS CLARIFICATION]` remains on **FR-003** (“Cut bei
-  Taking Over”). Checklist item stays unchecked until the operator
-  answers.
+- Validation 2026-09-18 (iteration 2): Clarifications encoded — “Cut bei
+  Taking Over” resolved as **out of scope** (content/asset swap, not
+  product cut tooling). **Dual mobile/desktop stage videos** required for
+  every V-Flip-available track (incl. Taking Over), with FRs, scenarios,
+  and SC-007. Zero `[NEEDS CLARIFICATION]` markers remain.
 - Partially supersedes swipe-required phone player habits from `015`.
-- **Next**: resolve clarification (especially Taking Over cut), then
-  `/speckit-plan` — can often plan in parallel with `020`/`021` once
-  answers land.
+- **Next**: `/speckit-plan` — can plan in parallel with `020`/`021`.

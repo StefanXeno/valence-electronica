@@ -67,10 +67,15 @@ and reach each destination without opening a jukebox or circular dock.
    loads, **Then** the same four destinations remain reachable as
    primary navigation (labels or an equivalent clear menu), not only
    via a circular content dock.
-3. **Given** Shop has a configured destination, **When** the visitor
-   activates Shop, **Then** they reach the merch buying path without
-   opening About, Discography, or the jukebox first.
-4. **Given** Tour has show content, **When** the visitor activates Tour,
+3. **Given** Shop has a configured external store URL, **When** the
+   visitor activates Shop, **Then** they reach the merch buying path
+   (outbound store) without opening About, Discography, or the jukebox
+   first.
+4. **Given** Shop has no store URL configured yet, **When** the visitor
+   activates Shop, **Then** they see a soft “Coming soon” empty state
+   (or equivalent honest panel) — Shop remains visible in the nav; the
+   site does not 404.
+5. **Given** Tour has show content, **When** the visitor activates Tour,
    **Then** they see upcoming shows and can reach ticket purchase links
    where those links exist in content.
 
@@ -98,7 +103,7 @@ the artist.
    landing stage, **Then** they remain on (or return to) the stage
    without a dead end.
 3. **Given** Contact is available, **When** the visitor activates it,
-   **Then** they reach a clear contact path (see clarification / assumptions).
+   **Then** they reach a clear contact path (see Assumptions).
 
 ---
 
@@ -160,8 +165,11 @@ side icon column as the main secondary chrome.
 
 ### Edge Cases
 
-- Shop or Contact destination missing or not yet live — behavior per
-  [NEEDS CLARIFICATION] below; must not 404 the whole site.
+- Shop with no external store URL yet — nav still shows Shop; activating
+  it opens a soft “Coming soon” (or equivalent) empty state. Must not
+  404 the whole site or hide the menu item.
+- Contact destination missing or incomplete — must not 404 the whole
+  site; show an honest incomplete/empty contact path.
 - Tour with zero upcoming shows — show an honest empty state, still
   reachable from the menu.
 - Very narrow phones — top menu must remain usable (wrap, overflow menu,
@@ -182,13 +190,14 @@ side icon column as the main secondary chrome.
   (or keep them there if already on it).
 - **FR-003**: **Tour** MUST open the show/ticket discovery path using
   existing tour content (dates, venues, ticket links where present).
-- **FR-004**: **Shop** MUST open the merch buying path when a destination
-  is configured. [NEEDS CLARIFICATION: Shop destination when no live store
-  exists yet — external store URL, placeholder “coming soon”, hide Shop
-  until live, or in-page merch panel?]
+- **FR-004**: **Shop** MUST always appear in primary nav. When an
+  external store URL (Bandcamp, Shopify, or similar) is configured in
+  content, activating Shop MUST take the visitor to that merch buying
+  path. When no store URL is configured, activating Shop MUST show a
+  soft “Coming soon” empty state (or equivalent honest panel) — do not
+  hide Shop and do not require an in-site storefront.
 - **FR-005**: **Contact** MUST open a clear contact path for fans
-  (content-editable). Exact channel mix follows Assumptions unless
-  clarified with Shop.
+  (content-editable). Exact channel mix follows Assumptions.
 - **FR-006**: Laptop-width layouts MUST place social platform links along
   a **side** peripheral zone (Nasaya-like), not exclusively inside a
   circular dock.
@@ -216,7 +225,8 @@ side icon column as the main secondary chrome.
 
 - **Primary Nav Item**: One of Home, Shop, Tour, Contact — label,
   destination kind (stage / shows / merch / contact), optional external
-  URL, visibility when destination missing.
+  URL. Shop stays visible even when its store URL is unset (Coming soon
+  empty state).
 - **Side Social Link**: Platform identity + outbound URL from existing
   socials content.
 - **Secondary Content Entry**: About, Discography, legal — still
@@ -229,9 +239,10 @@ side icon column as the main secondary chrome.
 - **SC-001**: In moderated first-use tests (phone and laptop), at least
   **9 of 10** participants locate Shop and Tour within **5 seconds** of
   load without facilitator hints.
-- **SC-002**: Participants can start a merch or ticket path (reach Shop
-  destination or a Tour ticket link when configured) in **under
-  30 seconds** from load.
+- **SC-002**: Participants can start a merch or ticket path in **under
+  30 seconds** from load: reach the external Shop store when configured,
+  or the Shop “Coming soon” empty state when not; or a Tour ticket link
+  when configured.
 - **SC-003**: Rest-state laptop review: **zero** primary circular side
   button columns; reviewers rate the chrome as “simpler / less
   corporate” vs current HUD in a preference check (**≥ 80%** prefer new).
@@ -255,6 +266,10 @@ side icon column as the main secondary chrome.
   separate from the stage.
 - Tour content continues to live in structured content (existing shows
   model); this feature changes **discovery chrome**, not show data shape.
+- **Shop** destination is an **external store URL** when the operator is
+  ready (Bandcamp/Shopify/etc.). Until that URL is configured, Shop
+  remains in the nav and opens a soft “Coming soon” empty state — not a
+  built-in e-commerce cart and not a hidden menu item.
 - Mobile Links retention means the liked phone pattern for platform
   links stays; it may be restyled to match simplification but must not
   be deleted.

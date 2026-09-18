@@ -13,7 +13,7 @@
 
 ## Requirement Completeness
 
-- [ ] No [NEEDS CLARIFICATION] markers remain
+- [x] No [NEEDS CLARIFICATION] markers remain
 - [x] Requirements are testable and unambiguous
 - [x] Success criteria are measurable
 - [x] Success criteria are technology-agnostic (no implementation details)
@@ -31,11 +31,10 @@
 
 ## Notes
 
-- Validation 2026-09-18 (iteration 1): Content quality and readiness pass.
-  One intentional `[NEEDS CLARIFICATION]` remains on **FR-004** (Shop
-  destination when no live store exists). That checklist item stays
-  unchecked until the operator answers.
+- Validation 2026-09-18 (iteration 2): Clarification encoded — **Shop** is
+  always in nav; external store URL when ready, soft “Coming soon” empty
+  state until then. Zero `[NEEDS CLARIFICATION]` markers remain.
 - Cross-linked to `021-jukebox-easter-egg` and `022-stage-artist-polish`.
 - Partially supersedes primary chrome placement in `019` / `015`.
-- **Next**: resolve clarification, then `/speckit-clarify` (if more gaps)
-  or `/speckit-plan` for `020`.
+- **Next**: `/speckit-plan` for `020` (or `/speckit-clarify` only if new
+  gaps appear during planning).
