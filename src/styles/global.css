@@ -139,7 +139,7 @@ a.channel-btn:focus-visible {
 }
 
 .stage-dock {
-  /* Same corner rhythm as vinyl FAB + socials (--stage-corner-gap).
+  /* Same corner rhythm as socials (--stage-corner-gap).
      Footer is hidden; do not lift the dock by --hud-footer. */
   left: var(--stage-corner-gap);
   right: var(--stage-corner-gap);

@@ -288,11 +288,11 @@ async function phoneTapOpen(page) {
   }
   if (!(await visible(page.locator('[data-shuffle-toggle]')))) errors.push('shuffle missing');
   if (!(await visible(page.locator('[data-bg-play-toggle]')))) errors.push('play/pause missing');
-  if (!(await visible(page.locator('[data-playlist-toggle]')))) errors.push('playlist missing');
-  if (await visible(page.locator('.jukebox__tool--vinyl'))) errors.push('vinyl visible on phone');
+  if (!(await visible(page.locator('.jukebox__tool--vinyl')))) errors.push('vinyl missing in transport');
+  if (await visible(page.locator('[data-playlist-toggle]'))) errors.push('playlist toggle still in bar');
   if (await visible(page.locator('.jukebox__tool--loop'))) errors.push('loop visible on phone');
-  if (!(await visible(page.locator('.jukebox__title-phone--now')))) {
-    errors.push('Currently playing header missing');
+  if (!(await visible(page.locator('.jukebox__title-phone--playlist')))) {
+    errors.push('useful-open playlist header (Songs) missing');
   }
   const height = (await boxOf(dock)).height;
   await shot(page, id);
@@ -365,34 +365,34 @@ async function phonePlaylist(page) {
   const current = page.locator('[data-now-playing]');
   const beforeText = (await current.textContent())?.trim() ?? '';
   const beforeBox = await boxOf(current);
+  // No bar playlist toggle — useful-open already lands on song selection.
+  const themeOn = await dock.evaluate((el) => el.classList.contains('is-theme-tracks'));
+  if (!themeOn) errors.push('useful-open did not add theme-track cards (is-theme-tracks)');
+  if (!(await visible(page.locator('.jukebox__title-phone--playlist')))) {
+    errors.push('playlist header (Songs) not visible after useful-open');
+  }
+  const afterOpenText = (await current.textContent())?.trim() ?? '';
+  if (beforeText && afterOpenText && beforeText !== afterOpenText) {
+    errors.push('current card label changed on useful-open playlist face');
+  }
+  const list = page.locator('[data-theme-tracks-panel]');
+  const listScroll = await list.evaluate((el) => el.scrollHeight > el.clientHeight + 4).catch(() => false);
+  await shot(page, id);
+  // Collapse clears playlist so the next open is useful-open again.
   const [morph] = await Promise.all([
     sampleDuring(page, '[data-player-dock]', () =>
-      page.locator('[data-playlist-toggle]').click({ force: true }),
+      page.locator('[data-player-handle]').click({ force: true }),
     ),
     shotAt(page, id, 80),
     shotAt(page, id, 160),
     shotAt(page, id, 240),
   ]);
-  await sleep(80);
-  const themeOn = await dock.evaluate((el) => el.classList.contains('is-theme-tracks'));
-  if (!themeOn) errors.push('playlist did not add theme-track cards (is-theme-tracks)');
-  if (!(await visible(page.locator('.jukebox__title-phone--playlist')))) {
-    errors.push('playlist header (V-Flip aka. Jukebox) not visible');
-  }
-  const afterOpenText = (await current.textContent())?.trim() ?? '';
-  if (beforeText && afterOpenText && beforeText !== afterOpenText) {
-    errors.push('current card label changed when playlist opened');
-  }
-  const list = page.locator('[data-theme-tracks-panel]');
-  const listScroll = await list.evaluate((el) => el.scrollHeight > el.clientHeight + 4).catch(() => false);
-  await shot(page, id);
-  await page.locator('[data-playlist-toggle]').tap();
   await sleep(SETTLE_MS);
   const themeOff = await dock.evaluate((el) => !el.classList.contains('is-theme-tracks'));
-  if (!themeOff) errors.push('closing playlist left theme-tracks open');
+  if (!themeOff) errors.push('collapse left theme-tracks open');
   const afterBox = await boxOf(current);
   if (Math.abs(afterBox.y - beforeBox.y) > 24) {
-    errors.push('playlist close jumped the current card');
+    errors.push('collapse jumped the current card');
   }
   const note = `peak=${morph.peak} settle=${morph.settle} overshoot=${morph.overshoot} listScroll=${listScroll} cardDy=${Math.round(afterBox.y - beforeBox.y)}`;
   const result = errors.length ? fail(id, errors) : pass(id, note);

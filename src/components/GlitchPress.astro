@@ -22,11 +22,10 @@
     ) {
       return true;
     }
-    // Toolbar / mute / stage-panel shells own hover+press. Playlist
-    // listen/play links inside the jukebox are regular one-shot hits.
+    // Toolbar / mute / stage-panel shells own hover+press.
     return (
       el.matches(
-        '[data-mute-control], [data-volume-control], [data-stage-panel], [data-playlist-toggle], [data-shuffle-toggle], [data-loop-toggle], [data-bg-play-toggle]',
+        '[data-mute-control], [data-volume-control], [data-stage-panel], [data-shuffle-toggle], [data-loop-toggle], [data-bg-play-toggle]',
       ) || Boolean(el.closest('[data-volume-control]'))
     );
   }

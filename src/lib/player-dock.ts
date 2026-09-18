@@ -30,7 +30,7 @@ export const PHONE_MQ = '(max-width: 1023px)';
 /**
  * 021 visit-only player surface defaults (no persistence):
  * - selectionVisible toggled by playlist / phone expand (is-theme-tracks)
- * - compact bar is desktop rest (vinyl FAB inert — no TrackInfoPanel flip)
+ * - compact bar is desktop rest (vinyl in-bar inert — no TrackInfoPanel flip)
  */
 
 /** About / Discography / Tour / Contact / Shop / socials / info — exclusive-open sheets. */
@@ -657,7 +657,7 @@ export function initPlayerDock(): void {
       closePhoneSheetsExcept('vflip-list');
     }
 
-    // Phone: useful-open lands on song selection. Vinyl FAB is decorative only.
+    // Phone: useful-open lands on song selection. Vinyl in-bar is decorative only.
     if (changed && syncVflip && phoneMq.matches) {
       if (next) {
         document.dispatchEvent(
