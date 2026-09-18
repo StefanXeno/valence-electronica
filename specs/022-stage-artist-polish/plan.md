@@ -14,16 +14,18 @@ flows work by **tap alone**. No in-product “cut” tooling for Taking Over.
 
 **Technical approach** (from [research.md](./research.md)):
 
-- Schema + loaders: `sourcesMobile` / `sourcesDesktop`; viewport resolve in
+- Schema + loaders: locked fields `sourcesMobile` / `sourcesDesktop`
+  (no nested `atmosphere` dual-option); viewport resolve in
   `background.ts` / `stage-switch.ts`.
 - Content: Show me How `hasAudio: true` + music bed; dual assets per entry;
   optional `centerLogo`.
 - Theme CSS brighten for Taking Over; new shuffle glyph; center overlay
-  component; verify no sprite layer.
-- Tap-sufficient phone open (coordinate with `021`).
+  component; **verify** Minecraft sprites absent (no invented asset purge).
+- Tap-sufficient phone open (**after `021`** for US6 QA).
 - Contract: [contracts/stage-artist-polish.md](./contracts/stage-artist-polish.md).
-- **Depends on**: theme/jukebox content assets; prefer `021` for selection
-  tap targets; do not fight `020` chrome.
+- **Depends on**: operator-supplied dual video + Show me How audio +
+  ⚠️ owner-approved NCS art; `021` before US6; do not fight `020` chrome.
+  Asset-gated tasks skip with notes if files missing — other 022 work continues.
 
 ## Technical Context
 

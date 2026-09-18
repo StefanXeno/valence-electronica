@@ -15,11 +15,13 @@ Discography, and legal as quieter secondary entries.
 **Technical approach** (from [research.md](./research.md)):
 
 - New top-nav composition component + CSS band; reuse `Hero` brand assets.
-- Content: `shopUrl` + contact block in site/content; nav labels in
-  `chrome.md`.
-- Relocate single `Channels` tree to laptop side; keep phone Links park.
-- Retire `StagePanels` circular pills as primary IA; wire Tour/Contact/
-  secondary panels to nav/secondary entries.
+- Content: `shopUrl` + `contact` object in `src/data/site.json` only;
+  nav labels in `chrome.md` (no `src/content/contact/`).
+- Relocate single `Channels` tree to laptop side; keep phone Links park
+  labeled by chrome `socialsLabel` (default **Links**).
+- **Remove** `StagePanels` circular pills from primary chrome (not a soft
+  demote-in-place); wire Tour/Contact to top nav; About/Discography via
+  secondary text row under the top band.
 - Contract: [contracts/site-nav-chrome-ui.md](./contracts/site-nav-chrome-ui.md).
 - **Do not** implement `021` player UX or `022` stage polish here.
 - Sequence: implement **020 before or with** `021`/`022` to avoid designing
@@ -33,10 +35,10 @@ Discography, and legal as quieter secondary entries.
 channels, legal overlay, `015`/`019` docks as baselines being simplified.
 **No new npm packages.**
 
-**Storage**: `src/content/ui/chrome.md` (nav labels, empty states);
-`src/data/site.json` (shop URL, contact fields and/or channels);
-`src/content/shows/*.md` (unchanged shape); optional
-`src/content/contact/` if chosen over site.json body.
+**Storage**: `src/content/ui/chrome.md` (nav labels, empty states,
+`socialsLabel`); `src/data/site.json` (`shopUrl`, `contact` object,
+`channels[]`); `src/content/shows/*.md` (unchanged shape). Contact is
+**not** a separate content collection.
 
 **Testing**: `astro check` + `astro build` in CI; manual
 [quickstart.md](./quickstart.md) at 320 / 390 / 1023 / 1024 / 1280.
@@ -105,22 +107,21 @@ src/
 │   ├── SiteNav.astro               # NEW: top band logo + Home/Shop/Tour/Contact
 │   ├── Hero.astro                  # Brand mark feeds / nests in top band
 │   ├── Channels.astro              # Relocate to laptop side; phone Links reuse
-│   ├── StagePanels.astro           # Demote/remove circular primary chrome
+│   ├── StagePanels.astro           # Remove from primary chrome (no circular dock IA)
 │   ├── TourDates.astro             # Opened from Tour nav
-│   ├── ContactPanel.astro          # NEW or adapt: contact empty/complete states
+│   ├── ContactPanel.astro          # NEW or adapt: contact from site.json
 │   ├── ShopComingSoon.astro        # NEW or shared empty panel for unset shopUrl
-│   ├── AboutPanel.astro            # Secondary entry
-│   ├── Discography.astro           # Secondary entry
+│   ├── AboutPanel.astro            # Secondary entry (under top band)
+│   ├── Discography.astro           # Secondary entry (under top band)
 │   ├── LegalSheet.astro            # Legal path preserved
 │   ├── LegalOverlay.astro
 │   └── Footer.astro                # Not sole legal path
 ├── content/
-│   ├── ui/chrome.md                # home/shop/tour/contact labels + empty copy
-│   ├── shows/*.md                  # Unchanged show shape
-│   └── contact/                    # OPTIONAL if not using site.json body
+│   ├── ui/chrome.md                # home/shop/tour/contact labels + socialsLabel
+│   └── shows/*.md                  # Unchanged show shape
 ├── data/
-│   └── site.json                   # shopUrl + contact fields; channels[]
-├── content.config.ts               # Schema for new chrome / contact fields
+│   └── site.json                   # shopUrl + contact{} + channels[]
+├── content.config.ts               # Schema for new chrome fields
 ├── lib/
 │   ├── stage.ts                    # getChrome / site helpers for nav + shop
 │   └── player-dock.ts              # Adjust phone Links only as needed for 020
@@ -139,9 +140,9 @@ shell unless tasks later prove single-page panels insufficient.
 | Violation | Why Needed | Simpler Alternative Rejected Because |
 |-----------|------------|-------------------------------------|
 | Client JS for panel open / exclusive-open | Tour/Contact/About sheets already use dock JS patterns | Pure CSS-only for every panel fights existing exclusive-open + phone Links park |
-| Optional contact content file | Longer contact copy may outgrow JSON | Forcing all markdown into JSON hurts artist editing |
 
-*(No new npm packages. No privileged/runtime backends.)*
+*(Contact stays in `site.json` — locked; no alternate content collection.
+No new npm packages. No privileged/runtime backends.)*
 
 ## Phase 0 & Phase 1 Outputs
 

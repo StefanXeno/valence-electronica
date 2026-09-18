@@ -58,9 +58,14 @@ None. Existing dock JS justified; no new packages/tracking; artist guide tasked.
 
 ## Next Actions
 
-- **Readiness: GO WITH CAVEATS** — implement after locking chrome field names + easter-egg drawer target; prefer `020` before vinyl placement QA.
-- No CRITICAL blockers for `/speckit-implement`.
+- **Readiness: GO** — U1/U2/I1 locked (vinyl DOM, chrome fields, `020`
+  ordered dependency for vinyl QA). Safe to `/speckit-implement` after `020`
+  for full US2 QA.
 
-## Remediation offer
+## Remediation applied
 
-Suggest concrete edits for U1/U2/I1? (Not applied unless approved.)
+| ID | Lock |
+|----|------|
+| U1 | Vinyl → `.jukebox__section--list` / TrackInfoPanel |
+| U2 | Chrome: `songsTitle`, `nowPlayingOpenLabel`, `vinylLabel` |
+| I1 | US2 vinyl QA ordered after `020` |

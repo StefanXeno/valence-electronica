@@ -52,7 +52,7 @@ dual-video → omit from selectable stage and/or fail maintainer validation.
 
 | Field | Change |
 | ----- | ------ |
-| `sources` | **Deprecated** as sole list — replace with `sourcesMobile` + `sourcesDesktop` (or resolver returns viewport sources) |
+| `sources` | **Deprecated** as sole list — replace with `sourcesMobile` + `sourcesDesktop`; viewport resolver returns the active array |
 | `hasAudio` | Unchanged rule: flag ∧ sources present for eligibility |
 | `themeId` | Unchanged |
 

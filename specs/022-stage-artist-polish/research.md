@@ -12,11 +12,11 @@ All Technical Context unknowns for this feature are resolved below.
   MUST use desktop. Missing either → treat bed as incomplete (omit from
   selectable stage and/or fail loud in maintainer checks) — **never**
   silently reuse the other viewport’s file as if dual-video were satisfied.
-- **Shape (plan default)**: Prefer explicit fields, e.g.
-  `sourcesMobile[]` + `sourcesDesktop[]` (or nested
-  `atmosphere: { mobile: { sources, poster? }, desktop: { … } }`). Migrate
-  existing single `sources[]` during implement with a one-time content
-  update — both slots required before entry stays selectable.
+- **Shape (locked)**: Explicit top-level fields `sourcesMobile[]` +
+  `sourcesDesktop[]` on each jukebox entry. **Do not** use a nested
+  `atmosphere: { mobile, desktop }` shape. Migrate existing single
+  `sources[]` during implement with a one-time content update — both
+  slots required before entry stays selectable.
 - **Runtime**: `background.ts` / `stage-switch.ts` resolve sources via
   `matchMedia('(max-width: 1023px)')` (and resize re-resolve). Crossfade
   buffers remain two `<video>` elements for transition — not “mobile vs

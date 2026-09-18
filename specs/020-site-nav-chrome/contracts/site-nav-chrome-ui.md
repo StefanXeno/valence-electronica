@@ -45,15 +45,15 @@ Progressive enhancement: destinations remain reachable without scripting
 |------|----------|
 | Top band | Full four-label menu + brand (see above). |
 | Side socials | Active platform links along a **side** peripheral edge (Nasaya-like). Exactly one `Channels` tree — relocate, do not duplicate. |
-| Secondary content | About / Discography / legal reachable without restoring circular icon column. |
-| Legal | Impressum + privacy reachable in ≤2 obvious actions (Contact, Info, or equivalent). |
+| Secondary content | About / Discography via **secondary text links under the top band** (not primary menu items); legal reachable without restoring circular icon column. |
+| Legal | Impressum + privacy reachable in ≤2 obvious actions (Contact, Info, or explicit legal entry near secondary row). |
 
 ## Phone (≤ 1023px)
 
 | Zone | Contract |
 |------|----------|
 | Top band | Same four destinations as primary nav (labels or clear equivalent menu). Not only via circular content dock. |
-| Links | Retain usable **Links** pattern for platform outbound links (may restyle; must not delete). One Channels tree; park/reuse per `015` spirit. |
+| Links | Retain usable **Links** pattern for platform outbound links (chrome `socialsLabel`, default **Links**; may restyle; must not delete). One Channels tree; park/reuse per `015` spirit. |
 | Narrow width | Wrap / overflow menu OK; **no** horizontal page scroll caused by nav (SC-006). |
 | Legal | Same reachability rule as laptop. |
 

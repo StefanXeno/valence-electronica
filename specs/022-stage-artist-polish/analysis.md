@@ -60,9 +60,17 @@ static image, not a tracking embed, but brand/partner permission is mandatory.
 
 ## Next Actions
 
-- **Readiness: GO WITH CAVEATS** — design artifacts are implementable; **US3 is asset-gated**. Prefer implement order `020 → 021 → 022`. Lock dual-video field names at T002. Do not merge NCS without T035.
-- No CRITICAL spec/plan/tasks contradictions blocking planning quality.
+- **Readiness: GO WITH ASSET GATES** — U2 schema locked; U1/asset checklist in
+  quickstart + tasks; A1 verify-absent; X2 US6 after 021; S1 NCS T035 kept.
+  Safe to `/speckit-implement` for non-asset work anytime; US3/US1/US4 content
+  wiring waits on operator drops.
 
-## Remediation offer
+## Remediation applied
 
-Want concrete edits for U1/U2/X2 (asset checklist in tasks, schema lock line, US6 dependency note)? Not applied unless approved.
+| ID | Lock |
+|----|------|
+| U1 | Operator asset checklist; gate + skip notes; continue other work |
+| U2 | `sourcesMobile` / `sourcesDesktop` only |
+| A1 | Sprites = verify absent |
+| X2 | US6 after `021` (ordered) |
+| S1 | ⚠️ NCS owner approval (T035) retained |

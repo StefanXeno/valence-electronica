@@ -26,8 +26,8 @@ owned by `022`.
 
 **⚠️ CRITICAL**: Blocks all user stories
 
-- [ ] T002 Extend or retarget chrome fields in `src/content.config.ts` + `src/content/ui/chrome.md` for selection title (`songsTitle` or retargeted `jukeboxPanelTitle`), optional now-playing open label, and vinyl accessible name per `data-model.md`
-- [ ] T003 [P] Update `getChrome()` / fallbacks in `src/lib/stage.ts` for the new or retargeted fields
+- [ ] T002 Add chrome fields `songsTitle`, `nowPlayingOpenLabel`, and `vinylLabel` in `src/content.config.ts` + `src/content/ui/chrome.md` per locked `data-model.md` (do not dual-option retarget `jukeboxPanelTitle` / `playlistLabel` as primary names)
+- [ ] T003 [P] Update `getChrome()` / fallbacks in `src/lib/stage.ts` for `songsTitle`, `nowPlayingOpenLabel`, `vinylLabel` (fallback `jukeboxLabel` → vinyl only if `vinylLabel` unset)
 - [ ] T004 Document visit-only surface defaults (`selectionVisible=true`, `nowPlayingVisible=false`, `vflipEasterEggOpen=false`) as comments or helpers near `src/lib/player-dock.ts` / Jukebox boot — no persistence
 - [ ] T005 [P] Confirm `src/lib/stage-switch.ts` track selection path does not hardcode single-video UX assumptions that would block `022` (opaque `sources` / future resolver)
 
@@ -63,7 +63,7 @@ owned by `022`.
 ### Implementation for User Story 2
 
 - [ ] T012 [US2] Unhide and/or relocate the vinyl control as a quiet brand object in `src/components/Jukebox.astro` + `src/styles/global.css` (not a labeled primary CTA; not covered by `020` top nav)
-- [ ] T013 [US2] Wire vinyl click/tap to open the V-Flip easter egg experience (prefer enabling `.jukebox__section--list` / `TrackInfoPanel.astro` drawer) in `src/components/Jukebox.astro`
+- [ ] T013 [US2] Wire vinyl **click/tap** to open the V-Flip easter egg — **must** enable `.jukebox__section--list` / `TrackInfoPanel.astro` drawer (locked DOM target; not optional alternate) in `src/components/Jukebox.astro`
 - [ ] T014 [US2] Ensure song selection remains usable without ever activating vinyl; easter egg does not trap the visitor (close path back to selection)
 - [ ] T015 [P] [US2] Verify no “V-Flip” item is added to `020` SiteNav / top menu (guard in review of `src/components/SiteNav.astro` if present)
 - [ ] T016 [US2] Forbidden discovery check: no unmarked-corner-only, konami, or long-press-only path required in `src/components/Jukebox.astro` / `player-dock.ts`
@@ -81,7 +81,7 @@ owned by `022`.
 
 ### Implementation for User Story 3
 
-- [ ] T018 [US3] Repurpose or add a control to open NowPlayingSurface from selection in `src/components/Jukebox.astro` (chrome `nowPlayingOpenLabel` / retargeted `playlistLabel`)
+- [ ] T018 [US3] Add/use control to open NowPlayingSurface from selection in `src/components/Jukebox.astro` labeled with chrome `nowPlayingOpenLabel`
 - [ ] T019 [US3] Show active track identity in the optional now-playing view without making it the boot default
 - [ ] T020 [US3] On close now-playing or full reload, restore selection as default surface in `src/components/Jukebox.astro` + `src/lib/player-dock.ts`
 - [ ] T021 [US3] Manually walk `specs/021-jukebox-easter-egg/quickstart.md` Scenario 3 (+ Scenario 4 edge smoke)
@@ -105,12 +105,14 @@ owned by `022`.
 ### Phase Dependencies
 
 - Setup → Foundational → US1 (MVP) → US2 → US3 → Polish
-- **External**: Prefer `020` complete before US2 vinyl placement QA
+- **External (ordered dependency)**: Complete `020` before US2 vinyl
+  placement / overlap QA (T012–T017). US1 selection-first may proceed
+  without SiteNav if needed, but vinyl QA waits on `020`.
 
 ### User Story Dependencies
 
 - **US1**: Foundation only — MVP
-- **US2**: After US1 (selection must work without vinyl)
+- **US2**: After US1 (selection must work without vinyl); vinyl QA after `020`
 - **US3**: After US1 (needs selection home to return to)
 
 ### Parallel Opportunities
@@ -139,6 +141,14 @@ Task: "Phone open → selection in player-dock.ts"
 1. `020` chrome
 2. **021** (this) selection + vinyl
 3. `022` shuffle look, tap-first, dual videos, track polish
+
+## Locked decisions (analyze caveats)
+
+| Topic | Decision |
+| ----- | -------- |
+| Easter-egg DOM | Vinyl click/tap → `.jukebox__section--list` / TrackInfoPanel |
+| Chrome fields | `songsTitle`, `nowPlayingOpenLabel`, `vinylLabel` |
+| Vinyl QA vs 020 | Ordered dependency — QA after 020; not ambiguity |
 
 ## Notes
 

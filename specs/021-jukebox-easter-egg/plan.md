@@ -18,12 +18,14 @@ video per track (dual videos in `022`).
 - Invert default of `is-theme-tracks` / selection visibility in
   `Jukebox.astro` + `player-dock.ts`.
 - Retarget playlist control toward optional now-playing.
-- Unhide/relocate vinyl as quiet brand object → open TrackInfoPanel /
-  legacy V-Flip drawer.
-- Chrome string retargets; artist guide if new fields.
+- Unhide/relocate vinyl as quiet brand object → **must** open
+  `.jukebox__section--list` / `TrackInfoPanel` (locked DOM target).
+- Chrome: add `songsTitle`, `nowPlayingOpenLabel`, `vinylLabel` (aligned
+  with `020` Title/Label style); artist guide for new fields.
 - Contract: [contracts/jukebox-selection-first-ui.md](./contracts/jukebox-selection-first-ui.md).
-- **Depends on `020`** for simplified chrome; coordinate with `022` for
-  gestures and dual-video opacity.
+- **Depends on `020`** for simplified chrome (ordered: complete `020`
+  before US2 vinyl placement QA); coordinate with `022` for gestures and
+  dual-video opacity.
 
 ## Technical Context
 

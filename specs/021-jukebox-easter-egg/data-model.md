@@ -37,7 +37,7 @@ Quiet brand object; click/tap opens V-Flip easter egg.
 
 | Field | Type | Required | Description |
 | ----- | ---- | -------- | ----------- |
-| `accessibleName` | string | yes | From chrome (`jukeboxLabel` or dedicated `vinylLabel`) |
+| `accessibleName` | string | yes | From chrome `vinylLabel` (fallback `jukeboxLabel` only if unset) |
 | `discovery` | enum | yes | `click-tap` only — not corner/konami/long-press-only |
 | `primaryNav` | boolean | const false | Must not appear in `020` top menu |
 | `requiredForSongChange` | boolean | const false | |
@@ -48,7 +48,7 @@ Alternate jukebox experience revealed from vinyl.
 
 | Concern | Rule |
 | ------- | ---- |
-| Open path | Vinyl activate → open easter-egg drawer/experience |
+| Open path | Vinyl click/tap → open `.jukebox__section--list` / `TrackInfoPanel` drawer (locked DOM target) |
 | Default player | Remains song selection; easter egg must not trap visitor |
 | Content | May reuse TrackInfoPanel / legacy list+detail sections |
 
@@ -56,23 +56,21 @@ Alternate jukebox experience revealed from vinyl.
 
 File: `src/content/ui/chrome.md`
 
+**Naming scheme (locked)** — same Title/Label style as `020` chrome fields.
+Use the dedicated fields below; do **not** dual-option retarget vs new names.
+
 | Field | Role after 021 |
 | ----- | -------------- |
-| `currentlyPlayingLabel` | Optional now-playing header / control — **not** default rest title |
+| `songsTitle` | **Default selection** surface title (new; default `Songs`) |
+| `nowPlayingOpenLabel` | Opt-in control to open NowPlayingSurface (new; default `Now playing`) |
+| `vinylLabel` | Vinyl / easter-egg accessible name (new; quiet; not top-nav CTA) |
+| `currentlyPlayingLabel` | Optional now-playing header when that surface is open — **not** default rest title |
 | `currentlyPausingLabel` | Optional pausing variant when now-playing visible |
-| `jukeboxPanelTitle` | Prefer as **default selection** surface title (or add `songsTitle`) |
-| `jukeboxLabel` | Vinyl / easter-egg accessible name (quiet; not top-nav CTA) |
-| `playlistLabel` | May become “show now playing” / selection toggle label — retarget carefully |
+| `jukeboxPanelTitle` | Easter-egg / TrackInfoPanel drawer title if still shown — **not** the default selection title |
+| `jukeboxLabel` | Legacy alias — prefer `vinylLabel`; fallback only if `vinylLabel` unset |
+| `playlistLabel` | Legacy — prefer `nowPlayingOpenLabel` for the opt-in control |
 | `stageButtonLabel` | Per-row play affordance if still shown |
 | `shuffleLabel` / icons | Behavior retained; **look** owned by `022` |
-
-New optional fields (if clearer than retargeting):
-
-| Field | Default | Description |
-| ----- | ------- | ----------- |
-| `songsTitle` | `Songs` | Default selection surface title |
-| `nowPlayingOpenLabel` | `Now playing` | Opt-in control to open NowPlayingSurface |
-| `vinylLabel` | `Vinyl` / brand | Accessible name for vinyl control if distinct from `jukeboxLabel` |
 
 ## Entity: PlayerSurfaceState (visit-only)
 

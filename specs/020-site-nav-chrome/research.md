@@ -59,17 +59,20 @@ All Technical Context unknowns for this feature are resolved below.
 
 - **Decision**: Resting chrome MUST NOT present a vertical (laptop) or
   five-icon circular (phone content dock as *primary nav*) stack for
-  Shop/Tour/Socials/About/etc. **StagePanels** circular pills cease to be
-  the primary IA. Secondary content (About, Discography, legal/Info)
-  moves to quieter entries: e.g. under Contact, a secondary text row,
-  or subdued links adjacent to the top panel — plan-time placement must
-  satisfy FR-008 and constitution V (legal reachable in 1–2 actions).
+  Shop/Tour/Socials/About/etc. **StagePanels** circular pills are
+  **removed from primary chrome** (not left as an ambiguous soft demote).
+  Secondary content (About, Discography, legal/Info) uses a quiet
+  **secondary text row under the top band** — satisfies FR-008 and
+  constitution V (legal reachable in 1–2 actions).
 - **Rationale**: Gosha/Hendrik feedback; FR-008 / SC-003; partially
   supersedes `019` desktop icon bar and `015` phone content dock as the
   *primary* way to reach Shop/Tour/Contact.
 - **Alternatives considered**:
   - Restyle circles only — still “dashboard of circles” (rejected).
-  - Delete About/Discography — out of Assumptions (they remain secondary).
+  - Soft demote StagePanels in place — rejected; end state is remove from
+    primary chrome.
+  - Delete About/Discography — out of Assumptions (they remain secondary
+    under the top band).
   - Keep phone five-icon dock as primary — conflicts with FR-001 phone
     acceptance (four destinations as primary nav).
 
@@ -81,11 +84,13 @@ All Technical Context unknowns for this feature are resolved below.
     today’s top-right cluster to a side edge treatment. Not exclusively
     inside a circular dock.
   - **Phone (≤1023px)**: Retain the liked **Links** pattern (socials
-    trigger / parked Channels in a sheet or equivalent). May restyle to
-    match simplification; must not delete (FR-007 / SC-004).
+    trigger / parked Channels in a sheet or equivalent). Visitor label =
+    chrome `socialsLabel` with default **`Links`** (field name unchanged).
+    May restyle to match simplification; must not delete (FR-007 / SC-004).
 - **Rationale**: Spec US3; `015` Links retention called out explicitly.
 - **Alternatives considered**: Socials only in Contact — buries platforms
   (fails US3). Duplicate channel mounts — rejected (`015` one-tree rule).
+  Dual “Links” vs “Socials” visitor strings — rejected; one default.
 
 ## R6: Breakpoint stays 1024px; progressive enhancement for primary nav
 
@@ -112,12 +117,14 @@ All Technical Context unknowns for this feature are resolved below.
 ## R8: Content-code separation for nav labels + artist docs
 
 - **Decision**: Nav labels (`homeTitle`, `shopTitle`, `tourTitle`,
-  `contactTitle`), Shop URL, Contact copy, Coming soon strings live in
-  `chrome.md` and/or `site.json`. Update `docs/artist-guide.md` in the
-  same change set (constitution VII).
+  `contactTitle`), Shop URL, and Contact copy live in `chrome.md` +
+  `site.json` only (`contact` object in `site.json` — no contact content
+  collection). Update `docs/artist-guide.md` in the same change set
+  (constitution VII).
 - **Rationale**: FR-012; principles III + VII.
 - **Alternatives considered**: Hardcoded English labels in Astro —
-  violates III.
+  violates III. `src/content/contact/` markdown — rejected; keep one site
+  data surface consistent with channels.
 
 ## R9: Legal path after Info dock removal
 

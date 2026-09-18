@@ -30,9 +30,9 @@ Player / V-Flip / dual-video work stays in `021` / `022`.
 **⚠️ CRITICAL**: No user story work until this phase is complete
 
 - [ ] T002 Extend `ui` collection schema in `src/content.config.ts` with `homeTitle`, `shopTitle`, `contactTitle`, `shopComingSoonTitle`, `shopComingSoonBody`, and `contactEmpty` per `specs/020-site-nav-chrome/data-model.md` (reuse existing `tourTitle`)
-- [ ] T003 [P] Add the new chrome fields with English defaults to `src/content/ui/chrome.md`
-- [ ] T004 Add `shopUrl` (optional) and contact fields to `src/data/site.json` (and TypeScript types) per data-model — leave `shopUrl` unset so Coming soon path is testable
-- [ ] T005 Extend `getChrome()` / site loaders in `src/lib/stage.ts` to expose primary-nav labels, shop URL, and contact payload with safe defaults
+- [ ] T003 [P] Add the new chrome fields with English defaults to `src/content/ui/chrome.md`; set `socialsLabel` default to **`Links`** (field name stays `socialsLabel`)
+- [ ] T004 Add optional `shopUrl` and a `contact` object (`headline`, `body`, `email`, `links`) to `src/data/site.json` (and TypeScript types) per data-model — leave `shopUrl` unset so Coming soon path is testable; do **not** create `src/content/contact/`
+- [ ] T005 Extend `getChrome()` / site loaders in `src/lib/stage.ts` to expose primary-nav labels, shop URL, and contact payload from `site.json` with safe defaults (fallback `socialsLabel` → `Links`)
 - [ ] T006 [P] Create stub `src/components/SiteNav.astro` that renders brand slot + four text items from chrome (no final styling yet) and mount it from `src/pages/index.astro` without removing old chrome yet
 
 **Checkpoint**: `npm run check` passes; chrome/site fields resolve; SiteNav stub visible in DOM
@@ -68,7 +68,7 @@ Player / V-Flip / dual-video work stays in `021` / `022`.
 
 - [ ] T013 [US2] Integrate brand/logo from `src/components/Hero.astro` into the SiteNav brand slot so logo weight dominates menu text (avoid tiny nav-mark-only treatment)
 - [ ] T014 [US2] Implement **Home** → landing stage (close trapping panels / scroll-to-stage) in `src/components/SiteNav.astro` + any small helper in `src/lib/`
-- [ ] T015 [US2] Create `src/components/ContactPanel.astro` (or equivalent) fed by site contact fields; honest empty/incomplete state using `contactEmpty`
+- [ ] T015 [US2] Create `src/components/ContactPanel.astro` (or equivalent) fed by `site.json` → `contact`; honest empty/incomplete state using chrome `contactEmpty`
 - [ ] T016 [US2] Wire **Contact** nav item to open ContactPanel from `src/components/SiteNav.astro`
 - [ ] T017 [US2] Manually walk `specs/020-site-nav-chrome/quickstart.md` Scenario 2
 
@@ -85,7 +85,7 @@ Player / V-Flip / dual-video work stays in `021` / `022`.
 ### Implementation for User Story 3
 
 - [ ] T018 [US3] Relocate laptop placement of `.stage__socials` / `Channels.astro` to a side peripheral zone in `src/styles/global.css` (+ markup hooks in `src/pages/index.astro` if needed) — do not mount a second Channels list
-- [ ] T019 [US3] Preserve phone Links pattern (park/reuse Channels) in `src/lib/player-dock.ts` and related phone CSS so Links remains usable after top-nav changes
+- [ ] T019 [US3] Preserve phone Links pattern (park/reuse Channels; label from chrome `socialsLabel`, default Links) in `src/lib/player-dock.ts` and related phone CSS so Links remains usable after top-nav changes
 - [ ] T020 [US3] Restyle side/Links chrome to match simplified language without reintroducing circular dock-as-only-path in `src/components/Channels.astro` / `src/styles/global.css`
 - [ ] T021 [US3] Manually walk `specs/020-site-nav-chrome/quickstart.md` Scenario 3
 
@@ -101,9 +101,9 @@ Player / V-Flip / dual-video work stays in `021` / `022`.
 
 ### Implementation for User Story 4
 
-- [ ] T022 [US4] Remove or demote circular primary chrome in `src/components/StagePanels.astro` so resting laptop/phone UI no longer uses a circular icon column/dock as primary IA
-- [ ] T023 [US4] Add quieter secondary entries for About and Discography (text links under nav, Contact area, or equivalent) in `src/components/SiteNav.astro` and/or `src/pages/index.astro` without restoring circular stacks
-- [ ] T024 [US4] Ensure Impressum / Privacy remain reachable in ≤2 actions via Contact, Info, or explicit legal entry using `src/components/LegalSheet.astro` / `LegalOverlay.astro` (constitution V)
+- [ ] T022 [US4] **Remove** circular primary chrome from resting UI in `src/components/StagePanels.astro` (and callers) — StagePanels MUST NOT remain a primary circular dock / corporate primary IA; secondary brand content may still open via non-circular secondary entries if needed
+- [ ] T023 [US4] Add quieter **secondary text links under the top band** for About and Discography in `src/components/SiteNav.astro` (not primary top-bar items; not Contact-area-only dual placement) without restoring circular stacks
+- [ ] T024 [US4] Ensure Impressum / Privacy remain reachable in ≤2 actions via Contact, Info, or explicit legal entry near the secondary row using `src/components/LegalSheet.astro` / `LegalOverlay.astro` (constitution V)
 - [ ] T025 [US4] Update phone exclusive-open / content-dock assumptions in `src/lib/player-dock.ts` so removed circular triggers do not leave dead controllers
 - [ ] T026 [US4] Manually walk `specs/020-site-nav-chrome/quickstart.md` Scenario 4 (+ Scenario 5 narrow/no-JS)
 
@@ -171,7 +171,7 @@ Task: "Confirm emptyShows still surfaces for Tour with no upcoming shows"
 2. US1 → validate Shop/Tour
 3. US2 → brand + Contact
 4. US3 → side socials + Links
-5. US4 → remove circular primary chrome + legal path
+5. US4 → remove StagePanels from primary chrome + secondary About/Discography under top band + legal path
 6. Polish → artist guide + supersession notes
 
 ### Suggested sequence vs siblings
@@ -179,6 +179,15 @@ Task: "Confirm emptyShows still surfaces for Tour with no upcoming shows"
 1. **020** (this feature) first — unlocks IA
 2. **021** jukebox/vinyl — designs player against new chrome
 3. **022** stage polish + dual videos
+
+## Locked decisions (analyze caveats)
+
+| Topic | Decision |
+| ----- | -------- |
+| Contact storage | `src/data/site.json` → `contact` only |
+| About / Discography | Secondary text row under top band — not primary top nav |
+| StagePanels | Remove from primary chrome (no ambiguous demote) |
+| Phone socials label | Chrome field `socialsLabel`, visitor default **Links** |
 
 ## Notes
 

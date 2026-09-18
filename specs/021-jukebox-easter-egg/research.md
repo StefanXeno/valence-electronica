@@ -48,16 +48,17 @@ All Technical Context unknowns for this feature are resolved below.
 
 ## R4: What “V-Flip easter egg” means in the as-built DOM
 
-- **Decision**: Easter egg opens the alternate jukebox experience —
-  preferentially the richer **TrackInfoPanel** / legacy list+detail
-  drawer (`.jukebox__section--list`, currently CSS-hidden), while the
-  **default** body remains Discography theme-track selection cards.
-  Casual path never requires opening that drawer.
+- **Decision (locked)**: Vinyl click/tap **MUST** open the richer
+  **TrackInfoPanel** / legacy list+detail drawer
+  (`.jukebox__section--list`). The **default** player body remains
+  Discography theme-track selection cards. Casual path never requires
+  opening that drawer. Not optional / not “prefer another target.”
 - **Rationale**: Selection already lives in Discography cards; V-Flip
-  lore/detail can stay hidden behind vinyl without blocking song changes.
+  lore/detail stays behind vinyl without blocking song changes; historical
+  `011` vinyl path.
 - **Alternatives considered**: Vinyl only toggles `is-open` with same
-  selection list — weak “easter egg” differentiation. Rebuild separate
-  mini-app — YAGNI.
+  selection list — weak “easter egg” differentiation (rejected). Rebuild
+  separate mini-app — YAGNI. Alternate unmarked DOM target — rejected.
 
 ## R5: Preserve playback meanings; shuffle look deferred
 
@@ -100,8 +101,11 @@ All Technical Context unknowns for this feature are resolved below.
 
 ## R9: Content-editable player strings
 
-- **Decision**: Selection titles, optional now-playing labels, vinyl /
-  easter-egg accessible names stay in `chrome.md`. Casual UI may say
-  “Songs” / “Tracks”; “V-Flip” can remain internal/easter-egg copy.
-- **Rationale**: FR-009; constitution III / VII (artist guide update for
-  any new fields).
+- **Decision (locked)**: New chrome fields `songsTitle`,
+  `nowPlayingOpenLabel`, `vinylLabel` (Title/Label style aligned with
+  `020`). Do not dual-option retarget `jukeboxPanelTitle` /
+  `playlistLabel` / `jukeboxLabel` as the primary names — those remain
+  legacy/fallback or easter-egg drawer title only.
+- **Rationale**: FR-009; constitution III / VII; matches `020` field style.
+- **Alternatives considered**: Retarget existing names only — rejected
+  (ambiguous for artists + dual-option analyze caveat).

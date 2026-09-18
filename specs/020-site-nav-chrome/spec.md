@@ -258,10 +258,11 @@ side icon column as the main secondary chrome.
 
 - Reference look is inspirational (Nasaya), not a pixel clone; Valence
   keeps its own brand voice and stage atmosphere.
-- **About** and **Discography** remain part of the site as secondary
-  content, reachable without restoring circular side docks (e.g. quieter
-  text entry, Contact area, or stage-adjacent secondary links). Exact
-  placement is plan-time within FR-008.
+- **About** and **Discography** remain part of the site as **secondary**
+  content only — **not** primary top-nav items (primary bar is Home •
+  Shop • Tour • Contact). Placement (locked): quiet **secondary text
+  links under the top band** that open existing content sheets. Must not
+  restore circular side docks (FR-008).
 - **Home** is the existing landing stage, not a new marketing homepage
   separate from the stage.
 - Tour content continues to live in structured content (existing shows
@@ -270,9 +271,11 @@ side icon column as the main secondary chrome.
   ready (Bandcamp/Shopify/etc.). Until that URL is configured, Shop
   remains in the nav and opens a soft “Coming soon” empty state — not a
   built-in e-commerce cart and not a hidden menu item.
-- Mobile Links retention means the liked phone pattern for platform
-  links stays; it may be restyled to match simplification but must not
-  be deleted.
+- **Contact** copy/fields live in `src/data/site.json` → `contact`
+  (single source of truth with channels / shop URL).
+- Mobile **Links** retention means the liked phone pattern for platform
+  links stays; visitor label is chrome `socialsLabel` (default **Links**).
+  It may be restyled to match simplification but must not be deleted.
 - Interactivity (jukebox, themes, glitch) remains brand-secondary and is
   specified in `021` / `022`, not removed by this feature.
 - Constitution constraints apply: static-first, content-code separation,

@@ -33,9 +33,10 @@ Visitor-facing primary destinations in the top band.
 | `shopUrl` | string (URL) | no | unset | External merch store (Bandcamp/Shopify/etc.) |
 | `shopComingSoon` | string | no | chrome `comingSoon` / dedicated copy | Body for soft empty state when `shopUrl` unset |
 
-**Storage decision**: Prefer `src/data/site.json` under a `shop` object
-(or top-level `shopUrl`) so the artist edits one site file; labels stay in
-`chrome.md`. See [research.md](./research.md) R2 / R8.
+**Storage decision (locked)**: `shopUrl` (and optional shop empty copy
+override) live in `src/data/site.json` alongside existing `channels[]` /
+artist identity — one site data file. Labels stay in `chrome.md`. See
+[research.md](./research.md) R2 / R8. No alternate shop storage path.
 
 ## Entity: SiteContact (new)
 
@@ -49,9 +50,10 @@ Visitor-facing primary destinations in the top band.
 Incomplete contact → honest empty/incomplete UI; never site-wide 404
 (FR-005 edge case).
 
-**Storage decision**: Small structured block in `site.json` and/or
-`src/content/contact/index.md` — implementer picks one place; artist guide
-documents the single edit surface (constitution VII).
+**Storage decision (locked)**: Contact is a structured `contact` object in
+`src/data/site.json` (same single source of truth as channels / shop URL).
+Do **not** add `src/content/contact/`. Artist guide documents only
+`site.json` → `contact` (constitution VII).
 
 ## Entity: UiChrome (extended)
 
@@ -69,7 +71,8 @@ File: `src/content/ui/chrome.md` (+ schema in `src/content.config.ts`)
 | `aboutTitle` | string | no | existing | Secondary entry label |
 | `discographyTitle` | string | no | existing | Secondary entry label |
 | `infoTitle` / legal pills | string | no | existing | Legal path labels (FR-011) |
-| `socialsLabel` / `socialsIcon` | | | existing | Mobile Links / side socials a11y |
+| `socialsLabel` | string | no | `Links` | Visitor-facing label for phone Links / laptop side socials a11y (field name stays `socialsLabel`; default visitor string is **Links**) |
+| `socialsIcon` | string | no | existing | Icon token for the same control |
 
 Existing player / jukebox chrome fields remain owned by `021` / prior
 specs — do not redefine here.
@@ -88,13 +91,18 @@ Derived from existing `site.json` → `channels[]` (`id`, `label`, `url`,
 ## Entity: SecondaryContentEntry
 
 About, Discography, Info/legal — still content-backed; **not** primary
-circular side chrome.
+top-nav items and **not** circular side chrome.
+
+**Placement (locked)**: Quiet **secondary text row under the top band**
+(Home • Shop • Tour • Contact remain the only primary top-bar items).
+About / Discography open existing content sheets from those secondary
+links — not from the top black bar primary menu.
 
 | Entry | Content source | Rest chrome |
 | ----- | -------------- | ----------- |
-| About | `src/content/about/me.md` | Quiet text / secondary link |
-| Discography | catalog / discography components | Quiet text / secondary link |
-| Legal / Info | existing legal overlay + chrome pills | Reachable via Contact or explicit legal entry (FR-011) |
+| About | `src/content/about/me.md` | Secondary text link under top band |
+| Discography | catalog / discography components | Secondary text link under top band |
+| Legal / Info | existing legal overlay + chrome pills | Reachable via Contact or explicit legal entry near secondary row (FR-011) |
 
 ## Entity: TopNavLayout (presentation)
 

@@ -65,10 +65,15 @@ None. Gates in plan.md PASS for I–VII. Legal reachability and artist-guide upd
 
 ## Next Actions
 
-- **Readiness: GO WITH CAVEATS** — safe to `/speckit-implement` after locking Contact storage + About/Discography secondary placement in the first implement session.
-- No CRITICAL blockers. Optional: tighten T022 wording and data-model “one storage” before coding US2/US4.
-- Suggested follow-ups only if desired: `/speckit-clarify` not required; small manual edits to data-model.md / T022 are enough.
+- **Readiness: GO** — analyze caveats U1/U2/A1/I1 locked in plan, data-model,
+  tasks, research, contracts, and spec Assumptions (2026-09-18 remediation).
+- Safe to `/speckit-implement`.
 
-## Remediation offer
+## Remediation applied
 
-Would you like concrete remediation edits for the top issues (U1, U2, A1)? (Not applied unless you approve.)
+| ID | Lock |
+|----|------|
+| U1 | Contact → `site.json` `contact` only |
+| U2 | About/Discography → secondary text under top band |
+| A1 | StagePanels → remove from primary chrome |
+| I1 | Visitor label = `socialsLabel` default **Links** |

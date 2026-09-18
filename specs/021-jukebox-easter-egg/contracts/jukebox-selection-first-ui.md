@@ -29,7 +29,7 @@ as-built unless explicitly replaced. **Shuffle appearance** → `022`.
 
 | Rule | Contract |
 |------|----------|
-| Entry | Visible **vinyl** brand object; **click/tap** opens V-Flip easter egg |
+| Entry | Visible **vinyl** brand object; **click/tap** opens V-Flip easter egg by enabling `.jukebox__section--list` / TrackInfoPanel drawer (**locked** DOM target) |
 | Not allowed | Unmarked corner only, konami sequence, long-press-only |
 | Not primary | Not in `020` top menu; not default player tab/title |
 | Not required | Song changes work if vinyl never used |
@@ -55,8 +55,9 @@ as-built unless explicitly replaced. **Shuffle appearance** → `022`.
 ## Content strings
 
 All visitor-facing player labels for this feature remain chrome-editable
-(constitution III). Prefer casual “Songs”/“Tracks” for default surface;
-“V-Flip” may stay easter-egg / internal copy.
+(constitution III). Locked fields: `songsTitle` (default surface),
+`nowPlayingOpenLabel`, `vinylLabel`. “V-Flip” may stay easter-egg /
+internal copy.
 
 ## Non-goals
 

@@ -15,8 +15,9 @@ path. Extends atmosphere binding from `002` / `005` / jukebox content.
 | Rule | Contract |
 |------|----------|
 | Scope | Every V-Flip-available stage bed, including Taking Over |
-| Mobile (≤1023px) | Plays configured **mobile** video only |
-| Desktop (≥1024px) | Plays configured **desktop** video only |
+| Mobile (≤1023px) | Plays `sourcesMobile` only |
+| Desktop (≥1024px) | Plays `sourcesDesktop` only |
+| Schema | Locked field names: `sourcesMobile` / `sourcesDesktop` (no nested atmosphere object) |
 | Completeness | Both bindings required or entry not offered as stage bed |
 | Forbidden | Silently using the other viewport’s file to “fill in” |
 | QA | Distinct asset identity (path/filename) per viewport (SC-007) |
@@ -49,7 +50,7 @@ path. Extends atmosphere binding from `002` / `005` / jukebox content.
 
 | Rule | Contract |
 |------|----------|
-| Minecraft-style sprites on live stage | **Zero** |
+| Minecraft-style sprites on live stage | **Zero** (verify absent / do not reintroduce; do not invent deletion of non-existent assets) |
 
 ## Shuffle appearance
 
@@ -64,7 +65,7 @@ path. Extends atmosphere binding from `002` / `005` / jukebox content.
 |------|----------|
 | Open + song change | Completable by **tap alone** |
 | Swipe | Optional; not required; hints must not imply swipe-only |
-| Coordination | Aligns with `021` selection-first default body |
+| Coordination | **Requires `021` selection-first** before US6 QA — explicit ordered dependency |
 
 ## Non-goals
 
