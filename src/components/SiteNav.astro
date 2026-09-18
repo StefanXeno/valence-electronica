@@ -60,25 +60,33 @@ const menuChannels = site.channels
             {chrome.shopTitle}
           </a>
         ) : (
-          <a class="site-nav__item" href="#stage-panel-shop" data-site-nav-open="shop">
+          <a
+            class="site-nav__item"
+            href={withBase('/shop')}
+            data-legal-slug="shop"
+          >
             {chrome.shopTitle}
           </a>
         )
       }
-      <a class="site-nav__item" href="#stage-panel-tour" data-site-nav-open="tour">
+      <a class="site-nav__item" href={withBase('/tour')} data-legal-slug="tour">
         {chrome.tourTitle}
       </a>
-      <a class="site-nav__item" href="#stage-panel-contact" data-site-nav-open="contact">
+      <a class="site-nav__item" href={withBase('/contact')} data-legal-slug="contact">
         {chrome.contactTitle}
       </a>
       {
         about && (
-          <a class="site-nav__item" href="#stage-panel-about" data-site-nav-open="about">
+          <a class="site-nav__item" href={withBase('/about')} data-legal-slug="about">
             {chrome.aboutTitle}
           </a>
         )
       }
-      <a class="site-nav__item" href="#stage-panel-discography" data-site-nav-open="discography">
+      <a
+        class="site-nav__item"
+        href={withBase('/discography')}
+        data-legal-slug="discography"
+      >
         {chrome.discographyTitle}
       </a>
       <a
@@ -131,8 +139,8 @@ const menuChannels = site.channels
         ) : (
           <a
             class="site-nav__menu-item"
-            href="#stage-panel-shop"
-            data-site-nav-open="shop"
+            href={withBase('/shop')}
+            data-legal-slug="shop"
             data-site-nav-menu-close
           >
             {chrome.shopTitle}
@@ -141,16 +149,16 @@ const menuChannels = site.channels
       }
       <a
         class="site-nav__menu-item"
-        href="#stage-panel-tour"
-        data-site-nav-open="tour"
+        href={withBase('/tour')}
+        data-legal-slug="tour"
         data-site-nav-menu-close
       >
         {chrome.tourTitle}
       </a>
       <a
         class="site-nav__menu-item"
-        href="#stage-panel-contact"
-        data-site-nav-open="contact"
+        href={withBase('/contact')}
+        data-legal-slug="contact"
         data-site-nav-menu-close
       >
         {chrome.contactTitle}
@@ -159,8 +167,8 @@ const menuChannels = site.channels
         about && (
           <a
             class="site-nav__menu-item"
-            href="#stage-panel-about"
-            data-site-nav-open="about"
+            href={withBase('/about')}
+            data-legal-slug="about"
             data-site-nav-menu-close
           >
             {chrome.aboutTitle}
@@ -169,8 +177,8 @@ const menuChannels = site.channels
       }
       <a
         class="site-nav__menu-item"
-        href="#stage-panel-discography"
-        data-site-nav-open="discography"
+        href={withBase('/discography')}
+        data-legal-slug="discography"
         data-site-nav-menu-close
       >
         {chrome.discographyTitle}
@@ -220,15 +228,8 @@ const menuChannels = site.channels
 </header>
 
 <script>
-  import {
-    closeOpenStageNavPanels,
-    isStageNavPanelId,
-    openStageNavOverlay,
-  } from '../lib/stage-nav-overlay';
-
   function goHome() {
-    closeOpenStageNavPanels();
-    // Close legal sheet if open (same exit path as LegalOverlay).
+    // Same exit path as LegalOverlay (Imprint / About / Tour / …).
     const legalExit = document.querySelector<HTMLElement>(
       '[data-legal-panel]:not([hidden]) [data-legal-exit]',
     );
@@ -274,7 +275,7 @@ const menuChannels = site.channels
 
     root.querySelectorAll<HTMLElement>('[data-site-nav-menu-close]').forEach((el) => {
       el.addEventListener('click', () => {
-        // Close menu after the open handler runs (bubble after capture opens).
+        // Close menu after LegalOverlay open handler runs (bubble after capture).
         window.requestAnimationFrame(() => setMenuOpen(false));
       });
     });
@@ -287,17 +288,6 @@ const menuChannels = site.channels
 
     window.matchMedia('(min-width: 1024px)').addEventListener('change', (event) => {
       if (event.matches) setMenuOpen(false);
-    });
-
-    root.querySelectorAll<HTMLAnchorElement>('[data-site-nav-open]').forEach((el) => {
-      el.addEventListener('click', (event) => {
-        const id = el.dataset.siteNavOpen;
-        if (!id || !isStageNavPanelId(id)) return;
-        event.preventDefault();
-        setMenuOpen(false);
-        // Phone + desktop: LegalPanel-style sheet (set open directly — no hidden summary.click).
-        openStageNavOverlay(id);
-      });
     });
   }
 

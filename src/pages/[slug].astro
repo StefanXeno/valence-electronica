@@ -1,0 +1,58 @@
+---
+import Base from '../layouts/Base.astro';
+import Hero from '../components/Hero.astro';
+import Channels from '../components/Channels.astro';
+import Jukebox from '../components/Jukebox.astro';
+import site from '../data/site.json';
+import {
+  CONTENT_OVERLAY_SLUGS,
+  type ContentOverlaySlug,
+} from '../lib/content-overlay';
+import { getAboutEntry, getChrome, getSiteNavData } from '../lib/stage';
+
+export async function getStaticPaths() {
+  const [chrome, about] = await Promise.all([getChrome(), getAboutEntry()]);
+  const { shopUrl } = getSiteNavData();
+
+  const titles: Record<ContentOverlaySlug, string> = {
+    about: chrome.aboutTitle,
+    discography: chrome.discographyTitle,
+    tour: chrome.tourTitle,
+    contact: chrome.contactTitle,
+    shop: chrome.shopTitle,
+  };
+
+  return CONTENT_OVERLAY_SLUGS.filter((slug) => {
+    if (slug === 'about') return Boolean(about);
+    if (slug === 'shop') return !shopUrl;
+    return true;
+  }).map((slug) => ({
+    params: { slug },
+    props: { panelTitle: titles[slug] },
+  }));
+}
+
+interface Props {
+  panelTitle: string;
+}
+
+const { panelTitle } = Astro.props as Props;
+---
+
+<!--
+  Same landing shell as `/legal/[slug]`. LegalOverlay in Base opens the matching
+  panel from the URL so deep links work; SiteNav clicks use history + overlay.
+-->
+<Base title={`${panelTitle} — ${site.artist.name}`}>
+  <div class="stage">
+    <div class="stage__identity">
+      <Hero />
+    </div>
+    <div class="stage__socials">
+      <Channels />
+    </div>
+    <div class="stage__jukebox">
+      <Jukebox />
+    </div>
+  </div>
+</Base>
