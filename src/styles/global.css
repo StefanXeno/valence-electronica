@@ -3,7 +3,8 @@
   --font-body: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
 
   /* Whole-site visual scale (chrome, stage, overlays, legal). Prefer zoom over
-     transform:scale so position:fixed stays viewport-relative. */
+     transform:scale so position:fixed stays viewport-relative.
+     Desktop/laptop: 0.8; phone (≤1023px) restores 1 — see media query below. */
   --site-scale: 0.8;
   /* Relative HUD chrome density (desktop vs phone) — multiplied under --site-scale. */
   --hud-scale: 1.5;
@@ -199,6 +200,8 @@ a.channel-btn:focus-visible {
 /* Phone HUD (015): ≤1023px. Laptop HUD unchanged from 1024px. */
 @media (max-width: 1023px) {
   :root {
+    /* Full visual size on phones — desktop stays at 0.8 via :root default. */
+    --site-scale: 1;
     --hud-scale: 1;
     --phone-handle: 1.5rem;
     /* Invisible grab strip — keep the chevron visual at --phone-handle. */
