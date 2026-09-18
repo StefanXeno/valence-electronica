@@ -22,18 +22,18 @@
     ) {
       return true;
     }
-    // Toolbar / mute / vinyl / stage-panel shells own hover+press. Playlist
+    // Toolbar / mute / stage-panel shells own hover+press. Playlist
     // listen/play links inside the jukebox are regular one-shot hits.
     return (
       el.matches(
-        '[data-mute-control], [data-volume-control], [data-jukebox-toggle], [data-stage-panel], [data-playlist-toggle], [data-shuffle-toggle], [data-loop-toggle], [data-bg-play-toggle]',
+        '[data-mute-control], [data-volume-control], [data-stage-panel], [data-playlist-toggle], [data-shuffle-toggle], [data-loop-toggle], [data-bg-play-toggle]',
       ) || Boolean(el.closest('[data-volume-control]'))
     );
   }
 
   function isLiveToggle(el: Element): boolean {
     return el.matches(
-      '[data-mute-control], [data-jukebox-toggle], [data-shuffle-toggle][aria-pressed="true"], [data-loop-toggle][aria-pressed="true"]',
+      '[data-mute-control], [data-shuffle-toggle][aria-pressed="true"], [data-loop-toggle][aria-pressed="true"]',
     );
   }
 

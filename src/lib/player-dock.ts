@@ -29,9 +29,8 @@ export const PHONE_MQ = '(max-width: 1023px)';
 
 /**
  * 021 visit-only player surface defaults (no persistence):
- * - selectionVisible = true (is-theme-tracks)
- * - nowPlayingVisible = false
- * - vflipEasterEggOpen = false (vinyl → .jukebox__section--list)
+ * - selectionVisible toggled by playlist / phone expand (is-theme-tracks)
+ * - compact bar is desktop rest (vinyl FAB inert — no TrackInfoPanel flip)
  */
 
 /** About / Discography / Tour / Contact / Shop / socials / info — exclusive-open sheets. */
@@ -658,8 +657,7 @@ export function initPlayerDock(): void {
       closePhoneSheetsExcept('vflip-list');
     }
 
-    // Phone: useful-open lands on song selection (021) — not V-Flip easter egg.
-    // Vinyl control still opens V-Flip via jukebox toggle.
+    // Phone: useful-open lands on song selection. Vinyl FAB is decorative only.
     if (changed && syncVflip && phoneMq.matches) {
       if (next) {
         document.dispatchEvent(

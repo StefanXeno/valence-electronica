@@ -151,13 +151,6 @@ export function initLabelReveal(): void {
     if (!label) return;
     const panel = el.closest('details');
     if (panel instanceof HTMLDetailsElement && panel.open) return;
-    // Open V-Flip uses an inline track title — no floater on the vinyl FAB.
-    if (
-      el.matches('[data-jukebox-toggle]') &&
-      document.querySelector('[data-jukebox]')?.classList.contains('is-open')
-    ) {
-      return;
-    }
     active = el;
     labelObserver.disconnect();
     labelObserver.observe(el, { attributes: true, attributeFilter: ['data-hud-label'] });

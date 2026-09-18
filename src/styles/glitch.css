@@ -58,7 +58,6 @@
 .stage-panel.glitch-hit,
 [data-glitch-live].glitch-hit,
 [data-jukebox],
-[data-jukebox-toggle],
 [data-stage-panel],
 [data-stage-panels] {
   pointer-events: auto;

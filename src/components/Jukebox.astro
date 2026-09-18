@@ -30,7 +30,7 @@ const defaultLabel =
        / overflow create a fixed containing block, which trapped the disc in the card). */
     <div class="jukebox-with-fab">
     <div
-      class="jukebox is-theme-tracks"
+      class="jukebox"
       role="region"
       aria-label={chrome.vinylLabel}
       data-jukebox
@@ -124,11 +124,11 @@ const defaultLabel =
           class="jukebox__tool jukebox__tool--playlist glitch-hit"
           data-playlist-toggle
           data-glitch-live
-          aria-pressed="false"
-          aria-expanded="true"
+          aria-pressed="true"
+          aria-expanded="false"
           aria-controls="jukebox-theme-tracks"
-          aria-label={chrome.nowPlayingOpenLabel}
-          data-hud-label={chrome.nowPlayingOpenLabel}
+          aria-label={chrome.songsTitle}
+          data-hud-label={chrome.songsTitle}
           data-hud-label-anchor="above"
           data-playlist-label={chrome.nowPlayingOpenLabel}
           data-now-playing-label={chrome.currentlyPlayingLabel}
@@ -206,44 +206,29 @@ const defaultLabel =
 
     </div>
 
-      {/* Fixed bottom-left vinyl FAB — sibling of .jukebox so fixed = viewport. */}
-      <button
-        type="button"
-        class="jukebox__vinyl-fab glitch-hit"
-        data-jukebox-toggle
-        data-glitch-live
-        data-hud-label={chrome.vinylLabel}
-        data-hud-label-anchor="above"
-        aria-expanded="false"
-        aria-controls="jukebox-drawer"
-        aria-label={chrome.vinylLabel}
-      >
-        <span class="jukebox__vinyl-disc" aria-hidden="true">
+      {/* Fixed bottom-left vinyl — decorative only (no open / flip / panel). */}
+      <div class="jukebox__vinyl-fab" aria-hidden="true">
+        <span class="jukebox__vinyl-disc">
           <HudIcon token="jukebox" />
         </span>
-      </button>
+      </div>
     </div>
   )
 }
 
 <script>
   import {
-    clearTransitionGlitch,
     createContinuousGlitch,
     isGlitchThemeActive,
-    playTransitionGlitch,
   } from '../lib/glitch';
-  import { panelCloseDelayMs, runSmoothPanelOpen, shouldSmoothPanelOpen } from '../lib/panel-motion';
   import { initStageSwitch, STAGE_SELECT_EVENT, type StageCatalogEntry } from '../lib/stage-switch';
   import { initPlayerDock, syncDesktopNowTitle } from '../lib/player-dock';
   import type { StageSchedule } from '../lib/stage-schedule';
 
   function bootStageSwitch() {
     const root = document.querySelector<HTMLElement>('[data-jukebox]');
-    /* Vinyl FAB is a sibling outside .jukebox (fixed containing-block escape). */
-    const toggle = document.querySelector<HTMLButtonElement>('[data-jukebox-toggle]');
     const drawer = root?.querySelector<HTMLElement>('[data-jukebox-drawer]');
-    if (!root?.dataset.stageCatalog || !toggle || !drawer) return;
+    if (!root?.dataset.stageCatalog || !drawer) return;
 
     let catalog: StageCatalogEntry[];
     let schedule: StageSchedule = { timezone: 'Europe/Berlin', rules: [] };
@@ -270,8 +255,6 @@ const defaultLabel =
     });
 
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-    let morphTimer: number | undefined;
-    let isOpen = false;
 
     const bindHoverGlitch = (btn: HTMLElement) => {
       let over = false;
@@ -304,8 +287,6 @@ const defaultLabel =
       return hoverGlitch;
     };
 
-    const vinylHoverGlitch = bindHoverGlitch(toggle);
-
     root.querySelectorAll<HTMLElement>(
       '[data-shuffle-toggle], [data-loop-toggle], [data-bg-play-toggle], [data-playlist-toggle], [data-jukebox-option]',
     ).forEach(bindHoverGlitch);
@@ -317,7 +298,7 @@ const defaultLabel =
       next: boolean,
       phase: 'prepare' | 'apply' | 'commit' | 'instant' = 'instant',
     ) => {
-      // 021: selection (theme-tracks) is default home. Button opens optional now-playing.
+      // Playlist expands Songs; compact bar is rest (vinyl is inert — no TrackInfoPanel).
       playlistBtn?.setAttribute('aria-pressed', next ? 'false' : 'true');
       playlistBtn?.setAttribute('aria-expanded', next ? 'true' : 'false');
       const phone = window.matchMedia('(max-width: 1023px)').matches;
@@ -327,13 +308,14 @@ const defaultLabel =
           playlistBtn.dataset.nowPlayingLabel?.trim() ||
           'Now playing';
         const songsLabel = playlistBtn.dataset.songsLabel?.trim() || 'Songs';
-        // On selection (next=true): control says "Now playing". On solo card: "Songs".
+        // On selection (next=true): control says "Now playing". On bar/solo: "Songs".
         const label = next ? openNowLabel : songsLabel;
         playlistBtn.setAttribute('aria-label', label);
         playlistBtn.setAttribute('data-hud-label', label);
         const icon = playlistBtn.querySelector<HTMLElement>('.jukebox__playlist-icon');
         const wave = playlistBtn.querySelector<HTMLElement>('.jukebox__playlist-wave');
-        const showWave = !phone && !next;
+        // Desktop bar rest shows the playlist icon; wave only while Songs is open.
+        const showWave = !phone && next;
         if (icon) icon.hidden = showWave;
         if (wave) wave.hidden = !showWave;
       }
@@ -344,7 +326,6 @@ const defaultLabel =
       root.classList.toggle('is-theme-tracks', next);
       syncDesktopNowTitle();
       if (!themePanel) return;
-      themePanel.hidden = false;
       if (phase !== 'apply') {
         root.querySelectorAll<HTMLElement>('.discog[data-theme-tracks] .discog__item').forEach((item) => {
           const on = item.dataset.discogActive === 'true';
@@ -353,96 +334,16 @@ const defaultLabel =
           else item.setAttribute('aria-hidden', 'true');
         });
       }
-      if (!phone && !next) themePanel.hidden = false;
-    };
-
-    const setOpen = (next: boolean) => {
-      isOpen = next;
-      root.classList.toggle('is-open', next);
-      toggle.setAttribute('aria-expanded', next ? 'true' : 'false');
-      if (!next) {
-        // 021: closing V-Flip returns to selection-first home (not solo card).
-        setPlaylistOpen(true);
-      } else if (window.matchMedia('(max-width: 1023px)').matches && themePanel) {
-        themePanel.hidden = false;
-      }
-      document.dispatchEvent(new CustomEvent('vflip-list-change', { detail: { open: next } }));
+      // Desktop: hide Songs panel when collapsed to the compact bar.
+      if (!phone) themePanel.hidden = !next;
+      else themePanel.hidden = false;
     };
 
     const muteToggle = root.querySelector<HTMLElement>('[data-mute-control]');
     if (muteToggle) bindHoverGlitch(muteToggle);
 
-    const playMorph = (direction: 'in' | 'out') => {
-      if (reduceMotion.matches || !isGlitchThemeActive()) return;
-      vinylHoverGlitch.stop();
-      root.dataset.glitch = direction;
-      window.clearTimeout(morphTimer);
-      const dur = playTransitionGlitch(root, 560);
-      morphTimer = window.setTimeout(() => {
-        clearTransitionGlitch(root);
-        vinylHoverGlitch.start();
-      }, (dur || 560) + 80);
-    };
-
-    const openVflip = (animated = true) => {
-      if (isOpen) return;
-      if (!animated || reduceMotion.matches) {
-        setOpen(true);
-        return;
-      }
-      if (shouldSmoothPanelOpen(reduceMotion.matches)) {
-        // Flush closed styles, then drop is-panel-opening so max-height/opacity ease in.
-        root.classList.add('is-panel-opening');
-        setOpen(true);
-        runSmoothPanelOpen(root, reduceMotion.matches);
-        window.requestAnimationFrame(() => {
-          window.requestAnimationFrame(() => {
-            root.classList.remove('is-panel-opening');
-          });
-        });
-      } else {
-        setOpen(true);
-        playMorph('in');
-      }
-    };
-
-    const closeVflip = (animated: boolean) => {
-      if (!isOpen) return;
-      if (!animated) {
-        setOpen(false);
-        root.classList.remove('is-panel-closing');
-        return;
-      }
-      // Phone click-close: player-dock interpolates sheet height. Stay open
-      // until that morph commits — is-panel-closing hides transport instantly.
-      if (window.matchMedia('(max-width: 1023px)').matches) {
-        document.dispatchEvent(new CustomEvent('phone-hud-request-collapse'));
-        return;
-      }
-      if (root.classList.contains('is-glitching')) return;
-      if (isGlitchThemeActive()) {
-        playMorph('out');
-      } else if (!reduceMotion.matches) {
-        root.classList.add('is-panel-closing');
-      }
-      window.setTimeout(() => {
-        setOpen(false);
-        root.classList.remove('is-panel-closing');
-      }, panelCloseDelayMs(reduceMotion.matches));
-    };
-
-    toggle.addEventListener('click', (event) => {
-      event.preventDefault();
-      event.stopPropagation();
-      if (!isOpen) openVflip();
-      else closeVflip(true);
-    });
-
-    if (!window.matchMedia('(max-width: 1023px)').matches && themePanel) {
-      themePanel.hidden = false;
-      // 021 selection-first: desktop rest lands on song list.
-      setPlaylistOpen(true, 'instant');
-    }
+    // Compact bar rest on laptop; phone keeps collapsed dock until handle expands.
+    setPlaylistOpen(false, 'instant');
 
     playlistBtn?.addEventListener('click', (event) => {
       event.preventDefault();
@@ -473,26 +374,17 @@ const defaultLabel =
       document.dispatchEvent(new CustomEvent(STAGE_SELECT_EVENT, { detail: { id } }));
     });
 
-    window.matchMedia('(max-width: 1023px)').addEventListener('change', (event) => {
-      setOpen(false);
-      if (!event.matches && themePanel) {
-        themePanel.hidden = false;
-        setPlaylistOpen(true, 'instant');
-      } else {
-        setPlaylistOpen(false);
-      }
+    window.matchMedia('(max-width: 1023px)').addEventListener('change', () => {
+      root.classList.remove('is-open', 'is-panel-opening', 'is-panel-closing');
+      setPlaylistOpen(false, 'instant');
     });
 
-    setOpen(false);
-
-    document.addEventListener('phone-hud-open-vflip', (event) => {
-      const animated = (event as CustomEvent<{ animated?: boolean }>).detail?.animated !== false;
-      openVflip(animated);
+    // Vinyl easter-egg open path retired — keep listeners as no-ops for dock exclusivity.
+    document.addEventListener('phone-hud-open-vflip', () => {
+      /* inert: V-Flip chrome is the compact bar only */
     });
-
-    document.addEventListener('phone-hud-close-vflip', (event) => {
-      const animated = Boolean((event as CustomEvent<{ animated?: boolean }>).detail?.animated);
-      closeVflip(animated);
+    document.addEventListener('phone-hud-close-vflip', () => {
+      root.classList.remove('is-open', 'is-panel-opening', 'is-panel-closing');
     });
   }
 
@@ -800,11 +692,10 @@ const defaultLabel =
   }
 
   /*
-   * Vinyl easter egg — true viewport bottom-left (sibling of .jukebox).
-   * Inset matches Channels icon gap (--stage-corner-gap).
+   * Vinyl disc — decorative only (sibling of .jukebox so fixed = viewport).
+   * Inset matches Channels icon gap (--stage-corner-gap). Clicks do nothing.
    */
   .jukebox__vinyl-fab {
-    appearance: none;
     position: fixed;
     z-index: 4;
     left: var(--stage-corner-gap);
@@ -829,34 +720,12 @@ const defaultLabel =
         #121212 65% 100%
       );
     color: color-mix(in srgb, var(--color-text-muted) 75%, #fff);
-    cursor: pointer;
+    cursor: default;
     box-shadow:
       0 0.35rem 1.1rem color-mix(in srgb, black 48%, transparent),
       inset 0 0 0 1px color-mix(in srgb, #fff 8%, transparent);
-    pointer-events: auto;
-    transition:
-      transform 160ms ease,
-      border-color 160ms ease,
-      color 160ms ease,
-      box-shadow 160ms ease;
-  }
-
-  .jukebox__vinyl-fab:hover,
-  .jukebox__vinyl-fab:focus-visible {
-    color: var(--color-accent-alt);
-    border-color: color-mix(in srgb, var(--color-accent) 45%, var(--color-border));
-    outline: none;
-    transform: scale(1.04);
-  }
-
-  /* FAB is no longer a .jukebox descendant — open state via :has(). */
-  :global(html):has(.jukebox.is-open) .jukebox__vinyl-fab {
-    border-color: color-mix(in srgb, var(--color-accent) 55%, var(--color-border));
-    color: var(--color-accent-alt);
-    box-shadow:
-      0 0.35rem 1.1rem color-mix(in srgb, black 48%, transparent),
-      0 0 0.85rem color-mix(in srgb, var(--color-accent) 28%, transparent),
-      inset 0 0 0 1px color-mix(in srgb, #fff 8%, transparent);
+    pointer-events: none;
+    user-select: none;
   }
 
   .jukebox__vinyl-disc {
@@ -1213,8 +1082,8 @@ const defaultLabel =
   }
 
   /*
-   * Desktop always-open player (019 / T028). CSS-first: paints with no JS.
-   * Rest = phone now-playing card + toolbar. Playlist is a view-switch.
+   * Desktop V-Flip = compact control bar at rest. Playlist expands Songs.
+   * TrackInfoPanel / vinyl flip is retired (vinyl FAB is decorative only).
    */
   @media (min-width: 1024px) {
     .jukebox {
@@ -1226,11 +1095,17 @@ const defaultLabel =
         3 * (4.8rem * var(--hud-scale)) + 2 * (0.55rem * var(--hud-scale))
       );
       --player-playlist-morph-dur: 380ms;
-      width: calc(var(--jukebox-rest-base) + var(--jukebox-slider-extra));
+      /* Compact pill — playlist | shuffle | play | mute */
+      width: var(--jukebox-closed-width);
       max-width: min(
         calc(var(--jukebox-open-width) + var(--jukebox-slider-extra)),
         calc(100vw - 2 * var(--stage-corner-gap, 0.3rem))
       );
+      border-radius: 999px;
+    }
+
+    .jukebox.is-theme-tracks {
+      width: calc(var(--jukebox-rest-base) + var(--jukebox-slider-extra));
       border-radius: calc(0.85rem * var(--hud-scale));
     }
 
@@ -1252,7 +1127,7 @@ const defaultLabel =
       pointer-events: auto;
     }
 
-    /* Playlist is a view-switch. Unmute takes space instantly — no width ease. */
+    /* Playlist expand/collapse. Unmute takes space instantly — no width ease. */
     html:not([data-hud-glitch='true']) .jukebox,
     html[data-hud-glitch='true'] .jukebox {
       transition: none;
@@ -1283,7 +1158,7 @@ const defaultLabel =
       opacity: 0;
     }
 
-    /* Faces flip with is-theme-tracks (applied at morph start on desktop). */
+    /* Songs open: playlist title. Compact bar has no header (drawer collapsed). */
     .jukebox.is-theme-tracks .jukebox__title-phone--now {
       opacity: 0;
       visibility: hidden;
@@ -1294,69 +1169,27 @@ const defaultLabel =
       visibility: visible;
     }
 
-    /*
-     * Selection ↔ TrackInfoPanel (vinyl open): crossfade in place.
-     * Keep both faces display:block so opacity/transform can ease — no display:none snaps.
-     */
-    .jukebox__section--list,
+    /* TrackInfoPanel retired — never show the vinyl easter-egg list face. */
+    .jukebox__section--list {
+      display: none !important;
+    }
+
     .jukebox__section--theme-tracks,
     .jukebox__section--theme-tracks[hidden] {
+      display: none;
+    }
+
+    .jukebox.is-theme-tracks .jukebox__section--theme-tracks,
+    .jukebox.is-theme-tracks .jukebox__section--theme-tracks[hidden] {
       display: block !important;
-      transition:
-        opacity var(--player-playlist-morph-dur, 380ms) cubic-bezier(0.22, 1, 0.36, 1),
-        transform var(--player-playlist-morph-dur, 380ms) cubic-bezier(0.22, 1, 0.36, 1),
-        visibility 0s linear var(--player-playlist-morph-dur, 380ms);
-    }
-
-    .jukebox__section--list {
-      position: absolute;
-      left: 0;
-      right: 0;
-      top: 0;
-      opacity: 0;
-      visibility: hidden;
-      pointer-events: none;
-      transform: translateY(0.4rem);
-      z-index: 1;
-    }
-
-    /* Vinyl easter egg: TrackInfoPanel / list drawer over selection */
-    .jukebox.is-open .jukebox__section--list {
       position: relative;
       opacity: 1;
       visibility: visible;
       pointer-events: auto;
-      transform: translateY(0);
-      transition-delay: 0s;
-      z-index: 2;
-    }
-
-    .jukebox.is-open .jukebox__section--theme-tracks,
-    .jukebox.is-open .jukebox__section--theme-tracks[hidden] {
-      position: absolute;
-      left: 0;
-      right: 0;
-      top: 0;
-      opacity: 0;
-      visibility: hidden;
-      pointer-events: none;
-      transform: translateY(-0.35rem);
-      z-index: 1;
-    }
-
-    .jukebox:not(.is-open) .jukebox__section--theme-tracks,
-    .jukebox:not(.is-open) .jukebox__section--theme-tracks[hidden] {
-      position: relative;
-      opacity: 1;
-      visibility: visible;
-      pointer-events: auto;
-      transform: translateY(0);
-      transition-delay: 0s;
       z-index: 2;
     }
 
     @media (prefers-reduced-motion: reduce) {
-      .jukebox__section--list,
       .jukebox__section--theme-tracks,
       .jukebox__section--theme-tracks[hidden] {
         transition: none;
@@ -1372,13 +1205,36 @@ const defaultLabel =
       display: inline-grid;
     }
 
+    /* Compact bar: no drawer chrome. Songs open: pad the panel. */
+    .jukebox__drawer {
+      max-height: 0;
+      opacity: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .jukebox.is-theme-tracks .jukebox__drawer {
+      max-height: none;
+      opacity: 1;
+      pointer-events: auto;
+      overflow: hidden;
+    }
+
     .jukebox__drawer-inner,
-    .jukebox.is-open:not(.is-panel-opening) .jukebox__drawer-inner {
+    .jukebox.is-theme-tracks .jukebox__drawer-inner {
       position: relative;
+      padding: 0;
+    }
+
+    .jukebox.is-theme-tracks .jukebox__drawer-inner {
       padding: var(--jukebox-well-y) calc(0.55rem * var(--hud-scale)) 0;
     }
 
     .jukebox__header {
+      display: none;
+    }
+
+    .jukebox.is-theme-tracks .jukebox__header {
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -1400,23 +1256,12 @@ const defaultLabel =
       cursor: default;
     }
 
-    /* CURRENTLY PLAYING: wave on the right, vertically centered with the label.
-       Hug the bars — a --control-size slot + leftover margin made the right
-       inset larger than the title's left inset (drawer pad 0.55rem). */
-    .jukebox:not(.is-theme-tracks) .jukebox__header-wave.player-dock__soundwave {
-      position: static;
-      display: flex;
-      flex: 0 0 auto;
-      align-self: center;
-      width: auto;
-      margin: 0;
-    }
-
-    .jukebox.is-theme-tracks .jukebox__header-wave.player-dock__soundwave {
+    /* Songs header: no solo-card wave (compact bar owns transport). */
+    .jukebox__header-wave.player-dock__soundwave {
       display: none;
     }
 
-    /* Same slot: playlist icon at rest, soundwave in the jukebox view. */
+    /* Same slot: playlist icon at rest, soundwave while Songs is open. */
     .jukebox.is-theme-tracks .jukebox__playlist-icon:not([hidden]) {
       display: none;
     }
@@ -1425,16 +1270,22 @@ const defaultLabel =
       display: flex !important;
     }
 
-    .jukebox.is-theme-tracks .jukebox__tool--playlist[aria-pressed='true'] {
+    .jukebox.is-theme-tracks .jukebox__tool--playlist[aria-pressed='false'] {
       border-color: transparent;
       background: transparent;
       color: inherit;
     }
 
-    /* Rest: hide the card EQ (header has the wave). Morph/list: badge grows in. */
+    /* Compact bar: panel collapsed. Songs open: show the list well. */
+    .jukebox__panel {
+      max-height: 0;
+      opacity: 0;
+      overflow: hidden;
+      pointer-events: none;
+      padding-bottom: 0;
+    }
 
-    .jukebox__panel,
-    .jukebox.is-open:not(.is-panel-opening) .jukebox__panel {
+    .jukebox.is-theme-tracks .jukebox__panel {
       max-height: none;
       opacity: 1;
       overflow: hidden;
@@ -1443,6 +1294,10 @@ const defaultLabel =
     }
 
     .jukebox__toolbar {
+      border-top-color: transparent;
+    }
+
+    .jukebox.is-theme-tracks .jukebox__toolbar {
       border-top-color: color-mix(in srgb, var(--color-border) 45%, transparent);
     }
 
@@ -1461,8 +1316,8 @@ const defaultLabel =
     }
 
     /* Same scrollport rest → morph → settled. Gutter reserved before the bar paints. */
-    .jukebox__section--theme-tracks,
-    .jukebox__section--theme-tracks[hidden],
+    .jukebox.is-theme-tracks .jukebox__section--theme-tracks,
+    .jukebox.is-theme-tracks .jukebox__section--theme-tracks[hidden],
     .jukebox.is-playlist-morphing .jukebox__section--theme-tracks,
     .jukebox.is-playlist-morphing .jukebox__section--theme-tracks[hidden] {
       max-height: none;
@@ -1941,46 +1796,17 @@ const defaultLabel =
     }
 
     /*
-     * Phone sheet: selection (theme-tracks) is the useful-open default.
-     * Vinyl easter egg (is-open) swaps in TrackInfoPanel / .jukebox__section--list
-     * — same surface as laptop V-Flip (021). Do not keep the old "list is
-     * laptop-only" rule when is-open; that made vinyl a no-op on phone.
+     * Phone sheet: selection (theme-tracks) is the useful-open body.
+     * Vinyl no longer flips to TrackInfoPanel — keep list section hidden.
      */
-    .jukebox.is-player-expanded:not(.is-open) .jukebox__section--list,
-    .jukebox.is-sheet-morphing:not(.is-open) .jukebox__section--list,
-    .jukebox.is-sheet-dragging:not(.is-open) .jukebox__section--list {
-      display: none;
-    }
-
+    .jukebox.is-player-expanded .jukebox__section--list,
+    .jukebox.is-sheet-morphing .jukebox__section--list,
+    .jukebox.is-sheet-dragging .jukebox__section--list,
     .jukebox.is-open .jukebox__section--list {
-      display: block !important;
-      animation: jukebox-face-in var(--jukebox-dur, 280ms) var(--jukebox-ease, cubic-bezier(0.4, 0, 0.2, 1)) both;
-    }
-
-    .jukebox.is-open:not(.is-panel-opening) .jukebox__section--theme-tracks,
-    .jukebox.is-open:not(.is-panel-opening) .jukebox__section--theme-tracks[hidden] {
       display: none !important;
     }
 
-    @keyframes jukebox-face-in {
-      from {
-        opacity: 0;
-        transform: translateY(0.35rem);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .jukebox.is-open .jukebox__section--list {
-        animation: none;
-      }
-    }
-
     .jukebox.is-player-expanded .jukebox__panel,
-    .jukebox.is-open:not(.is-panel-opening) .jukebox__panel,
     .jukebox.is-sheet-dragging .jukebox__panel,
     .jukebox.is-playlist-morphing .jukebox__panel {
       display: flex;
@@ -1991,26 +1817,24 @@ const defaultLabel =
       padding-bottom: var(--jukebox-toolbar-pad);
     }
 
-    .jukebox.is-player-expanded:not(.is-theme-tracks):not(.is-playlist-morphing) .jukebox__panel,
-    .jukebox.is-open:not(.is-theme-tracks):not(.is-playlist-morphing) .jukebox__panel {
+    .jukebox.is-player-expanded:not(.is-theme-tracks):not(.is-playlist-morphing) .jukebox__panel {
       overflow: visible;
     }
 
     .jukebox.is-player-expanded .jukebox__header,
-    .jukebox.is-open .jukebox__header,
     .jukebox.is-playlist-morphing .jukebox__header {
       flex: 0 0 auto;
     }
 
     /* !important beats UA `[hidden] { display: none !important }`. */
-    .jukebox.is-player-expanded:not(.is-open) .jukebox__section--theme-tracks,
-    .jukebox.is-player-expanded:not(.is-open) .jukebox__section--theme-tracks[hidden],
-    .jukebox.is-sheet-dragging:not(.is-open) .jukebox__section--theme-tracks,
-    .jukebox.is-sheet-dragging:not(.is-open) .jukebox__section--theme-tracks[hidden],
-    .jukebox.is-sheet-morphing:not(.is-open) .jukebox__section--theme-tracks,
-    .jukebox.is-sheet-morphing:not(.is-open) .jukebox__section--theme-tracks[hidden],
-    .jukebox.is-playlist-morphing:not(.is-open) .jukebox__section--theme-tracks,
-    .jukebox.is-playlist-morphing:not(.is-open) .jukebox__section--theme-tracks[hidden] {
+    .jukebox.is-player-expanded .jukebox__section--theme-tracks,
+    .jukebox.is-player-expanded .jukebox__section--theme-tracks[hidden],
+    .jukebox.is-sheet-dragging .jukebox__section--theme-tracks,
+    .jukebox.is-sheet-dragging .jukebox__section--theme-tracks[hidden],
+    .jukebox.is-sheet-morphing .jukebox__section--theme-tracks,
+    .jukebox.is-sheet-morphing .jukebox__section--theme-tracks[hidden],
+    .jukebox.is-playlist-morphing .jukebox__section--theme-tracks,
+    .jukebox.is-playlist-morphing .jukebox__section--theme-tracks[hidden] {
       display: block !important;
       overflow-x: hidden;
     }
