@@ -192,8 +192,7 @@ const menuChannels = site.channels
     {
       menuChannels.length > 0 && (
         <div class="site-nav__menu-socials">
-          <p class="site-nav__menu-socials-label">{chrome.socialsLabel}</p>
-          <ul class="site-nav__menu-channels">
+          <ul class="site-nav__menu-channels" aria-label={chrome.socialsLabel}>
             {menuChannels.map((channel) => (
               <li>
                 <a
@@ -205,7 +204,6 @@ const menuChannels = site.channels
                   data-site-nav-menu-close
                 >
                   <ChannelIcon id={channel.id} label={channel.label} />
-                  <span>{channel.label}</span>
                 </a>
               </li>
             ))}
@@ -299,6 +297,9 @@ const menuChannels = site.channels
   }
 
   .site-nav__bar {
+    /* Stay above the fullscreen menu so brand + open/close toggle stay usable. */
+    position: relative;
+    z-index: 10;
     display: flex;
     flex-wrap: nowrap;
     align-items: center;
@@ -459,17 +460,6 @@ const menuChannels = site.channels
 
   .site-nav__menu-socials {
     display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-
-  .site-nav__menu-socials-label {
-    margin: 0;
-    font-family: var(--font-display);
-    font-size: 0.75rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: color-mix(in srgb, #fff 55%, transparent);
   }
 
   .site-nav__menu-channels {
@@ -478,19 +468,24 @@ const menuChannels = site.channels
     padding: 0;
     display: flex;
     flex-wrap: wrap;
-    gap: 0.65rem 1rem;
+    align-items: center;
+    gap: 1rem 1.25rem;
   }
 
+  /* Icon-only — no circular bordered chips (those stay on desktop stage socials). */
   .site-nav__menu-channel {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.45rem;
+    display: inline-grid;
+    place-items: center;
+    width: auto;
+    height: auto;
+    padding: 0.15rem;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    backdrop-filter: none;
+    box-shadow: none;
     color: color-mix(in srgb, #fff 78%, transparent);
     text-decoration: none;
-    font-family: var(--font-display);
-    font-size: 0.85rem;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
   }
 
   .site-nav__menu-channel:hover,
@@ -500,8 +495,9 @@ const menuChannels = site.channels
   }
 
   .site-nav__menu-channel :global(.channel-icon) {
-    width: 1.25rem;
-    height: 1.25rem;
+    display: block;
+    width: 1.5rem;
+    height: 1.5rem;
   }
 
   @media (min-width: 1024px) {
