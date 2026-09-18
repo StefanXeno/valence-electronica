@@ -368,7 +368,8 @@ const defaultLabel =
     overflow: hidden;
   }
 
-  .jukebox:has(.volume-control--in-jukebox[data-sound='on']) {
+  /* :global — MuteControl is a child component; scoped :has() never matched. */
+  .jukebox:has(:global(.volume-control--in-jukebox[data-sound='on'])) {
     --jukebox-mute-width: calc(
       var(--control-size) + var(--jukebox-toolbar-gap) + var(--jukebox-volume-slider-size) +
         var(--jukebox-slider-thumb-inset)
@@ -1018,7 +1019,7 @@ const defaultLabel =
     }
 
     /* Volume slider hole only while unmuted — bar ends at mute when muted. */
-    .jukebox:has(.volume-control--in-jukebox[data-sound='on']) {
+    .jukebox:has(:global(.volume-control--in-jukebox[data-sound='on'])) {
       --jukebox-slider-extra: calc(
         var(--jukebox-toolbar-gap) + var(--jukebox-volume-slider-size) + var(--jukebox-slider-thumb-inset)
       );
@@ -1846,7 +1847,8 @@ const defaultLabel =
       pointer-events: none;
     }
 
-    .jukebox:has(.volume-control--in-jukebox[data-sound='on']) {
+    /* Phone: no volume slider — keep mute slot at speaker width when unmuted. */
+    .jukebox:has(:global(.volume-control--in-jukebox[data-sound='on'])) {
       --jukebox-mute-width: var(--control-size);
     }
 
