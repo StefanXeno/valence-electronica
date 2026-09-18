@@ -170,7 +170,7 @@ const defaultLabel =
         </div>
 
         {showMute && (
-          <div class="jukebox__tool jukebox__tool--mute" data-jukebox-mute-slot>
+          <div class="jukebox__tool jukebox__tool--mute" data-jukebox-mute-slot data-sound="off">
             <MuteControl
               unmuteTooltip={chrome.unmuteTooltip}
               muteTooltip={chrome.muteTooltip}
@@ -368,8 +368,12 @@ const defaultLabel =
     overflow: hidden;
   }
 
-  /* :global — MuteControl is a child component; scoped :has() never matched. */
-  .jukebox:has(:global(.volume-control--in-jukebox[data-sound='on'])) {
+  /*
+   * Expand via same-scope mute slot data-sound (set by MuteControl JS).
+   * Do NOT use :has(:global(.volume-control…)) — :global inside :has survives
+   * into the built CSS as an invalid pseudo-class and never matches.
+   */
+  .jukebox:has(.jukebox__tool--mute[data-sound='on']) {
     --jukebox-mute-width: calc(
       var(--control-size) + var(--jukebox-toolbar-gap) + var(--jukebox-volume-slider-size) +
         var(--jukebox-slider-thumb-inset)
@@ -558,6 +562,9 @@ const defaultLabel =
     border-color: transparent;
     padding: 0;
     overflow: visible;
+    /* Flex host so in-flow mute + slider stay hittable (not absolute/clipped). */
+    display: flex;
+    align-items: center;
   }
 
   .jukebox__tool--mute[hidden] {
@@ -1019,7 +1026,7 @@ const defaultLabel =
     }
 
     /* Volume slider hole only while unmuted — bar ends at mute when muted. */
-    .jukebox:has(:global(.volume-control--in-jukebox[data-sound='on'])) {
+    .jukebox:has(.jukebox__tool--mute[data-sound='on']) {
       --jukebox-slider-extra: calc(
         var(--jukebox-toolbar-gap) + var(--jukebox-volume-slider-size) + var(--jukebox-slider-thumb-inset)
       );
@@ -1027,7 +1034,8 @@ const defaultLabel =
 
     .jukebox__tool--mute,
     .jukebox__tool--mute[hidden] {
-      display: block !important;
+      display: flex !important;
+      align-items: center;
       visibility: visible;
       pointer-events: auto;
     }
@@ -1848,7 +1856,7 @@ const defaultLabel =
     }
 
     /* Phone: no volume slider — keep mute slot at speaker width when unmuted. */
-    .jukebox:has(:global(.volume-control--in-jukebox[data-sound='on'])) {
+    .jukebox:has(.jukebox__tool--mute[data-sound='on']) {
       --jukebox-mute-width: var(--control-size);
     }
 
