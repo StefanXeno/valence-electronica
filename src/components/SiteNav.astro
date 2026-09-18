@@ -458,8 +458,15 @@ const menuChannels = site.channels
     outline: none;
   }
 
+  /* Bottom-middle of the fullscreen overlay (nav stays vertically centered). */
   .site-nav__menu-socials {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: max(2rem, env(safe-area-inset-bottom, 0px));
     display: flex;
+    justify-content: center;
+    pointer-events: none;
   }
 
   .site-nav__menu-channels {
@@ -469,7 +476,9 @@ const menuChannels = site.channels
     display: flex;
     flex-wrap: wrap;
     align-items: center;
+    justify-content: center;
     gap: 1rem 1.25rem;
+    pointer-events: auto;
   }
 
   /* Icon-only — no circular bordered chips (those stay on desktop stage socials). */

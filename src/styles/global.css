@@ -379,52 +379,20 @@ a.channel-btn:focus-visible {
   }
 
   /*
-   * Phone: persistent bottom-right socials above the player dock.
-   * Full-page SiteNav menu also lists links. Do not hide behind Links sheet.
+   * Phone: stage socials live only in the SiteNav fullscreen menu.
+   * Hide the bottom-right Channels corner (desktop placement unchanged ≥1024).
    */
   .stage__socials {
-    top: auto;
-    left: auto;
-    /* Same horizontal rhythm as desktop; sit just above the player dock. */
-    right: var(--stage-corner-gap);
-    bottom: calc(
-      var(--hud-dock-bottom) + var(--phone-dock-lift) + var(--phone-player-h) + var(--phone-dock-gap) +
-        var(--stage-corner-gap)
-    );
-    max-width: min(70vw, 16rem);
-    visibility: visible;
-    pointer-events: auto;
-    opacity: 1;
-    transform: none;
-    z-index: 4;
+    display: none !important;
+    visibility: hidden;
+    pointer-events: none;
   }
 
-  .stage__socials .channels {
-    width: auto;
-    max-width: 100%;
-    box-sizing: border-box;
-    padding: 0;
-    border: 0;
-    border-radius: 0;
-    background: transparent;
-    backdrop-filter: none;
-    box-shadow: none;
-  }
-
-  .stage__socials .channels ul {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-    align-items: center;
-    width: auto;
-    max-width: 100%;
-    gap: var(--stage-corner-gap);
-    max-height: none;
-    overflow: visible;
-  }
-
-  .stage__socials .channels li {
-    flex: 0 0 auto;
+  /* Phone: hide V-Flip / player dock for now (desktop StageDock unchanged). */
+  .stage-dock {
+    display: none !important;
+    visibility: hidden;
+    pointer-events: none;
   }
 
   /* Legacy park target — keep harmless if JS ever re-parents. */
@@ -437,13 +405,5 @@ a.channel-btn:focus-visible {
     z-index: 1;
     max-width: none;
     transform: none;
-  }
-}
-
-@media (max-width: 1023px) and (prefers-reduced-motion: reduce) {
-  .stage__socials,
-  html[data-socials-open] .stage__socials {
-    transform: none;
-    transition: none;
   }
 }
