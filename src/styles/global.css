@@ -13,6 +13,8 @@
   --hud-inset: calc(0.75rem * var(--hud-scale));
   --hud-footer: calc(2.4rem * var(--hud-scale));
   --hud-dock-bottom: calc(var(--hud-footer) + 0.2rem);
+  /* Icon-to-icon gap on Channels — also viewport inset for corner FABs. */
+  --stage-corner-gap: calc(0.3rem * var(--hud-scale));
   --tagline-max-width: 30rem;
 }
 
@@ -117,13 +119,13 @@ a.channel-btn:focus-visible {
   z-index: 2;
 }
 
-/* Bottom-right socials (020 feedback) — clear of the floor player chrome. */
+/* Bottom-right socials — tight to the viewport corner (same rhythm as icon gap). */
 .stage__socials {
   top: auto;
   left: auto;
-  right: var(--hud-inset);
-  bottom: calc(var(--hud-inset) + var(--control-size) + 0.85rem);
-  max-width: min(calc(50vw - var(--hud-inset)), calc(100vw - 7.5rem));
+  right: var(--stage-corner-gap);
+  bottom: var(--stage-corner-gap);
+  max-width: min(calc(50vw - var(--stage-corner-gap)), calc(100vw - 7.5rem));
   transform: none;
 }
 
@@ -381,10 +383,11 @@ a.channel-btn:focus-visible {
   .stage__socials {
     top: auto;
     left: auto;
-    right: var(--phone-dock-inset);
+    /* Same horizontal rhythm as desktop; sit just above the player dock. */
+    right: var(--stage-corner-gap);
     bottom: calc(
       var(--hud-dock-bottom) + var(--phone-dock-lift) + var(--phone-player-h) + var(--phone-dock-gap) +
-        0.55rem
+        var(--stage-corner-gap)
     );
     max-width: min(70vw, 16rem);
     visibility: visible;
@@ -413,7 +416,7 @@ a.channel-btn:focus-visible {
     align-items: center;
     width: auto;
     max-width: 100%;
-    gap: 0.45rem;
+    gap: var(--stage-corner-gap);
     max-height: none;
     overflow: visible;
   }

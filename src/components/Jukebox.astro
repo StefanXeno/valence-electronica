@@ -26,6 +26,9 @@ const defaultLabel =
 
 {
   videos.length > 0 && (
+    /* display:contents wrapper — vinyl FAB must sit outside .jukebox (backdrop-filter
+       / overflow create a fixed containing block, which trapped the disc in the card). */
+    <div class="jukebox-with-fab">
     <div
       class="jukebox is-theme-tracks"
       role="region"
@@ -201,7 +204,9 @@ const defaultLabel =
         )}
       </div>
 
-      {/* Fixed bottom-left vinyl FAB — outside toolbar chrome (021 easter egg). */}
+    </div>
+
+      {/* Fixed bottom-left vinyl FAB — sibling of .jukebox so fixed = viewport. */}
       <button
         type="button"
         class="jukebox__vinyl-fab glitch-hit"
@@ -235,7 +240,8 @@ const defaultLabel =
 
   function bootStageSwitch() {
     const root = document.querySelector<HTMLElement>('[data-jukebox]');
-    const toggle = root?.querySelector<HTMLButtonElement>('[data-jukebox-toggle]');
+    /* Vinyl FAB is a sibling outside .jukebox (fixed containing-block escape). */
+    const toggle = document.querySelector<HTMLButtonElement>('[data-jukebox-toggle]');
     const drawer = root?.querySelector<HTMLElement>('[data-jukebox-drawer]');
     if (!root?.dataset.stageCatalog || !toggle || !drawer) return;
 
@@ -488,6 +494,11 @@ const defaultLabel =
 </script>
 
 <style>
+  /* Lets the vinyl FAB escape .jukebox’s backdrop-filter fixed containing block. */
+  .jukebox-with-fab {
+    display: contents;
+  }
+
   .jukebox {
     --jukebox-ease: cubic-bezier(0.4, 0, 0.2, 1);
     --jukebox-dur: 280ms;
@@ -778,15 +789,15 @@ const defaultLabel =
   }
 
   /*
-   * Vinyl easter egg — fixed bottom-left disc (not buried in toolbar).
-   * Uses the historical jukebox vinyl glyph; button itself reads as a record.
+   * Vinyl easter egg — true viewport bottom-left (sibling of .jukebox).
+   * Inset matches Channels icon gap (--stage-corner-gap).
    */
   .jukebox__vinyl-fab {
     appearance: none;
     position: fixed;
     z-index: 4;
-    left: var(--hud-inset);
-    bottom: var(--hud-inset);
+    left: var(--stage-corner-gap);
+    bottom: var(--stage-corner-gap);
     display: inline-grid;
     place-items: center;
     width: calc(3.5rem * var(--hud-scale));
@@ -827,7 +838,8 @@ const defaultLabel =
     transform: scale(1.04);
   }
 
-  .jukebox.is-open .jukebox__vinyl-fab {
+  /* FAB is no longer a .jukebox descendant — open state via :has(). */
+  :global(html):has(.jukebox.is-open) .jukebox__vinyl-fab {
     border-color: color-mix(in srgb, var(--color-accent) 55%, var(--color-border));
     color: var(--color-accent-alt);
     box-shadow:
@@ -1838,13 +1850,13 @@ const defaultLabel =
       align-self: stretch;
     }
 
-    /* Vinyl easter egg stays available on phone (021); handle still expands player. */
+    /* Vinyl stays above the player dock; same gap rhythm as socials. */
     .jukebox__vinyl-fab {
       display: inline-grid;
-      left: var(--phone-dock-inset);
+      left: var(--stage-corner-gap);
       bottom: calc(
         var(--hud-dock-bottom) + var(--phone-dock-lift) + var(--phone-player-h) + var(--phone-dock-gap) +
-          0.55rem
+          var(--stage-corner-gap)
       );
       z-index: calc(var(--z-phone-player-front, 7) + 1);
       width: 3.15rem;

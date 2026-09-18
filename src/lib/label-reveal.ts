@@ -154,7 +154,7 @@ export function initLabelReveal(): void {
     // Open V-Flip uses an inline track title — no floater on the vinyl FAB.
     if (
       el.matches('[data-jukebox-toggle]') &&
-      el.closest('[data-jukebox]')?.classList.contains('is-open')
+      document.querySelector('[data-jukebox]')?.classList.contains('is-open')
     ) {
       return;
     }
