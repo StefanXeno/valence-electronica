@@ -18,7 +18,7 @@ owned by `022`.
 
 ## Phase 1: Setup (Shared Infrastructure)
 
-- [ ] T001 Review `specs/021-jukebox-easter-egg/contracts/jukebox-selection-first-ui.md` and `research.md` against `src/components/Jukebox.astro`, `src/components/Discography.astro`, `src/components/TrackInfoPanel.astro`, `src/lib/player-dock.ts`, `src/lib/stage-switch.ts`, and supersession notes vs `015`/`018`/`019`/`011`
+- [x] T001 Review `specs/021-jukebox-easter-egg/contracts/jukebox-selection-first-ui.md` and `research.md` against `src/components/Jukebox.astro`, `src/components/Discography.astro`, `src/components/TrackInfoPanel.astro`, `src/lib/player-dock.ts`, `src/lib/stage-switch.ts`, and supersession notes vs `015`/`018`/`019`/`011`
 
 ---
 
@@ -26,10 +26,10 @@ owned by `022`.
 
 **⚠️ CRITICAL**: Blocks all user stories
 
-- [ ] T002 Add chrome fields `songsTitle`, `nowPlayingOpenLabel`, and `vinylLabel` in `src/content.config.ts` + `src/content/ui/chrome.md` per locked `data-model.md` (do not dual-option retarget `jukeboxPanelTitle` / `playlistLabel` as primary names)
-- [ ] T003 [P] Update `getChrome()` / fallbacks in `src/lib/stage.ts` for `songsTitle`, `nowPlayingOpenLabel`, `vinylLabel` (fallback `jukeboxLabel` → vinyl only if `vinylLabel` unset)
-- [ ] T004 Document visit-only surface defaults (`selectionVisible=true`, `nowPlayingVisible=false`, `vflipEasterEggOpen=false`) as comments or helpers near `src/lib/player-dock.ts` / Jukebox boot — no persistence
-- [ ] T005 [P] Confirm `src/lib/stage-switch.ts` track selection path does not hardcode single-video UX assumptions that would block `022` (opaque `sources` / future resolver)
+- [x] T002 Add chrome fields `songsTitle`, `nowPlayingOpenLabel`, and `vinylLabel` in `src/content.config.ts` + `src/content/ui/chrome.md` per locked `data-model.md` (do not dual-option retarget `jukeboxPanelTitle` / `playlistLabel` as primary names)
+- [x] T003 [P] Update `getChrome()` / fallbacks in `src/lib/stage.ts` for `songsTitle`, `nowPlayingOpenLabel`, `vinylLabel` (fallback `jukeboxLabel` → vinyl only if `vinylLabel` unset)
+- [x] T004 Document visit-only surface defaults (`selectionVisible=true`, `nowPlayingVisible=false`, `vflipEasterEggOpen=false`) as comments or helpers near `src/lib/player-dock.ts` / Jukebox boot — no persistence
+- [x] T005 [P] Confirm `src/lib/stage-switch.ts` track selection path does not hardcode single-video UX assumptions that would block `022` (opaque `sources` / future resolver)
 
 **Checkpoint**: `npm run check` passes; chrome resolves; no dual-video hardcoding introduced
 
@@ -43,11 +43,11 @@ owned by `022`.
 
 ### Implementation for User Story 1
 
-- [ ] T006 [US1] Boot / CSS-first rest in `src/components/Jukebox.astro` so desktop (≥1024px) default body shows theme-track **selection** (not solo Currently playing card)
-- [ ] T007 [US1] Change phone useful-open default in `src/lib/player-dock.ts` + `src/components/Jukebox.astro` so expanded/open body lands on **selection**, not solo Currently playing
-- [ ] T008 [US1] Invert or retarget playlist/`is-theme-tracks` semantics so visitors are not forced through currently-playing-first → playlist to change songs
-- [ ] T009 [US1] Ensure selecting another catalog track from the visible list activates it without an extra obligatory “open playlist” step (`src/lib/stage-switch.ts` + Discography cards in `src/components/Discography.astro`)
-- [ ] T010 [US1] Update default headers to selection-oriented chrome strings (not `currentlyPlayingLabel` as rest title) in `src/components/Jukebox.astro`
+- [x] T006 [US1] Boot / CSS-first rest in `src/components/Jukebox.astro` so desktop (≥1024px) default body shows theme-track **selection** (not solo Currently playing card)
+- [x] T007 [US1] Change phone useful-open default in `src/lib/player-dock.ts` + `src/components/Jukebox.astro` so expanded/open body lands on **selection**, not solo Currently playing
+- [x] T008 [US1] Invert or retarget playlist/`is-theme-tracks` semantics so visitors are not forced through currently-playing-first → playlist to change songs
+- [x] T009 [US1] Ensure selecting another catalog track from the visible list activates it without an extra obligatory “open playlist” step (`src/lib/stage-switch.ts` + Discography cards in `src/components/Discography.astro`)
+- [x] T010 [US1] Update default headers to selection-oriented chrome strings (not `currentlyPlayingLabel` as rest title) in `src/components/Jukebox.astro`
 - [ ] T011 [US1] Manually walk `specs/021-jukebox-easter-egg/quickstart.md` Scenario 1 (390 + 1280)
 
 **Checkpoint**: Selection-first MVP on phone and laptop
@@ -62,11 +62,11 @@ owned by `022`.
 
 ### Implementation for User Story 2
 
-- [ ] T012 [US2] Unhide and/or relocate the vinyl control as a quiet brand object in `src/components/Jukebox.astro` + `src/styles/global.css` (not a labeled primary CTA; not covered by `020` top nav)
-- [ ] T013 [US2] Wire vinyl **click/tap** to open the V-Flip easter egg — **must** enable `.jukebox__section--list` / `TrackInfoPanel.astro` drawer (locked DOM target; not optional alternate) in `src/components/Jukebox.astro`
-- [ ] T014 [US2] Ensure song selection remains usable without ever activating vinyl; easter egg does not trap the visitor (close path back to selection)
-- [ ] T015 [P] [US2] Verify no “V-Flip” item is added to `020` SiteNav / top menu (guard in review of `src/components/SiteNav.astro` if present)
-- [ ] T016 [US2] Forbidden discovery check: no unmarked-corner-only, konami, or long-press-only path required in `src/components/Jukebox.astro` / `player-dock.ts`
+- [x] T012 [US2] Unhide and/or relocate the vinyl control as a quiet brand object in `src/components/Jukebox.astro` + `src/styles/global.css` (not a labeled primary CTA; not covered by `020` top nav)
+- [x] T013 [US2] Wire vinyl **click/tap** to open the V-Flip easter egg — **must** enable `.jukebox__section--list` / `TrackInfoPanel.astro` drawer (locked DOM target; not optional alternate) in `src/components/Jukebox.astro`
+- [x] T014 [US2] Ensure song selection remains usable without ever activating vinyl; easter egg does not trap the visitor (close path back to selection)
+- [x] T015 [P] [US2] Verify no “V-Flip” item is added to `020` SiteNav / top menu (guard in review of `src/components/SiteNav.astro` if present)
+- [x] T016 [US2] Forbidden discovery check: no unmarked-corner-only, konami, or long-press-only path required in `src/components/Jukebox.astro` / `player-dock.ts`
 - [ ] T017 [US2] Manually walk `specs/021-jukebox-easter-egg/quickstart.md` Scenario 2
 
 **Checkpoint**: Vinyl easter egg discoverable; casual path intact
@@ -155,3 +155,11 @@ Task: "Phone open → selection in player-dock.ts"
 - No new npm packages
 - Do not implement dual-video schema here — only avoid blocking it
 - Do not put V-Flip in top nav
+
+## Implement session notes (2026-09-18)
+
+- Foundation + selection-first boot (desktop `is-theme-tracks`, phone expand → selection).
+- Vinyl unhidden; click opens `.jukebox__section--list` / TrackInfoPanel (locked).
+- Chrome: `songsTitle`, `nowPlayingOpenLabel`, `vinylLabel`.
+- **Remaining:** T011/T017/T021 manual QA; US3 polish (T018–T020); T022–T026 polish.
+- Operator must verify vinyl placement vs 020 top nav visually.

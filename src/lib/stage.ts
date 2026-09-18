@@ -19,6 +19,9 @@ export interface UiChrome {
   stageButtonLabel: string;
   currentlyPlayingLabel: string;
   currentlyPausingLabel: string;
+  songsTitle: string;
+  nowPlayingOpenLabel: string;
+  vinylLabel: string;
   emptyReleases: string;
   emptyShows: string;
   jukeboxLabel: string;
@@ -97,6 +100,9 @@ const CHROME_FALLBACK: UiChrome = {
   stageButtonLabel: 'Play on V-Flip',
   currentlyPlayingLabel: 'Currently playing',
   currentlyPausingLabel: 'Currently pausing',
+  songsTitle: 'Songs',
+  nowPlayingOpenLabel: 'Now playing',
+  vinylLabel: 'Vinyl',
   emptyReleases: 'No releases yet',
   emptyShows: 'No upcoming dates',
   jukeboxLabel: 'V-Flip',
@@ -169,6 +175,10 @@ export async function getChrome(): Promise<UiChrome> {
       entry.data.currentlyPlayingLabel?.trim() || CHROME_FALLBACK.currentlyPlayingLabel,
     currentlyPausingLabel:
       entry.data.currentlyPausingLabel?.trim() || CHROME_FALLBACK.currentlyPausingLabel,
+    songsTitle: entry.data.songsTitle?.trim() || CHROME_FALLBACK.songsTitle,
+    nowPlayingOpenLabel:
+      entry.data.nowPlayingOpenLabel?.trim() || CHROME_FALLBACK.nowPlayingOpenLabel,
+    vinylLabel: entry.data.vinylLabel?.trim() || entry.data.jukeboxLabel?.trim() || CHROME_FALLBACK.vinylLabel,
     emptyReleases: entry.data.emptyReleases?.trim() || CHROME_FALLBACK.emptyReleases,
     emptyShows: entry.data.emptyShows?.trim() || CHROME_FALLBACK.emptyShows,
     jukeboxLabel: entry.data.jukeboxLabel?.trim() || CHROME_FALLBACK.jukeboxLabel,

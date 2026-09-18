@@ -11,6 +11,9 @@ contactEmpty: Contact details are not ready yet — check back soon.
 stageButtonLabel: Play on V-Flip
 currentlyPlayingLabel: Currently playing
 currentlyPausingLabel: Currently pausing
+songsTitle: Songs
+nowPlayingOpenLabel: Now playing
+vinylLabel: Vinyl
 emptyReleases: No releases yet
 emptyShows: No upcoming dates
 jukeboxLabel: V-Flip

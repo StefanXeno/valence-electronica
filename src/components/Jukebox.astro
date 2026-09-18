@@ -27,9 +27,9 @@ const defaultLabel =
 {
   videos.length > 0 && (
     <div
-      class="jukebox"
+      class="jukebox is-theme-tracks"
       role="region"
-      aria-label={chrome.jukeboxLabel}
+      aria-label={chrome.vinylLabel}
       data-jukebox
       data-player-dock
       data-stage-catalog={JSON.stringify(catalog)}
@@ -83,10 +83,11 @@ const defaultLabel =
                 class="jukebox__title"
                 data-playing-label={chrome.currentlyPlayingLabel}
                 data-pausing-label={chrome.currentlyPausingLabel}
+                data-songs-title={chrome.songsTitle}
               >
-                <span class="jukebox__title-laptop">{chrome.jukeboxPanelTitle}</span>
+                <span class="jukebox__title-laptop">{chrome.songsTitle}</span>
                 <span class="jukebox__title-phone jukebox__title-phone--now">{chrome.currentlyPlayingLabel}</span>
-                <span class="jukebox__title-phone jukebox__title-phone--playlist">{chrome.jukeboxPanelTitle}</span>
+                <span class="jukebox__title-phone jukebox__title-phone--playlist">{chrome.songsTitle}</span>
               </h2>
               <div class="jukebox__header-wave player-dock__soundwave" aria-hidden="true">
                 <span></span>
@@ -105,8 +106,7 @@ const defaultLabel =
               class="jukebox__section jukebox__section--theme-tracks"
               id="jukebox-theme-tracks"
               data-theme-tracks-panel
-              aria-label={chrome.jukeboxPanelTitle}
-              hidden
+              aria-label={chrome.songsTitle}
             >
               <Discography chrome={chrome} defaultId={defaultVideoId} themeTracksOnly />
             </section>
@@ -122,13 +122,14 @@ const defaultLabel =
           data-playlist-toggle
           data-glitch-live
           aria-pressed="false"
-          aria-expanded="false"
+          aria-expanded="true"
           aria-controls="jukebox-theme-tracks"
-          aria-label={chrome.playlistLabel}
-          data-hud-label={chrome.playlistLabel}
+          aria-label={chrome.nowPlayingOpenLabel}
+          data-hud-label={chrome.nowPlayingOpenLabel}
           data-hud-label-anchor="above"
-          data-playlist-label={chrome.playlistLabel}
+          data-playlist-label={chrome.nowPlayingOpenLabel}
           data-now-playing-label={chrome.currentlyPlayingLabel}
+          data-songs-label={chrome.songsTitle}
         >
           <span class="jukebox__playlist-icon" aria-hidden="true">
             <HudIcon token="playlist" />
@@ -179,11 +180,11 @@ const defaultLabel =
           class="jukebox__tool jukebox__tool--vinyl glitch-hit"
           data-jukebox-toggle
           data-glitch-live
-          data-hud-label={chrome.jukeboxLabel}
+          data-hud-label={chrome.vinylLabel}
           data-hud-label-anchor="above"
           aria-expanded="false"
           aria-controls="jukebox-drawer"
-          aria-label={chrome.jukeboxLabel}
+          aria-label={chrome.vinylLabel}
         >
           <HudIcon token={chrome.jukeboxIcon} emoji={chrome.jukeboxIconEmoji} />
         </button>
@@ -307,31 +308,33 @@ const defaultLabel =
       next: boolean,
       phase: 'prepare' | 'apply' | 'commit' | 'instant' = 'instant',
     ) => {
-      playlistBtn?.setAttribute('aria-pressed', next ? 'true' : 'false');
+      // 021: selection (theme-tracks) is default home. Button opens optional now-playing.
+      playlistBtn?.setAttribute('aria-pressed', next ? 'false' : 'true');
       playlistBtn?.setAttribute('aria-expanded', next ? 'true' : 'false');
       const phone = window.matchMedia('(max-width: 1023px)').matches;
       if (playlistBtn) {
-        const listLabel = playlistBtn.dataset.playlistLabel?.trim() || 'Playlist';
-        const nowLabel = playlistBtn.dataset.nowPlayingLabel?.trim() || 'Currently playing';
-        const label = !phone && next ? nowLabel : listLabel;
+        const openNowLabel =
+          playlistBtn.dataset.playlistLabel?.trim() ||
+          playlistBtn.dataset.nowPlayingLabel?.trim() ||
+          'Now playing';
+        const songsLabel = playlistBtn.dataset.songsLabel?.trim() || 'Songs';
+        // On selection (next=true): control says "Now playing". On solo card: "Songs".
+        const label = next ? openNowLabel : songsLabel;
         playlistBtn.setAttribute('aria-label', label);
         playlistBtn.setAttribute('data-hud-label', label);
-        // Exclusive faces: never stack icon + wave in the same slot.
         const icon = playlistBtn.querySelector<HTMLElement>('.jukebox__playlist-icon');
         const wave = playlistBtn.querySelector<HTMLElement>('.jukebox__playlist-wave');
-        const showWave = !phone && next;
+        const showWave = !phone && !next;
         if (icon) icon.hidden = showWave;
         if (wave) wave.hidden = !showWave;
       }
       if (phase === 'prepare') {
-        // Keep the discog list mounted — never display:none mid-morph.
         if (themePanel) themePanel.hidden = false;
         return;
       }
       root.classList.toggle('is-theme-tracks', next);
       syncDesktopNowTitle();
       if (!themePanel) return;
-      // Desktop rest always shows the solo card; phone unhides when expanded.
       themePanel.hidden = false;
       if (phase !== 'apply') {
         root.querySelectorAll<HTMLElement>('.discog[data-theme-tracks] .discog__item').forEach((item) => {
@@ -419,12 +422,13 @@ const defaultLabel =
 
     if (!window.matchMedia('(max-width: 1023px)').matches && themePanel) {
       themePanel.hidden = false;
+      // 021 selection-first: desktop rest lands on song list.
+      setPlaylistOpen(true, 'instant');
     }
 
     playlistBtn?.addEventListener('click', (event) => {
       event.preventDefault();
       event.stopPropagation();
-      // Same morph as phone (018): extras grow around the now-playing card.
       const next = !root.classList.contains('is-theme-tracks');
       document.dispatchEvent(new CustomEvent('phone-player-playlist', { detail: { open: next } }));
     });
@@ -453,8 +457,12 @@ const defaultLabel =
 
     window.matchMedia('(max-width: 1023px)').addEventListener('change', (event) => {
       setOpen(false);
-      setPlaylistOpen(false);
-      if (!event.matches && themePanel) themePanel.hidden = false;
+      if (!event.matches && themePanel) {
+        themePanel.hidden = false;
+        setPlaylistOpen(true, 'instant');
+      } else {
+        setPlaylistOpen(false);
+      }
     });
 
     setOpen(false);
@@ -1186,12 +1194,25 @@ const defaultLabel =
       display: none;
     }
 
+    /* Vinyl easter egg: open TrackInfoPanel / list drawer over selection */
+    .jukebox.is-open .jukebox__section--list {
+      display: block !important;
+    }
+
+    .jukebox.is-open .jukebox__section--theme-tracks,
+    .jukebox.is-open .jukebox__section--theme-tracks[hidden] {
+      display: none !important;
+    }
+
     .jukebox__section--theme-tracks,
     .jukebox__section--theme-tracks[hidden] {
       display: block !important;
     }
 
-    .jukebox__tool--vinyl,
+    .jukebox__tool--vinyl {
+      display: inline-grid;
+    }
+
     .jukebox__tool--loop {
       display: none;
     }
@@ -1738,8 +1759,11 @@ const defaultLabel =
       align-self: stretch;
     }
 
-    /* Pill handle opens V-Flip — no separate vinyl control on phone. */
-    .jukebox__tool--vinyl,
+    /* Vinyl easter egg stays available on phone (021); handle still expands player. */
+    .jukebox__tool--vinyl {
+      display: inline-grid;
+    }
+
     .jukebox__tool--loop {
       display: none;
     }
