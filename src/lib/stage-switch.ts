@@ -154,6 +154,8 @@ function loadVideoSources(
     el.type = source.type;
     video.append(el);
   }
+  // Warm muxed AAC while still muted so first unmute is not a cold fetch/decode.
+  video.preload = 'auto';
   video.muted = keepMuted;
   video.volume = volume;
   video.load();
@@ -167,6 +169,7 @@ function resetVideoBuffer(video: HTMLVideoElement) {
   video.querySelectorAll('source').forEach((node) => node.remove());
   video.removeAttribute('src');
   video.muted = true;
+  video.preload = 'none';
   video.load();
 }
 

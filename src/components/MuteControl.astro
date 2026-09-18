@@ -251,6 +251,8 @@ const {
             : DESKTOP_VOLUME;
         lastVolume = video.volume;
         slider.value = String(video.volume);
+        // User gesture: resume if the UA stalled attaching the audio track.
+        void video.play()?.catch(() => {});
       } else {
         lastVolume = video.volume > 0 ? video.volume : lastVolume;
         video.muted = true;

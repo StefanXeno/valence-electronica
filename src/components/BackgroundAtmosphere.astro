@@ -34,7 +34,7 @@ const showMute = packAllowsMute(pack, video.hasAudio, useVideo);
     muted
     loop
     playsinline
-    preload="metadata"
+    preload="auto"
     poster={posterSrc}
   >
     {sources.map((source) => <source src={source.src} type={source.type} />)}
