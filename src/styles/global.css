@@ -2,6 +2,10 @@
   --font-display: 'Unbounded Variable', system-ui, sans-serif;
   --font-body: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
 
+  /* Whole-site visual scale (chrome, stage, overlays, legal). Prefer zoom over
+     transform:scale so position:fixed stays viewport-relative. */
+  --site-scale: 0.8;
+  /* Relative HUD chrome density (desktop vs phone) — multiplied under --site-scale. */
   --hud-scale: 1.5;
 
   --space-s: 0.75rem;
@@ -27,6 +31,7 @@
 html {
   color-scheme: dark;
   overflow-x: clip;
+  zoom: var(--site-scale);
 }
 
 body {
