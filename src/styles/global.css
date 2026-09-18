@@ -119,7 +119,8 @@ a.channel-btn:focus-visible {
 }
 
 .stage__identity {
-  top: var(--hud-inset);
+  /* Sit below SiteNav top band + secondary row */
+  top: calc(var(--hud-inset) + 4.75rem);
   left: var(--hud-inset);
   max-width: min(var(--tagline-max-width), calc(100vw - calc(6.5rem * var(--hud-scale))));
 }
@@ -128,6 +129,23 @@ a.channel-btn:focus-visible {
   top: var(--hud-inset);
   right: var(--hud-inset);
   max-width: min(calc(50vw - var(--hud-inset)), calc(100vw - 7.5rem));
+}
+
+/* Laptop: side socials along the right edge (Nasaya-like), not top-right cluster */
+@media (min-width: 1024px) {
+  .stage__socials {
+    top: 50%;
+    right: var(--hud-inset);
+    left: auto;
+    bottom: auto;
+    transform: translateY(-50%);
+    max-width: min(11rem, 18vw);
+  }
+
+  .stage__socials .channels ul {
+    flex-direction: column;
+    align-items: flex-end;
+  }
 }
 
 .stage-dock {

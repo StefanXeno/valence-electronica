@@ -1,0 +1,31 @@
+---
+import type { UiChrome } from '../lib/stage';
+
+interface Props {
+  chrome: UiChrome;
+}
+
+const { chrome } = Astro.props;
+---
+
+<div class="shop-coming-soon">
+  <h2 class="shop-coming-soon__title">{chrome.shopComingSoonTitle}</h2>
+  <p class="shop-coming-soon__body">{chrome.shopComingSoonBody}</p>
+</div>
+
+<style>
+  .shop-coming-soon {
+    font-size: 0.9rem;
+    color: var(--color-text);
+  }
+
+  .shop-coming-soon__title {
+    margin: 0 0 0.6em;
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+  }
+
+  .shop-coming-soon__body {
+    margin: 0;
+  }
+</style>

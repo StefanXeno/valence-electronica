@@ -1,0 +1,265 @@
+---
+import { Image } from 'astro:assets';
+import site from '../data/site.json';
+import wordmark from '../assets/images/brand/valence-wordmark.png';
+import type { UiChrome } from '../lib/stage';
+import { getAboutEntry, getSiteNavData } from '../lib/stage';
+
+interface Props {
+  chrome: UiChrome;
+}
+
+const { chrome } = Astro.props;
+const { shopUrl } = getSiteNavData();
+const about = await getAboutEntry();
+const artistName = site.artist.name;
+---
+
+<header class="site-nav" data-site-nav>
+  <div class="site-nav__band">
+    <a class="site-nav__brand" href="#stage" data-site-nav-home aria-label={artistName}>
+      <Image
+        class="site-nav__wordmark"
+        src={wordmark}
+        alt={artistName}
+        widths={[320, 640]}
+        sizes="(max-width: 1023px) 42vw, 11rem"
+        decoding="async"
+        loading="eager"
+        fetchpriority="high"
+      />
+    </a>
+    <nav class="site-nav__primary" aria-label="Primary">
+      <a class="site-nav__item" href="#stage" data-site-nav-home>{chrome.homeTitle}</a>
+      {
+        shopUrl ? (
+          <a
+            class="site-nav__item"
+            href={shopUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            data-site-nav-shop="external"
+          >
+            {chrome.shopTitle}
+          </a>
+        ) : (
+          <a class="site-nav__item" href="#stage-panel-shop" data-site-nav-open="shop">
+            {chrome.shopTitle}
+          </a>
+        )
+      }
+      <a class="site-nav__item" href="#stage-panel-tour" data-site-nav-open="tour">
+        {chrome.tourTitle}
+      </a>
+      <a class="site-nav__item" href="#stage-panel-contact" data-site-nav-open="contact">
+        {chrome.contactTitle}
+      </a>
+    </nav>
+  </div>
+  <nav class="site-nav__secondary" aria-label="Secondary">
+    {
+      about && (
+        <a class="site-nav__secondary-item" href="#stage-panel-about" data-site-nav-open="about">
+          {chrome.aboutTitle}
+        </a>
+      )
+    }
+    <a
+      class="site-nav__secondary-item"
+      href="#stage-panel-discography"
+      data-site-nav-open="discography"
+    >
+      {chrome.discographyTitle}
+    </a>
+    <a class="site-nav__secondary-item" href="#stage-panel-info" data-site-nav-open="info">
+      {chrome.infoTitle}
+    </a>
+    <button
+      type="button"
+      class="site-nav__secondary-item site-nav__links-trigger"
+      data-socials-trigger
+      aria-expanded="false"
+      aria-controls="stage-socials"
+    >
+      {chrome.socialsLabel}
+    </button>
+  </nav>
+</header>
+
+<script>
+  import { isPhoneHud, requestPhoneContent, type PhoneContentSheet } from '../lib/player-dock';
+
+  const CONTENT_SHEETS = new Set([
+    'about',
+    'discography',
+    'tour',
+    'contact',
+    'shop',
+    'info',
+    'socials',
+  ]);
+  const PANEL_IDS = new Set(['about', 'discography', 'tour', 'info', 'contact', 'shop']);
+
+  function closeOpenPanels(except?: HTMLDetailsElement) {
+    document.querySelectorAll<HTMLDetailsElement>('[data-stage-panel][open]').forEach((node) => {
+      if (except && node === except) return;
+      node.open = false;
+    });
+  }
+
+  function openDesktopPanel(id: string) {
+    const panel = document.querySelector<HTMLDetailsElement>(`[data-stage-panel="${id}"]`);
+    if (!panel) return;
+    closeOpenPanels(panel);
+    panel.open = true;
+    panel.scrollIntoView({ block: 'nearest' });
+  }
+
+  function goHome() {
+    closeOpenPanels();
+    const stage = document.querySelector('#stage') ?? document.querySelector('.stage');
+    stage?.scrollIntoView({ block: 'start' });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function initSiteNav() {
+    const root = document.querySelector('[data-site-nav]');
+    if (!root) return;
+
+    root.querySelectorAll<HTMLElement>('[data-site-nav-home]').forEach((el) => {
+      el.addEventListener('click', (event) => {
+        event.preventDefault();
+        goHome();
+      });
+    });
+
+    root.querySelectorAll<HTMLAnchorElement>('[data-site-nav-open]').forEach((el) => {
+      el.addEventListener('click', (event) => {
+        const id = el.dataset.siteNavOpen;
+        if (!id || !PANEL_IDS.has(id)) return;
+        event.preventDefault();
+        if (isPhoneHud() && CONTENT_SHEETS.has(id)) {
+          requestPhoneContent(id as PhoneContentSheet);
+          return;
+        }
+        openDesktopPanel(id);
+      });
+    });
+  }
+
+  initSiteNav();
+</script>
+
+<style>
+  .site-nav {
+    pointer-events: auto;
+    position: fixed;
+    z-index: 3;
+    top: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    padding: 0.45rem clamp(0.65rem, 2vw, 1.1rem) 0.35rem;
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, #0a0a0a 94%, transparent) 0%,
+      color-mix(in srgb, #0a0a0a 88%, transparent) 70%,
+      transparent 100%
+    );
+  }
+
+  .site-nav__band {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.55rem 1rem;
+    padding: 0.45rem 0.75rem;
+    background: color-mix(in srgb, #050505 92%, var(--color-accent, #c8ff4a) 4%);
+    border-bottom: 1px solid color-mix(in srgb, #fff 12%, transparent);
+  }
+
+  .site-nav__brand {
+    display: block;
+    line-height: 0;
+    flex: 0 1 auto;
+  }
+
+  .site-nav__wordmark {
+    display: block;
+    width: min(11rem, 42vw);
+    height: auto;
+  }
+
+  .site-nav__primary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.15rem 0.85rem;
+    font-family: var(--font-display);
+    font-size: clamp(0.72rem, 2.4vw, 0.88rem);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .site-nav__item {
+    color: color-mix(in srgb, #fff 88%, transparent);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+  }
+
+  .site-nav__item:hover,
+  .site-nav__item:focus-visible {
+    color: #fff;
+    border-bottom-color: color-mix(in srgb, var(--color-accent-alt, #c8ff4a) 70%, transparent);
+    outline: none;
+  }
+
+  .site-nav__secondary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem 0.85rem;
+    padding: 0 0.75rem 0.15rem;
+    font-size: clamp(0.65rem, 2vw, 0.75rem);
+    letter-spacing: 0.03em;
+  }
+
+  .site-nav__secondary-item {
+    appearance: none;
+    background: none;
+    border: 0;
+    padding: 0;
+    margin: 0;
+    font: inherit;
+    color: color-mix(in srgb, #fff 62%, transparent);
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .site-nav__secondary-item:hover,
+  .site-nav__secondary-item:focus-visible {
+    color: color-mix(in srgb, #fff 92%, transparent);
+    outline: none;
+  }
+
+  /* Phone: Links lives in secondary row; laptop side socials own the Channels tree. */
+  @media (min-width: 1024px) {
+    .site-nav__links-trigger {
+      display: none;
+    }
+  }
+
+  @media (max-width: 1023px) {
+    .site-nav__band {
+      gap: 0.4rem;
+    }
+
+    .site-nav__primary {
+      width: 100%;
+      justify-content: space-between;
+    }
+  }
+</style>

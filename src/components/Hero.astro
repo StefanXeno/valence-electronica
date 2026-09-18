@@ -4,25 +4,35 @@ import site from '../data/site.json';
 import { formatTagline, loadTaglinePool, validateTaglinePool } from '../lib/tagline-pool';
 import wordmark from '../assets/images/brand/valence-wordmark.png';
 
+interface Props {
+  /** `full` = wordmark + tagline; `tagline` = rotating line only (brand lives in SiteNav). */
+  variant?: 'full' | 'tagline';
+}
+
+const { variant = 'full' } = Astro.props;
 const { name, tagline } = site.artist;
 validateTaglinePool(loadTaglinePool());
 
 const fallbackTagline = formatTagline(tagline.trim());
 ---
 
-<section class="identity">
-  <h1 class="identity__name">
-    <Image
-      class="identity__wordmark"
-      src={wordmark}
-      alt={name}
-      widths={[480, 960]}
-      sizes="(max-width: 1023px) 82vw, 14rem"
-      decoding="async"
-      loading="eager"
-      fetchpriority="high"
-    />
-  </h1>
+<section class:list={['identity', variant === 'tagline' && 'identity--tagline']}>
+  {
+    variant === 'full' && (
+      <h1 class="identity__name">
+        <Image
+          class="identity__wordmark"
+          src={wordmark}
+          alt={name}
+          widths={[480, 960]}
+          sizes="(max-width: 1023px) 82vw, 14rem"
+          decoding="async"
+          loading="eager"
+          fetchpriority="high"
+        />
+      </h1>
+    )
+  }
   <p
     class="tagline glitch-hit"
     data-tagline-root
@@ -72,14 +82,14 @@ const fallbackTagline = formatTagline(tagline.trim());
     overflow-wrap: break-word;
   }
 
+  .identity--tagline .tagline {
+    margin: 0;
+  }
+
   @media (max-width: 1023px) {
     .identity__wordmark {
       width: min(calc(13.25rem * var(--hud-scale)), 100%);
       max-width: 100%;
-    }
-
-    .tagline {
-      font-size: clamp(0.88rem, 4vw, 1.08rem);
     }
   }
 </style>

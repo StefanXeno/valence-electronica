@@ -9,6 +9,12 @@
     "title": "Valence — Electronic Music",
     "indexable": false
   },
+  "contact": {
+    "headline": "",
+    "body": "",
+    "email": "",
+    "links": []
+  },
   "channels": [
     {
       "id": "bandcamp",

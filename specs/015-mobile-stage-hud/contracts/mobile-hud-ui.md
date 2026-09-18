@@ -7,6 +7,11 @@
 **Authority below 1024px** (viewport width ≤ 1023px). Laptop floor chrome is
 [`019/contracts/desktop-chrome-polish.md`](../../019-desktop-chrome-polish/contracts/desktop-chrome-polish.md).
 
+> **Supersession (020):** Primary site nav, side socials placement, and removal of
+> the five-icon circular content dock as the *primary* path to Shop/Tour/Contact
+> are owned by [`020-site-nav-chrome`](../../020-site-nav-chrome/contracts/site-nav-chrome-ui.md).
+> Phone **Links** park/reuse of Channels remains. Floor **player** defaults → `021`.
+
 Visual annex `docs/mockups/mobile-stage-hud.jpg` is **historical**. Where it
 conflicts with this file (detached socials tray, loop, four icons, always-
 visible footer, vinyl-in-pill), **this file wins**.

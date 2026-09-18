@@ -2,6 +2,12 @@
 aboutTitle: About me
 discographyTitle: Discography
 tourTitle: Tour
+homeTitle: Home
+shopTitle: Shop
+contactTitle: Contact
+shopComingSoonTitle: Coming soon
+shopComingSoonBody: Merch is on the way. Check back soon.
+contactEmpty: Contact details are not ready yet — check back soon.
 stageButtonLabel: Play on V-Flip
 currentlyPlayingLabel: Currently playing
 currentlyPausingLabel: Currently pausing
@@ -10,7 +16,7 @@ emptyShows: No upcoming dates
 jukeboxLabel: V-Flip
 jukeboxPanelTitle: V-Flip aka. Jukebox
 jukeboxPanelTooltip: Pick a track to switch stages—the site theme changes with each one.
-socialsLabel: Socials
+socialsLabel: Links
 socialsIcon: socials
 infoTitle: Info
 infoIcon: info

@@ -1,12 +1,14 @@
 ---
 import AboutPanel from './AboutPanel.astro';
+import ContactPanel from './ContactPanel.astro';
 import Discography from './Discography.astro';
 import LegalSheet from './LegalSheet.astro';
+import ShopComingSoon from './ShopComingSoon.astro';
 import TourDates from './TourDates.astro';
 import HudIcon from './HudIcon.astro';
 import site from '../data/site.json';
 import { getBackgroundConfig } from '../lib/background';
-import { getAboutEntry, getChrome } from '../lib/stage';
+import { getAboutEntry, getChrome, getSiteNavData } from '../lib/stage';
 
 const year = new Date().getFullYear();
 
@@ -15,6 +17,7 @@ const [chrome, about, { defaultVideoId }] = await Promise.all([
   getAboutEntry(),
   getBackgroundConfig(),
 ]);
+const { shopUrl, contact } = getSiteNavData();
 
 const panels = [
   about && {
@@ -38,7 +41,7 @@ const panels = [
 ].filter((panel): panel is NonNullable<typeof panel> => Boolean(panel));
 ---
 
-<div class="stage-panels" data-stage-panels>
+<div class="stage-panels stage-panels--nav-driven" data-stage-panels>
   <div class="stage-panels__sheet">
     {
       panels.map((panel) => (
@@ -51,14 +54,8 @@ const panels = [
           id={`stage-panel-${panel.body}`}
           data-stage-panel={panel.body}
         >
-          <summary
-            class="stage-panel__summary glitch-hit"
-            data-hud-label={panel.title}
-            data-hud-label-anchor="above"
-          >
+          <summary class="stage-panel__summary stage-panel__summary--sr-only">
             <span class="visually-hidden">{panel.title}</span>
-            <HudIcon token={panel.icon} emoji={panel.emoji} />
-            <span class="stage-panel__label">{panel.title}</span>
           </summary>
           <div class="stage-panel__body">
             <h2 class="stage-panel__sheet-title">
@@ -76,18 +73,43 @@ const panels = [
         </details>
       ))
     }
+    {
+      !shopUrl && (
+        <details class="stage-panel stage-panel--shop" id="stage-panel-shop" data-stage-panel="shop">
+          <summary class="stage-panel__summary stage-panel__summary--sr-only">
+            <span class="visually-hidden">{chrome.shopTitle}</span>
+          </summary>
+          <div class="stage-panel__body">
+            <h2 class="stage-panel__sheet-title">
+              <span class="stage-panel__sheet-title-text">{chrome.shopTitle}</span>
+            </h2>
+            <div class="stage-panel__scroll">
+              <ShopComingSoon chrome={chrome} />
+            </div>
+          </div>
+        </details>
+      )
+    }
+    <details
+      class="stage-panel stage-panel--contact"
+      id="stage-panel-contact"
+      data-stage-panel="contact"
+    >
+      <summary class="stage-panel__summary stage-panel__summary--sr-only">
+        <span class="visually-hidden">{chrome.contactTitle}</span>
+      </summary>
+      <div class="stage-panel__body">
+        <h2 class="stage-panel__sheet-title">
+          <span class="stage-panel__sheet-title-text">{chrome.contactTitle}</span>
+        </h2>
+        <div class="stage-panel__scroll">
+          <ContactPanel chrome={chrome} contact={contact} />
+        </div>
+      </div>
+    </details>
     <details class="stage-panel stage-panel--info" id="stage-panel-info" data-stage-panel="info">
-      <summary
-        class="stage-panel__summary glitch-hit"
-        data-hud-label={chrome.infoTitle}
-        data-hud-label-anchor="above"
-      >
+      <summary class="stage-panel__summary stage-panel__summary--sr-only">
         <span class="visually-hidden">{chrome.infoTitle}</span>
-        <HudIcon token={chrome.infoIcon} emoji={chrome.infoIconEmoji} />
-        <span class="stage-panel__label">{chrome.infoTitle}</span>
-        <span class="stage-panel__sheet-copy stage-panel__sheet-copy--summary"
-          >© {year} {site.artist.name}</span
-        >
       </summary>
       <div class="stage-panel__body">
         <h2 class="stage-panel__sheet-title">
@@ -103,45 +125,7 @@ const panels = [
       </div>
     </details>
   </div>
-  <div class="stage-panels__icons" data-stage-panel-icons>
-    {
-      panels.map((panel) => (
-        <button
-          type="button"
-          class="stage-panel__summary stage-panel__icon glitch-hit"
-          data-stage-panel-trigger={panel.body}
-          aria-expanded="false"
-          aria-controls={`stage-panel-${panel.body}`}
-          aria-label={panel.title}
-        >
-          <span class="visually-hidden">{panel.title}</span>
-          <HudIcon token={panel.icon} emoji={panel.emoji} />
-        </button>
-      ))
-    }
-    <button
-      type="button"
-      class="stage-panel__summary stage-panel__icon stage-panel__icon--socials glitch-hit"
-      data-socials-trigger
-      aria-expanded="false"
-      aria-controls="stage-socials"
-      aria-label={chrome.socialsLabel}
-    >
-      <span class="visually-hidden">{chrome.socialsLabel}</span>
-      <HudIcon token={chrome.socialsIcon} emoji={chrome.socialsIconEmoji} />
-    </button>
-    <button
-      type="button"
-      class="stage-panel__summary stage-panel__icon glitch-hit"
-      data-stage-panel-trigger="info"
-      aria-expanded="false"
-      aria-controls="stage-panel-info"
-      aria-label={chrome.infoTitle}
-    >
-      <span class="visually-hidden">{chrome.infoTitle}</span>
-      <HudIcon token={chrome.infoIcon} emoji={chrome.infoIconEmoji} />
-    </button>
-  </div>
+  <!-- Primary circular icon dock removed (020). Sheets open from SiteNav. -->
 </div>
 
 <script>
@@ -276,6 +260,35 @@ const panels = [
     align-items: flex-end;
     justify-content: flex-end;
     gap: calc(0.35rem * var(--hud-scale));
+  }
+
+  /* 020: no circular resting pills — sheets open from SiteNav only */
+  .stage-panels--nav-driven .stage-panel__summary--sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  @media (min-width: 1024px) {
+    .stage-panels--nav-driven .stage-panel:not([open]) {
+      display: none;
+    }
+
+    .stage-panels--nav-driven .stage-panel[open] {
+      width: min(24rem, 38vw);
+      border-radius: 0.85rem;
+      overflow: hidden;
+    }
+
+    .stage-panels--nav-driven .stage-panel[open] .stage-panel__summary--sr-only {
+      display: none;
+    }
   }
 
   /* Desktop: wrappers dissolve so details stay flex pills. Phone restyles both. */
@@ -688,6 +701,36 @@ const panels = [
       transition:
         padding var(--phone-panel-morph-dur, 320ms) var(--phone-bloom-ease, cubic-bezier(0.4, 0, 0.2, 1)),
         gap var(--phone-panel-morph-dur, 320ms) var(--phone-bloom-ease, cubic-bezier(0.4, 0, 0.2, 1));
+    }
+
+    /* 020: no resting circular icon pill — sheet only when open from SiteNav / Links */
+    .stage-panels--nav-driven:not(.is-sheet-open):not(.is-sheet-closing):not(.is-socials-open) {
+      padding: 0;
+      border: 0;
+      background: transparent;
+      backdrop-filter: none;
+      min-height: 0;
+      height: 0;
+      overflow: hidden;
+      pointer-events: none;
+      box-shadow: none;
+    }
+
+    .stage-panels--nav-driven.is-sheet-open,
+    .stage-panels--nav-driven.is-sheet-closing,
+    .stage-panels--nav-driven.is-socials-open,
+    :global(html[data-sheet-open]) .stage-panels--nav-driven,
+    :global(html[data-socials-open]) .stage-panels--nav-driven {
+      height: auto;
+      overflow: visible;
+      pointer-events: auto;
+      padding-top: var(--phone-bar-pad);
+      padding-bottom: var(--phone-bar-pad);
+      padding-left: var(--phone-bar-pad);
+      padding-right: var(--phone-bar-pad);
+      border: 1px solid var(--color-border);
+      background: color-mix(in srgb, var(--color-surface) 92%, transparent);
+      backdrop-filter: blur(10px);
     }
 
     /* Desktop glitch steps() on .stage-panel must not leak onto the phone pill. */

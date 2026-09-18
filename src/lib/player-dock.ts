@@ -27,8 +27,15 @@ import {
 /** Phone HUD media query (SC-007: 1023 = phone, 1024 = laptop). */
 export const PHONE_MQ = '(max-width: 1023px)';
 
-/** About / Discography / Tour / socials / info — one pill, exclusive-open. */
-export type PhoneContentSheet = 'about' | 'discography' | 'tour' | 'socials' | 'info';
+/** About / Discography / Tour / Contact / Shop / socials / info — exclusive-open sheets. */
+export type PhoneContentSheet =
+  | 'about'
+  | 'discography'
+  | 'tour'
+  | 'contact'
+  | 'shop'
+  | 'socials'
+  | 'info';
 
 const HINT_NODS = 3;
 const HINT_PERIOD_MS = 60_000;
@@ -88,11 +95,26 @@ export function syncNowPlayingLabel(activeId: string): void {
   else el.removeAttribute('title');
 }
 
-type ExtraSheet = 'about' | 'discography' | 'tour' | 'vflip-list' | 'socials' | 'info';
+type ExtraSheet =
+  | 'about'
+  | 'discography'
+  | 'tour'
+  | 'contact'
+  | 'shop'
+  | 'vflip-list'
+  | 'socials'
+  | 'info';
 
 function panelKind(details: HTMLDetailsElement): ExtraSheet | undefined {
   const kind = details.dataset.stagePanel;
-  if (kind === 'about' || kind === 'discography' || kind === 'tour' || kind === 'info') {
+  if (
+    kind === 'about' ||
+    kind === 'discography' ||
+    kind === 'tour' ||
+    kind === 'contact' ||
+    kind === 'shop' ||
+    kind === 'info'
+  ) {
     return kind;
   }
   return undefined;
@@ -165,6 +187,8 @@ function isContentSheet(keep?: ExtraSheet): keep is PhoneContentSheet {
     keep === 'about' ||
     keep === 'discography' ||
     keep === 'tour' ||
+    keep === 'contact' ||
+    keep === 'shop' ||
     keep === 'socials' ||
     keep === 'info'
   );

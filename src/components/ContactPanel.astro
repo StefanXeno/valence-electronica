@@ -1,0 +1,74 @@
+---
+import type { UiChrome } from '../lib/stage';
+import { isContactComplete, type SiteContact } from '../lib/stage';
+
+interface Props {
+  chrome: UiChrome;
+  contact: SiteContact;
+}
+
+const { chrome, contact } = Astro.props;
+const complete = isContactComplete(contact);
+const headline = contact.headline || chrome.contactTitle;
+---
+
+<div class="contact-panel">
+  {
+    complete ? (
+      <>
+        <h2 class="contact-panel__title">{headline}</h2>
+        {contact.body && <p class="contact-panel__body">{contact.body}</p>}
+        {contact.email && (
+          <p class="contact-panel__email">
+            <a href={`mailto:${contact.email}`}>{contact.email}</a>
+          </p>
+        )}
+        {contact.links.length > 0 && (
+          <ul class="contact-panel__links">
+            {contact.links.map((link) => (
+              <li>
+                <a href={link.url} target="_blank" rel="noopener noreferrer">
+                  {link.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        )}
+      </>
+    ) : (
+      <p class="contact-panel__empty">{chrome.contactEmpty}</p>
+    )
+  }
+</div>
+
+<style>
+  .contact-panel {
+    font-size: 0.9rem;
+    color: var(--color-text);
+  }
+
+  .contact-panel__title {
+    margin: 0 0 0.6em;
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+  }
+
+  .contact-panel__body,
+  .contact-panel__email,
+  .contact-panel__empty {
+    margin: 0 0 0.7em;
+  }
+
+  .contact-panel__links {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35em;
+  }
+
+  .contact-panel a {
+    color: var(--color-accent-alt);
+  }
+</style>

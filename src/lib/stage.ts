@@ -1,5 +1,6 @@
 import { getCollection, getEntry } from 'astro:content';
 
+import siteJson from '../data/site.json';
 import { resolveHudIcon, type HudIconToken } from './hud-icons';
 import { berlinToday, collectUpcomingShows, type ShowEntryInput } from './stage-upcoming';
 
@@ -9,6 +10,12 @@ export interface UiChrome {
   aboutTitle: string;
   discographyTitle: string;
   tourTitle: string;
+  homeTitle: string;
+  shopTitle: string;
+  contactTitle: string;
+  shopComingSoonTitle: string;
+  shopComingSoonBody: string;
+  contactEmpty: string;
   stageButtonLabel: string;
   currentlyPlayingLabel: string;
   currentlyPausingLabel: string;
@@ -60,10 +67,33 @@ export interface UiChrome {
   volumeSliderTooltip: string;
 }
 
+export interface SiteContactLink {
+  label: string;
+  url: string;
+}
+
+export interface SiteContact {
+  headline: string;
+  body: string;
+  email: string;
+  links: SiteContactLink[];
+}
+
+export interface SiteNavData {
+  shopUrl?: string;
+  contact: SiteContact;
+}
+
 const CHROME_FALLBACK: UiChrome = {
   aboutTitle: 'About me',
   discographyTitle: 'Discography',
   tourTitle: 'Tour',
+  homeTitle: 'Home',
+  shopTitle: 'Shop',
+  contactTitle: 'Contact',
+  shopComingSoonTitle: 'Coming soon',
+  shopComingSoonBody: 'Merch is on the way. Check back soon.',
+  contactEmpty: 'Contact details are not ready yet — check back soon.',
   stageButtonLabel: 'Play on V-Flip',
   currentlyPlayingLabel: 'Currently playing',
   currentlyPausingLabel: 'Currently pausing',
@@ -72,7 +102,7 @@ const CHROME_FALLBACK: UiChrome = {
   jukeboxLabel: 'V-Flip',
   jukeboxPanelTitle: 'V-Flip aka. Jukebox',
   jukeboxPanelTooltip: 'Pick a track to switch stages—the site theme changes with each one.',
-  socialsLabel: 'Socials',
+  socialsLabel: 'Links',
   socialsIcon: 'socials',
   infoTitle: 'Info',
   infoIcon: 'info',
@@ -126,6 +156,14 @@ export async function getChrome(): Promise<UiChrome> {
     aboutTitle: entry.data.aboutTitle?.trim() || CHROME_FALLBACK.aboutTitle,
     discographyTitle: entry.data.discographyTitle?.trim() || CHROME_FALLBACK.discographyTitle,
     tourTitle: entry.data.tourTitle?.trim() || CHROME_FALLBACK.tourTitle,
+    homeTitle: entry.data.homeTitle?.trim() || CHROME_FALLBACK.homeTitle,
+    shopTitle: entry.data.shopTitle?.trim() || CHROME_FALLBACK.shopTitle,
+    contactTitle: entry.data.contactTitle?.trim() || CHROME_FALLBACK.contactTitle,
+    shopComingSoonTitle:
+      entry.data.shopComingSoonTitle?.trim() || CHROME_FALLBACK.shopComingSoonTitle,
+    shopComingSoonBody:
+      entry.data.shopComingSoonBody?.trim() || CHROME_FALLBACK.shopComingSoonBody,
+    contactEmpty: entry.data.contactEmpty?.trim() || CHROME_FALLBACK.contactEmpty,
     stageButtonLabel: entry.data.stageButtonLabel?.trim() || CHROME_FALLBACK.stageButtonLabel,
     currentlyPlayingLabel:
       entry.data.currentlyPlayingLabel?.trim() || CHROME_FALLBACK.currentlyPlayingLabel,
@@ -226,4 +264,47 @@ export async function getUpcomingShows(): Promise<ShowItem[]> {
   }
 
   return collectUpcomingShows(entries, berlinToday());
+}
+
+function parseContact(raw: unknown): SiteContact {
+  const empty: SiteContact = { headline: '', body: '', email: '', links: [] };
+  if (!raw || typeof raw !== 'object') return empty;
+  const c = raw as Record<string, unknown>;
+  const linksRaw = Array.isArray(c.links) ? c.links : [];
+  const links: SiteContactLink[] = [];
+  for (const item of linksRaw) {
+    if (!item || typeof item !== 'object') continue;
+    const row = item as Record<string, unknown>;
+    const label = typeof row.label === 'string' ? row.label.trim() : '';
+    const url = typeof row.url === 'string' ? row.url.trim() : '';
+    if (!label || !url) continue;
+    if (!/^https?:\/\//i.test(url)) continue;
+    links.push({ label, url });
+  }
+  return {
+    headline: typeof c.headline === 'string' ? c.headline.trim() : '',
+    body: typeof c.body === 'string' ? c.body.trim() : '',
+    email: typeof c.email === 'string' ? c.email.trim() : '',
+    links,
+  };
+}
+
+/** Shop URL + contact block from site.json (020 single source of truth). */
+export function getSiteNavData(): SiteNavData {
+  const raw = siteJson as {
+    shopUrl?: string;
+    contact?: unknown;
+  };
+  const shopUrl =
+    typeof raw.shopUrl === 'string' && /^https?:\/\//i.test(raw.shopUrl.trim())
+      ? raw.shopUrl.trim()
+      : undefined;
+  return {
+    shopUrl,
+    contact: parseContact(raw.contact),
+  };
+}
+
+export function isContactComplete(contact: SiteContact): boolean {
+  return Boolean(contact.body || contact.email || contact.links.length > 0);
 }

@@ -7,6 +7,12 @@
 as amended by
 [`018/contracts/phone-player-polish.md`](../../018-player-animation-polish/contracts/phone-player-polish.md).
 
+> **Supersession (020):** Primary top-band nav (Home · Shop · Tour · Contact), laptop
+> side socials, and retirement of circular side / content-dock stacks as resting
+> primary chrome are owned by
+> [`020-site-nav-chrome`](../../020-site-nav-chrome/contracts/site-nav-chrome-ui.md).
+> Floor **player** surface defaults → `021`.
+
 **Supersedes for desktop floor chrome**: layout / player / footer rows in
 [`009/contracts/desktop-hud-ui.md`](../../009-desktop-stage-ui/contracts/desktop-hud-ui.md)
 and the collapsed vinyl toolbar in

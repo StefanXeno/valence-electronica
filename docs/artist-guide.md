@@ -16,8 +16,9 @@ the file, open a pull request into `pre-release`, and merge it (see [How to publ
 
 **File:** [`src/data/site.json`](../src/data/site.json)
 
-**Controls:** Artist name, tagline, short description, location, SEO title, and social /
-streaming links (Bandcamp, SoundCloud, YouTube, etc.).
+**Controls:** Artist name, tagline, short description, location, SEO title, social /
+streaming links (Bandcamp, SoundCloud, YouTube, etc.), **Shop URL**, and **Contact**
+copy.
 
 **Tips:**
 
@@ -25,6 +26,11 @@ streaming links (Bandcamp, SoundCloud, YouTube, etc.).
 - Set `"status": "placeholder"` to show a “coming soon” chip without a link.
 - Set `"seo": { "indexable": true }` when you are ready for search engines to index the site
   (keep `false` while the site is still private / under construction).
+- Optional top-level `"shopUrl"` — absolute `https://…` merch store. When unset, **Shop**
+  stays in the top nav and opens a soft “Coming soon” panel.
+- `"contact"` object (single edit surface — do **not** add a separate contact folder):
+  - `headline`, `body`, `email`, `links: [{ label, url }]`
+  - Leave fields empty for an honest “not ready yet” Contact panel.
 
 **Do not break:** Channel `id` values are stable references — do not rename them without
 developer help.
@@ -175,16 +181,23 @@ headline; falls back to `venue`), optional `ticketUrl` (Tickets pill) and option
 
 **Controls:** Region titles, empty-state strings, jukebox/social labels, stage-button label,
 landing intro copy (`introLead`, `introName`), tour pill labels (`ticketLabel`,
-`venueInfoLabel`), and optional **HUD icon overrides**
+`venueInfoLabel`), **top nav labels** (`homeTitle`, `shopTitle`, `tourTitle`,
+`contactTitle`), Shop empty copy (`shopComingSoonTitle`, `shopComingSoonBody`), Contact
+empty copy (`contactEmpty`), phone/side **Links** label (`socialsLabel` — default
+**Links**), and optional **HUD icon overrides**
 (`jukeboxIcon`, `aboutIcon`, `discographyIcon`, `tourIcon`, `trackInfoIcon`, `shuffleIcon`,
 `loopIcon`, `socialsIcon`, `infoIcon`).
+
+**Top nav (020):** Primary bar is **Home · Shop · Tour · Contact** plus brand mark.
+**About** / **Discography** / **Info** are quieter secondary text under the band — not
+primary top-bar items. Legal opens from **Info** (Imprint / Privacy).
 
 **Laptop player chrome (1024px up):** always-open boxed player — **phone now-playing
 card** + **Playlist**, **Shuffle**, **Play/pause**, **Mute**. No vinyl / V-Flip toggle,
 no Loop control. Unmute shows the **volume slider** and widens the player; mute hides
 it. Playlist is the phone **theme-track card** list (background-available tracks),
-not the old laptop text list. `loopDefault` stays off on laptop. Legal is the
-**Info** icon in the bottom-right bar (not the footer).
+not the old laptop text list. `loopDefault` stays off on laptop. Legal is via **Info**
+in secondary chrome (not the footer).
 
 **Phone / shared player chrome (optional):**
 
@@ -196,9 +209,9 @@ not the old laptop text list. `loopDefault` stays off on laptop. Legal is the
 - `volumeSliderTooltip` — laptop slider hint when unmuted (phone hides the slider)
 - `playerExpandLabel` / `playerCollapseLabel` — accessible names for the **phone player
   handle** (arrow on top of the pill). Phone HUD is below 1024px.
-- `socialsIcon` — optional token or emoji for the phone socials trigger (default token:
-  `socials`, a connected-nodes / share glyph — not a chevron)
-- `infoTitle` / `infoIcon` — Info sheet on **phone and laptop** (© top-right + English
+- `socialsLabel` / `socialsIcon` — phone **Links** trigger (default label: Links; default
+  token: `socials`)
+- `infoTitle` / `infoIcon` — Info sheet on **phone and laptop** (© + English
   **Imprint** / **Privacy Policy** pills that open the existing legal overlay). Default
   title: Info. Default token: `info` (circled i). Laptop does **not** use a footer.
 
