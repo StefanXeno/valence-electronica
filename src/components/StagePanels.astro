@@ -58,10 +58,35 @@ const panels = [
             <span class="visually-hidden">{panel.title}</span>
           </summary>
           <div class="stage-panel__body">
-            <h2 class="stage-panel__sheet-title">
-              <HudIcon token={panel.icon} emoji={panel.emoji} />
-              <span class="stage-panel__sheet-title-text">{panel.title}</span>
-            </h2>
+            <header class="stage-panel__sheet-header">
+              <button
+                type="button"
+                class="stage-panel__exit glitch-hit"
+                data-stage-panel-exit
+                aria-label="Exit"
+                title="Exit"
+              >
+                <svg
+                  class="stage-panel__exit-icon"
+                  viewBox="0 0 24 24"
+                  width="18"
+                  height="18"
+                  aria-hidden="true"
+                  focusable="false"
+                >
+                  <path
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    d="M6 6l12 12M18 6L6 18"></path>
+                </svg>
+              </button>
+              <h2 class="stage-panel__sheet-title">
+                <HudIcon token={panel.icon} emoji={panel.emoji} />
+                <span class="stage-panel__sheet-title-text">{panel.title}</span>
+              </h2>
+            </header>
             <div class="stage-panel__scroll">
               {panel.body === 'about' && <AboutPanel />}
               {panel.body === 'discography' && (
@@ -80,9 +105,34 @@ const panels = [
             <span class="visually-hidden">{chrome.shopTitle}</span>
           </summary>
           <div class="stage-panel__body">
-            <h2 class="stage-panel__sheet-title">
-              <span class="stage-panel__sheet-title-text">{chrome.shopTitle}</span>
-            </h2>
+            <header class="stage-panel__sheet-header">
+              <button
+                type="button"
+                class="stage-panel__exit glitch-hit"
+                data-stage-panel-exit
+                aria-label="Exit"
+                title="Exit"
+              >
+                <svg
+                  class="stage-panel__exit-icon"
+                  viewBox="0 0 24 24"
+                  width="18"
+                  height="18"
+                  aria-hidden="true"
+                  focusable="false"
+                >
+                  <path
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    d="M6 6l12 12M18 6L6 18"></path>
+                </svg>
+              </button>
+              <h2 class="stage-panel__sheet-title">
+                <span class="stage-panel__sheet-title-text">{chrome.shopTitle}</span>
+              </h2>
+            </header>
             <div class="stage-panel__scroll">
               <ShopComingSoon chrome={chrome} />
             </div>
@@ -99,9 +149,34 @@ const panels = [
         <span class="visually-hidden">{chrome.contactTitle}</span>
       </summary>
       <div class="stage-panel__body">
-        <h2 class="stage-panel__sheet-title">
-          <span class="stage-panel__sheet-title-text">{chrome.contactTitle}</span>
-        </h2>
+        <header class="stage-panel__sheet-header">
+          <button
+            type="button"
+            class="stage-panel__exit glitch-hit"
+            data-stage-panel-exit
+            aria-label="Exit"
+            title="Exit"
+          >
+            <svg
+              class="stage-panel__exit-icon"
+              viewBox="0 0 24 24"
+              width="18"
+              height="18"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <path
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                d="M6 6l12 12M18 6L6 18"></path>
+            </svg>
+          </button>
+          <h2 class="stage-panel__sheet-title">
+            <span class="stage-panel__sheet-title-text">{chrome.contactTitle}</span>
+          </h2>
+        </header>
         <div class="stage-panel__scroll">
           <ContactPanel chrome={chrome} contact={contact} />
         </div>
@@ -112,13 +187,38 @@ const panels = [
         <span class="visually-hidden">{chrome.infoTitle}</span>
       </summary>
       <div class="stage-panel__body">
-        <h2 class="stage-panel__sheet-title">
-          <HudIcon token={chrome.infoIcon} emoji={chrome.infoIconEmoji} />
-          <span class="stage-panel__sheet-title-text">{chrome.infoTitle}</span>
-          <span class="stage-panel__sheet-copy stage-panel__sheet-copy--sheet"
-            >© {year} {site.artist.name}</span
+        <header class="stage-panel__sheet-header">
+          <button
+            type="button"
+            class="stage-panel__exit glitch-hit"
+            data-stage-panel-exit
+            aria-label="Exit"
+            title="Exit"
           >
-        </h2>
+            <svg
+              class="stage-panel__exit-icon"
+              viewBox="0 0 24 24"
+              width="18"
+              height="18"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <path
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                d="M6 6l12 12M18 6L6 18"></path>
+            </svg>
+          </button>
+          <h2 class="stage-panel__sheet-title">
+            <HudIcon token={chrome.infoIcon} emoji={chrome.infoIconEmoji} />
+            <span class="stage-panel__sheet-title-text">{chrome.infoTitle}</span>
+            <span class="stage-panel__sheet-copy stage-panel__sheet-copy--sheet"
+              >© {year} {site.artist.name}</span
+            >
+          </h2>
+        </header>
         <div class="stage-panel__scroll">
           <LegalSheet />
         </div>
@@ -130,10 +230,27 @@ const panels = [
 
 <script>
   import { clearTransitionGlitch, isGlitchThemeActive, playTransitionGlitch } from '../lib/glitch';
-  import { createTwoStageMotion, SMOOTH_PANEL_PHASE_MS } from '../lib/panel-motion';
-  import { isPhoneHud, requestPhoneContent, type PhoneContentSheet } from '../lib/player-dock';
+  import { SMOOTH_PANEL_PHASE_MS } from '../lib/panel-motion';
 
-  const desktopPanelMotion = new Map<HTMLDetailsElement, ReturnType<typeof createTwoStageMotion>>();
+  /**
+   * Nav content opens like LegalPanel (fullscreen sheet), not the old dock chip.
+   * Toggle [open] + CSS frame animation — no two-stage width/height grow.
+   */
+  function setPanelOpen(panel: HTMLDetailsElement, open: boolean) {
+    panel.open = open;
+    if (!open) panel.classList.remove('is-panel-closing', 'is-overlay-in');
+    else {
+      panel.classList.remove('is-panel-closing');
+      // Retrigger legal-style enter animation on each open.
+      panel.classList.remove('is-overlay-in');
+      void panel.offsetWidth;
+      panel.classList.add('is-overlay-in');
+    }
+  }
+
+  function closePanel(panel: HTMLDetailsElement) {
+    setPanelOpen(panel, false);
+  }
 
   function initExclusivePanels() {
     const cluster = document.querySelector('[data-stage-panels]');
@@ -142,22 +259,18 @@ const panels = [
     cluster.addEventListener(
       'toggle',
       (event) => {
-        // Phone: player-dock cross-switch keeps the outgoing [open] while fading.
-        if (isPhoneHud()) return;
         const target = event.target;
         if (!(target instanceof HTMLDetailsElement) || !target.open) return;
         cluster.querySelectorAll('details[open]').forEach((node) => {
           if (!(node instanceof HTMLDetailsElement) || node === target) return;
-          const motion = desktopPanelMotion.get(node);
-          if (motion) motion.request(false);
-          else node.open = false;
+          closePanel(node);
         });
       },
       true,
     );
   }
 
-  function initStagePanelGlitch(panel: HTMLDetailsElement) {
+  function initStagePanelOverlay(panel: HTMLDetailsElement) {
     const summary = panel.querySelector('summary');
     if (!summary) return;
 
@@ -174,79 +287,60 @@ const panels = [
       }, (dur || SMOOTH_PANEL_PHASE_MS * 2) + 80);
     };
 
-    const motion = createTwoStageMotion(panel, {
-      reducedMotion: () => reduceMotion.matches,
-      applySemanticOpen: (open) => {
-        panel.open = open;
-        if (!open) panel.classList.remove('is-panel-closing');
-      },
-    });
-    desktopPanelMotion.set(panel, motion);
-
     summary.addEventListener('click', (event) => {
-      // Phone: icon row drives open/close (native open + delayed close).
-      if (isPhoneHud()) return;
-
       event.preventDefault();
-      const next = !motion.getTarget();
+      const next = !panel.open;
       if (isGlitchThemeActive() && !reduceMotion.matches) {
         playMorph(next ? 'in' : 'out');
       }
-      motion.request(next);
+      setPanelOpen(panel, next);
+      if (next) {
+        const exit = panel.querySelector<HTMLElement>('[data-stage-panel-exit]');
+        exit?.focus();
+      }
     });
 
-    window.matchMedia('(max-width: 1023px)').addEventListener('change', (event) => {
-      if (event.matches) motion.snap(false);
+    panel.querySelectorAll<HTMLElement>('[data-stage-panel-exit]').forEach((exit) => {
+      exit.addEventListener('click', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        if (isGlitchThemeActive() && !reduceMotion.matches) playMorph('out');
+        closePanel(panel);
+      });
+    });
+
+    // Backdrop click (padding around the frame) — same dismiss path as Exit.
+    panel.addEventListener('click', (event) => {
+      if (event.target === panel && panel.open) {
+        if (isGlitchThemeActive() && !reduceMotion.matches) playMorph('out');
+        closePanel(panel);
+      }
     });
   }
 
-  function initPhoneIconTriggers() {
-    const cluster = document.querySelector('[data-stage-panels]');
-    const icons = cluster?.querySelector('[data-stage-panel-icons]');
-    if (!cluster || !icons) return;
-
-    const syncExpanded = () => {
-      icons.querySelectorAll<HTMLButtonElement>('[data-stage-panel-trigger]').forEach((btn) => {
-        const id = btn.dataset.stagePanelTrigger;
-        const open = Boolean(
-          id &&
-            cluster.querySelector(
-              `[data-stage-panel="${id}"][open]:not(.is-cross-out):not(.is-panel-closing)`,
-            ),
-        );
-        btn.setAttribute('aria-expanded', open ? 'true' : 'false');
-      });
-    };
-
-    icons.addEventListener('click', (event) => {
-      const btn = event.target instanceof Element
-        ? event.target.closest<HTMLButtonElement>('[data-stage-panel-trigger]')
-        : null;
-      if (!btn) return;
-      const id = btn.dataset.stagePanelTrigger;
-      if (id !== 'about' && id !== 'discography' && id !== 'tour' && id !== 'info') return;
+  function initOverlayEscape() {
+    document.addEventListener('keydown', (event) => {
+      if (event.key !== 'Escape') return;
+      // Legal overlay owns Escape when it is open.
+      const legalOpen = document.querySelector(
+        '#legal-overlay [data-legal-panel]:not([hidden]), [data-legal-panel]:not([hidden])',
+      );
+      if (legalOpen) return;
+      const open = document.querySelector<HTMLDetailsElement>(
+        '[data-stage-panel][open]:not(.is-panel-closing)',
+      );
+      if (!open) return;
       event.preventDefault();
-
-      if (isPhoneHud()) {
-        requestPhoneContent(id as PhoneContentSheet);
-        return;
-      }
-
-      const panel = cluster.querySelector<HTMLDetailsElement>(`[data-stage-panel="${id}"]`);
-      const summary = panel?.querySelector<HTMLElement>(':scope > summary');
-      summary?.click();
+      closePanel(open);
     });
-
-    cluster.addEventListener('toggle', syncExpanded, true);
-    syncExpanded();
   }
 
   function bootStagePanels() {
     const cluster = document.querySelector('[data-stage-panels]');
-    cluster?.setAttribute('data-two-stage-js', '');
+    cluster?.setAttribute('data-nav-overlay-js', '');
     initExclusivePanels();
-    initPhoneIconTriggers();
-    document.querySelectorAll<HTMLDetailsElement>('[data-stage-panel]').forEach(initStagePanelGlitch);
+    initOverlayEscape();
+    document.querySelectorAll<HTMLDetailsElement>('[data-stage-panel]').forEach(initStagePanelOverlay);
   }
 
   bootStagePanels();
@@ -275,20 +369,179 @@ const panels = [
     border: 0;
   }
 
-  @media (min-width: 1024px) {
-    .stage-panels--nav-driven .stage-panel:not([open]) {
-      display: none;
+  /*
+   * Nav content = LegalPanel presentation (fullscreen sheet), not a dock chip.
+   * Closed panels stay out of layout; open panel is a fixed stage-filling overlay.
+   */
+  .stage-panels--nav-driven .stage-panel:not([open]) {
+    display: none;
+  }
+
+  .stage-panels--nav-driven .stage-panel[open] {
+    position: fixed;
+    inset: 0;
+    z-index: 5;
+    display: grid;
+    place-items: stretch;
+    width: auto;
+    max-width: none;
+    margin: 0;
+    padding: clamp(0.75rem, 3vw, 1.5rem);
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    backdrop-filter: none;
+    overflow: visible;
+    box-sizing: border-box;
+    pointer-events: auto;
+  }
+
+  .stage-panels--nav-driven .stage-panel[open] .stage-panel__summary--sr-only {
+    display: none;
+  }
+
+  .stage-panels--nav-driven .stage-panel[open] .stage-panel__body {
+    pointer-events: auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    max-height: 100%;
+    height: 100%;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    opacity: 1;
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    border-radius: 0.75rem;
+    background: color-mix(in srgb, var(--color-surface) 92%, transparent);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 1rem 3rem rgb(0 0 0 / 35%);
+    box-sizing: border-box;
+  }
+
+  .stage-panels--nav-driven .stage-panel[open].is-overlay-in .stage-panel__body {
+    animation: stage-panel-overlay-in 320ms ease-out both;
+  }
+
+  @keyframes stage-panel-overlay-in {
+    from {
+      opacity: 0;
+      transform: translateY(0.75rem) scale(0.985);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .stage-panels--nav-driven .stage-panel[open].is-overlay-in .stage-panel__body {
+      animation: none;
+    }
+  }
+
+  .stage-panel__sheet-header {
+    display: grid;
+    gap: var(--space-s);
+    flex: 0 0 auto;
+    padding: var(--space-m) var(--space-m) var(--space-s);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .stage-panel__exit {
+    justify-self: end;
+    display: inline-grid;
+    place-items: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    margin: 0;
+    padding: 0;
+    color: var(--color-text);
+    text-decoration: none;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    background: var(--color-bg);
+    cursor: pointer;
+  }
+
+  .stage-panel__exit:hover,
+  .stage-panel__exit:focus-visible {
+    border-color: var(--color-accent);
+    outline: none;
+  }
+
+  .stage-panel__exit-icon {
+    display: block;
+  }
+
+  .stage-panels--nav-driven .stage-panel[open] .stage-panel__sheet-title {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.45rem 0.65rem;
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(1.5rem, 5vw, 2.25rem);
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: 0.02em;
+    color: var(--color-text);
+  }
+
+  .stage-panels--nav-driven .stage-panel[open] .stage-panel__sheet-copy--sheet {
+    margin-left: auto;
+    font-family: var(--font-body);
+    font-size: calc(0.72rem * var(--hud-scale));
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    text-transform: none;
+    color: var(--color-text-muted);
+  }
+
+  .stage-panels--nav-driven .stage-panel[open] .stage-panel__scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+    padding: var(--space-m);
+    color: var(--color-text);
+  }
+
+  /*
+   * Phone dock used to morph a content pill. Nav overlays are fixed LegalPanel
+   * sheets — keep the dock collapsed and never clip the overlay.
+   */
+  @media (max-width: 1023px) {
+    .stage-panels--nav-driven,
+    .stage-panels--nav-driven:has([data-stage-panel][open]),
+    .stage-panels--nav-driven.is-sheet-open,
+    .stage-panels--nav-driven.is-sheet-closing,
+    :global(html[data-sheet-open]) .stage-panels--nav-driven {
+      height: 0 !important;
+      min-height: 0 !important;
+      padding: 0 !important;
+      border: 0 !important;
+      background: transparent !important;
+      backdrop-filter: none !important;
+      box-shadow: none !important;
+      gap: 0 !important;
+      overflow: visible !important;
+      pointer-events: none !important;
+    }
+
+    .stage-panels--nav-driven .stage-panels__sheet,
+    .stage-panels--nav-driven:has([data-stage-panel][open]) .stage-panels__sheet,
+    .stage-panels--nav-driven.is-sheet-open .stage-panels__sheet {
+      display: contents;
+      height: auto !important;
+      overflow: visible !important;
+      visibility: visible !important;
+      pointer-events: none;
     }
 
     .stage-panels--nav-driven .stage-panel[open] {
-      display: block;
-      width: min(24rem, 38vw);
-      border-radius: 0.85rem;
-      overflow: hidden;
-    }
-
-    .stage-panels--nav-driven .stage-panel[open] .stage-panel__summary--sr-only {
-      display: none;
+      pointer-events: auto;
     }
   }
 
@@ -322,15 +575,13 @@ const panels = [
     box-sizing: border-box;
   }
 
-  .stage-panel--socials,
-  .stage-panel--info {
+  .stage-panel--socials {
     display: none;
   }
 
-  @media (min-width: 1024px) {
-    .stage-panel--info {
-      display: block;
-    }
+  /* Info rests hidden; nav-driven [open] overlay rule paints it like About. */
+  .stage-panel--info {
+    display: none;
   }
 
   .stage-panel--socials .stage-panel__summary {
@@ -586,10 +837,11 @@ const panels = [
     padding: 0 var(--stage-panel-inset) var(--stage-panel-inset);
   }
 
-  /* After the generic open body — desktop Discography must not inherit 11rem. */
+  /* After the generic open body — nav overlays keep full sheet height. */
   @media (min-width: 1024px) {
-    .stage-panel--discography[open] .stage-panel__body {
-      max-height: min(50svh, var(--discog-panel-viewport-h, var(--stage-panel-body-open-h)));
+    .stage-panels--nav-driven .stage-panel--discography[open] .stage-panel__body,
+    .stage-panels--nav-driven .stage-panel[open] .stage-panel__body {
+      max-height: 100%;
     }
   }
 
@@ -704,7 +956,8 @@ const panels = [
         gap var(--phone-panel-morph-dur, 320ms) var(--phone-bloom-ease, cubic-bezier(0.4, 0, 0.2, 1));
     }
 
-    /* 020: no resting circular icon pill — sheet only when open from SiteNav / Links */
+    /* 020: no resting circular icon pill — sheet only when open from SiteNav / Links.
+       overflow:visible so fixed nav overlays (Imprint-style) are not clipped. */
     .stage-panels--nav-driven:not(.is-sheet-open):not(.is-sheet-closing):not(.is-socials-open) {
       padding: 0;
       border: 0;
@@ -712,7 +965,7 @@ const panels = [
       backdrop-filter: none;
       min-height: 0;
       height: 0;
-      overflow: hidden;
+      overflow: visible;
       pointer-events: none;
       box-shadow: none;
     }

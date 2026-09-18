@@ -391,8 +391,15 @@ const defaultLabel =
         return;
       }
       if (shouldSmoothPanelOpen(reduceMotion.matches)) {
+        // Flush closed styles, then drop is-panel-opening so max-height/opacity ease in.
+        root.classList.add('is-panel-opening');
         setOpen(true);
         runSmoothPanelOpen(root, reduceMotion.matches);
+        window.requestAnimationFrame(() => {
+          window.requestAnimationFrame(() => {
+            root.classList.remove('is-panel-opening');
+          });
+        });
       } else {
         setOpen(true);
         playMorph('in');
@@ -507,7 +514,10 @@ const defaultLabel =
     --jukebox-toolbar-pad: calc(0.25rem * var(--hud-scale));
     --jukebox-volume-slider-size: min(calc(5rem * var(--hud-scale)), 22vw);
     --jukebox-slider-thumb-inset: calc(0.35rem * var(--hud-scale));
-    --jukebox-open-width: min(calc(22rem * var(--hud-scale)), calc(100vw - 2 * var(--hud-inset, 0.75rem)));
+    --jukebox-open-width: min(
+      calc(22rem * var(--hud-scale)),
+      calc(100vw - 2 * var(--stage-corner-gap, 0.3rem))
+    );
     --jukebox-mute-width: var(--control-size);
     --jukebox-closed-width: calc(
       3 * var(--control-size) + var(--jukebox-mute-width) + 3 * var(--jukebox-toolbar-gap) +
@@ -642,6 +652,7 @@ const defaultLabel =
   }
 
   .jukebox__panel {
+    position: relative;
     width: 100%;
     max-width: 100%;
     max-height: 0;
@@ -860,12 +871,10 @@ const defaultLabel =
     height: 100%;
   }
 
-  /* Desktop player clears the vinyl FAB corner. */
-  @media (min-width: 1024px) {
-    .jukebox {
-      margin-left: calc(3.75rem * var(--hud-scale));
-    }
-  }
+  /*
+   * Desktop Songs / V-Flip box shares the vinyl corner inset (no extra
+   * margin-left gutter). Vinyl FAB stays fixed on top (higher z-index).
+   */
 
   .jukebox.is-glitching[data-glitch='in'] .jukebox__panel {
     animation: jukebox-panel-in var(--g-dur, 560ms) both;
@@ -1220,7 +1229,7 @@ const defaultLabel =
       width: calc(var(--jukebox-rest-base) + var(--jukebox-slider-extra));
       max-width: min(
         calc(var(--jukebox-open-width) + var(--jukebox-slider-extra)),
-        calc(100vw - 2 * var(--hud-inset, 0.75rem))
+        calc(100vw - 2 * var(--stage-corner-gap, 0.3rem))
       );
       border-radius: calc(0.85rem * var(--hud-scale));
     }
@@ -1285,23 +1294,73 @@ const defaultLabel =
       visibility: visible;
     }
 
-    .jukebox__section--list {
-      display: none;
+    /*
+     * Selection ↔ TrackInfoPanel (vinyl open): crossfade in place.
+     * Keep both faces display:block so opacity/transform can ease — no display:none snaps.
+     */
+    .jukebox__section--list,
+    .jukebox__section--theme-tracks,
+    .jukebox__section--theme-tracks[hidden] {
+      display: block !important;
+      transition:
+        opacity var(--player-playlist-morph-dur, 380ms) cubic-bezier(0.22, 1, 0.36, 1),
+        transform var(--player-playlist-morph-dur, 380ms) cubic-bezier(0.22, 1, 0.36, 1),
+        visibility 0s linear var(--player-playlist-morph-dur, 380ms);
     }
 
-    /* Vinyl easter egg: open TrackInfoPanel / list drawer over selection */
+    .jukebox__section--list {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transform: translateY(0.4rem);
+      z-index: 1;
+    }
+
+    /* Vinyl easter egg: TrackInfoPanel / list drawer over selection */
     .jukebox.is-open .jukebox__section--list {
-      display: block !important;
+      position: relative;
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transform: translateY(0);
+      transition-delay: 0s;
+      z-index: 2;
     }
 
     .jukebox.is-open .jukebox__section--theme-tracks,
     .jukebox.is-open .jukebox__section--theme-tracks[hidden] {
-      display: none !important;
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transform: translateY(-0.35rem);
+      z-index: 1;
     }
 
-    .jukebox__section--theme-tracks,
-    .jukebox__section--theme-tracks[hidden] {
-      display: block !important;
+    .jukebox:not(.is-open) .jukebox__section--theme-tracks,
+    .jukebox:not(.is-open) .jukebox__section--theme-tracks[hidden] {
+      position: relative;
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transform: translateY(0);
+      transition-delay: 0s;
+      z-index: 2;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .jukebox__section--list,
+      .jukebox__section--theme-tracks,
+      .jukebox__section--theme-tracks[hidden] {
+        transition: none;
+      }
     }
 
     .jukebox__tool--loop {
@@ -1895,11 +1954,29 @@ const defaultLabel =
 
     .jukebox.is-open .jukebox__section--list {
       display: block !important;
+      animation: jukebox-face-in var(--jukebox-dur, 280ms) var(--jukebox-ease, cubic-bezier(0.4, 0, 0.2, 1)) both;
     }
 
     .jukebox.is-open:not(.is-panel-opening) .jukebox__section--theme-tracks,
     .jukebox.is-open:not(.is-panel-opening) .jukebox__section--theme-tracks[hidden] {
       display: none !important;
+    }
+
+    @keyframes jukebox-face-in {
+      from {
+        opacity: 0;
+        transform: translateY(0.35rem);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .jukebox.is-open .jukebox__section--list {
+        animation: none;
+      }
     }
 
     .jukebox.is-player-expanded .jukebox__panel,

@@ -200,51 +200,38 @@ const menuChannels = site.channels
 </header>
 
 <script>
-  import { isPhoneHud, requestPhoneContent, type PhoneContentSheet } from '../lib/player-dock';
-
-  const CONTENT_SHEETS = new Set([
-    'about',
-    'discography',
-    'tour',
-    'contact',
-    'shop',
-    'info',
-    'socials',
-  ]);
   const PANEL_IDS = new Set(['about', 'discography', 'tour', 'info', 'contact', 'shop']);
 
   function closeOpenPanels(except?: HTMLDetailsElement) {
     document.querySelectorAll<HTMLDetailsElement>('[data-stage-panel][open]').forEach((node) => {
       if (except && node === except) return;
       const summary = node.querySelector<HTMLElement>(':scope > summary');
-      // Prefer summary click so two-stage motion / exclusive close run.
-      if (summary && !isPhoneHud()) summary.click();
+      // Prefer summary click so overlay exit / exclusive close run.
+      if (summary) summary.click();
       else node.open = false;
     });
   }
 
   /**
-   * Open a desktop StagePanel the same way the old icon dock did: click the
-   * native <summary> so createTwoStageMotion applies is-two-stage-height.
-   * Setting panel.open alone leaves the body at max-height:0 (dead nav).
+   * Open nav content like Imprint / Privacy (LegalPanel sheet), not the old
+   * bottom-right StagePanel chip. Click the native <summary> so StagePanels
+   * overlay JS applies is-overlay-in + focus the exit control.
    */
-  function openDesktopPanel(id: string) {
+  function openNavOverlay(id: string) {
     const panel = document.querySelector<HTMLDetailsElement>(`[data-stage-panel="${id}"]`);
     const summary = panel?.querySelector<HTMLElement>(':scope > summary');
     if (!panel || !summary) return;
 
     if (panel.open && !panel.classList.contains('is-panel-closing')) {
-      // Already open — toggle closed via the same motion path.
       summary.click();
       return;
     }
 
     summary.click();
-    panel.scrollIntoView({ block: 'nearest' });
   }
 
   function goHome() {
-    if (!isPhoneHud()) closeOpenPanels();
+    closeOpenPanels();
     const stage = document.querySelector('#stage') ?? document.querySelector('.stage');
     stage?.scrollIntoView({ block: 'start' });
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -306,12 +293,9 @@ const menuChannels = site.channels
         const id = el.dataset.siteNavOpen;
         if (!id || !PANEL_IDS.has(id)) return;
         event.preventDefault();
-        if (isPhoneHud() && CONTENT_SHEETS.has(id)) {
-          setMenuOpen(false);
-          requestPhoneContent(id as PhoneContentSheet);
-          return;
-        }
-        openDesktopPanel(id);
+        setMenuOpen(false);
+        // Phone + desktop: same LegalPanel-style sheet (not the content pill chip).
+        openNavOverlay(id);
       });
     });
   }
