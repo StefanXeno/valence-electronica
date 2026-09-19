@@ -334,22 +334,26 @@ const {
     display: flex;
     align-items: center;
     justify-content: flex-start;
-    width: 100%;
     height: 100%;
     min-width: var(--control-size);
     min-height: var(--control-size);
-    max-width: none;
     padding: 0;
-    flex: none;
   }
 
+  /* Muted: speaker-sized only — no residual flex hole for the range. */
   .volume-control--in-jukebox[data-sound='off'] {
     gap: 0;
+    width: var(--control-size);
+    max-width: var(--control-size);
+    flex: 0 0 var(--control-size);
   }
 
   /* Same gap as the toolbar so mute → slider matches vinyl | shuffle | play | mute. */
   .volume-control--in-jukebox[data-sound='on'] {
     gap: var(--jukebox-toolbar-gap, calc(0.35rem * var(--hud-scale)));
+    width: 100%;
+    max-width: none;
+    flex: none;
   }
 
   /*
@@ -388,20 +392,33 @@ const {
 
   .volume-control--in-jukebox[data-sound='on'] .volume-control__slider-wrap {
     /* Fill the mute-slot remainder so the track ends at the bar’s right pad. */
+    display: flex;
     flex: 1 1 auto;
     width: auto;
     max-width: none;
     min-width: var(--volume-slider-size);
+    height: auto;
     opacity: 1;
     visibility: visible;
     pointer-events: auto;
   }
 
+  /*
+   * Muted: pull the range out of flex entirely. width/opacity/visibility alone
+   * still leave <input type="range"> min-content width (extra play→mute gap)
+   * and native accent tracks can paint through collapsed wrappers.
+   */
   .volume-control--in-jukebox[data-sound='off'] .volume-control__slider-wrap {
+    display: none;
     flex: none;
     width: 0;
     max-width: 0;
     min-width: 0;
+    height: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    overflow: hidden;
     opacity: 0;
     visibility: hidden;
     pointer-events: none;

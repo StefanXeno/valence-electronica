@@ -71,4 +71,30 @@ describe('jukebox mute expand selector (Astro scoped CSS)', () => {
       /\.jukebox\[data-astro-cid-[a-z0-9]+\]:has\(\.jukebox__tool--mute\[data-sound=["']on["']\]\)/,
     );
   });
+
+  it('muted in-jukebox slider wrap uses display:none so range min-content cannot widen the mute slot', async () => {
+    const css = await compileCss(
+      `
+---
+---
+<div class="volume-control volume-control--in-jukebox" data-sound="off">
+  <div class="volume-control__slider-wrap"></div>
+</div>
+<style>
+  .volume-control--in-jukebox[data-sound='off'] .volume-control__slider-wrap {
+    display: none;
+    width: 0;
+    max-width: 0;
+    min-width: 0;
+  }
+</style>
+`,
+      '/tmp/MuteCollapsed.astro',
+    );
+    // Astro may inject [data-astro-cid-…] between the class and [data-sound].
+    expect(css).toMatch(
+      /\.volume-control--in-jukebox\[data-astro-cid-[a-z0-9]+\]\[data-sound=["']?off["']?\]\s+\.volume-control__slider-wrap/,
+    );
+    expect(css).toMatch(/display:\s*none/);
+  });
 });

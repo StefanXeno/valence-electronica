@@ -556,16 +556,25 @@ const defaultLabel =
     flex: 0 0 var(--jukebox-mute-width);
     width: var(--jukebox-mute-width);
     min-width: var(--jukebox-mute-width);
+    max-width: var(--jukebox-mute-width);
     height: var(--control-size);
     /* Sit in the V-Flip / player pill — no second circle around the speaker. */
     border: 0;
     border-color: transparent;
     padding: 0;
-    overflow: visible;
+    /* Muted: clip any native range paint. Unmuted overrides overflow below. */
+    overflow: hidden;
+    box-sizing: border-box;
     /* Flex host so in-flow mute + slider stay hittable (not absolute/clipped). */
     display: flex;
     align-items: center;
     justify-content: flex-start;
+  }
+
+  /* Unmuted: allow the track to use the expanded mute-slot width. */
+  .jukebox__tool--mute[data-sound='on'],
+  .jukebox__tool--mute[data-sound='on']:hover {
+    overflow: visible;
   }
 
   .jukebox__tool--mute[hidden] {
@@ -1069,6 +1078,8 @@ const defaultLabel =
       flex: 1 1 auto;
       width: auto;
       min-width: var(--jukebox-mute-width);
+      max-width: none;
+      overflow: visible;
     }
 
     /* Playlist expand/collapse. Unmute takes space instantly — no width ease. */
