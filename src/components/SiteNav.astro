@@ -3,7 +3,7 @@ import { Image } from 'astro:assets';
 import site from '../data/site.json';
 import wordmark from '../assets/images/brand/valence-wordmark.png';
 import type { UiChrome } from '../lib/stage';
-import { getAboutEntry, getSiteNavData } from '../lib/stage';
+import { getAboutEntry, getSiteNavData, getUpcomingShows, resolveShowTitle } from '../lib/stage';
 import { withBase } from '../lib/url';
 import ChannelIcon from './ChannelIcon.astro';
 
@@ -14,7 +14,13 @@ interface Props {
 const { chrome } = Astro.props;
 const { shopUrl } = getSiteNavData();
 const about = await getAboutEntry();
+const upcomingShows = await getUpcomingShows();
 const artistName = site.artist.name;
+const tourDateFmt = new Intl.DateTimeFormat('en-GB', {
+  timeZone: 'Europe/Berlin',
+  day: 'numeric',
+  month: 'short',
+});
 
 const menuChannels = site.channels
   .map((channel) => {
@@ -130,6 +136,7 @@ const menuChannels = site.channels
             rel="noopener noreferrer"
             data-site-nav-shop="external"
             data-site-nav-menu-close
+            style="--nav-stagger: 0"
           >
             {chrome.shopTitle}
           </a>
@@ -139,19 +146,77 @@ const menuChannels = site.channels
             href={withBase('/shop')}
             data-legal-slug="shop"
             data-site-nav-menu-close
+            style="--nav-stagger: 0"
           >
             {chrome.shopTitle}
           </a>
         )
       }
-      <a
-        class="site-nav__menu-item"
-        href={withBase('/tour')}
-        data-legal-slug="tour"
-        data-site-nav-menu-close
-      >
-        {chrome.tourTitle}
-      </a>
+      {/* Mobile-only Tour expand: destinations strip, not a nested dropdown. */}
+      <div class="site-nav__menu-tour" data-site-nav-tour style="--nav-stagger: 1">
+        <button
+          type="button"
+          class="site-nav__menu-item site-nav__menu-tour-toggle"
+          data-site-nav-tour-toggle
+          aria-expanded="false"
+          aria-controls="site-nav-tour-panel"
+        >
+          <span>{chrome.tourTitle}</span>
+          <span class="site-nav__menu-tour-chevron" aria-hidden="true"></span>
+        </button>
+        <div
+          class="site-nav__menu-tour-panel"
+          id="site-nav-tour-panel"
+          data-site-nav-tour-panel
+          hidden
+        >
+          <div class="site-nav__menu-tour-panel-inner">
+            {
+              upcomingShows.length === 0 ? (
+                <p class="site-nav__menu-tour-empty">{chrome.emptyShows}</p>
+              ) : (
+                <ul class="site-nav__menu-tour-destinations" aria-label={chrome.tourTitle}>
+                  {upcomingShows.map((show, index) => {
+                    const eventTitle = resolveShowTitle(show.title, show.venue);
+                    const dateLabel = tourDateFmt.format(show.date);
+                    const href = show.ticketUrl || show.venueUrl || withBase('/tour');
+                    const external = Boolean(show.ticketUrl || show.venueUrl);
+                    return (
+                      <li style={`--dest-stagger: ${index}`}>
+                        <a
+                          class="site-nav__menu-tour-dest"
+                          href={href}
+                          target={external ? '_blank' : undefined}
+                          rel={external ? 'noopener noreferrer' : undefined}
+                          data-legal-slug={external ? undefined : 'tour'}
+                          data-site-nav-menu-close
+                        >
+                          <span class="site-nav__menu-tour-dest-city">{show.city}</span>
+                          <span class="site-nav__menu-tour-dest-meta">
+                            <time datetime={show.date.toISOString().slice(0, 10)}>
+                              {dateLabel}
+                            </time>
+                            {' · '}
+                            {eventTitle}
+                          </span>
+                        </a>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )
+            }
+            <a
+              class="site-nav__menu-tour-all"
+              href={withBase('/tour')}
+              data-legal-slug="tour"
+              data-site-nav-menu-close
+            >
+              All dates
+            </a>
+          </div>
+        </div>
+      </div>
       {
         about && (
           <a
@@ -159,6 +224,7 @@ const menuChannels = site.channels
             href={withBase('/about')}
             data-legal-slug="about"
             data-site-nav-menu-close
+            style="--nav-stagger: 2"
           >
             {chrome.aboutTitle}
           </a>
@@ -169,6 +235,7 @@ const menuChannels = site.channels
         href={withBase('/discography')}
         data-legal-slug="discography"
         data-site-nav-menu-close
+        style="--nav-stagger: 3"
       >
         {chrome.discographyTitle}
       </a>
@@ -177,6 +244,7 @@ const menuChannels = site.channels
         href={withBase('/legal/imprint')}
         data-legal-slug="imprint"
         data-site-nav-menu-close
+        style="--nav-stagger: 4"
       >
         {chrome.imprintButton}
       </a>
@@ -185,13 +253,14 @@ const menuChannels = site.channels
         href={withBase('/legal/privacy')}
         data-legal-slug="privacy"
         data-site-nav-menu-close
+        style="--nav-stagger: 5"
       >
         {chrome.privacyButton}
       </a>
     </nav>
     {
       menuChannels.length > 0 && (
-        <div class="site-nav__menu-socials">
+        <div class="site-nav__menu-socials" style="--nav-stagger: 6">
           <ul class="site-nav__menu-channels" aria-label={chrome.socialsLabel}>
             {menuChannels.map((channel) => (
               <li>
@@ -232,6 +301,9 @@ const menuChannels = site.channels
 
     const menu = root.querySelector<HTMLElement>('[data-site-nav-menu]');
     const menuBtn = root.querySelector<HTMLButtonElement>('[data-site-nav-menu-toggle]');
+    const tourBlock = root.querySelector<HTMLElement>('[data-site-nav-tour]');
+    const tourToggle = root.querySelector<HTMLButtonElement>('[data-site-nav-tour-toggle]');
+    const tourPanel = root.querySelector<HTMLElement>('[data-site-nav-tour-panel]');
     let closeTimer: number | undefined;
     let onCloseTransitionEnd: ((event: TransitionEvent) => void) | undefined;
 
@@ -249,9 +321,34 @@ const menuChannels = site.channels
       }
     };
 
+    const setTourOpen = (open: boolean) => {
+      if (!tourBlock || !tourToggle || !tourPanel) return;
+      tourToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+      if (open) {
+        tourPanel.hidden = false;
+        // Force layout so grid-rows / opacity transitions run from collapsed.
+        void tourPanel.offsetHeight;
+        tourBlock.classList.add('is-tour-open');
+      } else {
+        tourBlock.classList.remove('is-tour-open');
+        if (prefersReducedMotion()) {
+          tourPanel.hidden = true;
+        } else {
+          // Hide after collapse transition; keep in DOM while animating.
+          window.setTimeout(() => {
+            if (!tourBlock.classList.contains('is-tour-open')) {
+              tourPanel.hidden = true;
+            }
+          }, 420);
+        }
+      }
+    };
+
     const finishClose = () => {
       clearCloseWait();
       if (!menu || !menuBtn) return;
+      setTourOpen(false);
+      if (tourPanel) tourPanel.hidden = true;
       menu.hidden = true;
       menuBtn.focus();
     };
@@ -262,7 +359,7 @@ const menuChannels = site.channels
       if (open) {
         clearCloseWait();
         menu.hidden = false;
-        // Paint off-screen (translateX 100%) before sliding in.
+        // Paint collapsed morph (clip-path circle) before expanding.
         void menu.offsetWidth;
         root.classList.add('is-menu-open');
         document.documentElement.classList.add('site-nav-menu-open');
@@ -275,6 +372,8 @@ const menuChannels = site.channels
 
       if (!root.classList.contains('is-menu-open') && menu.hidden) return;
 
+      // Collapse Tour first so reverse stagger reads cleanly.
+      setTourOpen(false);
       root.classList.remove('is-menu-open');
       document.documentElement.classList.remove('site-nav-menu-open');
       menuBtn.setAttribute('aria-expanded', 'false');
@@ -287,12 +386,13 @@ const menuChannels = site.channels
 
       clearCloseWait();
       onCloseTransitionEnd = (event: TransitionEvent) => {
-        if (event.target !== menu || event.propertyName !== 'transform') return;
+        if (event.target !== menu) return;
+        if (event.propertyName !== 'clip-path' && event.propertyName !== 'opacity') return;
         finishClose();
       };
       menu.addEventListener('transitionend', onCloseTransitionEnd);
       // Fallback if transitionend never fires (tab backgrounded, etc.).
-      closeTimer = window.setTimeout(finishClose, 500);
+      closeTimer = window.setTimeout(finishClose, 560);
     };
 
     root.querySelectorAll<HTMLElement>('[data-site-nav-home]').forEach((el) => {
@@ -307,6 +407,11 @@ const menuChannels = site.channels
       setMenuOpen(!root.classList.contains('is-menu-open'));
     });
 
+    tourToggle?.addEventListener('click', () => {
+      const next = !tourBlock?.classList.contains('is-tour-open');
+      setTourOpen(Boolean(next));
+    });
+
     root.querySelectorAll<HTMLElement>('[data-site-nav-menu-close]').forEach((el) => {
       el.addEventListener('click', () => {
         // Close menu after LegalOverlay open handler runs (bubble after capture).
@@ -315,9 +420,13 @@ const menuChannels = site.channels
     });
 
     document.addEventListener('keydown', (event) => {
-      if (event.key === 'Escape' && root.classList.contains('is-menu-open')) {
-        setMenuOpen(false);
+      if (event.key !== 'Escape' || !root.classList.contains('is-menu-open')) return;
+      if (tourBlock?.classList.contains('is-tour-open')) {
+        setTourOpen(false);
+        tourToggle?.focus();
+        return;
       }
+      setMenuOpen(false);
     });
 
     window.matchMedia('(min-width: 1024px)').addEventListener('change', (event) => {
@@ -458,8 +567,12 @@ const menuChannels = site.channels
     transform: rotate(-45deg);
   }
 
-  /* Full-viewport mobile menu — slides in from the right. */
+  /* Full-viewport morph from the hamburger corner (mobile only; hidden ≥1024). */
   .site-nav__menu {
+    --menu-morph-origin: calc(100% - 1.35rem) 1.35rem;
+    --menu-morph-dur: 480ms;
+    --menu-stagger-step: 55ms;
+    --menu-stagger-base: 90ms;
     position: fixed;
     inset: 0;
     z-index: 9;
@@ -474,21 +587,25 @@ const menuChannels = site.channels
     backdrop-filter: blur(16px);
     overflow-y: auto;
     overscroll-behavior: contain;
-    transform: translate3d(100%, 0, 0);
+    clip-path: circle(0% at var(--menu-morph-origin));
+    opacity: 0;
     visibility: hidden;
     pointer-events: none;
     transition:
-      transform 420ms cubic-bezier(0.22, 1, 0.36, 1),
-      visibility 0s linear 420ms;
-    will-change: transform;
+      clip-path var(--menu-morph-dur) cubic-bezier(0.22, 1, 0.36, 1),
+      opacity calc(var(--menu-morph-dur) * 0.7) ease,
+      visibility 0s linear var(--menu-morph-dur);
+    will-change: clip-path, opacity;
   }
 
   .site-nav.is-menu-open .site-nav__menu {
-    transform: translate3d(0, 0, 0);
+    clip-path: circle(160% at var(--menu-morph-origin));
+    opacity: 1;
     visibility: visible;
     pointer-events: auto;
     transition:
-      transform 420ms cubic-bezier(0.22, 1, 0.36, 1),
+      clip-path var(--menu-morph-dur) cubic-bezier(0.22, 1, 0.36, 1),
+      opacity calc(var(--menu-morph-dur) * 0.55) ease,
       visibility 0s linear 0s;
   }
 
@@ -500,7 +617,26 @@ const menuChannels = site.channels
     .site-nav__menu,
     .site-nav.is-menu-open .site-nav__menu {
       transition: none;
+      clip-path: none;
+      opacity: 1;
+    }
+
+    .site-nav__menu-primary > .site-nav__menu-item,
+    .site-nav__menu-primary > .site-nav__menu-tour,
+    .site-nav__menu-socials,
+    .site-nav.is-menu-open .site-nav__menu-primary > .site-nav__menu-item,
+    .site-nav.is-menu-open .site-nav__menu-primary > .site-nav__menu-tour,
+    .site-nav.is-menu-open .site-nav__menu-socials,
+    .site-nav__menu-tour-dest,
+    .site-nav__menu-tour.is-tour-open .site-nav__menu-tour-dest {
+      transition: none;
+      opacity: 1;
       transform: none;
+    }
+
+    .site-nav__menu-tour-panel,
+    .site-nav__menu-tour.is-tour-open .site-nav__menu-tour-panel {
+      transition: none;
     }
   }
 
@@ -515,15 +651,195 @@ const menuChannels = site.channels
     line-height: 1.15;
   }
 
+  /* Staggered slide/fade for top-level entries (direct children only). */
+  .site-nav__menu-primary > .site-nav__menu-item,
+  .site-nav__menu-primary > .site-nav__menu-tour,
+  .site-nav__menu-socials {
+    --nav-stagger: 0;
+    opacity: 0;
+    transform: translate3d(0, 0.85rem, 0);
+    transition:
+      opacity 360ms cubic-bezier(0.22, 1, 0.36, 1),
+      transform 360ms cubic-bezier(0.22, 1, 0.36, 1);
+    transition-delay: 0ms;
+  }
+
+  .site-nav.is-menu-open .site-nav__menu-primary > .site-nav__menu-item,
+  .site-nav.is-menu-open .site-nav__menu-primary > .site-nav__menu-tour,
+  .site-nav.is-menu-open .site-nav__menu-socials {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+    transition-delay: calc(
+      var(--menu-stagger-base) + (var(--nav-stagger) * var(--menu-stagger-step))
+    );
+  }
+
+  .site-nav:not(.is-menu-open) .site-nav__menu-primary > .site-nav__menu-item,
+  .site-nav:not(.is-menu-open) .site-nav__menu-primary > .site-nav__menu-tour,
+  .site-nav:not(.is-menu-open) .site-nav__menu-socials {
+    /* Reverse: items drop out slightly ahead of the morph close. */
+    transition-delay: calc((5 - var(--nav-stagger)) * 28ms);
+  }
+
   .site-nav__menu-item {
     color: color-mix(in srgb, #fff 90%, transparent);
     text-decoration: none;
     padding: 0.2em 0;
+    border: 0;
     border-bottom: 1px solid transparent;
+    background: transparent;
+    font: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
+    text-align: left;
+    cursor: pointer;
+    width: 100%;
   }
 
   .site-nav__menu-item:hover,
   .site-nav__menu-item:focus-visible {
+    color: #fff;
+    border-bottom-color: color-mix(in srgb, var(--color-accent-alt, #c8ff4a) 55%, transparent);
+    outline: none;
+  }
+
+  /* Tour: full-width expand + large destination typography (not a dropdown). */
+  .site-nav__menu-tour {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .site-nav__menu-tour-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+
+  .site-nav__menu-tour-chevron {
+    display: block;
+    width: 0.55em;
+    height: 0.55em;
+    border-right: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    transform: rotate(45deg);
+    opacity: 0.7;
+    transition: transform 280ms cubic-bezier(0.22, 1, 0.36, 1);
+    flex: 0 0 auto;
+  }
+
+  .site-nav__menu-tour.is-tour-open .site-nav__menu-tour-chevron {
+    transform: rotate(225deg);
+  }
+
+  .site-nav__menu-tour-panel {
+    display: grid;
+    grid-template-rows: 0fr;
+    opacity: 0;
+    transition:
+      grid-template-rows 380ms cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 280ms ease;
+  }
+
+  .site-nav__menu-tour.is-tour-open .site-nav__menu-tour-panel {
+    grid-template-rows: 1fr;
+    opacity: 1;
+  }
+
+  .site-nav__menu-tour-panel[hidden] {
+    display: none;
+  }
+
+  .site-nav__menu-tour.is-tour-open .site-nav__menu-tour-panel[hidden] {
+    display: grid;
+  }
+
+  .site-nav__menu-tour-panel-inner {
+    overflow: hidden;
+    min-height: 0;
+    padding: 0.35rem 0 0.85rem;
+  }
+
+  .site-nav__menu-tour-destinations {
+    list-style: none;
+    margin: 0;
+    padding: 0.35rem 0 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+    border-top: 1px solid color-mix(in srgb, #fff 14%, transparent);
+  }
+
+  .site-nav__menu-tour-dest {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    padding: 0.35rem 0;
+    text-decoration: none;
+    color: color-mix(in srgb, #fff 88%, transparent);
+    opacity: 0;
+    transform: translate3d(0, 0.5rem, 0);
+    transition:
+      opacity 320ms cubic-bezier(0.22, 1, 0.36, 1),
+      transform 320ms cubic-bezier(0.22, 1, 0.36, 1),
+      color 160ms ease;
+    transition-delay: 0ms;
+  }
+
+  .site-nav__menu-tour.is-tour-open .site-nav__menu-tour-dest {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+    transition-delay: calc(80ms + (var(--dest-stagger, 0) * 55ms));
+  }
+
+  .site-nav__menu-tour-dest:hover,
+  .site-nav__menu-tour-dest:focus-visible {
+    color: #fff;
+    outline: none;
+  }
+
+  .site-nav__menu-tour-dest-city {
+    font-family: var(--font-display);
+    font-size: clamp(1.35rem, 6.5vw, 1.85rem);
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    line-height: 1.1;
+  }
+
+  .site-nav__menu-tour-dest-meta {
+    font-family: var(--font-body, inherit);
+    font-size: clamp(0.72rem, 3.2vw, 0.85rem);
+    letter-spacing: 0.02em;
+    text-transform: none;
+    color: color-mix(in srgb, #fff 58%, transparent);
+  }
+
+  .site-nav__menu-tour-empty {
+    margin: 0.55rem 0 0.75rem;
+    padding-top: 0.55rem;
+    border-top: 1px solid color-mix(in srgb, #fff 14%, transparent);
+    font-family: var(--font-body, inherit);
+    font-size: clamp(0.85rem, 3.5vw, 1rem);
+    letter-spacing: 0.02em;
+    text-transform: none;
+    color: color-mix(in srgb, #fff 55%, transparent);
+  }
+
+  .site-nav__menu-tour-all {
+    display: inline-block;
+    margin-top: 0.15rem;
+    font-family: var(--font-display);
+    font-size: clamp(0.78rem, 3.4vw, 0.92rem);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: color-mix(in srgb, var(--color-accent-alt, #c8ff4a) 85%, #fff);
+    border-bottom: 1px solid transparent;
+  }
+
+  .site-nav__menu-tour-all:hover,
+  .site-nav__menu-tour-all:focus-visible {
     color: #fff;
     border-bottom-color: color-mix(in srgb, var(--color-accent-alt, #c8ff4a) 55%, transparent);
     outline: none;
@@ -611,6 +927,13 @@ const menuChannels = site.channels
       );
       padding: 0.55rem clamp(0.65rem, 2vw, 1.1rem) 0.35rem;
       padding-right: var(--burger-top-inset);
+      /* Morph origin tracks the burger corner on phone chrome. */
+      --menu-morph-x: calc(100% - (var(--burger-top-inset) + var(--burger) * 0.5));
+      --menu-morph-y: calc(var(--burger-top-inset) + var(--burger) * 0.5);
+    }
+
+    .site-nav__menu {
+      --menu-morph-origin: var(--menu-morph-x) var(--menu-morph-y);
     }
 
     .site-nav__bar {
