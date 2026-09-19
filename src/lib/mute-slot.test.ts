@@ -129,9 +129,46 @@ describe('jukebox muted toolbar layout (regression)', () => {
     );
   });
 
-  it('toolbar inline padding matches --jukebox-toolbar-gap (slider trailing space)', () => {
+  it('toolbar inline padding uses --jukebox-toolbar-inline-pad (balanced pill ends)', () => {
     expect(jukeboxSrc).toMatch(
-      /\.jukebox__toolbar\s*\{[^}]*padding:\s*var\(--jukebox-toolbar-pad\)\s+var\(--jukebox-toolbar-gap\)/s,
+      /\.jukebox__toolbar\s*\{[^}]*padding:\s*var\(--jukebox-toolbar-pad\)\s+var\(--jukebox-toolbar-inline-pad\)/s,
     );
+    // Always-on asymmetric end-pad stranded muted mute — unmuted-only is OK.
+    expect(jukeboxSrc).not.toMatch(/--jukebox-toolbar-end-pad(?![\w-])/);
+  });
+
+  it('unmuted toolbar gains end pad; mute→slider uses --jukebox-volume-gap', () => {
+    expect(jukeboxSrc).toMatch(/--jukebox-toolbar-unmuted-end-pad/);
+    expect(jukeboxSrc).toMatch(/--jukebox-volume-gap/);
+    expect(jukeboxSrc).toMatch(
+      /\.jukebox:has\(\.jukebox__tool--mute\[data-sound=['"]on['"]\]\)\s+\.jukebox__toolbar\s*\{[^}]*padding-right:\s*var\(--jukebox-toolbar-unmuted-end-pad\)/s,
+    );
+    expect(muteSrc).toMatch(
+      /\[data-sound=['"]on['"]\]\s*\{[^}]*gap:\s*var\(--jukebox-volume-gap/s,
+    );
+  });
+
+  it('desktop transport stays display:contents with no flex box props (Firefox double-gap)', () => {
+    // flex/margin/padding on a contents node can promote a real flex item in Firefox,
+    // nesting vinyl|shuffle|play and adding a second gap before mute.
+    const desktopTransport = jukeboxSrc.match(
+      /\.player-dock__transport\s*\{[^}]*display:\s*contents;[^}]*\}/gs,
+    );
+    expect(desktopTransport?.length).toBeGreaterThan(0);
+    for (const block of desktopTransport ?? []) {
+      if (!block.includes('display: contents')) continue;
+      // Phone overrides use display:flex !important — skip those.
+      if (block.includes('display: flex')) continue;
+      expect(block).not.toMatch(/\bflex\s*:/);
+      expect(block).not.toMatch(/\bmargin\s*:/);
+      expect(block).not.toMatch(/\bpadding\s*:/);
+    }
+    // Loop must not sit between play and mute in markup.
+    const playIdx = jukeboxSrc.indexOf('data-bg-play-toggle');
+    const muteIdx = jukeboxSrc.indexOf('data-jukebox-mute-slot');
+    const loopIdx = jukeboxSrc.indexOf('data-loop-toggle');
+    expect(playIdx).toBeGreaterThan(-1);
+    expect(muteIdx).toBeGreaterThan(playIdx);
+    expect(loopIdx).toBeGreaterThan(muteIdx);
   });
 });

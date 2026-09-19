@@ -154,19 +154,6 @@ const defaultLabel =
             <HudIcon token="pause" />
           </span>
         </button>
-
-        <button
-          type="button"
-          class="jukebox__tool jukebox__tool--loop glitch-hit"
-          data-loop-toggle
-          data-glitch-live
-          aria-pressed={chrome.loopDefault ? 'true' : 'false'}
-          aria-label={chrome.loopLabel}
-          data-hud-label={chrome.loopLabel}
-          data-hud-label-anchor="above"
-        >
-          <HudIcon token={chrome.loopIcon} emoji={chrome.loopIconEmoji} />
-        </button>
         </div>
 
         {showMute && (
@@ -179,6 +166,25 @@ const defaultLabel =
             />
           </div>
         )}
+
+        {/*
+          Loop stays after mute (never between play|mute). Compact desktop hides
+          it; phone Songs sheet may show it. `hidden` keeps it out of flex gap
+          even if a browser mishandles display:none under display:contents.
+        */}
+        <button
+          type="button"
+          class="jukebox__tool jukebox__tool--loop glitch-hit"
+          data-loop-toggle
+          data-glitch-live
+          hidden
+          aria-pressed={chrome.loopDefault ? 'true' : 'false'}
+          aria-label={chrome.loopLabel}
+          data-hud-label={chrome.loopLabel}
+          data-hud-label-anchor="above"
+        >
+          <HudIcon token={chrome.loopIcon} emoji={chrome.loopIconEmoji} />
+        </button>
       </div>
 
     </div>
@@ -339,6 +345,16 @@ const defaultLabel =
     --jukebox-panel-inset: calc(0.65rem * var(--hud-scale));
     --jukebox-toolbar-gap: calc(0.35rem * var(--hud-scale));
     --jukebox-toolbar-pad: calc(0.25rem * var(--hud-scale));
+    /*
+     * Inline pad for both ends — larger than the icon gap so the pill curve
+     * clears vinyl on the left and mute on the right when muted.
+     * Unmuted adds --jukebox-toolbar-unmuted-end-pad (thumb + curve clearance).
+     */
+    --jukebox-toolbar-inline-pad: calc(0.65rem * var(--hud-scale));
+    /* Right pad when slider is open — keeps track/thumb off the pill curve. */
+    --jukebox-toolbar-unmuted-end-pad: calc(1rem * var(--hud-scale));
+    /* Mute → track: tighter than tool gaps (speaker waves already eat the slot). */
+    --jukebox-volume-gap: calc(0.15rem * var(--hud-scale));
     /* Track length when unmuted — mute slot grows by speaker + gap + this. */
     --jukebox-volume-slider-size: min(calc(6.5rem * var(--hud-scale)), 26vw);
     --jukebox-open-width: min(
@@ -493,11 +509,16 @@ const defaultLabel =
     width: fit-content;
     max-width: 100%;
     min-height: var(--control-size);
-    /* Inline pad = same rhythm as item gaps so unmuted slider doesn't kiss the border. */
-    padding: var(--jukebox-toolbar-pad) var(--jukebox-toolbar-gap);
+    /* Same inline pad both ends — keeps muted mute balanced in the pill. */
+    padding: var(--jukebox-toolbar-pad) var(--jukebox-toolbar-inline-pad);
     box-sizing: border-box;
     border-top: 1px solid transparent;
     overflow: hidden;
+  }
+
+  /* Unmuted: extra right pad so the track/thumb clear the pill curve. */
+  .jukebox:has(.jukebox__tool--mute[data-sound='on']) .jukebox__toolbar {
+    padding-right: var(--jukebox-toolbar-unmuted-end-pad);
   }
 
   .jukebox.is-open:not(.is-panel-opening) .jukebox__toolbar {
@@ -550,14 +571,20 @@ const defaultLabel =
     max-width: var(--control-size);
     height: var(--control-size);
     margin: 0;
-    border: 0;
+    /* Same chrome as sibling tools so mute doesn’t read as a naked stray icon. */
+    border: 1px solid transparent;
     border-color: transparent;
     padding: 0;
     overflow: hidden;
     box-sizing: border-box;
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
+    display: inline-grid;
+    place-items: center;
+    place-content: center;
+  }
+
+  .jukebox__tool--mute:hover {
+    color: var(--color-accent-alt);
+    border-color: color-mix(in srgb, var(--color-border) 80%, transparent);
   }
 
   /*
@@ -567,13 +594,21 @@ const defaultLabel =
    */
   .jukebox__tool--mute[data-sound='on'],
   .jukebox__tool--mute[data-sound='on']:hover {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    place-items: unset;
+    place-content: unset;
     flex: 0 0 auto;
     width: auto;
     min-width: calc(
-      var(--control-size) + var(--jukebox-toolbar-gap) + var(--jukebox-volume-slider-size)
+      var(--control-size) + var(--jukebox-volume-gap) + var(--jukebox-volume-slider-size)
     );
     max-width: none;
     overflow: visible;
+    /* Slider stretch — drop the tool ring so it doesn’t box the track. */
+    border: 0;
+    border-color: transparent;
   }
 
   .jukebox__tool--mute[hidden] {
@@ -1013,14 +1048,30 @@ const defaultLabel =
         3 * (4.8rem * var(--hud-scale)) + 2 * (0.55rem * var(--hud-scale))
       );
       --player-playlist-morph-dur: 380ms;
-      /* Compact pill hugs vinyl | shuffle | play | mute — no empty tail. */
-      width: fit-content;
+      /* Compact: shell is invisible — visible pill is the toolbar only. */
+      width: max-content;
       max-width: min(
         var(--jukebox-open-width),
         calc(100vw - 2 * var(--stage-corner-gap, 0.3rem))
       );
+      border-color: transparent;
       border-radius: 999px;
+      background: transparent;
+      backdrop-filter: none;
+      overflow: visible;
       align-items: flex-start;
+    }
+
+    /*
+     * Compact pill chrome lives on the toolbar so a wider shell (drawer
+     * leftovers, etc.) cannot paint an empty tail after mute.
+     */
+    .jukebox:not(.is-theme-tracks) .jukebox__toolbar {
+      border: 1px solid var(--color-border);
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--color-surface) 92%, transparent);
+      backdrop-filter: blur(10px);
+      overflow: hidden;
     }
 
     .jukebox.is-theme-tracks {
@@ -1029,35 +1080,63 @@ const defaultLabel =
         var(--jukebox-open-width),
         calc(100vw - 2 * var(--stage-corner-gap, 0.3rem))
       );
+      border-color: var(--color-border);
       border-radius: calc(0.85rem * var(--hud-scale));
+      background: color-mix(in srgb, var(--color-surface) 92%, transparent);
+      backdrop-filter: blur(10px);
+      overflow: hidden;
       align-items: stretch;
+    }
+
+    .jukebox.is-theme-tracks .jukebox__toolbar {
+      border: 0;
+      border-top: 1px solid color-mix(in srgb, var(--color-border) 45%, transparent);
+      border-radius: 0;
+      background: transparent;
+      backdrop-filter: none;
+      width: 100%;
     }
 
     /* Compact desktop must not inherit phone/panel .is-open width lock. */
     .jukebox.is-open:not(.is-theme-tracks) {
-      width: fit-content;
+      width: max-content;
       border-radius: 999px;
+      border-color: transparent;
+      background: transparent;
+      backdrop-filter: none;
+      overflow: visible;
     }
 
-    /* Unmuted: bar still fit-content; mute slot min-width already includes the slider. */
+    /* Unmuted: bar still max-content; mute slot min-width already includes the slider. */
     .jukebox:has(.jukebox__tool--mute[data-sound='on']) {
-      width: fit-content;
+      width: max-content;
     }
 
     .jukebox__tool--mute,
     .jukebox__tool--mute[hidden] {
-      display: flex !important;
-      align-items: center;
-      justify-content: flex-start;
+      display: inline-grid !important;
+      place-items: center;
+      place-content: center;
       visibility: visible;
       pointer-events: auto;
     }
 
+    .jukebox__tool--mute[data-sound='on'],
+    .jukebox__tool--mute[data-sound='on'][hidden] {
+      display: flex !important;
+      align-items: center;
+      justify-content: flex-start;
+      place-items: unset;
+      place-content: unset;
+    }
+
     /*
-     * Compact pill: pull the collapsed drawer out of flow so its min-content
-     * (playlist cards) cannot widen the bar past the toolbar.
+     * Compact pill: fully remove the drawer from layout. Absolute+width:0 still
+     * let some min-content bleed widen the shell past the toolbar.
+     * Keep drawer available during playlist morph (before is-theme-tracks sticks).
      */
-    .jukebox:not(.is-theme-tracks) .jukebox__drawer {
+    .jukebox:not(.is-theme-tracks):not(.is-playlist-morphing) .jukebox__drawer {
+      display: none;
       position: absolute;
       width: 0;
       height: 0;
@@ -1070,25 +1149,17 @@ const defaultLabel =
     }
 
     /*
-     * Desktop transport is a real flex row (not display:contents). Mute stays a
-     * toolbar sibling so vinyl|shuffle|play|mute share one equal gap rhythm —
-     * contents + a growing mute slot was reading as space-between.
+     * Keep transport as display:contents ONLY — no flex/margin/padding here.
+     * Firefox will promote a contents element into a real flex item if you set
+     * flex/box props on it, which nests vinyl|shuffle|play and then adds a
+     * second toolbar gap before mute (pause→speaker looks ~2× shuffle→pause).
      */
     .player-dock__transport {
-      display: flex;
-      flex: 0 0 auto;
-      flex-direction: row;
-      flex-wrap: nowrap;
-      align-items: center;
-      justify-content: flex-start;
-      gap: var(--jukebox-toolbar-gap);
-      width: max-content;
-      margin: 0;
-      padding: 0;
+      display: contents;
     }
 
     .jukebox__toolbar {
-      width: fit-content;
+      width: max-content;
       max-width: 100%;
       justify-content: flex-start;
     }
@@ -1166,8 +1237,9 @@ const defaultLabel =
       }
     }
 
-    .jukebox__tool--loop {
-      display: none;
+    .jukebox__tool--loop,
+    .jukebox__tool--loop[hidden] {
+      display: none !important;
     }
 
     .jukebox__tool--vinyl,
@@ -1184,6 +1256,7 @@ const defaultLabel =
     }
 
     .jukebox.is-theme-tracks .jukebox__drawer {
+      display: block;
       position: relative;
       width: auto;
       height: auto;
@@ -1253,8 +1326,9 @@ const defaultLabel =
       padding-bottom: var(--jukebox-well-y);
     }
 
-    .jukebox__toolbar {
-      border-top-color: transparent;
+    /* Compact: keep the toolbar pill border intact (do not clear top). */
+    .jukebox:not(.is-theme-tracks) .jukebox__toolbar {
+      border-top-color: var(--color-border);
     }
 
     .jukebox.is-theme-tracks .jukebox__toolbar {
@@ -1724,8 +1798,9 @@ const defaultLabel =
       align-self: stretch;
     }
 
-    .jukebox__tool--loop {
-      display: none;
+    .jukebox__tool--loop,
+    .jukebox__tool--loop[hidden] {
+      display: none !important;
     }
 
     .jukebox__tool--vinyl,
