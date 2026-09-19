@@ -35,8 +35,6 @@ const {
     <svg
       class="volume-control__icon volume-control__icon--muted"
       viewBox="0 0 24 24"
-      width="33"
-      height="33"
       aria-hidden="true"
       focusable="false"
     >
@@ -48,8 +46,6 @@ const {
     <svg
       class="volume-control__icon volume-control__icon--on"
       viewBox="0 0 24 24"
-      width="33"
-      height="33"
       aria-hidden="true"
       focusable="false"
     >
@@ -318,6 +314,9 @@ const {
     position: relative;
     display: flex;
     align-items: center;
+    /* flex-start — inherited justify-content:center was shifting the speaker
+       when mute-slot width and (toggle+slider) content disagreed. */
+    justify-content: flex-start;
     width: 100%;
     height: 100%;
     min-width: var(--control-size);
@@ -334,14 +333,23 @@ const {
   .volume-control--in-jukebox[data-sound='on'] {
     display: flex;
     align-items: center;
+    justify-content: flex-start;
     width: 100%;
     height: 100%;
     min-width: var(--control-size);
     min-height: var(--control-size);
     max-width: none;
     padding: 0;
-    gap: 0;
     flex: none;
+  }
+
+  .volume-control--in-jukebox[data-sound='off'] {
+    gap: 0;
+  }
+
+  /* Same gap as the toolbar so mute → slider matches vinyl | shuffle | play | mute. */
+  .volume-control--in-jukebox[data-sound='on'] {
+    gap: var(--jukebox-toolbar-gap, calc(0.35rem * var(--hud-scale)));
   }
 
   /*
@@ -367,40 +375,42 @@ const {
     top: auto;
     right: auto;
     transform: none;
-    display: inline-flex;
+    display: flex;
     align-items: center;
     flex: none;
     min-width: 0;
     margin: 0;
+    padding: 0;
     transform-origin: left center;
-    overflow: visible;
-    box-sizing: content-box;
+    overflow: hidden;
+    box-sizing: border-box;
   }
 
   .volume-control--in-jukebox[data-sound='on'] .volume-control__slider-wrap {
-    width: var(--volume-slider-size);
-    max-width: var(--volume-slider-size);
-    margin-left: var(--jukebox-toolbar-gap, calc(0.2rem * var(--hud-scale)));
-    padding-right: var(--jukebox-slider-thumb-inset, calc(0.35rem * var(--hud-scale)));
+    /* Fill the mute-slot remainder so the track ends at the bar’s right pad. */
+    flex: 1 1 auto;
+    width: auto;
+    max-width: none;
+    min-width: var(--volume-slider-size);
     opacity: 1;
     visibility: visible;
     pointer-events: auto;
   }
 
   .volume-control--in-jukebox[data-sound='off'] .volume-control__slider-wrap {
+    flex: none;
     width: 0;
     max-width: 0;
-    margin-left: 0;
-    padding-right: 0;
+    min-width: 0;
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
   }
 
   .volume-control--in-jukebox .volume-control__slider {
-    width: var(--volume-slider-size);
+    width: 100%;
     min-width: 0;
-    max-width: var(--volume-slider-size);
+    max-width: none;
     margin: 0;
   }
 
@@ -469,6 +479,7 @@ const {
     .volume-control--in-jukebox[hidden] {
       display: flex !important;
       align-items: center;
+      justify-content: flex-start;
     }
 
     .volume-control--in-jukebox .volume-control__toggle:disabled {
@@ -531,21 +542,27 @@ const {
     color: var(--color-accent-alt);
   }
 
+  /*
+   * Fixed icon slot — both glyphs share one box; opacity swap (not display)
+   * so mute/unmute never changes layout width or alignment.
+   */
   .volume-control__icon {
     grid-area: 1 / 1;
     display: block;
+    width: calc(22px * var(--hud-scale));
+    height: calc(22px * var(--hud-scale));
+    max-width: none;
+    opacity: 0;
+    pointer-events: none;
   }
 
-  .volume-control__icon--on {
-    display: none;
-  }
-
-  .volume-control[data-sound='on'] .volume-control__icon--muted {
-    display: none;
+  .volume-control[data-sound='off'] .volume-control__icon--muted,
+  .volume-control:not([data-sound]) .volume-control__icon--muted {
+    opacity: 1;
   }
 
   .volume-control[data-sound='on'] .volume-control__icon--on {
-    display: block;
+    opacity: 1;
   }
 
   .volume-control__slider-wrap {

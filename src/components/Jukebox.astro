@@ -337,10 +337,10 @@ const defaultLabel =
     --jukebox-ease: cubic-bezier(0.4, 0, 0.2, 1);
     --jukebox-dur: 280ms;
     --jukebox-panel-inset: calc(0.65rem * var(--hud-scale));
-    --jukebox-toolbar-gap: calc(0.2rem * var(--hud-scale));
+    --jukebox-toolbar-gap: calc(0.35rem * var(--hud-scale));
     --jukebox-toolbar-pad: calc(0.25rem * var(--hud-scale));
-    --jukebox-volume-slider-size: min(calc(5rem * var(--hud-scale)), 22vw);
-    --jukebox-slider-thumb-inset: calc(0.35rem * var(--hud-scale));
+    /* Track length when unmuted; mute slot = speaker + gap + this. */
+    --jukebox-volume-slider-size: min(calc(6.5rem * var(--hud-scale)), 26vw);
     --jukebox-open-width: min(
       calc(22rem * var(--hud-scale)),
       calc(100vw - 2 * var(--stage-corner-gap, 0.3rem))
@@ -375,8 +375,7 @@ const defaultLabel =
    */
   .jukebox:has(.jukebox__tool--mute[data-sound='on']) {
     --jukebox-mute-width: calc(
-      var(--control-size) + var(--jukebox-toolbar-gap) + var(--jukebox-volume-slider-size) +
-        var(--jukebox-slider-thumb-inset)
+      var(--control-size) + var(--jukebox-toolbar-gap) + var(--jukebox-volume-slider-size)
     );
   }
 
@@ -503,6 +502,7 @@ const defaultLabel =
     flex-direction: row;
     flex-wrap: nowrap;
     align-items: center;
+    justify-content: flex-start;
     gap: var(--jukebox-toolbar-gap);
     flex: 0 0 auto;
     width: fit-content;
@@ -565,6 +565,7 @@ const defaultLabel =
     /* Flex host so in-flow mute + slider stay hittable (not absolute/clipped). */
     display: flex;
     align-items: center;
+    justify-content: flex-start;
   }
 
   .jukebox__tool--mute[hidden] {
@@ -582,7 +583,8 @@ const defaultLabel =
   .jukebox__tool--loop,
   .jukebox__tool--video-play,
   .jukebox__tool--vinyl {
-    flex: 0 0 auto;
+    /* Same fixed slot as .jukebox__tool — even vinyl | shuffle | play | mute rhythm. */
+    flex: 0 0 var(--control-size);
   }
 
   /* Default hide play/pause + vinyl; desktop 019 and phone 015 unhide them. */
@@ -1028,7 +1030,7 @@ const defaultLabel =
     /* Volume slider hole only while unmuted — bar ends at mute when muted. */
     .jukebox:has(.jukebox__tool--mute[data-sound='on']) {
       --jukebox-slider-extra: calc(
-        var(--jukebox-toolbar-gap) + var(--jukebox-volume-slider-size) + var(--jukebox-slider-thumb-inset)
+        var(--jukebox-toolbar-gap) + var(--jukebox-volume-slider-size)
       );
     }
 
@@ -1036,8 +1038,37 @@ const defaultLabel =
     .jukebox__tool--mute[hidden] {
       display: flex !important;
       align-items: center;
+      justify-content: flex-start;
       visibility: visible;
       pointer-events: auto;
+    }
+
+    /*
+     * Compact pill: pull the collapsed drawer out of flow so its min-content
+     * (playlist cards) cannot widen the bar past the toolbar — that was the
+     * empty gap after the volume slider.
+     */
+    .jukebox:not(.is-theme-tracks) .jukebox__drawer {
+      position: absolute;
+      width: 0;
+      height: 0;
+      min-width: 0;
+      max-height: 0;
+      overflow: hidden;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    /* Unmuted: if the pill is still wider than the tools, mute slot eats the slack. */
+    .jukebox:has(.jukebox__tool--mute[data-sound='on']) .jukebox__toolbar {
+      width: 100%;
+    }
+
+    .jukebox:has(.jukebox__tool--mute[data-sound='on']) .jukebox__tool--mute {
+      flex: 1 1 auto;
+      width: auto;
+      min-width: var(--jukebox-mute-width);
     }
 
     /* Playlist expand/collapse. Unmute takes space instantly — no width ease. */
@@ -1127,8 +1158,13 @@ const defaultLabel =
     }
 
     .jukebox.is-theme-tracks .jukebox__drawer {
+      position: relative;
+      width: auto;
+      height: auto;
+      min-width: 0;
       max-height: none;
       opacity: 1;
+      visibility: visible;
       pointer-events: auto;
       overflow: hidden;
     }
