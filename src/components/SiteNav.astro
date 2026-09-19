@@ -525,6 +525,49 @@ const menuChannels = site.channels
     .site-nav__primary {
       display: none;
     }
+
+    .site-nav {
+      --burger: 1.6rem;
+      --burger-bar: 2.5px;
+      --burger-gap: calc((var(--burger) - var(--burger-bar)) / 2);
+      /* Wordmark 960×362; width = min(11rem, 42vw). */
+      --wordmark-h: calc(min(11rem, 42vw) * 362 / 960);
+      --chrome-top: calc(0.55rem + 0.2rem);
+      /* Burger is vertically centered with the wordmark, so its visual top
+         inset is chrome-top + half the height difference — mirror that on the right. */
+      --burger-top-inset: calc(
+        var(--chrome-top) + (var(--wordmark-h) - var(--burger)) / 2
+      );
+      padding: 0.55rem clamp(0.65rem, 2vw, 1.1rem) 0.35rem;
+      padding-right: var(--burger-top-inset);
+    }
+
+    .site-nav__bar {
+      padding: 0.2rem 0;
+      align-items: center;
+    }
+
+    .site-nav__menu-btn {
+      width: var(--burger);
+      height: var(--burger);
+      place-items: center;
+    }
+
+    .site-nav__menu-btn-bars,
+    .site-nav__menu-btn-bars::before,
+    .site-nav__menu-btn-bars::after {
+      width: 100%;
+      height: var(--burger-bar);
+      border-radius: 1px;
+    }
+
+    .site-nav__menu-btn-bars::before {
+      top: calc(var(--burger-gap) * -1);
+    }
+
+    .site-nav__menu-btn-bars::after {
+      top: var(--burger-gap);
+    }
   }
 
   :global(html.site-nav-menu-open),
