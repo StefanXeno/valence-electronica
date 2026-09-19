@@ -314,15 +314,13 @@ const {
     position: relative;
     display: flex;
     align-items: center;
-    /* flex-start — inherited justify-content:center was shifting the speaker
-       when mute-slot width and (toggle+slider) content disagreed. */
     justify-content: flex-start;
-    width: 100%;
+    width: var(--control-size);
     height: 100%;
     min-width: var(--control-size);
     min-height: var(--control-size);
-    max-width: none;
-    flex: none;
+    max-width: var(--control-size);
+    flex: 0 0 var(--control-size);
     overflow: visible;
     gap: 0;
     padding: 0;
@@ -335,7 +333,6 @@ const {
     align-items: center;
     justify-content: flex-start;
     height: 100%;
-    min-width: var(--control-size);
     min-height: var(--control-size);
     padding: 0;
   }
@@ -351,9 +348,12 @@ const {
   /* Same gap as the toolbar so mute → slider matches vinyl | shuffle | play | mute. */
   .volume-control--in-jukebox[data-sound='on'] {
     gap: var(--jukebox-toolbar-gap, calc(0.35rem * var(--hud-scale)));
-    width: 100%;
+    width: auto;
     max-width: none;
-    flex: none;
+    min-width: calc(
+      var(--control-size) + var(--jukebox-toolbar-gap, 0.35rem) + var(--volume-slider-size)
+    );
+    flex: 0 0 auto;
   }
 
   /*
@@ -391,11 +391,11 @@ const {
   }
 
   .volume-control--in-jukebox[data-sound='on'] .volume-control__slider-wrap {
-    /* Fill the mute-slot remainder so the track ends at the bar’s right pad. */
+    /* Fixed track length — do not flex-grow (that was the uneven muted gap). */
     display: flex;
-    flex: 1 1 auto;
-    width: auto;
-    max-width: none;
+    flex: 0 0 var(--volume-slider-size);
+    width: var(--volume-slider-size);
+    max-width: var(--volume-slider-size);
     min-width: var(--volume-slider-size);
     height: auto;
     opacity: 1;

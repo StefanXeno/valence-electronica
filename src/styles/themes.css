@@ -58,12 +58,6 @@
   initial-value: rgb(8 0 0 / 68%);
 }
 
-@property --jukebox-mute-width {
-  syntax: '<length>';
-  inherits: true;
-  initial-value: 0px;
-}
-
 :root,
 [data-theme='default'] {
   --color-bg: #0a0000;
