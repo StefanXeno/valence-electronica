@@ -493,7 +493,8 @@ const defaultLabel =
     width: fit-content;
     max-width: 100%;
     min-height: var(--control-size);
-    padding: var(--jukebox-toolbar-pad);
+    /* Inline pad = same rhythm as item gaps so unmuted slider doesn't kiss the border. */
+    padding: var(--jukebox-toolbar-pad) var(--jukebox-toolbar-gap);
     box-sizing: border-box;
     border-top: 1px solid transparent;
     overflow: hidden;

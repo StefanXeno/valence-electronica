@@ -128,4 +128,10 @@ describe('jukebox muted toolbar layout (regression)', () => {
       /\[data-sound=['"]on['"]\]\s+\.volume-control__slider-wrap\s*\{[^}]*flex:\s*1\s+1\s+auto/s,
     );
   });
+
+  it('toolbar inline padding matches --jukebox-toolbar-gap (slider trailing space)', () => {
+    expect(jukeboxSrc).toMatch(
+      /\.jukebox__toolbar\s*\{[^}]*padding:\s*var\(--jukebox-toolbar-pad\)\s+var\(--jukebox-toolbar-gap\)/s,
+    );
+  });
 });
