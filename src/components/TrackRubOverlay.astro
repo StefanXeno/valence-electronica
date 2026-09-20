@@ -105,7 +105,7 @@ for (const entry of [...jukeboxRaw, ...tracksRaw]) {
       >
         <div class="ve-achievement__card" aria-hidden="true">
           <span class="ve-achievement__glyph" data-ve-achievement-glyph>
-            <svg viewBox="0 0 40 40" width="40" height="40" focusable="false">
+            <svg viewBox="0 0 40 40" width="44" height="44" focusable="false">
               <circle
                 cx="20"
                 cy="20"
@@ -248,15 +248,16 @@ for (const entry of [...jukeboxRaw, ...tracksRaw]) {
     }
   }
 
-  /* Above rub panel (z=40) — corner toast, never steals pointer events. */
+  /* Above rub panel (z=40) — top-center toast, never steals pointer events. */
   .ve-achievement {
     position: fixed;
     top: max(0.85rem, env(safe-area-inset-top, 0px));
-    right: max(0.85rem, env(safe-area-inset-right, 0px));
+    left: 50%;
     z-index: 50;
-    width: min(22.5rem, calc(100vw - 1.7rem));
+    width: min(26rem, calc(100vw - 1.7rem));
     margin: 0;
     pointer-events: none;
+    transform: translateX(-50%);
   }
 
   .ve-achievement[hidden] {
@@ -266,11 +267,11 @@ for (const entry of [...jukeboxRaw, ...tracksRaw]) {
   .ve-achievement__card {
     display: grid;
     grid-template-columns: auto 1fr;
-    gap: 0.85rem;
+    gap: 1rem;
     align-items: center;
-    padding: 0.85rem 1rem 0.9rem 0.85rem;
+    padding: 1.05rem 1.2rem 1.1rem 1.05rem;
     border: 1px solid color-mix(in srgb, var(--color-border) 80%, var(--color-accent));
-    border-radius: 0.55rem;
+    border-radius: 0.6rem;
     background:
       linear-gradient(
         135deg,
@@ -284,9 +285,9 @@ for (const entry of [...jukeboxRaw, ...tracksRaw]) {
       inset 0 1px 0 color-mix(in srgb, var(--color-accent-alt) 12%, transparent);
     /* Accent rail */
     border-left: 3px solid var(--color-accent);
-    transform-origin: top right;
+    transform-origin: top center;
     opacity: 0;
-    transform: translateY(-1.1rem) translateX(0.55rem) scale(0.94);
+    transform: translateY(-1.1rem) scale(0.94);
   }
 
   .ve-achievement.is-in .ve-achievement__card {
@@ -300,11 +301,11 @@ for (const entry of [...jukeboxRaw, ...tracksRaw]) {
   .ve-achievement__glyph {
     display: grid;
     place-items: center;
-    width: 2.75rem;
-    height: 2.75rem;
+    width: 3.15rem;
+    height: 3.15rem;
     color: var(--color-accent-alt);
     border: 1px solid color-mix(in srgb, var(--color-border) 70%, var(--color-accent));
-    border-radius: 0.4rem;
+    border-radius: 0.45rem;
     background: color-mix(in srgb, var(--color-bg) 55%, transparent);
   }
 
@@ -321,7 +322,7 @@ for (const entry of [...jukeboxRaw, ...tracksRaw]) {
   .ve-achievement__eyebrow {
     margin: 0;
     font-family: var(--font-display);
-    font-size: 0.62rem;
+    font-size: 0.68rem;
     font-weight: 500;
     letter-spacing: 0.14em;
     text-transform: uppercase;
@@ -331,7 +332,7 @@ for (const entry of [...jukeboxRaw, ...tracksRaw]) {
   .ve-achievement__title {
     margin: 0;
     font-family: var(--font-display);
-    font-size: clamp(0.95rem, 2.6vw, 1.1rem);
+    font-size: clamp(1.05rem, 2.8vw, 1.25rem);
     font-weight: 600;
     line-height: 1.2;
     color: var(--color-text);
@@ -339,7 +340,7 @@ for (const entry of [...jukeboxRaw, ...tracksRaw]) {
 
   .ve-achievement__sub {
     margin: 0.15rem 0 0;
-    font-size: 0.78rem;
+    font-size: 0.85rem;
     line-height: 1.35;
     color: var(--color-text-muted);
   }
@@ -359,15 +360,15 @@ for (const entry of [...jukeboxRaw, ...tracksRaw]) {
   @keyframes ve-achievement-in {
     0% {
       opacity: 0;
-      transform: translateY(-1.1rem) translateX(0.55rem) scale(0.94);
+      transform: translateY(-1.1rem) scale(0.94);
     }
     58% {
       opacity: 1;
-      transform: translateY(0.12rem) translateX(0) scale(1.02);
+      transform: translateY(0.12rem) scale(1.02);
     }
     100% {
       opacity: 1;
-      transform: translateY(0) translateX(0) scale(1);
+      transform: translateY(0) scale(1);
     }
   }
 
@@ -378,7 +379,7 @@ for (const entry of [...jukeboxRaw, ...tracksRaw]) {
     }
     to {
       opacity: 0;
-      transform: translateY(-0.65rem) translateX(0.35rem) scale(0.96);
+      transform: translateY(-0.65rem) scale(0.96);
     }
   }
 
