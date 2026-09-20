@@ -425,14 +425,38 @@ const menuChannels = site.channels
                               <ul class="site-nav__menu-portal-release-list site-nav__menu-portal-release-list--collection">
                                 {block.entries.map((release) => (
                                   <li class="site-nav__menu-portal-release site-nav__menu-portal-release--nested">
-                                    {/* Reuse head-text title/artist so track rows match single cards. */}
-                                    <div class="site-nav__menu-portal-head-text site-nav__menu-portal-head-text--nested">
-                                      <span class="site-nav__menu-portal-head-text__title">
-                                        {release.title}
-                                      </span>
-                                      <span class="site-nav__menu-portal-head-text__artist">
-                                        {release.artist ?? defaultArtist}
-                                      </span>
+                                    {/* Title/artist + trailing platform glyphs (no Listen On label). */}
+                                    <div class="site-nav__menu-portal-nested-row">
+                                      <div class="site-nav__menu-portal-head-text site-nav__menu-portal-head-text--nested">
+                                        <span class="site-nav__menu-portal-head-text__title">
+                                          {release.title}
+                                        </span>
+                                        <span class="site-nav__menu-portal-head-text__artist">
+                                          {release.artist ?? defaultArtist}
+                                        </span>
+                                      </div>
+                                      {release.listenLinks.length > 0 && (
+                                        <ul
+                                          class="site-nav__menu-portal-listen-glyphs"
+                                          aria-label={chrome.listenOnLabel}
+                                        >
+                                          {release.listenLinks.map((link) => (
+                                            <li>
+                                              <a
+                                                class="glitch-hit"
+                                                href={link.url}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                aria-label={link.label}
+                                                data-hud-label={link.label}
+                                                data-hud-label-anchor="above"
+                                              >
+                                                <ChannelIcon id={link.platform} label={link.label} />
+                                              </a>
+                                            </li>
+                                          ))}
+                                        </ul>
+                                      )}
                                     </div>
                                   </li>
                                 ))}
@@ -1431,6 +1455,68 @@ const menuChannels = site.channels
 
   .site-nav__menu-portal-release--nested {
     display: block;
+  }
+
+  /* Nested row: title/artist left, compact always-visible platform glyphs right. */
+  .site-nav__menu-portal-nested-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.45rem;
+    min-width: 0;
+  }
+
+  .site-nav__menu-portal-nested-row .site-nav__menu-portal-head-text--nested {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  /* Dense trailing glyphs — same chrome as singles listen buttons, scaled down; no label. */
+  .site-nav__menu-portal-listen-glyphs {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: inline-flex;
+    flex-flow: row nowrap;
+    align-items: center;
+    gap: 0.22rem;
+    flex: 0 0 auto;
+  }
+
+  .site-nav__menu-portal-listen-glyphs li {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .site-nav__menu-portal-listen-glyphs a {
+    overflow: visible;
+    display: inline-grid;
+    place-items: center;
+    width: 1.85rem;
+    height: 1.85rem;
+    border: 1px solid color-mix(in srgb, #fff 22%, transparent);
+    border-radius: 999px;
+    color: color-mix(in srgb, #fff 72%, transparent);
+    background: color-mix(in srgb, #fff 4%, transparent);
+    text-decoration: none;
+    transition:
+      color 160ms ease,
+      border-color 160ms ease,
+      background-color 160ms ease;
+  }
+
+  .site-nav__menu-portal-listen-glyphs a:hover,
+  .site-nav__menu-portal-listen-glyphs a:focus-visible {
+    color: var(--color-accent-alt, #c8ff4a);
+    border-color: color-mix(in srgb, var(--color-accent-alt, #c8ff4a) 45%, transparent);
+    background: color-mix(in srgb, var(--color-accent-alt, #c8ff4a) 10%, transparent);
+    outline: none;
+  }
+
+  .site-nav__menu-portal-listen-glyphs :global(.channel-icon) {
+    width: 0.95rem;
+    height: 0.95rem;
   }
 
   /* Nested EP tracks: same type ramp as singles, one step quieter. */
