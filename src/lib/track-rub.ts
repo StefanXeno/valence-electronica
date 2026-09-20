@@ -3,6 +3,8 @@
  * Three direction-reversals with enough travel open the track body overlay.
  */
 
+import { applyRubSuccessTagline } from './tagline-rotator';
+
 const MIN_STROKE_PX = 36;
 const RUBS_NEEDED = 3;
 const IDLE_RESET_MS = 1600;
@@ -168,6 +170,8 @@ function openRubPanel(trackId: string, source: HTMLElement) {
   const exit = panel.querySelector<HTMLElement>('[data-track-rub-exit]');
   exit?.focus();
 
+  // Page-lifetime brand wink — resets on full reload (no storage).
+  applyRubSuccessTagline();
   maybeShowRubAchievement();
 }
 

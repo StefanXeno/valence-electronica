@@ -14,6 +14,33 @@ import {
 const FADE_MS = 500;
 const GLITCH_SWAP_RATIO = 0.45;
 
+/** Shown under the Valence logo after a successful rub reveal — page lifetime only. */
+export const RUB_SUCCESS_TAGLINE = 'You know how to rub ^^';
+
+type ActiveRotator = {
+  pin: (text: string) => void;
+};
+
+/** Living rotator instance so rub success can freeze the line without localStorage. */
+let activeRotator: ActiveRotator | null = null;
+
+/**
+ * Swap the logo subtext to the rub easter-egg line and stop rotation for this page load.
+ * No persistence — a full reload restores the normal rotating tagline.
+ */
+export function applyRubSuccessTagline(): void {
+  const text = RUB_SUCCESS_TAGLINE;
+  if (activeRotator) {
+    activeRotator.pin(text);
+    return;
+  }
+  // Rotator not booted yet (or missing) — still mutate the brand subtext node.
+  const root = document.querySelector<HTMLElement>('[data-tagline-root]');
+  if (!root) return;
+  root.textContent = formatTagline(text);
+  root.removeAttribute('data-tagline-phase');
+}
+
 function prefersReducedMotion(): boolean {
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 }
@@ -58,6 +85,8 @@ export function initTaglineRotator(root: HTMLElement, fallbackText: string): () 
   let currentText = root.textContent ?? fallbackText;
   let rotationTimer: ReturnType<typeof setTimeout> | undefined;
   let disposed = false;
+  /** Rub success freezes this line until reload (page-lifetime pin). */
+  let pinned = false;
 
   const clearRotationTimer = () => {
     if (rotationTimer !== undefined) {
@@ -76,8 +105,17 @@ export function initTaglineRotator(root: HTMLElement, fallbackText: string): () 
     delete root.dataset.glitch;
   };
 
+  const pin = (text: string) => {
+    pinned = true;
+    clearRotationTimer();
+    clearGlitchState();
+    root.textContent = formatTagline(text);
+    root.removeAttribute('data-tagline-phase');
+    currentText = text;
+  };
+
   const scheduleNextRotation = () => {
-    if (disposed || eligible.length === 0) return;
+    if (disposed || pinned || eligible.length === 0) return;
     clearRotationTimer();
     rotationTimer = setTimeout(() => {
       void advanceRotation();
@@ -85,34 +123,35 @@ export function initTaglineRotator(root: HTMLElement, fallbackText: string): () 
   };
 
   const applyInstant = (text: string) => {
+    if (pinned) return;
     root.textContent = formatTagline(text);
     root.removeAttribute('data-tagline-phase');
     currentText = text;
   };
 
   const applyWithFade = async (text: string) => {
-    if (taglineTextsEqual(text, currentText)) return;
+    if (pinned || taglineTextsEqual(text, currentText)) return;
 
     root.removeAttribute('data-tagline-phase');
     await nextFrame();
-    if (disposed) return;
+    if (disposed || pinned) return;
 
     root.dataset.taglinePhase = 'out';
     void root.offsetWidth;
     await waitForMotionEnd(root);
-    if (disposed) return;
+    if (disposed || pinned) return;
 
     root.textContent = formatTagline(text);
     root.dataset.taglinePhase = 'in';
     await waitForMotionEnd(root);
-    if (disposed) return;
+    if (disposed || pinned) return;
 
     root.removeAttribute('data-tagline-phase');
     currentText = text;
   };
 
   const applyWithGlitch = async (text: string) => {
-    if (taglineTextsEqual(text, currentText)) return;
+    if (pinned || taglineTextsEqual(text, currentText)) return;
 
     root.removeAttribute('data-tagline-phase');
     clearGlitchState();
@@ -125,19 +164,19 @@ export function initTaglineRotator(root: HTMLElement, fallbackText: string): () 
 
     const swapAt = Math.round(dur * GLITCH_SWAP_RATIO);
     await waitMs(swapAt);
-    if (disposed) return;
+    if (disposed || pinned) return;
 
     root.textContent = formatTagline(text);
     currentText = text;
 
     await waitMs(dur + 80 - swapAt);
-    if (disposed) return;
+    if (disposed || pinned) return;
 
     clearGlitchState();
   };
 
   const showLine = (text: string, animate: boolean) => {
-    if (taglineTextsEqual(text, currentText)) return Promise.resolve();
+    if (pinned || taglineTextsEqual(text, currentText)) return Promise.resolve();
     if (!animate || prefersReducedMotion()) {
       applyInstant(text);
       return Promise.resolve();
@@ -154,7 +193,7 @@ export function initTaglineRotator(root: HTMLElement, fallbackText: string): () 
   };
 
   const advanceRotation = async () => {
-    if (disposed) return;
+    if (disposed || pinned) return;
 
     syncEligibleSet();
     if (eligible.length === 0) {
@@ -173,11 +212,12 @@ export function initTaglineRotator(root: HTMLElement, fallbackText: string): () 
     index = nextIndex;
     const animate = !taglineTextsEqual(nextText, currentText);
     await showLine(nextText, animate);
-    if (disposed) return;
+    if (disposed || pinned) return;
     scheduleNextRotation();
   };
 
   const bootstrap = async () => {
+    if (pinned) return;
     syncEligibleSet();
     if (eligible.length === 0) {
       applyInstant(fallbackText);
@@ -192,7 +232,7 @@ export function initTaglineRotator(root: HTMLElement, fallbackText: string): () 
     }
 
     await showLine(first, !taglineTextsEqual(first, currentText));
-    if (disposed) return;
+    if (disposed || pinned) return;
     scheduleNextRotation();
   };
 
@@ -203,11 +243,13 @@ export function initTaglineRotator(root: HTMLElement, fallbackText: string): () 
     root.removeAttribute('data-tagline-phase');
   };
 
+  activeRotator = { pin };
   window.addEventListener('pagehide', onPageHide);
 
   void bootstrap();
 
   return () => {
+    if (activeRotator?.pin === pin) activeRotator = null;
     onPageHide();
     window.removeEventListener('pagehide', onPageHide);
   };
