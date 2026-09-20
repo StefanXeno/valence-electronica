@@ -127,9 +127,9 @@ const menuChannels = site.channels
     hidden
   >
     {/*
-      One navigation system: every destination uses the same row (label + chevron).
+      One navigation system: primary destinations use the same row (label + chevron).
       Right chevron = leave/open overlay; down chevron = expand in place (Tour only).
-      Legal shares the row component as a secondary tier; socials are a labeled footer.
+      Legal is a quiet horizontal pair below; socials are a labeled footer.
     */}
     <div class="site-nav__menu-body">
       <nav class="site-nav__menu-list" aria-label="Primary">
@@ -258,34 +258,31 @@ const menuChannels = site.channels
           <span class="site-nav__menu-item-label">{chrome.discographyTitle}</span>
           <span class="site-nav__menu-item-chevron" aria-hidden="true"></span>
         </a>
+      </nav>
 
-        {/* Secondary tier: same row component + chevron axis; quieter weight. */}
-        <div class="site-nav__menu-tier" role="presentation" style="--nav-stagger: 4" aria-hidden="true"></div>
+      {/* Quiet horizontal legal pair — not competing with primary row weight. */}
+      <nav class="site-nav__menu-legal" aria-label="Legal" style="--nav-stagger: 4">
         <a
-          class="site-nav__menu-item site-nav__menu-item--secondary"
+          class="site-nav__menu-legal-item"
           href={withBase('/legal/imprint')}
           data-legal-slug="imprint"
           data-site-nav-menu-close
-          style="--nav-stagger: 5"
         >
-          <span class="site-nav__menu-item-label">{chrome.imprintButton}</span>
-          <span class="site-nav__menu-item-chevron" aria-hidden="true"></span>
+          {chrome.imprintButton}
         </a>
         <a
-          class="site-nav__menu-item site-nav__menu-item--secondary"
+          class="site-nav__menu-legal-item"
           href={withBase('/legal/privacy')}
           data-legal-slug="privacy"
           data-site-nav-menu-close
-          style="--nav-stagger: 6"
         >
-          <span class="site-nav__menu-item-label">{chrome.privacyButton}</span>
-          <span class="site-nav__menu-item-chevron" aria-hidden="true"></span>
+          {chrome.privacyButton}
         </a>
       </nav>
 
       {
         menuChannels.length > 0 && (
-          <div class="site-nav__menu-footer" style="--nav-stagger: 7">
+          <div class="site-nav__menu-footer" style="--nav-stagger: 5">
             <p class="site-nav__menu-footer-label">{chrome.socialsLabel}</p>
             <ul class="site-nav__menu-channels" aria-label={chrome.socialsLabel}>
               {menuChannels.map((channel) => (
@@ -600,7 +597,7 @@ const menuChannels = site.channels
     --menu-morph-dur: 480ms;
     --menu-stagger-step: 48ms;
     --menu-stagger-base: 90ms;
-    --menu-stagger-max: 7;
+    --menu-stagger-max: 5;
     /* Shared row geometry: one left label edge, one right chevron axis. */
     --menu-row-pad-y: 0.55rem;
     --menu-chevron-size: 0.5rem;
@@ -667,11 +664,11 @@ const menuChannels = site.channels
 
     .site-nav__menu-list > .site-nav__menu-item,
     .site-nav__menu-list > .site-nav__menu-tour,
-    .site-nav__menu-list > .site-nav__menu-tier,
+    .site-nav__menu-legal,
     .site-nav__menu-footer,
     .site-nav.is-menu-open .site-nav__menu-list > .site-nav__menu-item,
     .site-nav.is-menu-open .site-nav__menu-list > .site-nav__menu-tour,
-    .site-nav.is-menu-open .site-nav__menu-list > .site-nav__menu-tier,
+    .site-nav.is-menu-open .site-nav__menu-legal,
     .site-nav.is-menu-open .site-nav__menu-footer,
     .site-nav__menu-item--nested,
     .site-nav__menu-tour.is-tour-open .site-nav__menu-item--nested {
@@ -686,7 +683,7 @@ const menuChannels = site.channels
     }
   }
 
-  /* Single column of destination rows — primary + secondary share this list. */
+  /* Single column of primary destination rows. */
   .site-nav__menu-list {
     display: flex;
     flex-direction: column;
@@ -700,7 +697,7 @@ const menuChannels = site.channels
 
   .site-nav__menu-list > .site-nav__menu-item,
   .site-nav__menu-list > .site-nav__menu-tour,
-  .site-nav__menu-list > .site-nav__menu-tier,
+  .site-nav__menu-legal,
   .site-nav__menu-footer {
     --nav-stagger: 0;
     opacity: 0;
@@ -713,7 +710,7 @@ const menuChannels = site.channels
 
   .site-nav.is-menu-open .site-nav__menu-list > .site-nav__menu-item,
   .site-nav.is-menu-open .site-nav__menu-list > .site-nav__menu-tour,
-  .site-nav.is-menu-open .site-nav__menu-list > .site-nav__menu-tier,
+  .site-nav.is-menu-open .site-nav__menu-legal,
   .site-nav.is-menu-open .site-nav__menu-footer {
     opacity: 1;
     transform: translate3d(0, 0, 0);
@@ -724,7 +721,7 @@ const menuChannels = site.channels
 
   .site-nav:not(.is-menu-open) .site-nav__menu-list > .site-nav__menu-item,
   .site-nav:not(.is-menu-open) .site-nav__menu-list > .site-nav__menu-tour,
-  .site-nav:not(.is-menu-open) .site-nav__menu-list > .site-nav__menu-tier,
+  .site-nav:not(.is-menu-open) .site-nav__menu-legal,
   .site-nav:not(.is-menu-open) .site-nav__menu-footer {
     transition-delay: calc((var(--menu-stagger-max) - var(--nav-stagger)) * 28ms);
   }
@@ -810,22 +807,32 @@ const menuChannels = site.channels
     opacity: 1;
   }
 
-  /* Secondary destinations: identical row geometry/type; quieter weight only. */
-  .site-nav__menu-item--secondary {
-    color: color-mix(in srgb, #fff 58%, transparent);
+  /* Quiet legal row — side-by-side, smaller than primary destinations. */
+  .site-nav__menu-legal {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.55rem 1.15rem;
+    padding-top: 0.55rem;
+    margin-top: 0.35rem;
+    border-top: 1px solid color-mix(in srgb, #fff 12%, transparent);
+    font-family: var(--font-display);
+    font-size: clamp(0.78rem, 3.4vw, 0.92rem);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
   }
 
-  .site-nav__menu-item--secondary:hover,
-  .site-nav__menu-item--secondary:focus-visible {
+  .site-nav__menu-legal-item {
+    color: color-mix(in srgb, #fff 62%, transparent);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+  }
+
+  .site-nav__menu-legal-item:hover,
+  .site-nav__menu-legal-item:focus-visible {
     color: #fff;
-  }
-
-  /* Hairline between primary destinations and legal. */
-  .site-nav__menu-tier {
-    height: 0;
-    margin: 0.55rem 0 0.35rem;
-    border: 0;
-    border-top: 1px solid color-mix(in srgb, #fff 14%, transparent);
+    border-bottom-color: color-mix(in srgb, var(--color-accent-alt, #c8ff4a) 55%, transparent);
+    outline: none;
   }
 
   /* Tour expand: nested rows stay in the same system, indented under Tour. */
