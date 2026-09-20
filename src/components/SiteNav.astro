@@ -126,9 +126,13 @@ const menuChannels = site.channels
     data-site-nav-menu
     hidden
   >
-    {/* Full roster first; Tour expand is secondary content under Tour — not the whole menu. */}
+    {/*
+      One navigation system: every destination uses the same row (label + chevron).
+      Right chevron = leave/open overlay; down chevron = expand in place (Tour only).
+      Legal shares the row component as a secondary tier; socials are a labeled footer.
+    */}
     <div class="site-nav__menu-body">
-      <nav class="site-nav__menu-primary" aria-label="Primary">
+      <nav class="site-nav__menu-list" aria-label="Primary">
         {
           shopUrl ? (
             <a
@@ -156,7 +160,7 @@ const menuChannels = site.channels
             </a>
           )
         }
-        {/* Mobile-only Tour expand: destinations strip under Tour, not a takeover. */}
+
         <div class="site-nav__menu-tour" data-site-nav-tour style="--nav-stagger: 1">
           <button
             type="button"
@@ -167,7 +171,7 @@ const menuChannels = site.channels
           >
             <span class="site-nav__menu-item-label">{chrome.tourTitle}</span>
             <span
-              class="site-nav__menu-item-chevron site-nav__menu-tour-chevron"
+              class="site-nav__menu-item-chevron site-nav__menu-item-chevron--expand"
               aria-hidden="true"
             ></span>
           </button>
@@ -180,9 +184,9 @@ const menuChannels = site.channels
             <div class="site-nav__menu-tour-panel-inner">
               {
                 upcomingShows.length === 0 ? (
-                  <p class="site-nav__menu-tour-empty">{chrome.emptyShows}</p>
+                  <p class="site-nav__menu-nested-empty">{chrome.emptyShows}</p>
                 ) : (
-                  <ul class="site-nav__menu-tour-destinations" aria-label={chrome.tourTitle}>
+                  <ul class="site-nav__menu-nested" aria-label={chrome.tourTitle}>
                     {upcomingShows.map((show, index) => {
                       const eventTitle = resolveShowTitle(show.title, show.venue);
                       const dateLabel = tourDateFmt.format(show.date);
@@ -191,21 +195,24 @@ const menuChannels = site.channels
                       return (
                         <li style={`--dest-stagger: ${index}`}>
                           <a
-                            class="site-nav__menu-tour-dest"
+                            class="site-nav__menu-item site-nav__menu-item--nested"
                             href={href}
                             target={external ? '_blank' : undefined}
                             rel={external ? 'noopener noreferrer' : undefined}
                             data-legal-slug={external ? undefined : 'tour'}
                             data-site-nav-menu-close
                           >
-                            <span class="site-nav__menu-tour-dest-city">{show.city}</span>
-                            <span class="site-nav__menu-tour-dest-meta">
-                              <time datetime={show.date.toISOString().slice(0, 10)}>
-                                {dateLabel}
-                              </time>
-                              {' · '}
-                              {eventTitle}
+                            <span class="site-nav__menu-item-text">
+                              <span class="site-nav__menu-item-label">{show.city}</span>
+                              <span class="site-nav__menu-item-meta">
+                                <time datetime={show.date.toISOString().slice(0, 10)}>
+                                  {dateLabel}
+                                </time>
+                                {' · '}
+                                {eventTitle}
+                              </span>
                             </span>
+                            <span class="site-nav__menu-item-chevron" aria-hidden="true"></span>
                           </a>
                         </li>
                       );
@@ -214,16 +221,19 @@ const menuChannels = site.channels
                 )
               }
               <a
-                class="site-nav__menu-tour-all"
+                class="site-nav__menu-item site-nav__menu-item--nested"
                 href={withBase('/tour')}
                 data-legal-slug="tour"
                 data-site-nav-menu-close
+                style={`--dest-stagger: ${Math.max(upcomingShows.length, 1)}`}
               >
-                All dates
+                <span class="site-nav__menu-item-label">All dates</span>
+                <span class="site-nav__menu-item-chevron" aria-hidden="true"></span>
               </a>
             </div>
           </div>
         </div>
+
         {
           about && (
             <a
@@ -248,30 +258,35 @@ const menuChannels = site.channels
           <span class="site-nav__menu-item-label">{chrome.discographyTitle}</span>
           <span class="site-nav__menu-item-chevron" aria-hidden="true"></span>
         </a>
-      </nav>
 
-      <nav class="site-nav__menu-legal" aria-label="Legal" style="--nav-stagger: 4">
+        {/* Secondary tier: same row component + chevron axis; quieter weight. */}
+        <div class="site-nav__menu-tier" role="presentation" style="--nav-stagger: 4" aria-hidden="true"></div>
         <a
-          class="site-nav__menu-legal-item"
+          class="site-nav__menu-item site-nav__menu-item--secondary"
           href={withBase('/legal/imprint')}
           data-legal-slug="imprint"
           data-site-nav-menu-close
+          style="--nav-stagger: 5"
         >
-          {chrome.imprintButton}
+          <span class="site-nav__menu-item-label">{chrome.imprintButton}</span>
+          <span class="site-nav__menu-item-chevron" aria-hidden="true"></span>
         </a>
         <a
-          class="site-nav__menu-legal-item"
+          class="site-nav__menu-item site-nav__menu-item--secondary"
           href={withBase('/legal/privacy')}
           data-legal-slug="privacy"
           data-site-nav-menu-close
+          style="--nav-stagger: 6"
         >
-          {chrome.privacyButton}
+          <span class="site-nav__menu-item-label">{chrome.privacyButton}</span>
+          <span class="site-nav__menu-item-chevron" aria-hidden="true"></span>
         </a>
       </nav>
 
       {
         menuChannels.length > 0 && (
-          <div class="site-nav__menu-socials" style="--nav-stagger: 5">
+          <div class="site-nav__menu-footer" style="--nav-stagger: 7">
+            <p class="site-nav__menu-footer-label">{chrome.socialsLabel}</p>
             <ul class="site-nav__menu-channels" aria-label={chrome.socialsLabel}>
               {menuChannels.map((channel) => (
                 <li>
@@ -583,15 +598,17 @@ const menuChannels = site.channels
   .site-nav__menu {
     --menu-morph-origin: calc(100% - 1.35rem) 1.35rem;
     --menu-morph-dur: 480ms;
-    --menu-stagger-step: 55ms;
+    --menu-stagger-step: 48ms;
     --menu-stagger-base: 90ms;
-    --menu-stagger-max: 5;
+    --menu-stagger-max: 7;
+    /* Shared row geometry: one left label edge, one right chevron axis. */
+    --menu-row-pad-y: 0.55rem;
+    --menu-chevron-size: 0.5rem;
     position: fixed;
     inset: 0;
     z-index: 9;
     display: flex;
     flex-direction: column;
-    /* Top-align so Shop → legal → socials read as one coherent list, not a Tour-centered hero. */
     justify-content: flex-start;
     padding: max(5.5rem, calc(env(safe-area-inset-top, 0px) + 4.5rem))
       clamp(1.25rem, 6vw, 2.5rem)
@@ -629,12 +646,11 @@ const menuChannels = site.channels
   .site-nav__menu-body {
     display: flex;
     flex-direction: column;
-    gap: 1.75rem;
+    gap: 0;
     width: 100%;
-    max-width: 28rem;
+    max-width: 26rem;
     margin: 0 auto;
     flex: 1 0 auto;
-    /* Fill the morph viewport so socials can sit low without absolute overlay. */
     min-height: calc(
       100dvh - max(5.5rem, calc(env(safe-area-inset-top, 0px) + 4.5rem)) -
         max(2rem, env(safe-area-inset-bottom, 0px))
@@ -649,16 +665,16 @@ const menuChannels = site.channels
       opacity: 1;
     }
 
-    .site-nav__menu-primary > .site-nav__menu-item,
-    .site-nav__menu-primary > .site-nav__menu-tour,
-    .site-nav__menu-legal,
-    .site-nav__menu-socials,
-    .site-nav.is-menu-open .site-nav__menu-primary > .site-nav__menu-item,
-    .site-nav.is-menu-open .site-nav__menu-primary > .site-nav__menu-tour,
-    .site-nav.is-menu-open .site-nav__menu-legal,
-    .site-nav.is-menu-open .site-nav__menu-socials,
-    .site-nav__menu-tour-dest,
-    .site-nav__menu-tour.is-tour-open .site-nav__menu-tour-dest {
+    .site-nav__menu-list > .site-nav__menu-item,
+    .site-nav__menu-list > .site-nav__menu-tour,
+    .site-nav__menu-list > .site-nav__menu-tier,
+    .site-nav__menu-footer,
+    .site-nav.is-menu-open .site-nav__menu-list > .site-nav__menu-item,
+    .site-nav.is-menu-open .site-nav__menu-list > .site-nav__menu-tour,
+    .site-nav.is-menu-open .site-nav__menu-list > .site-nav__menu-tier,
+    .site-nav.is-menu-open .site-nav__menu-footer,
+    .site-nav__menu-item--nested,
+    .site-nav__menu-tour.is-tour-open .site-nav__menu-item--nested {
       transition: none;
       opacity: 1;
       transform: none;
@@ -670,23 +686,22 @@ const menuChannels = site.channels
     }
   }
 
-  .site-nav__menu-primary {
+  /* Single column of destination rows — primary + secondary share this list. */
+  .site-nav__menu-list {
     display: flex;
     flex-direction: column;
-    gap: 0.2rem;
+    gap: 0;
     font-family: var(--font-display);
-    /* Sized so Shop / Tour / About / Discography fit with legal + socials below. */
-    font-size: clamp(1.4rem, 7vw, 2rem);
+    font-size: clamp(1.35rem, 6.5vw, 1.85rem);
     letter-spacing: 0.04em;
     text-transform: uppercase;
     line-height: 1.15;
   }
 
-  /* Staggered slide/fade for top-level blocks (primary rows, legal, socials). */
-  .site-nav__menu-primary > .site-nav__menu-item,
-  .site-nav__menu-primary > .site-nav__menu-tour,
-  .site-nav__menu-legal,
-  .site-nav__menu-socials {
+  .site-nav__menu-list > .site-nav__menu-item,
+  .site-nav__menu-list > .site-nav__menu-tour,
+  .site-nav__menu-list > .site-nav__menu-tier,
+  .site-nav__menu-footer {
     --nav-stagger: 0;
     opacity: 0;
     transform: translate3d(0, 0.85rem, 0);
@@ -696,10 +711,10 @@ const menuChannels = site.channels
     transition-delay: 0ms;
   }
 
-  .site-nav.is-menu-open .site-nav__menu-primary > .site-nav__menu-item,
-  .site-nav.is-menu-open .site-nav__menu-primary > .site-nav__menu-tour,
-  .site-nav.is-menu-open .site-nav__menu-legal,
-  .site-nav.is-menu-open .site-nav__menu-socials {
+  .site-nav.is-menu-open .site-nav__menu-list > .site-nav__menu-item,
+  .site-nav.is-menu-open .site-nav__menu-list > .site-nav__menu-tour,
+  .site-nav.is-menu-open .site-nav__menu-list > .site-nav__menu-tier,
+  .site-nav.is-menu-open .site-nav__menu-footer {
     opacity: 1;
     transform: translate3d(0, 0, 0);
     transition-delay: calc(
@@ -707,32 +722,34 @@ const menuChannels = site.channels
     );
   }
 
-  .site-nav:not(.is-menu-open) .site-nav__menu-primary > .site-nav__menu-item,
-  .site-nav:not(.is-menu-open) .site-nav__menu-primary > .site-nav__menu-tour,
-  .site-nav:not(.is-menu-open) .site-nav__menu-legal,
-  .site-nav:not(.is-menu-open) .site-nav__menu-socials {
-    /* Reverse: items drop out slightly ahead of the morph close. */
+  .site-nav:not(.is-menu-open) .site-nav__menu-list > .site-nav__menu-item,
+  .site-nav:not(.is-menu-open) .site-nav__menu-list > .site-nav__menu-tour,
+  .site-nav:not(.is-menu-open) .site-nav__menu-list > .site-nav__menu-tier,
+  .site-nav:not(.is-menu-open) .site-nav__menu-footer {
     transition-delay: calc((var(--menu-stagger-max) - var(--nav-stagger)) * 28ms);
   }
 
-  /* Shared primary row: label + chevron — Tour toggle and link items same family. */
+  /* One row component: label (left) + chevron (right axis). */
   .site-nav__menu-item {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 0.75rem;
-    color: color-mix(in srgb, #fff 90%, transparent);
-    text-decoration: none;
-    padding: 0.35em 0;
+    gap: 0.85rem;
+    box-sizing: border-box;
+    width: 100%;
+    min-height: calc(1.15em + (var(--menu-row-pad-y) * 2));
+    padding: var(--menu-row-pad-y) 0;
+    margin: 0;
     border: 0;
     border-bottom: 1px solid transparent;
     background: transparent;
+    color: color-mix(in srgb, #fff 90%, transparent);
     font: inherit;
     letter-spacing: inherit;
     text-transform: inherit;
     text-align: left;
+    text-decoration: none;
     cursor: pointer;
-    width: 100%;
   }
 
   .site-nav__menu-item:hover,
@@ -746,19 +763,46 @@ const menuChannels = site.channels
     min-width: 0;
   }
 
-  /* Default: navigate affordance (points right). Tour overrides to expand (down). */
+  .site-nav__menu-item-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.12rem;
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  .site-nav__menu-item-meta {
+    font-family: var(--font-body, inherit);
+    font-size: 0.58em;
+    letter-spacing: 0.02em;
+    text-transform: none;
+    line-height: 1.25;
+    color: color-mix(in srgb, #fff 55%, transparent);
+  }
+
+  .site-nav__menu-item:hover .site-nav__menu-item-meta,
+  .site-nav__menu-item:focus-visible .site-nav__menu-item-meta {
+    color: color-mix(in srgb, #fff 70%, transparent);
+  }
+
+  /* Right = navigates / leaves; --expand = opens in place (points down). */
   .site-nav__menu-item-chevron {
     display: block;
-    width: 0.55em;
-    height: 0.55em;
+    width: var(--menu-chevron-size);
+    height: var(--menu-chevron-size);
     border-right: 2px solid currentColor;
     border-bottom: 2px solid currentColor;
     transform: rotate(-45deg);
-    opacity: 0.7;
+    opacity: 0.65;
     flex: 0 0 auto;
+    align-self: center;
     transition:
       transform 280ms cubic-bezier(0.22, 1, 0.36, 1),
       opacity 160ms ease;
+  }
+
+  .site-nav__menu-item-chevron--expand {
+    transform: rotate(45deg);
   }
 
   .site-nav__menu-item:hover .site-nav__menu-item-chevron,
@@ -766,18 +810,32 @@ const menuChannels = site.channels
     opacity: 1;
   }
 
-  /* Tour: compact destinations under Tour — special expand, not a takeover. */
+  /* Secondary destinations: identical row geometry/type; quieter weight only. */
+  .site-nav__menu-item--secondary {
+    color: color-mix(in srgb, #fff 58%, transparent);
+  }
+
+  .site-nav__menu-item--secondary:hover,
+  .site-nav__menu-item--secondary:focus-visible {
+    color: #fff;
+  }
+
+  /* Hairline between primary destinations and legal. */
+  .site-nav__menu-tier {
+    height: 0;
+    margin: 0.55rem 0 0.35rem;
+    border: 0;
+    border-top: 1px solid color-mix(in srgb, #fff 14%, transparent);
+  }
+
+  /* Tour expand: nested rows stay in the same system, indented under Tour. */
   .site-nav__menu-tour {
     display: flex;
     flex-direction: column;
     gap: 0;
   }
 
-  .site-nav__menu-tour-chevron {
-    transform: rotate(45deg);
-  }
-
-  .site-nav__menu-tour.is-tour-open .site-nav__menu-tour-chevron {
+  .site-nav__menu-tour.is-tour-open .site-nav__menu-item-chevron--expand {
     transform: rotate(225deg);
   }
 
@@ -806,68 +864,54 @@ const menuChannels = site.channels
   .site-nav__menu-tour-panel-inner {
     overflow: hidden;
     min-height: 0;
-    padding: 0.25rem 0 0.55rem;
+    margin: 0.1rem 0 0.35rem;
+    padding: 0.15rem 0 0.15rem 0.85rem;
+    border-left: 1px solid color-mix(in srgb, #fff 16%, transparent);
   }
 
-  .site-nav__menu-tour-destinations {
+  .site-nav__menu-nested {
     list-style: none;
     margin: 0;
-    padding: 0.3rem 0 0.55rem;
+    padding: 0;
     display: flex;
     flex-direction: column;
-    gap: 0.35rem;
-    border-top: 1px solid color-mix(in srgb, #fff 14%, transparent);
+    gap: 0;
   }
 
-  .site-nav__menu-tour-dest {
-    display: flex;
-    flex-direction: column;
-    gap: 0.1rem;
-    padding: 0.25rem 0;
-    text-decoration: none;
-    color: color-mix(in srgb, #fff 88%, transparent);
+  .site-nav__menu-item--nested {
+    --dest-stagger: 0;
+    font-size: 0.68em;
+    min-height: calc(1.15em + (var(--menu-row-pad-y) * 1.6));
+    padding-top: calc(var(--menu-row-pad-y) * 0.75);
+    padding-bottom: calc(var(--menu-row-pad-y) * 0.75);
+    color: color-mix(in srgb, #fff 82%, transparent);
     opacity: 0;
-    transform: translate3d(0, 0.5rem, 0);
+    transform: translate3d(0, 0.4rem, 0);
     transition:
       opacity 320ms cubic-bezier(0.22, 1, 0.36, 1),
       transform 320ms cubic-bezier(0.22, 1, 0.36, 1),
-      color 160ms ease;
+      color 160ms ease,
+      border-bottom-color 160ms ease;
     transition-delay: 0ms;
   }
 
-  .site-nav__menu-tour.is-tour-open .site-nav__menu-tour-dest {
+  .site-nav__menu-tour.is-tour-open .site-nav__menu-item--nested {
     opacity: 1;
     transform: translate3d(0, 0, 0);
-    transition-delay: calc(80ms + (var(--dest-stagger, 0) * 55ms));
+    transition-delay: calc(80ms + (var(--dest-stagger, 0) * 50ms));
   }
 
-  .site-nav__menu-tour-dest:hover,
-  .site-nav__menu-tour-dest:focus-visible {
-    color: #fff;
-    outline: none;
+  .site-nav__menu-item--nested .site-nav__menu-item-chevron {
+    width: calc(var(--menu-chevron-size) * 0.85);
+    height: calc(var(--menu-chevron-size) * 0.85);
   }
 
-  .site-nav__menu-tour-dest-city {
-    font-family: var(--font-display);
-    /* Secondary to primary menu labels — Tour expand stays special, not dominant. */
-    font-size: clamp(0.95rem, 4.2vw, 1.15rem);
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    line-height: 1.15;
+  .site-nav__menu-item--nested .site-nav__menu-item-meta {
+    font-size: 0.72em;
   }
 
-  .site-nav__menu-tour-dest-meta {
-    font-family: var(--font-body, inherit);
-    font-size: clamp(0.7rem, 3vw, 0.8rem);
-    letter-spacing: 0.02em;
-    text-transform: none;
-    color: color-mix(in srgb, #fff 58%, transparent);
-  }
-
-  .site-nav__menu-tour-empty {
-    margin: 0.45rem 0 0.55rem;
-    padding-top: 0.45rem;
-    border-top: 1px solid color-mix(in srgb, #fff 14%, transparent);
+  .site-nav__menu-nested-empty {
+    margin: 0.35rem 0;
     font-family: var(--font-body, inherit);
     font-size: clamp(0.8rem, 3.3vw, 0.95rem);
     letter-spacing: 0.02em;
@@ -875,58 +919,24 @@ const menuChannels = site.channels
     color: color-mix(in srgb, #fff 55%, transparent);
   }
 
-  .site-nav__menu-tour-all {
-    display: inline-block;
-    margin-top: 0.1rem;
-    font-family: var(--font-display);
-    font-size: clamp(0.72rem, 3.2vw, 0.85rem);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    text-decoration: none;
-    color: color-mix(in srgb, var(--color-accent-alt, #c8ff4a) 85%, #fff);
-    border-bottom: 1px solid transparent;
-  }
-
-  .site-nav__menu-tour-all:hover,
-  .site-nav__menu-tour-all:focus-visible {
-    color: #fff;
-    border-bottom-color: color-mix(in srgb, var(--color-accent-alt, #c8ff4a) 55%, transparent);
-    outline: none;
-  }
-
-  /* Quiet legal row — still in the menu, not competing with primary labels. */
-  .site-nav__menu-legal {
+  /* Labeled social footer — clear break from nav rows, still in-flow. */
+  .site-nav__menu-footer {
     display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.55rem 1.15rem;
-    padding-top: 0.35rem;
-    border-top: 1px solid color-mix(in srgb, #fff 12%, transparent);
-    font-family: var(--font-display);
-    font-size: clamp(0.78rem, 3.4vw, 0.92rem);
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-  }
-
-  .site-nav__menu-legal-item {
-    color: color-mix(in srgb, #fff 62%, transparent);
-    text-decoration: none;
-    border-bottom: 1px solid transparent;
-  }
-
-  .site-nav__menu-legal-item:hover,
-  .site-nav__menu-legal-item:focus-visible {
-    color: #fff;
-    border-bottom-color: color-mix(in srgb, var(--color-accent-alt, #c8ff4a) 55%, transparent);
-    outline: none;
-  }
-
-  /* In-flow under legal — no absolute overlay that buries Imprint / Privacy. */
-  .site-nav__menu-socials {
-    display: flex;
-    justify-content: flex-start;
-    padding-top: 0.15rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
     margin-top: auto;
+    padding-top: 1.25rem;
+    border-top: 1px solid color-mix(in srgb, #fff 12%, transparent);
+  }
+
+  .site-nav__menu-footer-label {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(0.7rem, 3vw, 0.8rem);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, #fff 48%, transparent);
   }
 
   .site-nav__menu-channels {
@@ -937,10 +947,9 @@ const menuChannels = site.channels
     flex-wrap: wrap;
     align-items: center;
     justify-content: flex-start;
-    gap: 1rem 1.25rem;
+    gap: 1rem 1.35rem;
   }
 
-  /* Icon-only — no circular bordered chips (those stay on desktop stage socials). */
   .site-nav__menu-channel {
     display: inline-grid;
     place-items: center;
@@ -964,8 +973,8 @@ const menuChannels = site.channels
 
   .site-nav__menu-channel :global(.channel-icon) {
     display: block;
-    width: 1.5rem;
-    height: 1.5rem;
+    width: 1.45rem;
+    height: 1.45rem;
   }
 
   @media (min-width: 1024px) {
