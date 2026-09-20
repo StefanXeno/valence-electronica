@@ -140,7 +140,8 @@ const menuChannels = site.channels
               data-site-nav-menu-close
               style="--nav-stagger: 0"
             >
-              {chrome.shopTitle}
+              <span class="site-nav__menu-item-label">{chrome.shopTitle}</span>
+              <span class="site-nav__menu-item-chevron" aria-hidden="true"></span>
             </a>
           ) : (
             <a
@@ -150,7 +151,8 @@ const menuChannels = site.channels
               data-site-nav-menu-close
               style="--nav-stagger: 0"
             >
-              {chrome.shopTitle}
+              <span class="site-nav__menu-item-label">{chrome.shopTitle}</span>
+              <span class="site-nav__menu-item-chevron" aria-hidden="true"></span>
             </a>
           )
         }
@@ -163,8 +165,11 @@ const menuChannels = site.channels
             aria-expanded="false"
             aria-controls="site-nav-tour-panel"
           >
-            <span>{chrome.tourTitle}</span>
-            <span class="site-nav__menu-tour-chevron" aria-hidden="true"></span>
+            <span class="site-nav__menu-item-label">{chrome.tourTitle}</span>
+            <span
+              class="site-nav__menu-item-chevron site-nav__menu-tour-chevron"
+              aria-hidden="true"
+            ></span>
           </button>
           <div
             class="site-nav__menu-tour-panel"
@@ -228,7 +233,8 @@ const menuChannels = site.channels
               data-site-nav-menu-close
               style="--nav-stagger: 2"
             >
-              {chrome.aboutTitle}
+              <span class="site-nav__menu-item-label">{chrome.aboutTitle}</span>
+              <span class="site-nav__menu-item-chevron" aria-hidden="true"></span>
             </a>
           )
         }
@@ -239,7 +245,8 @@ const menuChannels = site.channels
           data-site-nav-menu-close
           style="--nav-stagger: 3"
         >
-          {chrome.discographyTitle}
+          <span class="site-nav__menu-item-label">{chrome.discographyTitle}</span>
+          <span class="site-nav__menu-item-chevron" aria-hidden="true"></span>
         </a>
       </nav>
 
@@ -708,10 +715,15 @@ const menuChannels = site.channels
     transition-delay: calc((var(--menu-stagger-max) - var(--nav-stagger)) * 28ms);
   }
 
+  /* Shared primary row: label + chevron — Tour toggle and link items same family. */
   .site-nav__menu-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
     color: color-mix(in srgb, #fff 90%, transparent);
     text-decoration: none;
-    padding: 0.2em 0;
+    padding: 0.35em 0;
     border: 0;
     border-bottom: 1px solid transparent;
     background: transparent;
@@ -730,6 +742,30 @@ const menuChannels = site.channels
     outline: none;
   }
 
+  .site-nav__menu-item-label {
+    min-width: 0;
+  }
+
+  /* Default: navigate affordance (points right). Tour overrides to expand (down). */
+  .site-nav__menu-item-chevron {
+    display: block;
+    width: 0.55em;
+    height: 0.55em;
+    border-right: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    transform: rotate(-45deg);
+    opacity: 0.7;
+    flex: 0 0 auto;
+    transition:
+      transform 280ms cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 160ms ease;
+  }
+
+  .site-nav__menu-item:hover .site-nav__menu-item-chevron,
+  .site-nav__menu-item:focus-visible .site-nav__menu-item-chevron {
+    opacity: 1;
+  }
+
   /* Tour: compact destinations under Tour — special expand, not a takeover. */
   .site-nav__menu-tour {
     display: flex;
@@ -737,23 +773,8 @@ const menuChannels = site.channels
     gap: 0;
   }
 
-  .site-nav__menu-tour-toggle {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.75rem;
-  }
-
   .site-nav__menu-tour-chevron {
-    display: block;
-    width: 0.55em;
-    height: 0.55em;
-    border-right: 2px solid currentColor;
-    border-bottom: 2px solid currentColor;
     transform: rotate(45deg);
-    opacity: 0.7;
-    transition: transform 280ms cubic-bezier(0.22, 1, 0.36, 1);
-    flex: 0 0 auto;
   }
 
   .site-nav__menu-tour.is-tour-open .site-nav__menu-tour-chevron {
