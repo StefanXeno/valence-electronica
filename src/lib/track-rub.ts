@@ -10,6 +10,11 @@ const IDLE_RESET_MS = 1600;
 const IGNORE_SELECTOR =
   'a, [data-discog-play], [data-stage-button], .discog__listen, .discog__listen-links, .site-nav__menu-portal-listen, .site-nav__menu-portal-listen-links, .site-nav__menu-portal-listen-glyphs';
 
+/** One-shot unlock toast after the first successful rub reveal. */
+export const ACHIEVEMENT_RUB_STORAGE_KEY = 've-achievement-why-are-you-rubbing';
+const ACHIEVEMENT_HOLD_MS = 4200;
+const ACHIEVEMENT_EXIT_MS = 400;
+
 type RubSession = {
   el: HTMLElement;
   trackId: string;
@@ -28,6 +33,8 @@ let session: RubSession | null = null;
 let lastFocus: HTMLElement | null = null;
 /** Suppress the synthetic click after a real rub so expand toggles / links stay calm. */
 let suppressClickUntil = 0;
+let achievementHideTimer: ReturnType<typeof setTimeout> | null = null;
+let achievementRemoveTimer: ReturnType<typeof setTimeout> | null = null;
 
 function clearIdle(s: RubSession) {
   if (s.idleTimer) {
@@ -61,6 +68,85 @@ function panelFor(trackId: string): HTMLElement | null {
   return document.querySelector(`[data-track-rub-panel="${trackId}"]`);
 }
 
+function prefersReducedMotion(): boolean {
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
+function hasRubAchievement(): boolean {
+  try {
+    return localStorage.getItem(ACHIEVEMENT_RUB_STORAGE_KEY) === '1';
+  } catch {
+    // Storage blocked — treat as already unlocked so we never spam the toast.
+    return true;
+  }
+}
+
+function markRubAchievement(): void {
+  try {
+    localStorage.setItem(ACHIEVEMENT_RUB_STORAGE_KEY, '1');
+  } catch {
+    // Site stays usable without persistence.
+  }
+}
+
+function clearAchievementTimers() {
+  if (achievementHideTimer) {
+    clearTimeout(achievementHideTimer);
+    achievementHideTimer = null;
+  }
+  if (achievementRemoveTimer) {
+    clearTimeout(achievementRemoveTimer);
+    achievementRemoveTimer = null;
+  }
+}
+
+/** Game-style toast on first successful rub reveal; no-op after localStorage unlock. */
+function maybeShowRubAchievement() {
+  if (hasRubAchievement()) return;
+
+  const root = document.querySelector<HTMLElement>('[data-ve-achievement]');
+  if (!root) return;
+
+  // Persist before animating so a second reveal during the hold never doubles up.
+  markRubAchievement();
+  clearAchievementTimers();
+
+  const title =
+    root.querySelector('[data-ve-achievement-title]')?.textContent?.trim() ??
+    'Why are you rubbing?!';
+  const sub =
+    root.querySelector('[data-ve-achievement-sub]')?.textContent?.trim() ??
+    'Rub a song in the discography for three times.';
+  const announce = root.querySelector<HTMLElement>('[data-ve-achievement-announce]');
+
+  root.hidden = false;
+  root.classList.remove('is-out');
+  // Retrigger entrance if the node was already in the tree.
+  root.classList.remove('is-in');
+  void root.offsetWidth;
+  root.classList.add('is-in');
+
+  // Populate after unhiding so polite live regions actually announce.
+  if (announce) {
+    announce.textContent = `Achievement unlocked: ${title}. ${sub}`;
+  }
+
+  const holdMs = prefersReducedMotion() ? 2800 : ACHIEVEMENT_HOLD_MS;
+  const exitMs = prefersReducedMotion() ? 0 : ACHIEVEMENT_EXIT_MS;
+
+  achievementHideTimer = setTimeout(() => {
+    root.classList.remove('is-in');
+    root.classList.add('is-out');
+    achievementRemoveTimer = setTimeout(() => {
+      root.classList.remove('is-out');
+      root.hidden = true;
+      if (announce) announce.textContent = '';
+      achievementRemoveTimer = null;
+    }, exitMs);
+    achievementHideTimer = null;
+  }, holdMs);
+}
+
 function openRubPanel(trackId: string, source: HTMLElement) {
   const panel = panelFor(trackId);
   if (!panel) return;
@@ -81,6 +167,8 @@ function openRubPanel(trackId: string, source: HTMLElement) {
 
   const exit = panel.querySelector<HTMLElement>('[data-track-rub-exit]');
   exit?.focus();
+
+  maybeShowRubAchievement();
 }
 
 export function closeTrackRubPanel() {

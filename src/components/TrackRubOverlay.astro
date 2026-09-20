@@ -42,56 +42,113 @@ for (const entry of [...jukeboxRaw, ...tracksRaw]) {
 
 {
   panels.length > 0 && (
-    <div id="track-rub-overlay" data-track-rub-overlay>
-      {panels.map(({ id, title, artist, Content }) => {
-        const titleId = `track-rub-title-${id}`;
-        return (
-          <div
-            class="track-rub-panel"
-            id={`track-rub-panel-${id}`}
-            data-track-rub-panel={id}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby={titleId}
-            hidden
-          >
-            <div class="track-rub-panel__frame">
-              <header class="track-rub-panel__header">
-                <button
-                  type="button"
-                  class="track-rub-panel__exit glitch-hit"
-                  data-track-rub-exit
-                  aria-label="Close"
-                  title="Close"
-                >
-                  <svg
-                    class="track-rub-panel__exit-icon"
-                    viewBox="0 0 24 24"
-                    width="18"
-                    height="18"
-                    aria-hidden="true"
-                    focusable="false"
+    <>
+      <div id="track-rub-overlay" data-track-rub-overlay>
+        {panels.map(({ id, title, artist, Content }) => {
+          const titleId = `track-rub-title-${id}`;
+          return (
+            <div
+              class="track-rub-panel"
+              id={`track-rub-panel-${id}`}
+              data-track-rub-panel={id}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby={titleId}
+              hidden
+            >
+              <div class="track-rub-panel__frame">
+                <header class="track-rub-panel__header">
+                  <button
+                    type="button"
+                    class="track-rub-panel__exit glitch-hit"
+                    data-track-rub-exit
+                    aria-label="Close"
+                    title="Close"
                   >
-                    <path
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      d="M6 6l12 12M18 6L6 18"
-                    />
-                  </svg>
-                </button>
-                <h1 id={titleId}>{title}</h1>
-                {artist && <p class="track-rub-panel__artist">{artist}</p>}
-              </header>
-              <div class="track-rub-panel__body">
-                <Content />
+                    <svg
+                      class="track-rub-panel__exit-icon"
+                      viewBox="0 0 24 24"
+                      width="18"
+                      height="18"
+                      aria-hidden="true"
+                      focusable="false"
+                    >
+                      <path
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        d="M6 6l12 12M18 6L6 18"
+                      />
+                    </svg>
+                  </button>
+                  <h1 id={titleId}>{title}</h1>
+                  {artist && <p class="track-rub-panel__artist">{artist}</p>}
+                </header>
+                <div class="track-rub-panel__body">
+                  <Content />
+                </div>
               </div>
             </div>
+          );
+        })}
+      </div>
+
+      {/* One-shot game-style unlock toast — shown from track-rub.ts on first reveal. */}
+      <div
+        class="ve-achievement"
+        data-ve-achievement
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+        hidden
+      >
+        <div class="ve-achievement__card" aria-hidden="true">
+          <span class="ve-achievement__glyph" data-ve-achievement-glyph>
+            <svg viewBox="0 0 40 40" width="40" height="40" focusable="false">
+              <circle
+                cx="20"
+                cy="20"
+                r="15.5"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                opacity="0.85"
+              />
+              <circle
+                cx="20"
+                cy="20"
+                r="9"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.25"
+                opacity="0.55"
+              />
+              <circle cx="20" cy="20" r="2.75" fill="currentColor" />
+              <path
+                d="M20 4.5v3.2M20 32.3v3.2M4.5 20h3.2M32.3 20h3.2"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.25"
+                stroke-linecap="round"
+                opacity="0.7"
+              />
+            </svg>
+          </span>
+          <div class="ve-achievement__copy">
+            <p class="ve-achievement__eyebrow">Achievement unlocked</p>
+            <p class="ve-achievement__title" data-ve-achievement-title>
+              Why are you rubbing?!
+            </p>
+            <p class="ve-achievement__sub" data-ve-achievement-sub>
+              Rub a song in the discography for three times.
+            </p>
           </div>
-        );
-      })}
-    </div>
+        </div>
+        {/* Screen-reader announcement text lives here; visual copy is aria-hidden. */}
+        <span class="ve-achievement__sr" data-ve-achievement-announce></span>
+      </div>
+    </>
   )
 }
 
@@ -191,9 +248,169 @@ for (const entry of [...jukeboxRaw, ...tracksRaw]) {
     }
   }
 
+  /* Above rub panel (z=40) — corner toast, never steals pointer events. */
+  .ve-achievement {
+    position: fixed;
+    top: max(0.85rem, env(safe-area-inset-top, 0px));
+    right: max(0.85rem, env(safe-area-inset-right, 0px));
+    z-index: 50;
+    width: min(22.5rem, calc(100vw - 1.7rem));
+    margin: 0;
+    pointer-events: none;
+  }
+
+  .ve-achievement[hidden] {
+    display: none;
+  }
+
+  .ve-achievement__card {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.85rem;
+    align-items: center;
+    padding: 0.85rem 1rem 0.9rem 0.85rem;
+    border: 1px solid color-mix(in srgb, var(--color-border) 80%, var(--color-accent));
+    border-radius: 0.55rem;
+    background:
+      linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--color-accent) 14%, transparent) 0%,
+        transparent 42%
+      ),
+      color-mix(in srgb, var(--color-surface) 94%, transparent);
+    backdrop-filter: blur(10px);
+    box-shadow:
+      0 0.65rem 1.75rem rgb(0 0 0 / 42%),
+      inset 0 1px 0 color-mix(in srgb, var(--color-accent-alt) 12%, transparent);
+    /* Accent rail */
+    border-left: 3px solid var(--color-accent);
+    transform-origin: top right;
+    opacity: 0;
+    transform: translateY(-1.1rem) translateX(0.55rem) scale(0.94);
+  }
+
+  .ve-achievement.is-in .ve-achievement__card {
+    animation: ve-achievement-in 520ms cubic-bezier(0.16, 0.84, 0.28, 1) both;
+  }
+
+  .ve-achievement.is-out .ve-achievement__card {
+    animation: ve-achievement-out 380ms cubic-bezier(0.4, 0, 0.7, 0.2) both;
+  }
+
+  .ve-achievement__glyph {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    color: var(--color-accent-alt);
+    border: 1px solid color-mix(in srgb, var(--color-border) 70%, var(--color-accent));
+    border-radius: 0.4rem;
+    background: color-mix(in srgb, var(--color-bg) 55%, transparent);
+  }
+
+  .ve-achievement.is-in .ve-achievement__glyph {
+    animation: ve-achievement-glyph 700ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+
+  .ve-achievement__copy {
+    min-width: 0;
+    display: grid;
+    gap: 0.2rem;
+  }
+
+  .ve-achievement__eyebrow {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 0.62rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-accent-alt);
+  }
+
+  .ve-achievement__title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(0.95rem, 2.6vw, 1.1rem);
+    font-weight: 600;
+    line-height: 1.2;
+    color: var(--color-text);
+  }
+
+  .ve-achievement__sub {
+    margin: 0.15rem 0 0;
+    font-size: 0.78rem;
+    line-height: 1.35;
+    color: var(--color-text-muted);
+  }
+
+  .ve-achievement__sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  @keyframes ve-achievement-in {
+    0% {
+      opacity: 0;
+      transform: translateY(-1.1rem) translateX(0.55rem) scale(0.94);
+    }
+    58% {
+      opacity: 1;
+      transform: translateY(0.12rem) translateX(0) scale(1.02);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0) translateX(0) scale(1);
+    }
+  }
+
+  @keyframes ve-achievement-out {
+    from {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+    to {
+      opacity: 0;
+      transform: translateY(-0.65rem) translateX(0.35rem) scale(0.96);
+    }
+  }
+
+  @keyframes ve-achievement-glyph {
+    0% {
+      transform: rotate(-28deg) scale(0.7);
+      opacity: 0.35;
+    }
+    55% {
+      transform: rotate(8deg) scale(1.08);
+      opacity: 1;
+    }
+    100% {
+      transform: rotate(0deg) scale(1);
+      opacity: 1;
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .track-rub-panel__frame {
       animation: none;
+    }
+
+    .ve-achievement.is-in .ve-achievement__card,
+    .ve-achievement.is-out .ve-achievement__card,
+    .ve-achievement.is-in .ve-achievement__glyph {
+      animation: none;
+    }
+
+    .ve-achievement.is-in .ve-achievement__card {
+      opacity: 1;
+      transform: none;
     }
   }
 </style>
