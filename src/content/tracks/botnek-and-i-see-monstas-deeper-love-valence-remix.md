@@ -1,6 +1,7 @@
 ---
 label: Deeper Love (Valence Remix)
 sortDate: 2015-01-10
+trackOrder: 10
 kind: Compilation (EVOLVE)
 cover: /images/covers/evolve.webp
 credits:

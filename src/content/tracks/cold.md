@@ -2,6 +2,7 @@
 label: Cold
 sortDate: 2021-01-02
 kind: Single
+cover: /images/covers/cold.webp
 listenLinks:
   - platform: bandcamp
     url: https://valenceelectronica.bandcamp.com/album/infinite

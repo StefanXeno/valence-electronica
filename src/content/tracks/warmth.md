@@ -1,6 +1,7 @@
 ---
 label: Warmth
 sortDate: 2026-01-06
+trackOrder: 3
 kind: EP (ANGELS)
 cover: /images/covers/angels.webp
 listenLinks:

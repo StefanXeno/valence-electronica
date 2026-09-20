@@ -10,6 +10,7 @@ import {
   pickPrimaryListenUrl,
   pickSharedCoverUrl,
   sortCatalogTracks,
+  sortCollectionTracks,
   sortDiscographyEntries,
   toDiscographyEntry,
   type CatalogTrack,
@@ -191,6 +192,25 @@ describe('pickSharedCoverUrl', () => {
   });
 });
 
+describe('sortCollectionTracks', () => {
+  it('orders by trackOrder ascending', () => {
+    const sorted = sortCollectionTracks([
+      row('warmth', 'Warmth', '2026-01-06', { trackOrder: 3 }),
+      row('arkangel', 'Arkangel', '2026-01-05', { trackOrder: 1 }),
+      row('hyperion', 'Hyperion', '2026-01-07', { trackOrder: 2 }),
+    ]);
+    expect(sorted.map((e) => e.id)).toEqual(['arkangel', 'hyperion', 'warmth']);
+  });
+
+  it('sinks missing trackOrder after numbered tracks', () => {
+    const sorted = sortCollectionTracks([
+      row('b', 'Beta', '2020-01-02'),
+      row('a', 'Alpha', '2020-01-01', { trackOrder: 1 }),
+    ]);
+    expect(sorted.map((e) => e.id)).toEqual(['a', 'b']);
+  });
+});
+
 describe('groupDiscographyByYear', () => {
   it('buckets by year, newest year first', () => {
     const groups = groupDiscographyByYear([
@@ -212,12 +232,14 @@ describe('groupDiscographyByYear', () => {
         kind: 'Compilation (INITIATE)',
         kindType: 'Compilation',
         collection: 'INITIATE',
+        trackOrder: 1,
         coverUrl: '/images/covers/initiate.webp',
       }),
       row('keys', 'Keys', '2014-01-03', {
         kind: 'Compilation (INITIATE)',
         kindType: 'Compilation',
         collection: 'INITIATE',
+        trackOrder: 13,
         coverUrl: '/images/covers/initiate.webp',
       }),
       row('spirited', 'Spirited', '2014-06-01', { kind: 'Single', kindType: 'Single' }),
@@ -232,7 +254,38 @@ describe('groupDiscographyByYear', () => {
       collection: 'INITIATE',
     });
     if (groups[0].blocks[1].type !== 'collection') throw new Error('expected collection');
-    expect(groups[0].blocks[1].entries.map((e) => e.id)).toEqual(['keys', 'joyride']);
+    expect(groups[0].blocks[1].entries.map((e) => e.id)).toEqual(['joyride', 'keys']);
+  });
+
+  it('uses trackOrder for collection tracklist, not newest-first date', () => {
+    const groups = groupDiscographyByYear([
+      row('warmth', 'Warmth', '2026-01-06', {
+        kind: 'EP (ANGELS)',
+        kindType: 'EP',
+        collection: 'ANGELS',
+        trackOrder: 3,
+      }),
+      row('arkangel', 'Arkangel', '2026-01-05', {
+        kind: 'EP (ANGELS)',
+        kindType: 'EP',
+        collection: 'ANGELS',
+        trackOrder: 1,
+      }),
+      row('hyperion', 'Hyperion', '2026-01-07', {
+        kind: 'EP (ANGELS)',
+        kindType: 'EP',
+        collection: 'ANGELS',
+        trackOrder: 2,
+      }),
+    ]);
+    expect(groups).toHaveLength(1);
+    expect(groups[0].blocks).toHaveLength(1);
+    if (groups[0].blocks[0].type !== 'collection') throw new Error('expected collection');
+    expect(groups[0].blocks[0].entries.map((e) => e.id)).toEqual([
+      'arkangel',
+      'hyperion',
+      'warmth',
+    ]);
   });
 });
 
@@ -277,5 +330,19 @@ describe('toDiscographyEntry cover and notes', () => {
     );
     expect(entry?.artist).toBe('Halsey');
     expect(pickArtistName([{ role: 'Artist', name: 'Halsey' }], 'Valence')).toBe('Halsey');
+  });
+
+  it('passes through trackOrder', () => {
+    const entry = toDiscographyEntry(
+      'arkangel',
+      {
+        label: 'Arkangel',
+        sortDate: new Date('2026-01-05'),
+        kind: 'EP (ANGELS)',
+        trackOrder: 1,
+      },
+      { source: 'track' },
+    );
+    expect(entry?.trackOrder).toBe(1);
   });
 });

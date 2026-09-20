@@ -1,6 +1,7 @@
 ---
 label: Give It Up
 sortDate: 2015-01-05
+trackOrder: 5
 kind: Compilation (EVOLVE)
 cover: /images/covers/evolve.webp
 listenLinks:

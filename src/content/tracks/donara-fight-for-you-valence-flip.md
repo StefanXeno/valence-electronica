@@ -1,6 +1,7 @@
 ---
 label: Fight for You (Valence Flip)
 sortDate: 2020-01-02
+trackOrder: 2
 kind: Compilation (Kaleidoscope)
 cover: /images/covers/kaleidoscopes.webp
 credits:

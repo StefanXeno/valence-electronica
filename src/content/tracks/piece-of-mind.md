@@ -1,6 +1,7 @@
 ---
 label: Piece of Mind.
 sortDate: 2020-01-10
+trackOrder: 3
 kind: EP (Heaven Is Acceptance EP)
 cover: /images/covers/heaven-is-acceptance.webp
 listenLinks:

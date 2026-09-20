@@ -1,6 +1,7 @@
 ---
 label: Neon Sky
 sortDate: 2014-01-09
+trackOrder: 9
 kind: Compilation (INITIATE)
 cover: /images/covers/initiate.webp
 listenLinks:

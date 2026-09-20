@@ -1,6 +1,7 @@
 ---
 label: Further Away (Valence Remix)
 sortDate: 2015-01-09
+trackOrder: 9
 kind: Compilation (EVOLVE)
 cover: /images/covers/evolve.webp
 credits:

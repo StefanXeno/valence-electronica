@@ -1,6 +1,7 @@
 ---
 label: Inside
 sortDate: 2015-01-08
+trackOrder: 8
 kind: Compilation (EVOLVE)
 cover: /images/covers/evolve.webp
 listenLinks:

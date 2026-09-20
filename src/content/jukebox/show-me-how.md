@@ -1,6 +1,7 @@
 ---
 label: Show Me How
 sortDate: 2026-02-26
+trackOrder: 1
 kind: EP (Show Me How • Remix EP)
 themeId: electric-cyan
 hasAudio: false

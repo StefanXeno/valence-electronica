@@ -1,6 +1,7 @@
 ---
 label: EPOCSODIELAK
 sortDate: 2020-01-01
+trackOrder: 1
 kind: Compilation (Kaleidoscope)
 cover: /images/covers/kaleidoscopes.webp
 listenLinks:

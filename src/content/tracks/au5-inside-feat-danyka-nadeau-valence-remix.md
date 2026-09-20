@@ -1,6 +1,7 @@
 ---
 label: "Inside (feat. Danyka Nadeau) [Valence Remix]"
 sortDate: 2015-01-07
+trackOrder: 7
 kind: Compilation (EVOLVE)
 cover: /images/covers/evolve.webp
 credits:

@@ -1,6 +1,7 @@
 ---
 label: "BLACK & WHITE / COLORBLIND"
 sortDate: 2024-01-05
+trackOrder: 5
 kind: EP (NOT A DOLL EP)
 cover: /images/covers/not-a-doll.webp
 credits:

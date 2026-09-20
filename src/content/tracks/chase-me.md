@@ -1,6 +1,7 @@
 ---
 label: Chase Me
 sortDate: 2014-01-12
+trackOrder: 12
 kind: Compilation (INITIATE)
 cover: /images/covers/initiate.webp
 listenLinks:

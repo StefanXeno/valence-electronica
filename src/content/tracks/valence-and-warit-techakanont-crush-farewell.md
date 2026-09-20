@@ -1,6 +1,7 @@
 ---
 label: crush (farewell)
 sortDate: 2020-01-06
+trackOrder: 6
 kind: Compilation (Kaleidoscope)
 cover: /images/covers/kaleidoscopes.webp
 credits:

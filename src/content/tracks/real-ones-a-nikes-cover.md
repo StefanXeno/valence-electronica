@@ -1,6 +1,7 @@
 ---
 label: "Real Ones, a Nikes Cover"
 sortDate: 2020-01-03
+trackOrder: 3
 kind: Compilation (Kaleidoscope)
 cover: /images/covers/kaleidoscopes.webp
 listenLinks:

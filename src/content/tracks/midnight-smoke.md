@@ -1,6 +1,7 @@
 ---
 label: Midnight Smoke
 sortDate: 2015-01-11
+trackOrder: 3
 kind: EP (Serenity EP)
 cover: /images/covers/serenity.webp
 listenLinks:

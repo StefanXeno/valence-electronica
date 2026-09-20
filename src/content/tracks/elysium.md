@@ -1,6 +1,7 @@
 ---
 label: Elysium
 sortDate: 2015-01-02
+trackOrder: 2
 kind: Compilation (EVOLVE)
 cover: /images/covers/evolve.webp
 listenLinks:

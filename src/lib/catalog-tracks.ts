@@ -50,6 +50,8 @@ export interface DiscographyEntry {
   kindType?: string;
   /** Collection name when kind is `EP (NAME)` / `Compilation (NAME)`. */
   collection?: string;
+  /** 1-based position within an EP / Compilation tracklist. */
+  trackOrder?: number;
   /** Display artist (from credits role Artist). */
   artist?: string;
   url?: string;
@@ -86,6 +88,7 @@ export interface CatalogMetadataFields {
   label?: string;
   sortDate?: Date;
   kind?: string;
+  trackOrder?: number;
   listenLinks?: { platform: string; url: string }[];
   coverUrl?: string;
   notes?: string;
@@ -236,6 +239,31 @@ export function sortDiscographyEntriesAsc(entries: DiscographyEntry[]): Discogra
   );
 }
 
+/**
+ * Tracklist order inside an EP / Compilation card.
+ * Uses `trackOrder` ascending when set; missing orders sink to the end, then date/title.
+ */
+export function sortCollectionTracks(entries: DiscographyEntry[]): DiscographyEntry[] {
+  return [...entries].sort((a, b) => {
+    const orderA = a.trackOrder ?? Number.POSITIVE_INFINITY;
+    const orderB = b.trackOrder ?? Number.POSITIVE_INFINITY;
+    return (
+      orderA - orderB ||
+      dateKey(a.sortDate) - dateKey(b.sortDate) ||
+      a.title.localeCompare(b.title)
+    );
+  });
+}
+
+/** Newest calendar date among members — places the collection on the year timeline. */
+function newestSortDate(entries: DiscographyEntry[]): Date | undefined {
+  let best: Date | undefined;
+  for (const entry of entries) {
+    if (!best || dateKey(entry.sortDate) > dateKey(best)) best = entry.sortDate;
+  }
+  return best;
+}
+
 export function toDiscographyEntry(
   id: string,
   data: CatalogMetadataFields,
@@ -272,6 +300,7 @@ export function toDiscographyEntry(
     kind: data.kind?.trim() || undefined,
     kindType: parsed?.type,
     collection: parsed?.collection,
+    trackOrder: data.trackOrder,
     artist: pickArtistName(credits),
     url: pickPrimaryListenUrl(listenLinks),
     listenLinks,
@@ -316,14 +345,14 @@ export function groupDiscographyByYear(entries: DiscographyEntry[]): Discography
   for (const [rawKind, members] of collectionBuckets) {
     const parsed = parseReleaseKind(rawKind);
     if (!parsed?.collection) continue;
-    const ordered = sortDiscographyEntries(members);
+    const ordered = sortCollectionTracks(members);
     const coverUrl = pickSharedCoverUrl(ordered);
     const withCover = ordered.map((entry) => ({
       ...entry,
       coverUrl: coverUrl ?? entry.coverUrl,
     }));
     // Newest track date places the collection in the year timeline.
-    const sortDate = ordered[0]?.sortDate;
+    const sortDate = newestSortDate(members);
     if (!sortDate) continue;
     blocks.push({
       type: 'collection',

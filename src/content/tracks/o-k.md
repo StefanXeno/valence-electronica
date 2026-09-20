@@ -1,6 +1,7 @@
 ---
 label: O_K
 sortDate: 2020-01-08
+trackOrder: 1
 kind: EP (Heaven Is Acceptance EP)
 cover: /images/covers/heaven-is-acceptance.webp
 listenLinks:

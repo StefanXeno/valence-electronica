@@ -2,6 +2,7 @@
 label: daydream
 sortDate: 2021-01-01
 kind: Single
+cover: /images/covers/daydream.webp
 listenLinks:
   - platform: bandcamp
     url: https://valenceelectronica.bandcamp.com/album/infinite

@@ -1,6 +1,7 @@
 ---
 label: Soar
 sortDate: 2014-01-08
+trackOrder: 8
 kind: Compilation (INITIATE)
 cover: /images/covers/initiate.webp
 listenLinks:

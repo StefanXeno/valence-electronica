@@ -1,6 +1,7 @@
 ---
 label: Heroes
 sortDate: 2015-01-06
+trackOrder: 6
 kind: Compilation (EVOLVE)
 cover: /images/covers/evolve.webp
 listenLinks:

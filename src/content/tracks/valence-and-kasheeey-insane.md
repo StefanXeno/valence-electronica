@@ -1,6 +1,7 @@
 ---
 label: INSANE
 sortDate: 2024-01-04
+trackOrder: 4
 kind: EP (NOT A DOLL EP)
 cover: /images/covers/not-a-doll.webp
 credits:

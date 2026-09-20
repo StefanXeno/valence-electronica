@@ -57,6 +57,8 @@ const catalogMetadata = {
   label: filledText,
   sortDate: z.coerce.date(),
   kind: z.string().optional(),
+  /** 1-based position within an EP / Compilation tracklist. */
+  trackOrder: z.number().int().positive().optional(),
   listenLinks: z.array(listenLink).optional(),
   blurb: z.string().optional(),
   credits: z.array(credit).optional(),
