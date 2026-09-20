@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { clampTransitionGlitchMs } from './glitch';
-import { isOpenStagePanelChromeHit, qualifiesAsAmbientGlitchTarget } from './glitch-ambient';
+import {
+  isOpenStagePanelChromeHit,
+  preferLeafSurfaces,
+  qualifiesAsAmbientGlitchTarget,
+  qualifiesAsWildAmbientGlitchTarget,
+} from './glitch-ambient';
 
 describe('clampTransitionGlitchMs', () => {
   it('covers phone 320 and playlist 380 windows', () => {
@@ -44,6 +49,40 @@ describe('qualifiesAsAmbientGlitchTarget', () => {
     expect(qualifiesAsAmbientGlitchTarget({ ...yes, placeholder: true })).toBe(false);
     expect(qualifiesAsAmbientGlitchTarget({ ...yes, tagline: true })).toBe(false);
     expect(qualifiesAsAmbientGlitchTarget({ ...yes, slider: true })).toBe(false);
+  });
+});
+
+describe('qualifiesAsWildAmbientGlitchTarget', () => {
+  const base = {
+    glitchHit: false,
+    interactive: false,
+    disabled: false,
+    hidden: false,
+    placeholder: false,
+    tagline: true,
+    slider: false,
+  };
+
+  it('allows tagline and non-interactive stage chrome', () => {
+    expect(qualifiesAsWildAmbientGlitchTarget(base)).toBe(true);
+    expect(qualifiesAsWildAmbientGlitchTarget({ ...base, tagline: false })).toBe(true);
+  });
+
+  it('still rejects hidden, disabled, placeholder, and sliders', () => {
+    expect(qualifiesAsWildAmbientGlitchTarget({ ...base, hidden: true })).toBe(false);
+    expect(qualifiesAsWildAmbientGlitchTarget({ ...base, disabled: true })).toBe(false);
+    expect(qualifiesAsWildAmbientGlitchTarget({ ...base, placeholder: true })).toBe(false);
+    expect(qualifiesAsWildAmbientGlitchTarget({ ...base, slider: true })).toBe(false);
+  });
+});
+
+describe('preferLeafSurfaces', () => {
+  it('drops parents when a descendant is also selected', () => {
+    const parent = { id: 'p' } as unknown as HTMLElement;
+    const child = { id: 'c' } as unknown as HTMLElement;
+    parent.contains = (node: Node) => node === child;
+    child.contains = () => false;
+    expect(preferLeafSurfaces([parent, child])).toEqual([child]);
   });
 });
 

@@ -3,7 +3,7 @@
  * Visual shell lives in TrackRubOverlay.astro — this module only drives show/hide + copy/glyph.
  */
 
-export type AchievementGlyph = 'rub' | 'infinite';
+export type AchievementGlyph = 'rub' | 'infinite' | 'demonic';
 
 const ACHIEVEMENT_HOLD_MS = 4200;
 const ACHIEVEMENT_EXIT_MS = 400;

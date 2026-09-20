@@ -1,3 +1,5 @@
+import { isWildGlitchActive } from './demonic-combo';
+
 export type GlitchStyle =
   | 'tear'
   | 'chroma'
@@ -218,10 +220,32 @@ function pickPreset(previousIndex?: number): { preset: GlitchPreset; index: numb
 
 const STYLE_ATTR = 'data-glitch-style';
 
+/** Demonic combo (666) — hotter than base Nightmare, not full seizure. */
+function amplifyForWild(preset: GlitchPreset): GlitchPreset {
+  const move = 2.4;
+  const skew = 2.6;
+  return {
+    ...preset,
+    xa: preset.xa * move,
+    xb: preset.xb * move,
+    xc: preset.xc * move,
+    ya: preset.ya * move,
+    yb: preset.yb * move,
+    yc: preset.yc * move,
+    sa: preset.sa * skew,
+    sb: preset.sb * skew,
+    sc: preset.sc * skew,
+    scale: 1 + (preset.scale - 1) * 2.8,
+    dur: Math.min(640, Math.max(180, Math.floor(preset.dur * 0.55))),
+    scan: Math.min(1, preset.scan * 1.35),
+  };
+}
+
 /** Apply one preset onto an element as CSS custom properties + style family. */
 export function applyGlitchPreset(el: HTMLElement): GlitchPreset {
   const prev = Number.parseInt(el.dataset.glitchPreset ?? '', 10);
-  const { preset, index } = pickPreset(Number.isFinite(prev) ? prev : undefined);
+  const { preset: base, index } = pickPreset(Number.isFinite(prev) ? prev : undefined);
+  const preset = isWildGlitchActive() ? amplifyForWild(base) : base;
   el.dataset.glitchPreset = String(index);
   el.setAttribute(STYLE_ATTR, preset.style);
 
