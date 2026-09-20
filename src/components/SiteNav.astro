@@ -1332,9 +1332,8 @@ const menuChannels = site.channels
     display: grid;
     grid-template-columns: auto minmax(0, 1fr);
     column-gap: 0.75rem;
-    /* Lock row to cover height so wrapping titles can't grow the card. */
-    align-items: stretch;
-    grid-template-rows: 4.25rem;
+    /* Cover stays square; head grows when titles wrap (see title line-clamp). */
+    align-items: center;
     margin-bottom: 0.55rem;
   }
 
@@ -1363,20 +1362,17 @@ const menuChannels = site.channels
 
   /*
    * Shared EP + single text stack:
-   * stretch to cover height → center kind/title/artist as one block.
+   * kind / title / artist as one block, vertically centered beside the cover.
    */
   .site-nav__menu-portal-head-text {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    align-self: stretch;
     gap: 0.18rem;
     min-width: 0;
-    overflow: hidden;
   }
 
   .site-nav__menu-portal-head-text__kind,
-  .site-nav__menu-portal-head-text__title,
   .site-nav__menu-portal-head-text__artist {
     display: block;
     margin: 0;
@@ -1394,17 +1390,22 @@ const menuChannels = site.channels
   }
 
   .site-nav__menu-portal-head-text__title {
+    margin: 0;
+    padding: 0;
     font-family: var(--font-display);
-    /* Smaller so long titles (e.g. Voltage Flip) stay on one line / within cover. */
     font-size: 0.88rem;
     font-weight: 600;
     letter-spacing: 0.03em;
     line-height: 1.2;
     text-transform: uppercase;
     color: color-mix(in srgb, #fff 92%, transparent);
+    /* Soft wrap up to 2 lines; ellipsis only if still too long. */
     overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    overflow-wrap: break-word;
   }
 
   .site-nav__menu-portal-head-text__artist {
