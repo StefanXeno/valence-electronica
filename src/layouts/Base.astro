@@ -8,6 +8,7 @@ import Footer from '../components/Footer.astro';
 import BackgroundAtmosphere from '../components/BackgroundAtmosphere.astro';
 import GlitchPress from '../components/GlitchPress.astro';
 import LegalOverlay from '../components/LegalOverlay.astro';
+import TrackRubOverlay from '../components/TrackRubOverlay.astro';
 import { getDefaultVideo } from '../lib/background';
 import { applyThemeAttributes, resolveThemePack } from '../lib/theme-packs';
 import { withBase } from '../lib/url';
@@ -68,11 +69,14 @@ const indexable = site.seo.indexable && !isPreview;
     </div>
     {/* Body-level overlay: legal + content sheets (About/Tour/…) share LegalPanel. */}
     <LegalOverlay />
+    <TrackRubOverlay />
     <GlitchPress />
     <div id="hud-label-reveal" class="hud-label-reveal" aria-hidden="true" hidden></div>
     <script>
       import { initLabelReveal } from '../lib/label-reveal';
+      import { initTrackRub } from '../lib/track-rub';
       initLabelReveal();
+      initTrackRub();
     </script>
   </body>
 </html>

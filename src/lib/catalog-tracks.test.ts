@@ -345,4 +345,32 @@ describe('toDiscographyEntry cover and notes', () => {
     );
     expect(entry?.trackOrder).toBe(1);
   });
+
+  it('passes through rubbable when true', () => {
+    const entry = toDiscographyEntry(
+      'taking-over',
+      {
+        label: 'Taking Over',
+        sortDate: new Date('2025-07-12'),
+        rubbable: true,
+      },
+      { source: 'jukebox', validStageIds: new Set(['taking-over']) },
+    );
+    expect(entry?.rubbable).toBe(true);
+  });
+
+  it('omits rubbable when false or unset', () => {
+    const off = toDiscographyEntry(
+      'x',
+      { label: 'X', sortDate: new Date('2020-01-01'), rubbable: false },
+      { source: 'track' },
+    );
+    const unset = toDiscographyEntry(
+      'y',
+      { label: 'Y', sortDate: new Date('2020-01-01') },
+      { source: 'track' },
+    );
+    expect(off?.rubbable).toBeUndefined();
+    expect(unset?.rubbable).toBeUndefined();
+  });
 });

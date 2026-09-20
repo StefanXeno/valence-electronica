@@ -49,6 +49,7 @@ const expandedType = typeDetail ?? release.kind;
 <li
   class:list={['discog__item', { 'discog__item--nested': nested }]}
   data-discog-entry={release.id}
+  data-rubbable={release.rubbable ? release.id : undefined}
 >
   {
     nested ? (
@@ -273,6 +274,10 @@ const expandedType = typeDetail ?? release.kind;
       border-color 200ms ease,
       background-color 200ms ease,
       box-shadow 200ms ease;
+  }
+
+  .discog__item[data-rubbable] {
+    touch-action: pan-y;
   }
 
   .discog__item--nested {

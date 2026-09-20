@@ -424,7 +424,10 @@ const menuChannels = site.channels
                               </div>
                               <ul class="site-nav__menu-portal-release-list site-nav__menu-portal-release-list--collection">
                                 {block.entries.map((release) => (
-                                  <li class="site-nav__menu-portal-release site-nav__menu-portal-release--nested">
+                                  <li
+                                    class="site-nav__menu-portal-release site-nav__menu-portal-release--nested"
+                                    data-rubbable={release.rubbable ? release.id : undefined}
+                                  >
                                     {/* Title/artist + trailing platform glyphs (no Listen On label). */}
                                     <div class="site-nav__menu-portal-nested-row">
                                       <div class="site-nav__menu-portal-head-text site-nav__menu-portal-head-text--nested">
@@ -468,7 +471,10 @@ const menuChannels = site.channels
                         const release = block.entry;
                         const singleCover = coverOrPlaceholder(release.coverUrl);
                         return (
-                          <div class="site-nav__menu-portal-collection site-nav__menu-portal-collection--single">
+                          <div
+                            class="site-nav__menu-portal-collection site-nav__menu-portal-collection--single"
+                            data-rubbable={release.rubbable ? release.id : undefined}
+                          >
                             {/* Same head grid as EP — identical vertical centering + text rhythm. */}
                             <div class="site-nav__menu-portal-collection-head">
                               <span
@@ -1660,6 +1666,11 @@ const menuChannels = site.channels
     gap: 0.2rem;
     padding: 0.85rem 0;
     border-bottom: 1px solid color-mix(in srgb, #fff 12%, transparent);
+  }
+
+  .site-nav__menu-portal-release[data-rubbable],
+  .site-nav__menu-portal-collection[data-rubbable] {
+    touch-action: pan-y;
   }
 
   .site-nav__menu-portal-release.site-nav__menu-portal-release--nested {
