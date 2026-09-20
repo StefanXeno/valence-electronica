@@ -92,13 +92,17 @@ const shows = defineCollection({
   schema: z.object({
     date: z.coerce.date(),
     city: filledText,
+    country: filledText,
+    /** Event title on the tour card (required). */
+    title: filledText,
+    /** Venue / place name (required). */
     venue: filledText,
-    /** Event title on the tour card. Omit to fall back to venue. */
-    title: filledText.optional(),
-    /** Ticket shop / RSVP. Omit to hide the Tickets pill. */
+    /** Ticket shop / RSVP. Omit to hide the Tickets control. */
     ticketUrl: z.url().optional(),
-    /** Venue or place info page. Omit to hide the Information pill. */
+    /** Venue or place info page. Linked from the venue name when set. */
     venueUrl: z.url().optional(),
+    /** Event / festival page. Linked from the event title when set. */
+    eventUrl: z.url().optional(),
   }),
 });
 

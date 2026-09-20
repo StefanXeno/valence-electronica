@@ -4,7 +4,7 @@ import siteJson from '../data/site.json';
 import { resolveHudIcon, type HudIconToken } from './hud-icons';
 import { berlinToday, collectUpcomingShows, type ShowEntryInput } from './stage-upcoming';
 
-export { groupShowsByYear, resolveShowTitle } from './stage-upcoming';
+export { berlinToday, formatShowLocality, groupShowsByYear, toCountryCode } from './stage-upcoming';
 
 export interface UiChrome {
   aboutTitle: string;
@@ -104,7 +104,7 @@ const CHROME_FALLBACK: UiChrome = {
   nowPlayingOpenLabel: 'Now playing',
   vinylLabel: 'Vinyl',
   emptyReleases: 'No releases yet',
-  emptyShows: 'No upcoming dates',
+  emptyShows: 'No tour dates',
   jukeboxLabel: 'V-Flip',
   jukeboxPanelTitle: 'V-Flip aka. Jukebox',
   jukeboxPanelTooltip: 'Pick a track to switch stages—the site theme changes with each one.',
@@ -146,10 +146,12 @@ export interface ShowItem {
   id: string;
   date: Date;
   city: string;
+  country: string;
+  title: string;
   venue: string;
-  title?: string;
   ticketUrl?: string;
   venueUrl?: string;
+  eventUrl?: string;
 }
 
 export async function getChrome(): Promise<UiChrome> {
@@ -258,19 +260,23 @@ export async function getUpcomingShows(): Promise<ShowItem[]> {
   for (const entry of raw) {
     // Skip loader placeholders and underscore templates (e.g. `_example.md`).
     if (entry.id.startsWith('__empty__') || entry.id.startsWith('_')) continue;
-    const { date, city, venue, title, ticketUrl, venueUrl } = entry.data;
-    if (!date || !city?.trim() || !venue?.trim()) {
-      console.warn(`[stage] omitted show "${entry.id}" (missing date, city, or venue)`);
+    const { date, city, country, venue, title, ticketUrl, venueUrl, eventUrl } = entry.data;
+    if (!date || !city?.trim() || !country?.trim() || !title?.trim() || !venue?.trim()) {
+      console.warn(
+        `[stage] omitted show "${entry.id}" (missing date, city, country, title, or venue)`,
+      );
       continue;
     }
     entries.push({
       id: entry.id,
       date,
       city,
-      venue,
+      country,
       title,
+      venue,
       ticketUrl,
       venueUrl,
+      eventUrl,
     });
   }
 

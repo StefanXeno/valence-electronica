@@ -1,5 +1,7 @@
 ---
 date: 2025-07-25
 city: Dinkelscherben
-venue: DINKEL Festival
+country: Germany
+venue: Dinkelscherben
+title: DINKEL Festival
 ---

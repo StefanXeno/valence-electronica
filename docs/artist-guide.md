@@ -156,21 +156,28 @@ site. Use jukebox (stage) or tracks (catalog-only) instead.
 
 ---
 
-### Shows (upcoming dates)
+### Shows (tour dates)
 
 **Folder:** [`src/content/shows/`](../src/content/shows/)
 
-**Controls:** Gig cards: `date`, `city`, `venue` (all required), optional `title` (card
-headline; falls back to `venue`), optional `ticketUrl` (Tickets pill) and optional
-`venueUrl` (Information pill). Past dates (Europe/Berlin) are hidden automatically.
+**Controls:** Gig cards require `date`, `city`, `country`, `title`, and `venue`. Optional:
+`ticketUrl` (Tickets pill), `venueUrl` (linked from the venue name), and `eventUrl` (linked
+from the event title). Title sits level with the date; venue is under the title. Under the
+date: **City, CC** (e.g. `Augsburg, DE`). Omitted optional fields are not shown.
+All dated shows are listed (past and future), newest first (year headings and dates).
 
 **Tips:**
 
-- A row missing `date`, `city`, or `venue` **fails the build** and names the file — nothing
-  disappears silently. Fix the file and push again.
-- `title` is the event name on the card. Leave it out and the venue name is used.
-- `ticketUrl` and `venueUrl` must be full addresses including `https://`. Leave either out
-  to hide that pill. Both can be set on the same gig.
+- A row missing `date`, `city`, `country`, `title`, or `venue` **fails the build** and names
+  the file — nothing disappears silently. Fix the file and push again.
+- `title` is the event name on the card (required). `venue` is the place name under it.
+- `country` can be an ISO code (`DE`) or a full name (`Germany` / `Deutschland`) — the UI
+  always shows the short code.
+- `ticketUrl`, `venueUrl`, and `eventUrl` must be full addresses including `https://`.
+  Leave any out to hide that control / link. The venue name links only when `venueUrl` is set;
+  the event title links only when `eventUrl` is set.
+  The Tickets pill / ticket icon stays visible through the show’s Berlin calendar day and
+  disappears the next day.
 - You can ship with no show files — the site shows empty-state copy.
 
 ---

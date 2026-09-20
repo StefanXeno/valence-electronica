@@ -1,5 +1,8 @@
 ---
 date: 2025-05-30
 city: Augsburg
-venue: SCHMECK Festival
+country: Germany
+venue: Mazda Museum
+title: SCHMECK Festival
+venueUrl: https://mazda-classic-frey.de/
 ---

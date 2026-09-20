@@ -1,8 +1,8 @@
 ---
-date: 2025-06-20
+date: 2025-01-22
 city: Augsburg
 country: Germany
 venue: Ballonfabrik
-title: PESTIVAL
+title: MIND NIGHT 2
 venueUrl: https://ballonfabrik.org/
 ---

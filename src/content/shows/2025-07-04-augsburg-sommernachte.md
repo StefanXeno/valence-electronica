@@ -1,5 +1,8 @@
 ---
 date: 2025-07-04
 city: Augsburg
-venue: Sommernächte
+country: Germany
+venue: Augsburg
+title: Sommernächte
+eventUrl: https://www.augsburger-stadtsommer.de/sommernaechte/allgemeines
 ---

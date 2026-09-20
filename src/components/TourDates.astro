@@ -1,6 +1,6 @@
 ---
 import '../styles/stage-card.css';
-import { getUpcomingShows, groupShowsByYear, resolveShowTitle, type UiChrome } from '../lib/stage';
+import { formatShowLocality, getUpcomingShows, groupShowsByYear, type UiChrome } from '../lib/stage';
 import HudIcon from './HudIcon.astro';
 
 interface Props {
@@ -29,48 +29,58 @@ const dateFmt = new Intl.DateTimeFormat('en-GB', {
           </h3>
           <ul class="tour__list">
             {yearShows.map((show) => {
-              const eventTitle = resolveShowTitle(show.title, show.venue);
               const dateLabel = dateFmt.format(show.date);
+              const locality = formatShowLocality(show.city, show.country);
+              const eventNode = show.eventUrl ? (
+                <a
+                  class="tour__event-link stage-card__title"
+                  href={show.eventUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {show.title}
+                </a>
+              ) : (
+                <span class="stage-card__title">{show.title}</span>
+              );
+              const venueNode = show.venueUrl ? (
+                <a
+                  class="tour__venue-link"
+                  href={show.venueUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {show.venue}
+                </a>
+              ) : (
+                show.venue
+              );
               return (
                 <li class="stage-card tour__card">
-                  <div class="stage-card__head">
-                    <span class="stage-card__title">{eventTitle}</span>
-                    <p class="stage-card__meta">
+                  <div class="stage-card__head tour__head">
+                    <div class="stage-card__meta tour__when">
                       <time datetime={show.date.toISOString().slice(0, 10)}>{dateLabel}</time>
-                      {' · '}
-                      {show.city}
-                    </p>
+                      <p class="tour__place">{locality}</p>
+                    </div>
+                    <div class="tour__event-block">
+                      {eventNode}
+                      <p class="tour__venue">{venueNode}</p>
+                    </div>
                   </div>
-                  {(show.ticketUrl || show.venueUrl) && (
+                  {show.ticketUrl && (
                     <div class="stage-card__footer">
-                      {show.ticketUrl && (
-                        <a
-                          class="stage-card__pill glitch-hit"
-                          href={show.ticketUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          aria-label={chrome.ticketLabel}
-                          data-hud-label={chrome.ticketLabel}
-                          data-hud-label-anchor="above"
-                        >
-                          <HudIcon token="ticket" />
-                          <span>{chrome.ticketLabel}</span>
-                        </a>
-                      )}
-                      {show.venueUrl && (
-                        <a
-                          class="stage-card__pill glitch-hit"
-                          href={show.venueUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          aria-label={chrome.venueInfoLabel}
-                          data-hud-label={chrome.venueInfoLabel}
-                          data-hud-label-anchor="above"
-                        >
-                          <HudIcon token="info" />
-                          <span>{chrome.venueInfoLabel}</span>
-                        </a>
-                      )}
+                      <a
+                        class="stage-card__pill glitch-hit"
+                        href={show.ticketUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={chrome.ticketLabel}
+                        data-hud-label={chrome.ticketLabel}
+                        data-hud-label-anchor="above"
+                      >
+                        <HudIcon token="ticket" />
+                        <span>{chrome.ticketLabel}</span>
+                      </a>
                     </div>
                   )}
                 </li>
@@ -122,5 +132,75 @@ const dateFmt = new Intl.DateTimeFormat('en-GB', {
     flex-direction: column;
     /* Rule spacing lives on the footer (margin-top = padding-top). */
     gap: 0;
+  }
+
+  /* Date column + title/venue block share the same top edge. */
+  .tour__head {
+    display: grid;
+    grid-template-columns: minmax(4.5rem, auto) minmax(0, 1fr);
+    column-gap: calc(0.85rem * var(--hud-scale));
+    align-items: start;
+  }
+
+  .tour__when {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15em;
+  }
+
+  .tour__event-block {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15em;
+    min-width: 0;
+  }
+
+  .tour__event-block :global(.stage-card__title),
+  .tour__event-block :global(.tour__event-link) {
+    font-size: calc(0.88rem * var(--hud-scale));
+    line-height: 1.35;
+    text-transform: none;
+  }
+
+  .tour__venue {
+    margin: 0;
+    font-size: calc(0.78rem * var(--hud-scale));
+    line-height: 1.35;
+    color: var(--color-text-muted);
+  }
+
+  .tour__place {
+    margin: 0;
+    font-size: 0.88em;
+    color: #fff;
+  }
+
+  .tour__event-link {
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, var(--color-text-muted) 65%, transparent);
+    text-underline-offset: 0.18em;
+    text-decoration-thickness: 1px;
+  }
+
+  .tour__event-link:hover,
+  .tour__event-link:focus-visible {
+    color: var(--color-accent-alt);
+    text-decoration-color: color-mix(in srgb, var(--color-accent-alt) 75%, transparent);
+    outline: none;
+  }
+
+  .tour__venue-link {
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, var(--color-text-muted) 55%, transparent);
+    text-underline-offset: 0.15em;
+  }
+
+  .tour__venue-link:hover,
+  .tour__venue-link:focus-visible {
+    color: var(--color-accent-alt);
+    text-decoration-color: color-mix(in srgb, var(--color-accent-alt) 70%, transparent);
+    outline: none;
   }
 </style>
