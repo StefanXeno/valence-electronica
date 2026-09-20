@@ -5,7 +5,10 @@ import {
   mergeDiscographyEntries,
   parseCredits,
   parseListenLinks,
+  parseReleaseKind,
+  pickArtistName,
   pickPrimaryListenUrl,
+  pickSharedCoverUrl,
   sortCatalogTracks,
   sortDiscographyEntries,
   toDiscographyEntry,
@@ -154,7 +157,7 @@ describe('mergeDiscographyEntries', () => {
     expect(merged.map((e) => e.id)).toEqual(['stage', 'catalog']);
   });
 
-  it('sorts merged list by date then title', () => {
+  it('sorts merged list newest first by date then title', () => {
     const merged = mergeDiscographyEntries(
       [row('b', 'Beta', '2024-06-01')],
       [row('a', 'Alpha', '2025-01-15'), row('c', 'Charlie', '2025-01-01')],
@@ -163,25 +166,73 @@ describe('mergeDiscographyEntries', () => {
   });
 });
 
+describe('parseReleaseKind', () => {
+  it('splits Compilation (INITIATE)', () => {
+    expect(parseReleaseKind('Compilation (INITIATE)')).toEqual({
+      type: 'Compilation',
+      collection: 'INITIATE',
+      raw: 'Compilation (INITIATE)',
+    });
+  });
+
+  it('keeps bare Single without collection', () => {
+    expect(parseReleaseKind('Single')).toEqual({ type: 'Single', raw: 'Single' });
+  });
+});
+
+describe('pickSharedCoverUrl', () => {
+  it('picks the majority cover across collection members', () => {
+    const cover = pickSharedCoverUrl([
+      row('a', 'A', '2026-01-01', { coverUrl: '/images/covers/show-me-how.webp' }),
+      row('b', 'B', '2026-01-02', { coverUrl: '/images/covers/show-me-how-ep.webp' }),
+      row('c', 'C', '2026-01-03', { coverUrl: '/images/covers/show-me-how-ep.webp' }),
+    ]);
+    expect(cover).toBe('/images/covers/show-me-how-ep.webp');
+  });
+});
+
 describe('groupDiscographyByYear', () => {
   it('buckets by year, newest year first', () => {
     const groups = groupDiscographyByYear([
-      row('a', 'Alpha', '2025-01-15'),
-      row('b', 'Beta', '2024-06-01'),
-      row('c', 'Charlie', '2025-11-01'),
+      row('a', 'Alpha', '2025-01-15', { kind: 'Single', kindType: 'Single' }),
+      row('b', 'Beta', '2024-06-01', { kind: 'Single', kindType: 'Single' }),
+      row('c', 'Charlie', '2025-11-01', { kind: 'Single', kindType: 'Single' }),
     ]);
     expect(groups.map((g) => g.year)).toEqual([2025, 2024]);
-    expect(groups[0].entries.map((e) => e.id)).toEqual(['a', 'c']);
+    expect(
+      groups[0].blocks.map((block) =>
+        block.type === 'single' ? block.entry.id : block.label,
+      ),
+    ).toEqual(['c', 'a']);
   });
 
-  it('keeps within-year insertion order', () => {
-    const sorted = sortDiscographyEntries([
-      row('early', 'Early', '2025-03-01'),
-      row('late', 'Late', '2025-11-01'),
+  it('groups Compilation / EP tracks under one collection block', () => {
+    const groups = groupDiscographyByYear([
+      row('joyride', 'Joyride', '2014-01-01', {
+        kind: 'Compilation (INITIATE)',
+        kindType: 'Compilation',
+        collection: 'INITIATE',
+        coverUrl: '/images/covers/initiate.webp',
+      }),
+      row('keys', 'Keys', '2014-01-03', {
+        kind: 'Compilation (INITIATE)',
+        kindType: 'Compilation',
+        collection: 'INITIATE',
+        coverUrl: '/images/covers/initiate.webp',
+      }),
+      row('spirited', 'Spirited', '2014-06-01', { kind: 'Single', kindType: 'Single' }),
     ]);
-    const groups = groupDiscographyByYear(sorted);
     expect(groups).toHaveLength(1);
-    expect(groups[0].entries.map((e) => e.id)).toEqual(['late', 'early']);
+    expect(groups[0].blocks).toHaveLength(2);
+    // Newest block first: Spirited (Jun) before INITIATE (placed by newest member Keys = Jan 3)
+    expect(groups[0].blocks[0]).toMatchObject({ type: 'single' });
+    expect(groups[0].blocks[1]).toMatchObject({
+      type: 'collection',
+      label: 'Compilation (INITIATE)',
+      collection: 'INITIATE',
+    });
+    if (groups[0].blocks[1].type !== 'collection') throw new Error('expected collection');
+    expect(groups[0].blocks[1].entries.map((e) => e.id)).toEqual(['keys', 'joyride']);
   });
 });
 
@@ -212,5 +263,19 @@ describe('toDiscographyEntry cover and notes', () => {
       { source: 'jukebox', validStageIds: new Set(['x']) },
     );
     expect(entry?.notes).toBe('From blurb');
+  });
+
+  it('reads artist from credits role Artist', () => {
+    const entry = toDiscographyEntry(
+      'gas',
+      {
+        label: 'Gasoline (Valence Remix)',
+        sortDate: new Date('2017-01-06'),
+        credits: [{ role: 'Artist', name: 'Halsey' }],
+      },
+      { source: 'track' },
+    );
+    expect(entry?.artist).toBe('Halsey');
+    expect(pickArtistName([{ role: 'Artist', name: 'Halsey' }], 'Valence')).toBe('Halsey');
   });
 });

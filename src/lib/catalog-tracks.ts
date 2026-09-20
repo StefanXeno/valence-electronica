@@ -30,6 +30,15 @@ export interface CatalogTrack {
   mentions?: string;
 }
 
+export interface ParsedReleaseKind {
+  /** e.g. EP, Compilation, Single */
+  type: string;
+  /** Name inside parentheses, e.g. INITIATE */
+  collection?: string;
+  /** Original kind string */
+  raw: string;
+}
+
 /** Discography row — jukebox-backed or catalog-only (tracks collection). */
 export interface DiscographyEntry {
   id: string;
@@ -37,19 +46,40 @@ export interface DiscographyEntry {
   year: number;
   sortDate: Date;
   kind?: string;
+  /** Parsed kind type (EP / Compilation / Single / …). */
+  kindType?: string;
+  /** Collection name when kind is `EP (NAME)` / `Compilation (NAME)`. */
+  collection?: string;
+  /** Display artist (from credits role Artist). */
+  artist?: string;
   url?: string;
   listenLinks: ListenLink[];
   /** Stage id when this release can be played on stage (same as id). */
   jukeboxId?: string;
-  /** Cover art under public/ when available (jukebox poster or track cover). */
+  /** Cover art under public/ when available (jukebox cover/poster or track cover). */
   coverUrl?: string;
   /** Expanded-panel notes: blurb, or tracks-collection body. */
   notes?: string;
 }
 
+/** Single track or EP/Compilation group inside a year. */
+export type DiscographyBlock =
+  | { type: 'single'; entry: DiscographyEntry }
+  | {
+      type: 'collection';
+      kindType: string;
+      collection: string;
+      /** Full label, e.g. `Compilation (INITIATE)`. */
+      label: string;
+      coverUrl?: string;
+      sortDate: Date;
+      year: number;
+      entries: DiscographyEntry[];
+    };
+
 export interface DiscographyYearGroup {
   year: number;
-  entries: DiscographyEntry[];
+  blocks: DiscographyBlock[];
 }
 
 export interface CatalogMetadataFields {
@@ -60,6 +90,7 @@ export interface CatalogMetadataFields {
   coverUrl?: string;
   notes?: string;
   blurb?: string;
+  credits?: { role: string; name: string }[];
 }
 
 export const PLATFORM_LABELS: Record<ListenPlatform, string> = {
@@ -133,6 +164,53 @@ export function parseCredits(
   return credits;
 }
 
+/** Artist credit when role is Artist (remixes / collabs). */
+export function pickArtistName(
+  credits: Credit[] | undefined,
+  fallback?: string,
+): string | undefined {
+  const hit = credits?.find((credit) => credit.role.trim().toLowerCase() === 'artist');
+  return hit?.name.trim() || fallback?.trim() || undefined;
+}
+
+/** Parse `Compilation (INITIATE)` / `EP (ANGELS)` / `Single`. */
+export function parseReleaseKind(kind?: string): ParsedReleaseKind | undefined {
+  const raw = kind?.trim();
+  if (!raw) return undefined;
+  const match = raw.match(/^(.+?)\s*\((.+)\)\s*$/);
+  if (match) {
+    return { type: match[1].trim(), collection: match[2].trim(), raw };
+  }
+  return { type: raw, raw };
+}
+
+export function isCollectionKind(parsed?: ParsedReleaseKind): boolean {
+  if (!parsed?.collection) return false;
+  const type = parsed.type.toLowerCase();
+  return type === 'ep' || type === 'compilation' || type === 'album';
+}
+
+/** Majority-share cover across collection members (ties → first seen). */
+export function pickSharedCoverUrl(entries: DiscographyEntry[]): string | undefined {
+  const counts = new Map<string, number>();
+  const order: string[] = [];
+  for (const entry of entries) {
+    if (!entry.coverUrl) continue;
+    if (!counts.has(entry.coverUrl)) order.push(entry.coverUrl);
+    counts.set(entry.coverUrl, (counts.get(entry.coverUrl) ?? 0) + 1);
+  }
+  let best: string | undefined;
+  let bestCount = 0;
+  for (const url of order) {
+    const count = counts.get(url) ?? 0;
+    if (count > bestCount) {
+      best = url;
+      bestCount = count;
+    }
+  }
+  return best;
+}
+
 export function dateKey(value: Date): number {
   return Date.UTC(value.getUTCFullYear(), value.getUTCMonth(), value.getUTCDate());
 }
@@ -144,9 +222,17 @@ export function sortCatalogTracks(tracks: CatalogTrack[]): CatalogTrack[] {
   );
 }
 
+/** Newest first — theme playlist / legacy callers. */
 export function sortDiscographyEntries(entries: DiscographyEntry[]): DiscographyEntry[] {
   return [...entries].sort(
     (a, b) => dateKey(b.sortDate) - dateKey(a.sortDate) || a.title.localeCompare(b.title),
+  );
+}
+
+/** Oldest first — catalog discography timeline. */
+export function sortDiscographyEntriesAsc(entries: DiscographyEntry[]): DiscographyEntry[] {
+  return [...entries].sort(
+    (a, b) => dateKey(a.sortDate) - dateKey(b.sortDate) || a.title.localeCompare(b.title),
   );
 }
 
@@ -175,6 +261,8 @@ export function toDiscographyEntry(
 
   const notes = data.notes?.trim() || data.blurb?.trim() || undefined;
   const coverUrl = data.coverUrl?.trim() || undefined;
+  const credits = parseCredits(data.credits, id);
+  const parsed = parseReleaseKind(data.kind);
 
   return {
     id,
@@ -182,6 +270,9 @@ export function toDiscographyEntry(
     year: sortDate.getUTCFullYear(),
     sortDate,
     kind: data.kind?.trim() || undefined,
+    kindType: parsed?.type,
+    collection: parsed?.collection,
+    artist: pickArtistName(credits),
     url: pickPrimaryListenUrl(listenLinks),
     listenLinks,
     jukeboxId,
@@ -190,19 +281,79 @@ export function toDiscographyEntry(
   };
 }
 
-/** Bucket discography rows into calendar-year groups, newest year first. */
-export function groupDiscographyByYear(entries: DiscographyEntry[]): DiscographyYearGroup[] {
-  const groups = new Map<number, DiscographyEntry[]>();
+function blockSortDate(block: DiscographyBlock): Date {
+  return block.type === 'single' ? block.entry.sortDate : block.sortDate;
+}
 
-  for (const entry of entries) {
-    const bucket = groups.get(entry.year);
-    if (bucket) bucket.push(entry);
-    else groups.set(entry.year, [entry]);
+function blockSortTitle(block: DiscographyBlock): string {
+  return block.type === 'single' ? block.entry.title : block.label;
+}
+
+/**
+ * Bucket into calendar years (newest first). Within each year, EP/Compilation
+ * tracks sharing the same kind string become one collection block; singles stay
+ * individual. Timeline order is newest → oldest.
+ */
+export function groupDiscographyByYear(entries: DiscographyEntry[]): DiscographyYearGroup[] {
+  const sorted = sortDiscographyEntries(entries);
+  const collectionBuckets = new Map<string, DiscographyEntry[]>();
+  const singles: DiscographyEntry[] = [];
+
+  for (const entry of sorted) {
+    const parsed = parseReleaseKind(entry.kind);
+    if (isCollectionKind(parsed) && entry.kind) {
+      const key = entry.kind.trim();
+      const bucket = collectionBuckets.get(key);
+      if (bucket) bucket.push(entry);
+      else collectionBuckets.set(key, [entry]);
+    } else {
+      singles.push(entry);
+    }
   }
 
-  return [...groups.entries()]
+  const blocks: DiscographyBlock[] = singles.map((entry) => ({ type: 'single' as const, entry }));
+
+  for (const [rawKind, members] of collectionBuckets) {
+    const parsed = parseReleaseKind(rawKind);
+    if (!parsed?.collection) continue;
+    const ordered = sortDiscographyEntries(members);
+    const coverUrl = pickSharedCoverUrl(ordered);
+    const withCover = ordered.map((entry) => ({
+      ...entry,
+      coverUrl: coverUrl ?? entry.coverUrl,
+    }));
+    // Newest track date places the collection in the year timeline.
+    const sortDate = ordered[0]?.sortDate;
+    if (!sortDate) continue;
+    blocks.push({
+      type: 'collection',
+      kindType: parsed.type,
+      collection: parsed.collection,
+      label: rawKind,
+      coverUrl,
+      sortDate,
+      year: sortDate.getUTCFullYear(),
+      entries: withCover,
+    });
+  }
+
+  blocks.sort(
+    (a, b) =>
+      dateKey(blockSortDate(b)) - dateKey(blockSortDate(a)) ||
+      blockSortTitle(a).localeCompare(blockSortTitle(b)),
+  );
+
+  const years = new Map<number, DiscographyBlock[]>();
+  for (const block of blocks) {
+    const year = block.type === 'single' ? block.entry.year : block.year;
+    const bucket = years.get(year);
+    if (bucket) bucket.push(block);
+    else years.set(year, [block]);
+  }
+
+  return [...years.entries()]
     .sort(([yearA], [yearB]) => yearB - yearA)
-    .map(([year, yearEntries]) => ({ year, entries: yearEntries }));
+    .map(([year, yearBlocks]) => ({ year, blocks: yearBlocks }));
 }
 
 /** Stage/theme switcher — has a jukebox id, even when hasAudio is false (e.g. Show Me How). */
@@ -237,6 +388,7 @@ export async function getThemeTrackDiscography(
         sortDate: entry.data.sortDate ?? new Date(0),
         coverUrl: entry.data.cover ?? entry.data.poster,
         notes: entry.data.blurb?.trim() || undefined,
+        credits: entry.data.credits,
       },
       { source: 'jukebox', validStageIds },
     );
@@ -278,6 +430,7 @@ export async function getMergedDiscography(
         coverUrl: entry.data.cover ?? entry.data.poster,
         // Stage body is lyrics — discography notes use blurb only.
         notes: entry.data.blurb?.trim() || undefined,
+        credits: entry.data.credits,
       },
       {
         source: 'jukebox',
@@ -300,6 +453,7 @@ export async function getMergedDiscography(
         ...entry.data,
         coverUrl: entry.data.cover,
         notes: entry.data.blurb?.trim() || entry.body?.trim() || undefined,
+        credits: entry.data.credits,
       },
       { source: 'track' },
     );
