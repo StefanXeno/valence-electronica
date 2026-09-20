@@ -121,8 +121,8 @@ playable on stage.
 - `sortDate` — ISO date (e.g. `2015-06-01`); year and sort order come from this
 
 **Optional:** `kind`, `listenLinks` (same platforms as jukebox — shown as **Listen On** icon
-links in Discography when set), `blurb`, `credits`, `mentions` (stored for future use — not
-shown in the Discography row today).
+links in Discography when set), `cover` (square art under `public/images/covers/`), `blurb`,
+`credits`, `mentions` (stored for future use — not shown in the Discography row today).
 
 **No stage fields:** do not add `poster`, `sources`, `themeId`, `hasAudio`, or `default`.
 
@@ -318,17 +318,22 @@ late-night line (e.g. “Still awake?”) cannot sit unchanged for hours.
 
 **Folders:**
 
-- [`public/images/`](../public/images/) — posters and stills (e.g. `public/images/posters/`)
+- [`public/images/posters/`](../public/images/posters/) — stage / atmosphere stills (jukebox `poster`)
+- [`public/images/covers/`](../public/images/covers/) — square release artwork (jukebox/tracks `cover`)
 - [`public/videos/`](../public/videos/) — looping background videos
 
-**Controls:** Files referenced from jukebox frontmatter (`poster`, `sources`).
+**Controls:** Files referenced from jukebox frontmatter (`poster`, optional `cover`, `sources`)
+and tracks frontmatter (optional `cover`).
 
 **Tips:**
 
-- Use paths like `/images/posters/nightmare.jpg` or `/videos/nightmare.mp4` in jukebox Markdown.
-- Prefer reasonably sized images and compressed video. **Oversized or wrong-format media
+- Use paths like `/images/posters/nightmare.jpg`, `/images/covers/nightmare.webp`, or
+  `/videos/nightmare.mp4` in Markdown.
+- Prefer WebP covers around **1400×1400** max. **Oversized or wrong-format media
   slows the site down** for fans on mobile — when in doubt, ask the developer to optimize.
-- Common formats: JPEG/WebP/SVG for posters; MP4 for video.
+- Common formats: JPEG/WebP/SVG for images; MP4 for video.
+- On jukebox entries, `cover` (when set) is shown in Discography; `poster` stays the
+  video still. Catalog-only tracks use `cover` only.
 
 ---
 

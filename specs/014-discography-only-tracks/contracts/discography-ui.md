@@ -20,8 +20,8 @@ Visitor-facing contract for the on-demand **Discography** panel after `014` as-b
 
 ```text
 ┌─ discog__item [data-discog-active when playing] ─────────────┐
-│  title (plain text)                    Play on V-Flip  OR     │
-│  year · kind                           Currently playing ⟳      │
+│  [cover]  title (plain text)           Play on V-Flip  OR     │
+│           year · kind                  Currently playing ⟳      │
 │  ─────────────────────────────────────────────────────────── │
 │  Listen On   [icon] [icon] [icon]                            │
 └──────────────────────────────────────────────────────────────┘
@@ -29,6 +29,7 @@ Visitor-facing contract for the on-demand **Discography** panel after `014` as-b
 
 | Region | Rule |
 |--------|------|
+| Cover | Square art from `cover` (jukebox/tracks) or jukebox `poster` fallback. When `listenLinks` exist, the cover is an outbound link to the **primary** listen URL (`pickPrimaryListenUrl`: Bandcamp → Spotify → YouTube → …). Title stays plain text. |
 | Title | Always plain text (`label`); not a single primary URL link |
 | Year · kind | Year from `sortDate`; optional `kind` after middle dot |
 | Stage affordance | **Only** when `jukeboxId` set |

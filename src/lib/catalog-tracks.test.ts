@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   filterThemeTracks,
+  groupDiscographyByYear,
   mergeDiscographyEntries,
   parseCredits,
   parseListenLinks,
@@ -159,5 +160,57 @@ describe('mergeDiscographyEntries', () => {
       [row('a', 'Alpha', '2025-01-15'), row('c', 'Charlie', '2025-01-01')],
     );
     expect(merged.map((e) => e.id)).toEqual(['a', 'c', 'b']);
+  });
+});
+
+describe('groupDiscographyByYear', () => {
+  it('buckets by year, newest year first', () => {
+    const groups = groupDiscographyByYear([
+      row('a', 'Alpha', '2025-01-15'),
+      row('b', 'Beta', '2024-06-01'),
+      row('c', 'Charlie', '2025-11-01'),
+    ]);
+    expect(groups.map((g) => g.year)).toEqual([2025, 2024]);
+    expect(groups[0].entries.map((e) => e.id)).toEqual(['a', 'c']);
+  });
+
+  it('keeps within-year insertion order', () => {
+    const sorted = sortDiscographyEntries([
+      row('early', 'Early', '2025-03-01'),
+      row('late', 'Late', '2025-11-01'),
+    ]);
+    const groups = groupDiscographyByYear(sorted);
+    expect(groups).toHaveLength(1);
+    expect(groups[0].entries.map((e) => e.id)).toEqual(['late', 'early']);
+  });
+});
+
+describe('toDiscographyEntry cover and notes', () => {
+  it('passes through coverUrl and notes', () => {
+    const entry = toDiscographyEntry(
+      'x',
+      {
+        label: 'Covered',
+        sortDate: new Date('2020-01-01'),
+        coverUrl: '/images/posters/x.jpg',
+        notes: 'Short note',
+      },
+      { source: 'track' },
+    );
+    expect(entry?.coverUrl).toBe('/images/posters/x.jpg');
+    expect(entry?.notes).toBe('Short note');
+  });
+
+  it('falls back notes from blurb', () => {
+    const entry = toDiscographyEntry(
+      'x',
+      {
+        label: 'Blurbed',
+        sortDate: new Date('2020-01-01'),
+        blurb: 'From blurb',
+      },
+      { source: 'jukebox', validStageIds: new Set(['x']) },
+    );
+    expect(entry?.notes).toBe('From blurb');
   });
 });

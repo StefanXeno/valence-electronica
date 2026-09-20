@@ -5,6 +5,7 @@ kind: Single
 themeId: steel-slate
 hasAudio: true
 poster: /images/posters/infinite.jpg
+cover: /images/covers/infinite.webp
 listenLinks:
   - platform: youtube
     url: https://www.youtube.com/watch?v=QHoqD47gQG8

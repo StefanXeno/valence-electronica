@@ -3,7 +3,7 @@ import { Image } from 'astro:assets';
 import { getCollection, render } from 'astro:content';
 import site from '../data/site.json';
 import wordmark from '../assets/images/brand/valence-wordmark.png';
-import { getMergedDiscography } from '../lib/catalog-tracks';
+import { getMergedDiscography, groupDiscographyByYear } from '../lib/catalog-tracks';
 import { getValidJukeboxEntries } from '../lib/background';
 import type { UiChrome } from '../lib/stage';
 import {
@@ -38,6 +38,7 @@ const legalPanels = await Promise.all(
   }),
 );
 const releases = await getMergedDiscography(new Set(stageVideos.map((v) => v.id)));
+const releaseYearGroups = groupDiscographyByYear(releases);
 const artistName = site.artist.name;
 const tourPortalDateFmt = new Intl.DateTimeFormat('en-GB', {
   timeZone: 'Europe/Berlin',
@@ -374,20 +375,34 @@ const menuChannels = site.channels
         >
           <h2 class="site-nav__menu-portal-title">{chrome.discographyTitle}</h2>
           {
-            releases.length === 0 ? (
+            releaseYearGroups.length === 0 ? (
               <p class="site-nav__menu-portal-empty">{chrome.emptyReleases}</p>
             ) : (
-              <ul class="site-nav__menu-portal-releases" aria-label={chrome.discographyTitle}>
-                {releases.map((release) => (
-                  <li class="site-nav__menu-portal-release">
-                    <span class="site-nav__menu-portal-release-title">{release.title}</span>
-                    <span class="site-nav__menu-portal-release-meta">
-                      {release.year}
-                      {release.kind ? ` · ${release.kind}` : ''}
-                    </span>
-                  </li>
+              <div class="site-nav__menu-portal-releases" aria-label={chrome.discographyTitle}>
+                {releaseYearGroups.map(({ year, entries }) => (
+                  <section
+                    class="site-nav__menu-portal-year"
+                    aria-labelledby={`site-nav-discog-year-${year}`}
+                  >
+                    <h3
+                      class="site-nav__menu-portal-year-label"
+                      id={`site-nav-discog-year-${year}`}
+                    >
+                      {year}
+                    </h3>
+                    <ul class="site-nav__menu-portal-release-list">
+                      {entries.map((release) => (
+                        <li class="site-nav__menu-portal-release">
+                          <span class="site-nav__menu-portal-release-title">{release.title}</span>
+                          {release.kind && (
+                            <span class="site-nav__menu-portal-release-meta">{release.kind}</span>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  </section>
                 ))}
-              </ul>
+              </div>
             )
           }
         </div>
@@ -891,6 +906,11 @@ const menuChannels = site.channels
     --menu-stagger-step: 48ms;
     --menu-stagger-base: 90ms;
     --menu-stagger-max: 5;
+    /* Clearance under wordmark + room for larger primary titles. */
+    --menu-pad-top: max(7.25rem, calc(env(safe-area-inset-top, 0px) + 6.25rem));
+    --menu-pad-bottom: max(2rem, env(safe-area-inset-bottom, 0px));
+    --menu-pad-x: clamp(1.25rem, 6vw, 2.5rem);
+    --menu-title-size: clamp(1.65rem, 7.5vw, 2.25rem);
     /* Shared row geometry: one left label edge. */
     --menu-row-pad-y: 0.55rem;
     position: fixed;
@@ -899,9 +919,7 @@ const menuChannels = site.channels
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    padding: max(5.5rem, calc(env(safe-area-inset-top, 0px) + 4.5rem))
-      clamp(1.25rem, 6vw, 2.5rem)
-      max(2rem, env(safe-area-inset-bottom, 0px));
+    padding: var(--menu-pad-top) var(--menu-pad-x) var(--menu-pad-bottom);
     background: color-mix(in srgb, #050505 92%, transparent);
     backdrop-filter: blur(16px);
     overflow-y: auto;
@@ -946,10 +964,7 @@ const menuChannels = site.channels
     max-width: 26rem;
     margin: 0 auto;
     flex: 1 0 auto;
-    min-height: calc(
-      100dvh - max(5.5rem, calc(env(safe-area-inset-top, 0px) + 4.5rem)) -
-        max(2rem, env(safe-area-inset-bottom, 0px))
-    );
+    min-height: calc(100dvh - var(--menu-pad-top) - var(--menu-pad-bottom));
     transition:
       opacity 380ms cubic-bezier(0.22, 1, 0.36, 1),
       filter 380ms cubic-bezier(0.22, 1, 0.36, 1),
@@ -982,9 +997,7 @@ const menuChannels = site.channels
     z-index: 2;
     display: flex;
     flex-direction: column;
-    padding: max(5.5rem, calc(env(safe-area-inset-top, 0px) + 4.5rem))
-      clamp(1.25rem, 6vw, 2.5rem)
-      max(2rem, env(safe-area-inset-bottom, 0px));
+    padding: var(--menu-pad-top) var(--menu-pad-x) var(--menu-pad-bottom);
     opacity: 0;
     filter: blur(12px);
     transform: scale(1.015);
@@ -1041,7 +1054,7 @@ const menuChannels = site.channels
   .site-nav__menu-portal-title {
     margin: 0 0 1.15rem;
     font-family: var(--font-display);
-    font-size: clamp(1.35rem, 6.5vw, 1.85rem);
+    font-size: var(--menu-title-size);
     letter-spacing: 0.04em;
     text-transform: uppercase;
     line-height: 1.15;
@@ -1118,13 +1131,19 @@ const menuChannels = site.channels
   }
 
   .site-nav__menu-portal-dates,
-  .site-nav__menu-portal-releases {
+  .site-nav__menu-portal-release-list {
     list-style: none;
     margin: 0;
     padding: 0;
     display: flex;
     flex-direction: column;
     gap: 0;
+  }
+
+  .site-nav__menu-portal-releases {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(1.1rem, 4vw, 1.5rem);
   }
 
   .site-nav__menu-portal-date-row {
@@ -1316,7 +1335,7 @@ const menuChannels = site.channels
     flex-direction: column;
     gap: 0;
     font-family: var(--font-display);
-    font-size: clamp(1.35rem, 6.5vw, 1.85rem);
+    font-size: var(--menu-title-size);
     letter-spacing: 0.04em;
     text-transform: uppercase;
     line-height: 1.15;

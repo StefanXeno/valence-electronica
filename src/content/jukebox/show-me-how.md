@@ -1,10 +1,11 @@
 ---
 label: Show Me How
 sortDate: 2026-02-26
-kind: Single
+kind: EP (Show Me How • Remix EP)
 themeId: electric-cyan
 hasAudio: false
 poster: /images/posters/show-me-how.jpg
+cover: /images/covers/show-me-how.webp
 listenLinks:
   - platform: youtube
     url: https://www.youtube.com/watch?v=nF_mCIkz2Mk

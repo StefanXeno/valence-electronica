@@ -5,6 +5,7 @@ kind: Single
 themeId: acid-lime
 hasAudio: true
 poster: /images/posters/taking-over.jpg
+cover: /images/covers/taking-over.webp
 listenLinks:
   - platform: youtube
     url: https://www.youtube.com/watch?v=UmnITfuu3h0

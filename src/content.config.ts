@@ -72,6 +72,8 @@ const jukebox = defineCollection({
     themeId: filledText.optional(),
     hasAudio: z.boolean().optional(),
     poster: publicPath,
+    /** Optional square cover for discography; falls back to poster when omitted. */
+    cover: publicPath.optional(),
     default: z.boolean().optional(),
     sources: z.array(mediaSource).optional(),
   }),
@@ -79,7 +81,11 @@ const jukebox = defineCollection({
 
 const tracks = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/tracks' }),
-  schema: z.object(catalogMetadata),
+  schema: z.object({
+    ...catalogMetadata,
+    /** Optional cover art under public/ (discography placeholder when omitted). */
+    cover: publicPath.optional(),
+  }),
 });
 
 const about = defineCollection({

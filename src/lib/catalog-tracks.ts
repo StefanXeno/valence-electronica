@@ -41,6 +41,15 @@ export interface DiscographyEntry {
   listenLinks: ListenLink[];
   /** Stage id when this release can be played on stage (same as id). */
   jukeboxId?: string;
+  /** Cover art under public/ when available (jukebox poster or track cover). */
+  coverUrl?: string;
+  /** Expanded-panel notes: blurb, or tracks-collection body. */
+  notes?: string;
+}
+
+export interface DiscographyYearGroup {
+  year: number;
+  entries: DiscographyEntry[];
 }
 
 export interface CatalogMetadataFields {
@@ -48,6 +57,9 @@ export interface CatalogMetadataFields {
   sortDate?: Date;
   kind?: string;
   listenLinks?: { platform: string; url: string }[];
+  coverUrl?: string;
+  notes?: string;
+  blurb?: string;
 }
 
 export const PLATFORM_LABELS: Record<ListenPlatform, string> = {
@@ -161,6 +173,9 @@ export function toDiscographyEntry(
   const jukeboxId =
     options.source === 'jukebox' && options.validStageIds?.has(id) ? id : undefined;
 
+  const notes = data.notes?.trim() || data.blurb?.trim() || undefined;
+  const coverUrl = data.coverUrl?.trim() || undefined;
+
   return {
     id,
     title,
@@ -170,7 +185,24 @@ export function toDiscographyEntry(
     url: pickPrimaryListenUrl(listenLinks),
     listenLinks,
     jukeboxId,
+    coverUrl,
+    notes,
   };
+}
+
+/** Bucket discography rows into calendar-year groups, newest year first. */
+export function groupDiscographyByYear(entries: DiscographyEntry[]): DiscographyYearGroup[] {
+  const groups = new Map<number, DiscographyEntry[]>();
+
+  for (const entry of entries) {
+    const bucket = groups.get(entry.year);
+    if (bucket) bucket.push(entry);
+    else groups.set(entry.year, [entry]);
+  }
+
+  return [...groups.entries()]
+    .sort(([yearA], [yearB]) => yearB - yearA)
+    .map(([year, yearEntries]) => ({ year, entries: yearEntries }));
 }
 
 /** Stage/theme switcher — has a jukebox id, even when hasAudio is false (e.g. Show Me How). */
@@ -203,6 +235,8 @@ export async function getThemeTrackDiscography(
       {
         ...entry.data,
         sortDate: entry.data.sortDate ?? new Date(0),
+        coverUrl: entry.data.cover ?? entry.data.poster,
+        notes: entry.data.blurb?.trim() || undefined,
       },
       { source: 'jukebox', validStageIds },
     );
@@ -237,10 +271,19 @@ export async function getMergedDiscography(
     jukeboxIds.add(entry.id);
     if (entry.data.inDiscography === false) continue;
 
-    const row = toDiscographyEntry(entry.id, entry.data, {
-      source: 'jukebox',
-      validStageIds,
-    });
+    const row = toDiscographyEntry(
+      entry.id,
+      {
+        ...entry.data,
+        coverUrl: entry.data.cover ?? entry.data.poster,
+        // Stage body is lyrics — discography notes use blurb only.
+        notes: entry.data.blurb?.trim() || undefined,
+      },
+      {
+        source: 'jukebox',
+        validStageIds,
+      },
+    );
     if (row) jukeboxRows.push(row);
   }
 
@@ -251,7 +294,15 @@ export async function getMergedDiscography(
       console.info(`[catalog] track "${entry.id}" skipped (jukebox entry wins)`);
       continue;
     }
-    const row = toDiscographyEntry(entry.id, entry.data, { source: 'track' });
+    const row = toDiscographyEntry(
+      entry.id,
+      {
+        ...entry.data,
+        coverUrl: entry.data.cover,
+        notes: entry.data.blurb?.trim() || entry.body?.trim() || undefined,
+      },
+      { source: 'track' },
+    );
     if (row) trackRows.push(row);
   }
 

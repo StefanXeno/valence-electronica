@@ -6,6 +6,7 @@ blurb: Cinematic electronic — something's coming for you.
 themeId: nightmare-crimson
 hasAudio: true
 poster: /images/posters/nightmare.jpg
+cover: /images/covers/nightmare.webp
 default: true
 listenLinks:
   - platform: youtube

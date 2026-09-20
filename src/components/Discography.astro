@@ -1,7 +1,12 @@
 ---
-import { getMergedDiscography, getThemeTrackDiscography } from '../lib/catalog-tracks';
+import {
+  getMergedDiscography,
+  getThemeTrackDiscography,
+  groupDiscographyByYear,
+} from '../lib/catalog-tracks';
 import { getValidJukeboxEntries } from '../lib/background';
 import type { UiChrome } from '../lib/stage';
+import { withBase } from '../lib/url';
 import ChannelIcon from './ChannelIcon.astro';
 import HudIcon from './HudIcon.astro';
 
@@ -18,20 +23,27 @@ const validIds = new Set(videos.map((entry) => entry.id));
 const releases = themeTracksOnly
   ? await getThemeTrackDiscography(validIds)
   : await getMergedDiscography(validIds);
+const yearGroups = themeTracksOnly ? [] : groupDiscographyByYear(releases);
+const dateFmt = new Intl.DateTimeFormat('en-GB', {
+  day: 'numeric',
+  month: 'short',
+  year: 'numeric',
+  timeZone: 'UTC',
+});
 ---
 
 {
   releases.length === 0 ? (
     <p class="discog__empty">{chrome.emptyReleases}</p>
-  ) : (
-    <ul class="discog" data-theme-tracks={themeTracksOnly ? '' : undefined}>
+  ) : themeTracksOnly ? (
+    <ul class="discog" data-theme-tracks>
       {releases.map((release) => {
         const onStage = Boolean(release.jukeboxId);
         const stageId = release.jukeboxId;
         const isActive = stageId === defaultId;
         return (
           <li
-            class:list={['discog__item', { 'is-playlist-collapsed': themeTracksOnly && !isActive }]}
+            class:list={['discog__item', { 'is-playlist-collapsed': !isActive }]}
             data-discog-item={stageId}
             data-discog-active={isActive ? 'true' : undefined}
           >
@@ -101,6 +113,157 @@ const releases = themeTracksOnly
         );
       })}
     </ul>
+  ) : (
+    <div class="discog discog--catalog" data-discog-catalog>
+      {yearGroups.map(({ year, entries }) => (
+        <section class="discog__year" aria-labelledby={`discog-year-${year}`}>
+          <h3 class="discog__year-label" id={`discog-year-${year}`}>
+            {year}
+          </h3>
+          <ul class="discog__list">
+            {entries.map((release) => {
+              const detailsId = `discog-details-${release.id}`;
+              const dateIso = release.sortDate.toISOString().slice(0, 10);
+              const dateLabel = dateFmt.format(release.sortDate);
+              const coverSrc = release.coverUrl ? withBase(release.coverUrl) : undefined;
+              const primaryListen =
+                release.listenLinks.find((link) => link.url === release.url) ??
+                release.listenLinks[0];
+              const coverListenHref = release.url;
+              const coverListenLabel = primaryListen
+                ? `${chrome.listenOnLabel} ${release.title} (${primaryListen.label})`
+                : undefined;
+              return (
+                <li class="discog__item" data-discog-entry={release.id}>
+                  <div class="discog__row">
+                    <div
+                      class="discog__cover"
+                      aria-hidden={coverListenHref && coverSrc ? undefined : 'true'}
+                    >
+                      {coverSrc && coverListenHref && coverListenLabel ? (
+                        <a
+                          class="discog__cover-link glitch-hit"
+                          href={coverListenHref}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label={coverListenLabel}
+                          data-hud-label={primaryListen?.label}
+                          data-hud-label-anchor="above"
+                        >
+                          <img
+                            class="discog__cover-img"
+                            src={coverSrc}
+                            alt=""
+                            loading="lazy"
+                            decoding="async"
+                          />
+                        </a>
+                      ) : coverSrc ? (
+                        <img
+                          class="discog__cover-img"
+                          src={coverSrc}
+                          alt=""
+                          loading="lazy"
+                          decoding="async"
+                        />
+                      ) : (
+                        <span class="discog__cover-placeholder" />
+                      )}
+                    </div>
+                    <div class="discog__main">
+                      <button
+                        type="button"
+                        class="discog__toggle"
+                        aria-expanded="false"
+                        aria-controls={detailsId}
+                      >
+                        <span class="discog__headline">
+                          <span class="discog__title">{release.title}</span>
+                          {release.kind && <span class="discog__kind">{release.kind}</span>}
+                        </span>
+                      </button>
+                      {release.listenLinks.length > 0 && (
+                        <div class="discog__listen discog__listen--summary">
+                          <span class="discog__listen-label">{chrome.listenOnLabel}</span>
+                          <ul class="discog__listen-links">
+                            {release.listenLinks.map((link) => (
+                              <li>
+                                <a
+                                  class="glitch-hit"
+                                  href={link.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  aria-label={link.label}
+                                  data-hud-label={link.label}
+                                  data-hud-label-anchor="above"
+                                >
+                                  <ChannelIcon id={link.platform} label={link.label} />
+                                </a>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      <div class="discog__details" id={detailsId} hidden>
+                        <dl class="discog__facts">
+                          <div class="discog__fact">
+                            <dt>{chrome.releasedLabel}</dt>
+                            <dd>
+                              <time datetime={dateIso}>{dateLabel}</time>
+                            </dd>
+                          </div>
+                          {release.kind && (
+                            <div class="discog__fact">
+                              <dt>Type</dt>
+                              <dd>{release.kind}</dd>
+                            </div>
+                          )}
+                        </dl>
+                        {release.listenLinks.length > 0 && (
+                          <div class="discog__listen">
+                            <span class="discog__listen-label">{chrome.listenOnLabel}</span>
+                            <ul class="discog__listen-links">
+                              {release.listenLinks.map((link) => (
+                                <li>
+                                  <a
+                                    class="glitch-hit"
+                                    href={link.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    aria-label={link.label}
+                                    data-hud-label={link.label}
+                                    data-hud-label-anchor="above"
+                                  >
+                                    <ChannelIcon id={link.platform} label={link.label} />
+                                  </a>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        {release.notes && <p class="discog__notes">{release.notes}</p>}
+                      </div>
+                    </div>
+                    <div class="discog__play-slot">
+                      <button
+                        type="button"
+                        class="discog__play glitch-hit"
+                        data-discog-play
+                        aria-label={chrome.stageButtonLabel}
+                        data-hud-label={chrome.stageButtonLabel}
+                        data-hud-label-anchor="above"
+                      >
+                        <HudIcon token="play" />
+                      </button>
+                    </div>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      ))}
+    </div>
   )
 }
 {
@@ -108,6 +271,43 @@ const releases = themeTracksOnly
     <template data-playlist-placeholder-template>
       <li class="discog__item" data-playlist-placeholder aria-hidden="true"></li>
     </template>
+  ) : null
+}
+
+{
+  !themeTracksOnly ? (
+    <script>
+      function setExpanded(item: HTMLElement, open: boolean) {
+        const toggle = item.querySelector<HTMLButtonElement>('.discog__toggle');
+        const details = item.querySelector<HTMLElement>('.discog__details');
+        if (!toggle || !details) return;
+        item.classList.toggle('is-expanded', open);
+        toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+        details.hidden = !open;
+      }
+
+      function initCatalog(root: ParentNode = document) {
+        root.querySelectorAll<HTMLElement>('[data-discog-catalog]').forEach((catalog) => {
+          if (catalog.dataset.discogReady === 'true') return;
+          catalog.dataset.discogReady = 'true';
+
+          catalog.addEventListener('click', (event) => {
+            const target = event.target;
+            if (!(target instanceof Element)) return;
+            if (target.closest('a, [data-discog-play]')) return;
+
+            const item = target.closest<HTMLElement>('[data-discog-entry]');
+            if (!item || !catalog.contains(item)) return;
+
+            const open = item.classList.contains('is-expanded');
+            setExpanded(item, !open);
+          });
+        });
+      }
+
+      initCatalog();
+      document.addEventListener('astro:page-load', () => initCatalog());
+    </script>
   ) : null
 }
 
@@ -128,8 +328,265 @@ const releases = themeTracksOnly
     font-size: calc(0.8rem * var(--hud-scale));
   }
 
+  /* —— Catalog (fullscreen discography): year groups + expandable rows —— */
+  .discog--catalog {
+    gap: calc(1.35rem * var(--hud-scale));
+  }
+
+  .discog__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--discog-row-gap);
+  }
+
+  .discog__year-label {
+    margin: 0 0 calc(0.55rem * var(--hud-scale));
+    font-family: var(--font-display);
+    font-size: calc(0.72rem * var(--hud-scale));
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    line-height: 1.2;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+  }
+
+  .discog--catalog .discog__item {
+    display: block;
+    padding: calc(0.7rem * var(--hud-scale)) calc(0.75rem * var(--hud-scale));
+    border: 1px solid color-mix(in srgb, var(--color-border) 85%, transparent);
+    border-radius: calc(0.6rem * var(--hud-scale));
+    background: color-mix(in srgb, var(--color-bg) 22%, transparent);
+    min-width: 0;
+    cursor: pointer;
+    transition:
+      border-color 200ms ease,
+      background-color 200ms ease,
+      box-shadow 200ms ease;
+  }
+
+  .discog--catalog .discog__item.is-expanded {
+    border-color: color-mix(in srgb, var(--color-accent) 45%, var(--color-border));
+    background: color-mix(in srgb, var(--color-accent) 8%, transparent);
+    box-shadow: inset 0 1px 0 color-mix(in srgb, var(--color-text) 6%, transparent);
+  }
+
+  .discog__row {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    column-gap: calc(0.75rem * var(--hud-scale));
+    align-items: start;
+  }
+
+  .discog__cover {
+    --discog-cover-size: calc(3.1rem * var(--hud-scale));
+    width: var(--discog-cover-size);
+    height: var(--discog-cover-size);
+    flex: 0 0 auto;
+    border-radius: calc(0.35rem * var(--hud-scale));
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--color-border) 70%, transparent);
+    background: color-mix(in srgb, var(--color-border) 22%, transparent);
+    transition:
+      width 280ms cubic-bezier(0.22, 1, 0.36, 1),
+      height 280ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .discog--catalog .discog__item.is-expanded .discog__cover {
+    --discog-cover-size: calc(5.5rem * var(--hud-scale));
+  }
+
+  .discog__cover-link {
+    display: block;
+    width: 100%;
+    height: 100%;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .discog__cover-link:focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--color-accent) 70%, transparent);
+    outline-offset: 2px;
+  }
+
+  .discog__cover-link:hover .discog__cover-img,
+  .discog__cover-link:focus-visible .discog__cover-img {
+    filter: brightness(1.08);
+  }
+
+  .discog__cover-img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .discog__cover-placeholder {
+    display: block;
+    width: 100%;
+    height: 100%;
+    background:
+      linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--color-border) 35%, transparent) 0%,
+        color-mix(in srgb, var(--color-border) 12%, transparent) 100%
+      );
+  }
+
+  .discog--catalog .discog__main {
+    display: flex;
+    flex-direction: column;
+    gap: calc(0.45rem * var(--hud-scale));
+    min-width: 0;
+  }
+
+  .discog__toggle {
+    appearance: none;
+    display: block;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    min-width: 0;
+  }
+
+  .discog__toggle:focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--color-accent) 70%, transparent);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  .discog__headline {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.35em 0.65em;
+    min-width: 0;
+  }
+
+  .discog--catalog .discog__title {
+    font-family: var(--font-display);
+    font-size: calc(0.88rem * var(--hud-scale));
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    line-height: 1.25;
+    color: var(--color-text);
+  }
+
+  .discog__kind {
+    font-size: calc(0.72rem * var(--hud-scale));
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+  }
+
+  .discog__details {
+    display: flex;
+    flex-direction: column;
+    gap: calc(0.55rem * var(--hud-scale));
+    padding-top: calc(0.35rem * var(--hud-scale));
+  }
+
+  .discog__details[hidden] {
+    display: none;
+  }
+
+  .discog__facts {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: calc(0.3rem * var(--hud-scale));
+  }
+
+  .discog__fact {
+    display: grid;
+    grid-template-columns: minmax(4.5rem, auto) minmax(0, 1fr);
+    column-gap: calc(0.65rem * var(--hud-scale));
+    align-items: baseline;
+    font-size: calc(0.78rem * var(--hud-scale));
+  }
+
+  .discog__fact dt {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 0.85em;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+  }
+
+  .discog__fact dd {
+    margin: 0;
+    color: var(--color-text);
+  }
+
+  .discog__notes {
+    margin: 0;
+    font-size: calc(0.78rem * var(--hud-scale));
+    line-height: 1.45;
+    color: var(--color-text-muted);
+  }
+
+  /* Collapsed: listen under title. Expanded: listen lives in details only. */
+  .discog--catalog .discog__item.is-expanded .discog__listen--summary {
+    display: none;
+  }
+
+  .discog__play-slot {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: calc(0.15rem * var(--hud-scale));
+  }
+
+  .discog__play {
+    appearance: none;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    width: calc(2.35rem * var(--hud-scale));
+    height: calc(2.35rem * var(--hud-scale));
+    border-radius: 999px;
+    display: grid;
+    place-items: center;
+    font: inherit;
+    color: var(--color-text-muted);
+    border: 1px solid color-mix(in srgb, var(--color-border) 70%, transparent);
+    background: transparent;
+    cursor: pointer;
+    transition:
+      border-color 160ms ease,
+      color 160ms ease,
+      background-color 160ms ease;
+  }
+
+  .discog__play:hover {
+    color: var(--color-accent-alt);
+    border-color: var(--color-accent);
+    background: color-mix(in srgb, var(--color-accent) 10%, transparent);
+  }
+
+  .discog__play :global(.hud-icon) {
+    width: calc(1.1rem * var(--hud-scale));
+    height: calc(1.1rem * var(--hud-scale));
+    translate: 0.08em 0;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .discog__cover {
+      transition: none;
+    }
+  }
+
   /* Left: title / meta / divider / listen. Right: play (or playing) spanning the card. */
-  .discog__item {
+  .discog:not(.discog--catalog) .discog__item {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: stretch;
@@ -145,13 +602,13 @@ const releases = themeTracksOnly
       box-shadow 200ms ease;
   }
 
-  .discog__item[data-discog-active='true'] {
+  .discog:not(.discog--catalog) .discog__item[data-discog-active='true'] {
     border-color: color-mix(in srgb, var(--color-accent) 55%, var(--color-border));
     background: color-mix(in srgb, var(--color-accent) 10%, transparent);
     box-shadow: inset 0 1px 0 color-mix(in srgb, var(--color-text) 6%, transparent);
   }
 
-  .discog__main {
+  .discog:not(.discog--catalog) .discog__main {
     display: flex;
     flex-direction: column;
     gap: calc(0.55rem * var(--hud-scale));
@@ -165,7 +622,7 @@ const releases = themeTracksOnly
     min-width: 0;
   }
 
-  .discog__title {
+  .discog:not(.discog--catalog) .discog__title {
     font-family: var(--font-display);
     font-size: calc(0.88rem * var(--hud-scale));
     font-weight: 600;
@@ -174,7 +631,7 @@ const releases = themeTracksOnly
     color: var(--color-text);
   }
 
-  .discog__item[data-discog-active='true'] .discog__title {
+  .discog:not(.discog--catalog) .discog__item[data-discog-active='true'] .discog__title {
     color: var(--color-accent-alt);
   }
 
@@ -485,6 +942,11 @@ const releases = themeTracksOnly
     min-width: 0;
   }
 
+  .discog--catalog .discog__listen--summary {
+    padding-top: calc(0.35rem * var(--hud-scale));
+    border-top: none;
+  }
+
   .discog__listen-label {
     font-family: var(--font-display);
     font-size: calc(0.58rem * var(--hud-scale));
@@ -667,7 +1129,7 @@ const releases = themeTracksOnly
    * Thumb-sized listen marks + play slot; divider already lives on .discog__main only.
    */
   @media (max-width: 1023px) {
-    .discog {
+    .discog[data-theme-tracks] {
       width: 100%;
       max-width: 100%;
       min-width: 0;
@@ -681,7 +1143,7 @@ const releases = themeTracksOnly
       touch-action: pan-y;
     }
 
-    .discog__item {
+    .discog:not(.discog--catalog) .discog__item {
       column-gap: 0.55rem;
     }
 
