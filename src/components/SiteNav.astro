@@ -1,7 +1,10 @@
 ---
 import { Image } from 'astro:assets';
+import { getCollection, render } from 'astro:content';
 import site from '../data/site.json';
 import wordmark from '../assets/images/brand/valence-wordmark.png';
+import { getMergedDiscography } from '../lib/catalog-tracks';
+import { getValidJukeboxEntries } from '../lib/background';
 import type { UiChrome } from '../lib/stage';
 import { getAboutEntry, getSiteNavData, getUpcomingShows, resolveShowTitle } from '../lib/stage';
 import { withBase } from '../lib/url';
@@ -14,12 +17,25 @@ interface Props {
 const { chrome } = Astro.props;
 const { shopUrl } = getSiteNavData();
 const about = await getAboutEntry();
+const AboutContent = about ? (await render(about)).Content : undefined;
 const upcomingShows = await getUpcomingShows();
+const [legalEntries, stageVideos] = await Promise.all([
+  getCollection('legal'),
+  getValidJukeboxEntries(),
+]);
+const legalPanels = await Promise.all(
+  legalEntries.map(async (entry) => {
+    const { Content } = await render(entry);
+    return { id: entry.id, title: entry.data.title, Content };
+  }),
+);
+const releases = await getMergedDiscography(new Set(stageVideos.map((v) => v.id)));
 const artistName = site.artist.name;
-const tourDateFmt = new Intl.DateTimeFormat('en-GB', {
+const tourPortalDateFmt = new Intl.DateTimeFormat('en-GB', {
   timeZone: 'Europe/Berlin',
   day: 'numeric',
   month: 'short',
+  year: 'numeric',
 });
 
 const menuChannels = site.channels
@@ -128,10 +144,10 @@ const menuChannels = site.channels
   >
     {/*
       One navigation system: primary destinations use the same row (label + chevron).
-      Right chevron = leave/open overlay; down chevron = expand in place (Tour only).
+      Mobile: primary + legal open a fade-portal content layer (shell stays).
       Legal is a quiet horizontal pair below; socials are a labeled footer.
     */}
-    <div class="site-nav__menu-body">
+    <div class="site-nav__menu-body" data-site-nav-menu-body>
       <nav class="site-nav__menu-list" aria-label="Primary">
         {
           shopUrl ? (
@@ -151,8 +167,7 @@ const menuChannels = site.channels
             <a
               class="site-nav__menu-item"
               href={withBase('/shop')}
-              data-legal-slug="shop"
-              data-site-nav-menu-close
+              data-site-nav-portal="shop"
               style="--nav-stagger: 0"
             >
               <span class="site-nav__menu-item-label">{chrome.shopTitle}</span>
@@ -161,86 +176,22 @@ const menuChannels = site.channels
           )
         }
 
-        <div class="site-nav__menu-tour" data-site-nav-tour style="--nav-stagger: 1">
-          <button
-            type="button"
-            class="site-nav__menu-item site-nav__menu-tour-toggle"
-            data-site-nav-tour-toggle
-            aria-expanded="false"
-            aria-controls="site-nav-tour-panel"
-          >
-            <span class="site-nav__menu-item-label">{chrome.tourTitle}</span>
-            <span
-              class="site-nav__menu-item-chevron site-nav__menu-item-chevron--expand"
-              aria-hidden="true"
-            ></span>
-          </button>
-          <div
-            class="site-nav__menu-tour-panel"
-            id="site-nav-tour-panel"
-            data-site-nav-tour-panel
-            hidden
-          >
-            <div class="site-nav__menu-tour-panel-inner">
-              {
-                upcomingShows.length === 0 ? (
-                  <p class="site-nav__menu-nested-empty">{chrome.emptyShows}</p>
-                ) : (
-                  <ul class="site-nav__menu-nested" aria-label={chrome.tourTitle}>
-                    {upcomingShows.map((show, index) => {
-                      const eventTitle = resolveShowTitle(show.title, show.venue);
-                      const dateLabel = tourDateFmt.format(show.date);
-                      const href = show.ticketUrl || show.venueUrl || withBase('/tour');
-                      const external = Boolean(show.ticketUrl || show.venueUrl);
-                      return (
-                        <li style={`--dest-stagger: ${index}`}>
-                          <a
-                            class="site-nav__menu-item site-nav__menu-item--nested"
-                            href={href}
-                            target={external ? '_blank' : undefined}
-                            rel={external ? 'noopener noreferrer' : undefined}
-                            data-legal-slug={external ? undefined : 'tour'}
-                            data-site-nav-menu-close
-                          >
-                            <span class="site-nav__menu-item-text">
-                              <span class="site-nav__menu-item-label">{show.city}</span>
-                              <span class="site-nav__menu-item-meta">
-                                <time datetime={show.date.toISOString().slice(0, 10)}>
-                                  {dateLabel}
-                                </time>
-                                {' · '}
-                                {eventTitle}
-                              </span>
-                            </span>
-                            <span class="site-nav__menu-item-chevron" aria-hidden="true"></span>
-                          </a>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                )
-              }
-              <a
-                class="site-nav__menu-item site-nav__menu-item--nested"
-                href={withBase('/tour')}
-                data-legal-slug="tour"
-                data-site-nav-menu-close
-                style={`--dest-stagger: ${Math.max(upcomingShows.length, 1)}`}
-              >
-                <span class="site-nav__menu-item-label">All dates</span>
-                <span class="site-nav__menu-item-chevron" aria-hidden="true"></span>
-              </a>
-            </div>
-          </div>
-        </div>
+        <a
+          class="site-nav__menu-item"
+          href={withBase('/tour')}
+          data-site-nav-portal="tour"
+          style="--nav-stagger: 1"
+        >
+          <span class="site-nav__menu-item-label">{chrome.tourTitle}</span>
+          <span class="site-nav__menu-item-chevron" aria-hidden="true"></span>
+        </a>
 
         {
           about && (
             <a
               class="site-nav__menu-item"
               href={withBase('/about')}
-              data-legal-slug="about"
-              data-site-nav-menu-close
+              data-site-nav-portal="about"
               style="--nav-stagger: 2"
             >
               <span class="site-nav__menu-item-label">{chrome.aboutTitle}</span>
@@ -251,8 +202,7 @@ const menuChannels = site.channels
         <a
           class="site-nav__menu-item"
           href={withBase('/discography')}
-          data-legal-slug="discography"
-          data-site-nav-menu-close
+          data-site-nav-portal="discography"
           style="--nav-stagger: 3"
         >
           <span class="site-nav__menu-item-label">{chrome.discographyTitle}</span>
@@ -265,16 +215,14 @@ const menuChannels = site.channels
         <a
           class="site-nav__menu-legal-item"
           href={withBase('/legal/imprint')}
-          data-legal-slug="imprint"
-          data-site-nav-menu-close
+          data-site-nav-portal="imprint"
         >
           {chrome.imprintButton}
         </a>
         <a
           class="site-nav__menu-legal-item"
           href={withBase('/legal/privacy')}
-          data-legal-slug="privacy"
-          data-site-nav-menu-close
+          data-site-nav-portal="privacy"
         >
           {chrome.privacyButton}
         </a>
@@ -304,6 +252,144 @@ const menuChannels = site.channels
         )
       }
     </div>
+
+    {/* Fade portal: soft-dissolve content layer over the menu list (mobile only). */}
+    <div
+      class="site-nav__menu-portal"
+      data-site-nav-portal-layer
+      hidden
+      aria-hidden="true"
+    >
+      <button
+        type="button"
+        class="site-nav__menu-portal-back"
+        data-site-nav-portal-back
+      >
+        <span class="site-nav__menu-portal-back-chevron" aria-hidden="true"></span>
+        Back
+      </button>
+
+      <div class="site-nav__menu-portal-scroll">
+        <div
+          class="site-nav__menu-portal-panel"
+          data-site-nav-portal-panel="tour"
+          hidden
+        >
+          <h2 class="site-nav__menu-portal-title">{chrome.tourTitle}</h2>
+          {
+            upcomingShows.length === 0 ? (
+              <p class="site-nav__menu-portal-empty">{chrome.emptyShows}</p>
+            ) : (
+              <ul class="site-nav__menu-portal-dates" aria-label={chrome.tourTitle}>
+                {upcomingShows.map((show) => {
+                  const eventTitle = resolveShowTitle(show.title, show.venue);
+                  const dateLabel = tourPortalDateFmt.format(show.date);
+                  const href = show.ticketUrl || show.venueUrl;
+                  const dateAttrs = {
+                    class: 'site-nav__menu-portal-date',
+                    datetime: show.date.toISOString().slice(0, 10),
+                  };
+                  if (href) {
+                    return (
+                      <li>
+                        <a
+                          class="site-nav__menu-portal-date-row"
+                          href={href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <time {...dateAttrs}>{dateLabel}</time>
+                          <span class="site-nav__menu-portal-date-city">{show.city}</span>
+                          <span class="site-nav__menu-portal-date-event">{eventTitle}</span>
+                        </a>
+                      </li>
+                    );
+                  }
+                  return (
+                    <li>
+                      <div class="site-nav__menu-portal-date-row">
+                        <time {...dateAttrs}>{dateLabel}</time>
+                        <span class="site-nav__menu-portal-date-city">{show.city}</span>
+                        <span class="site-nav__menu-portal-date-event">{eventTitle}</span>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            )
+          }
+        </div>
+
+        {
+          AboutContent && (
+            <div
+              class="site-nav__menu-portal-panel site-nav__menu-portal-panel--prose"
+              data-site-nav-portal-panel="about"
+              hidden
+            >
+              <h2 class="site-nav__menu-portal-title">{chrome.aboutTitle}</h2>
+              <div class="site-nav__menu-portal-prose">
+                <AboutContent />
+              </div>
+            </div>
+          )
+        }
+
+        <div
+          class="site-nav__menu-portal-panel"
+          data-site-nav-portal-panel="discography"
+          hidden
+        >
+          <h2 class="site-nav__menu-portal-title">{chrome.discographyTitle}</h2>
+          {
+            releases.length === 0 ? (
+              <p class="site-nav__menu-portal-empty">{chrome.emptyReleases}</p>
+            ) : (
+              <ul class="site-nav__menu-portal-releases" aria-label={chrome.discographyTitle}>
+                {releases.map((release) => (
+                  <li class="site-nav__menu-portal-release">
+                    <span class="site-nav__menu-portal-release-title">{release.title}</span>
+                    <span class="site-nav__menu-portal-release-meta">
+                      {release.year}
+                      {release.kind ? ` · ${release.kind}` : ''}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )
+          }
+        </div>
+
+        {
+          !shopUrl && (
+            <div
+              class="site-nav__menu-portal-panel site-nav__menu-portal-panel--prose"
+              data-site-nav-portal-panel="shop"
+              hidden
+            >
+              <h2 class="site-nav__menu-portal-title">{chrome.shopTitle}</h2>
+              <p class="site-nav__menu-portal-lead">{chrome.shopComingSoonTitle}</p>
+              <p class="site-nav__menu-portal-copy">{chrome.shopComingSoonBody}</p>
+            </div>
+          )
+        }
+
+        {
+          legalPanels.map(({ id, title, Content }) => (
+            <div
+              class="site-nav__menu-portal-panel site-nav__menu-portal-panel--prose"
+              data-site-nav-portal-panel={id}
+              hidden
+            >
+              <h2 class="site-nav__menu-portal-title">{title}</h2>
+              <div class="site-nav__menu-portal-prose site-nav__menu-portal-prose--legal">
+                <Content />
+              </div>
+            </div>
+          ))
+        }
+      </div>
+    </div>
   </div>
 </header>
 
@@ -325,14 +411,22 @@ const menuChannels = site.channels
 
     const menu = root.querySelector<HTMLElement>('[data-site-nav-menu]');
     const menuBtn = root.querySelector<HTMLButtonElement>('[data-site-nav-menu-toggle]');
-    const tourBlock = root.querySelector<HTMLElement>('[data-site-nav-tour]');
-    const tourToggle = root.querySelector<HTMLButtonElement>('[data-site-nav-tour-toggle]');
-    const tourPanel = root.querySelector<HTMLElement>('[data-site-nav-tour-panel]');
+    const menuBody = root.querySelector<HTMLElement>('[data-site-nav-menu-body]');
+    const portalLayer = root.querySelector<HTMLElement>('[data-site-nav-portal-layer]');
+    const portalBack = root.querySelector<HTMLButtonElement>('[data-site-nav-portal-back]');
+    const portalPanels = Array.from(
+      root.querySelectorAll<HTMLElement>('[data-site-nav-portal-panel]'),
+    );
     let closeTimer: number | undefined;
+    let portalTimer: number | undefined;
     let onCloseTransitionEnd: ((event: TransitionEvent) => void) | undefined;
+    let portalTrigger: HTMLElement | null = null;
+    let activePortal: string | null = null;
 
     const prefersReducedMotion = () =>
       window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    const isMobileMenu = () => window.matchMedia('(max-width: 1023px)').matches;
 
     const clearCloseWait = () => {
       if (closeTimer !== undefined) {
@@ -345,34 +439,88 @@ const menuChannels = site.channels
       }
     };
 
-    const setTourOpen = (open: boolean) => {
-      if (!tourBlock || !tourToggle || !tourPanel) return;
-      tourToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-      if (open) {
-        tourPanel.hidden = false;
-        // Force layout so grid-rows / opacity transitions run from collapsed.
-        void tourPanel.offsetHeight;
-        tourBlock.classList.add('is-tour-open');
-      } else {
-        tourBlock.classList.remove('is-tour-open');
-        if (prefersReducedMotion()) {
-          tourPanel.hidden = true;
-        } else {
-          // Hide after collapse transition; keep in DOM while animating.
-          window.setTimeout(() => {
-            if (!tourBlock.classList.contains('is-tour-open')) {
-              tourPanel.hidden = true;
-            }
-          }, 420);
-        }
+    const clearPortalWait = () => {
+      if (portalTimer !== undefined) {
+        window.clearTimeout(portalTimer);
+        portalTimer = undefined;
       }
+    };
+
+    const hideAllPortalPanels = () => {
+      portalPanels.forEach((panel) => {
+        panel.hidden = true;
+      });
+    };
+
+    const resetPortalInstant = () => {
+      clearPortalWait();
+      activePortal = null;
+      portalTrigger = null;
+      root.classList.remove('is-portal-open', 'is-portal-closing');
+      hideAllPortalPanels();
+      if (portalLayer) {
+        portalLayer.hidden = true;
+        portalLayer.setAttribute('aria-hidden', 'true');
+      }
+      menuBody?.removeAttribute('aria-hidden');
+    };
+
+    const setPortalOpen = (slug: string | null, trigger?: HTMLElement | null) => {
+      if (!portalLayer || !menuBody) return;
+
+      if (!slug) {
+        if (!activePortal && portalLayer.hidden) return;
+
+        root.classList.remove('is-portal-open');
+        root.classList.add('is-portal-closing');
+        menuBody.removeAttribute('aria-hidden');
+
+        const finishPortalClose = () => {
+          clearPortalWait();
+          hideAllPortalPanels();
+          portalLayer.hidden = true;
+          portalLayer.setAttribute('aria-hidden', 'true');
+          root.classList.remove('is-portal-closing');
+          activePortal = null;
+          const restore = portalTrigger;
+          portalTrigger = null;
+          restore?.focus();
+        };
+
+        if (prefersReducedMotion()) {
+          finishPortalClose();
+          return;
+        }
+
+        clearPortalWait();
+        portalTimer = window.setTimeout(finishPortalClose, 420);
+        return;
+      }
+
+      const panel = root.querySelector<HTMLElement>(
+        `[data-site-nav-portal-panel="${slug}"]`,
+      );
+      if (!panel) return;
+
+      clearPortalWait();
+      root.classList.remove('is-portal-closing');
+      portalTrigger = trigger ?? portalTrigger;
+      activePortal = slug;
+      hideAllPortalPanels();
+      panel.hidden = false;
+      portalLayer.hidden = false;
+      portalLayer.setAttribute('aria-hidden', 'false');
+      menuBody.setAttribute('aria-hidden', 'true');
+      // Paint closed portal before dissolving in.
+      void portalLayer.offsetWidth;
+      root.classList.add('is-portal-open');
+      portalBack?.focus();
     };
 
     const finishClose = () => {
       clearCloseWait();
       if (!menu || !menuBtn) return;
-      setTourOpen(false);
-      if (tourPanel) tourPanel.hidden = true;
+      resetPortalInstant();
       menu.hidden = true;
       menuBtn.focus();
     };
@@ -382,6 +530,7 @@ const menuChannels = site.channels
 
       if (open) {
         clearCloseWait();
+        resetPortalInstant();
         menu.hidden = false;
         // Paint collapsed morph (clip-path circle) before expanding.
         void menu.offsetWidth;
@@ -389,15 +538,16 @@ const menuChannels = site.channels
         document.documentElement.classList.add('site-nav-menu-open');
         menuBtn.setAttribute('aria-expanded', 'true');
         menuBtn.setAttribute('aria-label', 'Close menu');
-        const first = menu.querySelector<HTMLElement>('a, button');
+        const first = menuBody?.querySelector<HTMLElement>('a, button') ??
+          menu.querySelector<HTMLElement>('a, button');
         first?.focus();
         return;
       }
 
       if (!root.classList.contains('is-menu-open') && menu.hidden) return;
 
-      // Collapse Tour first so reverse stagger reads cleanly.
-      setTourOpen(false);
+      // Drop portal before morph-collapse so reverse stagger reads cleanly.
+      resetPortalInstant();
       root.classList.remove('is-menu-open');
       document.documentElement.classList.remove('site-nav-menu-open');
       menuBtn.setAttribute('aria-expanded', 'false');
@@ -431,9 +581,19 @@ const menuChannels = site.channels
       setMenuOpen(!root.classList.contains('is-menu-open'));
     });
 
-    tourToggle?.addEventListener('click', () => {
-      const next = !tourBlock?.classList.contains('is-tour-open');
-      setTourOpen(Boolean(next));
+    root.querySelectorAll<HTMLElement>('[data-site-nav-portal]').forEach((el) => {
+      el.addEventListener('click', (event) => {
+        if (!isMobileMenu() || !root.classList.contains('is-menu-open')) return;
+        const slug = el.getAttribute('data-site-nav-portal');
+        if (!slug) return;
+        event.preventDefault();
+        event.stopPropagation();
+        setPortalOpen(slug, el);
+      });
+    });
+
+    portalBack?.addEventListener('click', () => {
+      setPortalOpen(null);
     });
 
     root.querySelectorAll<HTMLElement>('[data-site-nav-menu-close]').forEach((el) => {
@@ -445,9 +605,9 @@ const menuChannels = site.channels
 
     document.addEventListener('keydown', (event) => {
       if (event.key !== 'Escape' || !root.classList.contains('is-menu-open')) return;
-      if (tourBlock?.classList.contains('is-tour-open')) {
-        setTourOpen(false);
-        tourToggle?.focus();
+      if (activePortal || root.classList.contains('is-portal-open')) {
+        event.preventDefault();
+        setPortalOpen(null);
         return;
       }
       setMenuOpen(false);
@@ -636,11 +796,17 @@ const menuChannels = site.channels
       visibility 0s linear 0s;
   }
 
+  .site-nav.is-portal-open .site-nav__menu {
+    overflow: hidden;
+  }
+
   .site-nav__menu[hidden] {
     display: none;
   }
 
   .site-nav__menu-body {
+    position: relative;
+    z-index: 1;
     display: flex;
     flex-direction: column;
     gap: 0;
@@ -652,6 +818,267 @@ const menuChannels = site.channels
       100dvh - max(5.5rem, calc(env(safe-area-inset-top, 0px) + 4.5rem)) -
         max(2rem, env(safe-area-inset-bottom, 0px))
     );
+    transition:
+      opacity 380ms cubic-bezier(0.22, 1, 0.36, 1),
+      filter 380ms cubic-bezier(0.22, 1, 0.36, 1),
+      transform 380ms cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: opacity, filter, transform;
+  }
+
+  .site-nav.is-portal-open .site-nav__menu-body,
+  .site-nav.is-portal-closing .site-nav__menu-body {
+    pointer-events: none;
+  }
+
+  .site-nav.is-portal-open .site-nav__menu-body {
+    opacity: 0;
+    filter: blur(10px);
+    transform: scale(0.985);
+  }
+
+  .site-nav.is-portal-closing .site-nav__menu-body {
+    opacity: 1;
+    filter: blur(0);
+    transform: none;
+  }
+
+  /* Soft-dissolve content layer over the list — same shell, new plane. */
+  .site-nav__menu-portal {
+    --portal-fade: 380ms;
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    padding: max(5.5rem, calc(env(safe-area-inset-top, 0px) + 4.5rem))
+      clamp(1.25rem, 6vw, 2.5rem)
+      max(2rem, env(safe-area-inset-bottom, 0px));
+    opacity: 0;
+    filter: blur(12px);
+    transform: scale(1.015);
+    visibility: hidden;
+    pointer-events: none;
+    transition:
+      opacity var(--portal-fade) cubic-bezier(0.22, 1, 0.36, 1),
+      filter var(--portal-fade) cubic-bezier(0.22, 1, 0.36, 1),
+      transform var(--portal-fade) cubic-bezier(0.22, 1, 0.36, 1),
+      visibility 0s linear var(--portal-fade);
+    will-change: opacity, filter, transform;
+  }
+
+  .site-nav.is-portal-open .site-nav__menu-portal {
+    opacity: 1;
+    filter: blur(0);
+    transform: none;
+    visibility: visible;
+    pointer-events: auto;
+    transition:
+      opacity var(--portal-fade) cubic-bezier(0.22, 1, 0.36, 1),
+      filter var(--portal-fade) cubic-bezier(0.22, 1, 0.36, 1),
+      transform var(--portal-fade) cubic-bezier(0.22, 1, 0.36, 1),
+      visibility 0s linear 0s;
+  }
+
+  .site-nav.is-portal-closing .site-nav__menu-portal {
+    opacity: 0;
+    filter: blur(10px);
+    transform: scale(1.01);
+    visibility: visible;
+    pointer-events: none;
+  }
+
+  .site-nav__menu-portal[hidden] {
+    display: none;
+  }
+
+  .site-nav.is-portal-open .site-nav__menu-portal[hidden],
+  .site-nav.is-portal-closing .site-nav__menu-portal[hidden] {
+    display: flex;
+  }
+
+  .site-nav__menu-portal-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    align-self: flex-start;
+    margin: 0 0 1.35rem;
+    padding: 0.2rem 0;
+    border: 0;
+    background: transparent;
+    color: color-mix(in srgb, #fff 62%, transparent);
+    font-family: var(--font-display);
+    font-size: clamp(0.72rem, 3.1vw, 0.84rem);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+
+  .site-nav__menu-portal-back:hover,
+  .site-nav__menu-portal-back:focus-visible {
+    color: #fff;
+    outline: none;
+  }
+
+  .site-nav__menu-portal-back-chevron {
+    display: block;
+    width: 0.45rem;
+    height: 0.45rem;
+    border-left: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    transform: rotate(45deg);
+    opacity: 0.75;
+  }
+
+  .site-nav__menu-portal-scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    width: 100%;
+    max-width: 26rem;
+    margin: 0 auto;
+  }
+
+  .site-nav__menu-portal-title {
+    margin: 0 0 1.15rem;
+    font-family: var(--font-display);
+    font-size: clamp(1.35rem, 6.5vw, 1.85rem);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    line-height: 1.15;
+    color: color-mix(in srgb, #fff 92%, transparent);
+  }
+
+  .site-nav__menu-portal-empty,
+  .site-nav__menu-portal-copy {
+    margin: 0;
+    font-family: var(--font-body, inherit);
+    font-size: clamp(0.95rem, 3.8vw, 1.1rem);
+    line-height: 1.55;
+    letter-spacing: 0.01em;
+    color: color-mix(in srgb, #fff 62%, transparent);
+  }
+
+  .site-nav__menu-portal-lead {
+    margin: 0 0 0.65rem;
+    font-family: var(--font-display);
+    font-size: clamp(1.05rem, 4.2vw, 1.25rem);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, #fff 82%, transparent);
+  }
+
+  .site-nav__menu-portal-prose {
+    font-family: var(--font-body, inherit);
+    font-size: clamp(1.05rem, 4.4vw, 1.35rem);
+    line-height: 1.6;
+    letter-spacing: 0.01em;
+    color: color-mix(in srgb, #fff 78%, transparent);
+  }
+
+  .site-nav__menu-portal-prose :global(p) {
+    margin: 0 0 0.85em;
+  }
+
+  .site-nav__menu-portal-prose :global(p:last-child) {
+    margin-bottom: 0;
+  }
+
+  .site-nav__menu-portal-prose--legal {
+    font-size: clamp(0.92rem, 3.6vw, 1.05rem);
+    line-height: 1.55;
+    color: color-mix(in srgb, #fff 70%, transparent);
+  }
+
+  .site-nav__menu-portal-prose--legal :global(ul),
+  .site-nav__menu-portal-prose--legal :global(ol) {
+    margin: 0 0 0.85em;
+    padding-left: 1.1em;
+  }
+
+  .site-nav__menu-portal-prose--legal :global(strong) {
+    color: color-mix(in srgb, #fff 88%, transparent);
+    font-weight: 600;
+  }
+
+  .site-nav__menu-portal-dates,
+  .site-nav__menu-portal-releases {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .site-nav__menu-portal-date-row {
+    display: grid;
+    grid-template-columns: minmax(5.5rem, auto) 1fr;
+    grid-template-areas:
+      'date city'
+      'date event';
+    column-gap: 1rem;
+    row-gap: 0.15rem;
+    align-items: baseline;
+    padding: 0.85rem 0;
+    border-bottom: 1px solid color-mix(in srgb, #fff 12%, transparent);
+    color: inherit;
+    text-decoration: none;
+  }
+
+  a.site-nav__menu-portal-date-row:hover,
+  a.site-nav__menu-portal-date-row:focus-visible {
+    border-bottom-color: color-mix(in srgb, var(--color-accent-alt, #c8ff4a) 55%, transparent);
+    outline: none;
+  }
+
+  .site-nav__menu-portal-date {
+    grid-area: date;
+    font-family: var(--font-display);
+    font-size: clamp(0.78rem, 3.2vw, 0.9rem);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, #fff 55%, transparent);
+  }
+
+  .site-nav__menu-portal-date-city {
+    grid-area: city;
+    font-family: var(--font-display);
+    font-size: clamp(1.05rem, 4.5vw, 1.35rem);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, #fff 90%, transparent);
+  }
+
+  .site-nav__menu-portal-date-event {
+    grid-area: event;
+    font-family: var(--font-body, inherit);
+    font-size: clamp(0.82rem, 3.3vw, 0.95rem);
+    letter-spacing: 0.01em;
+    color: color-mix(in srgb, #fff 55%, transparent);
+  }
+
+  .site-nav__menu-portal-release {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    padding: 0.85rem 0;
+    border-bottom: 1px solid color-mix(in srgb, #fff 12%, transparent);
+  }
+
+  .site-nav__menu-portal-release-title {
+    font-family: var(--font-display);
+    font-size: clamp(1.05rem, 4.5vw, 1.35rem);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, #fff 90%, transparent);
+  }
+
+  .site-nav__menu-portal-release-meta {
+    font-family: var(--font-body, inherit);
+    font-size: clamp(0.78rem, 3.2vw, 0.9rem);
+    letter-spacing: 0.02em;
+    color: color-mix(in srgb, #fff 52%, transparent);
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -663,23 +1090,30 @@ const menuChannels = site.channels
     }
 
     .site-nav__menu-list > .site-nav__menu-item,
-    .site-nav__menu-list > .site-nav__menu-tour,
     .site-nav__menu-legal,
     .site-nav__menu-footer,
     .site-nav.is-menu-open .site-nav__menu-list > .site-nav__menu-item,
-    .site-nav.is-menu-open .site-nav__menu-list > .site-nav__menu-tour,
     .site-nav.is-menu-open .site-nav__menu-legal,
     .site-nav.is-menu-open .site-nav__menu-footer,
-    .site-nav__menu-item--nested,
-    .site-nav__menu-tour.is-tour-open .site-nav__menu-item--nested {
+    .site-nav__menu-body,
+    .site-nav.is-portal-open .site-nav__menu-body,
+    .site-nav.is-portal-closing .site-nav__menu-body,
+    .site-nav__menu-portal,
+    .site-nav.is-portal-open .site-nav__menu-portal,
+    .site-nav.is-portal-closing .site-nav__menu-portal {
       transition: none;
       opacity: 1;
       transform: none;
+      filter: none;
     }
 
-    .site-nav__menu-tour-panel,
-    .site-nav__menu-tour.is-tour-open .site-nav__menu-tour-panel {
-      transition: none;
+    .site-nav.is-portal-open .site-nav__menu-body {
+      opacity: 0;
+    }
+
+    .site-nav:not(.is-portal-open) .site-nav__menu-portal,
+    .site-nav.is-portal-closing .site-nav__menu-portal {
+      opacity: 0;
     }
   }
 
@@ -696,7 +1130,6 @@ const menuChannels = site.channels
   }
 
   .site-nav__menu-list > .site-nav__menu-item,
-  .site-nav__menu-list > .site-nav__menu-tour,
   .site-nav__menu-legal,
   .site-nav__menu-footer {
     --nav-stagger: 0;
@@ -709,7 +1142,6 @@ const menuChannels = site.channels
   }
 
   .site-nav.is-menu-open .site-nav__menu-list > .site-nav__menu-item,
-  .site-nav.is-menu-open .site-nav__menu-list > .site-nav__menu-tour,
   .site-nav.is-menu-open .site-nav__menu-legal,
   .site-nav.is-menu-open .site-nav__menu-footer {
     opacity: 1;
@@ -720,7 +1152,6 @@ const menuChannels = site.channels
   }
 
   .site-nav:not(.is-menu-open) .site-nav__menu-list > .site-nav__menu-item,
-  .site-nav:not(.is-menu-open) .site-nav__menu-list > .site-nav__menu-tour,
   .site-nav:not(.is-menu-open) .site-nav__menu-legal,
   .site-nav:not(.is-menu-open) .site-nav__menu-footer {
     transition-delay: calc((var(--menu-stagger-max) - var(--nav-stagger)) * 28ms);
@@ -760,29 +1191,7 @@ const menuChannels = site.channels
     min-width: 0;
   }
 
-  .site-nav__menu-item-text {
-    display: flex;
-    flex-direction: column;
-    gap: 0.12rem;
-    min-width: 0;
-    flex: 1 1 auto;
-  }
-
-  .site-nav__menu-item-meta {
-    font-family: var(--font-body, inherit);
-    font-size: 0.58em;
-    letter-spacing: 0.02em;
-    text-transform: none;
-    line-height: 1.25;
-    color: color-mix(in srgb, #fff 55%, transparent);
-  }
-
-  .site-nav__menu-item:hover .site-nav__menu-item-meta,
-  .site-nav__menu-item:focus-visible .site-nav__menu-item-meta {
-    color: color-mix(in srgb, #fff 70%, transparent);
-  }
-
-  /* Right = navigates / leaves; --expand = opens in place (points down). */
+  /* Right chevron = opens fade-portal content (or external link). */
   .site-nav__menu-item-chevron {
     display: block;
     width: var(--menu-chevron-size);
@@ -796,10 +1205,6 @@ const menuChannels = site.channels
     transition:
       transform 280ms cubic-bezier(0.22, 1, 0.36, 1),
       opacity 160ms ease;
-  }
-
-  .site-nav__menu-item-chevron--expand {
-    transform: rotate(45deg);
   }
 
   .site-nav__menu-item:hover .site-nav__menu-item-chevron,
@@ -833,97 +1238,6 @@ const menuChannels = site.channels
     color: #fff;
     border-bottom-color: color-mix(in srgb, var(--color-accent-alt, #c8ff4a) 55%, transparent);
     outline: none;
-  }
-
-  /* Tour expand: nested rows stay in the same system, indented under Tour. */
-  .site-nav__menu-tour {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-  }
-
-  .site-nav__menu-tour.is-tour-open .site-nav__menu-item-chevron--expand {
-    transform: rotate(225deg);
-  }
-
-  .site-nav__menu-tour-panel {
-    display: grid;
-    grid-template-rows: 0fr;
-    opacity: 0;
-    transition:
-      grid-template-rows 380ms cubic-bezier(0.22, 1, 0.36, 1),
-      opacity 280ms ease;
-  }
-
-  .site-nav__menu-tour.is-tour-open .site-nav__menu-tour-panel {
-    grid-template-rows: 1fr;
-    opacity: 1;
-  }
-
-  .site-nav__menu-tour-panel[hidden] {
-    display: none;
-  }
-
-  .site-nav__menu-tour.is-tour-open .site-nav__menu-tour-panel[hidden] {
-    display: grid;
-  }
-
-  .site-nav__menu-tour-panel-inner {
-    overflow: hidden;
-    min-height: 0;
-    margin: 0.1rem 0 0.35rem;
-    padding: 0.15rem 0 0.15rem 0.85rem;
-    border-left: 1px solid color-mix(in srgb, #fff 16%, transparent);
-  }
-
-  .site-nav__menu-nested {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-  }
-
-  .site-nav__menu-item--nested {
-    --dest-stagger: 0;
-    font-size: 0.68em;
-    min-height: calc(1.15em + (var(--menu-row-pad-y) * 1.6));
-    padding-top: calc(var(--menu-row-pad-y) * 0.75);
-    padding-bottom: calc(var(--menu-row-pad-y) * 0.75);
-    color: color-mix(in srgb, #fff 82%, transparent);
-    opacity: 0;
-    transform: translate3d(0, 0.4rem, 0);
-    transition:
-      opacity 320ms cubic-bezier(0.22, 1, 0.36, 1),
-      transform 320ms cubic-bezier(0.22, 1, 0.36, 1),
-      color 160ms ease,
-      border-bottom-color 160ms ease;
-    transition-delay: 0ms;
-  }
-
-  .site-nav__menu-tour.is-tour-open .site-nav__menu-item--nested {
-    opacity: 1;
-    transform: translate3d(0, 0, 0);
-    transition-delay: calc(80ms + (var(--dest-stagger, 0) * 50ms));
-  }
-
-  .site-nav__menu-item--nested .site-nav__menu-item-chevron {
-    width: calc(var(--menu-chevron-size) * 0.85);
-    height: calc(var(--menu-chevron-size) * 0.85);
-  }
-
-  .site-nav__menu-item--nested .site-nav__menu-item-meta {
-    font-size: 0.72em;
-  }
-
-  .site-nav__menu-nested-empty {
-    margin: 0.35rem 0;
-    font-family: var(--font-body, inherit);
-    font-size: clamp(0.8rem, 3.3vw, 0.95rem);
-    letter-spacing: 0.02em;
-    text-transform: none;
-    color: color-mix(in srgb, #fff 55%, transparent);
   }
 
   /* Labeled social footer — clear break from nav rows, still in-flow. */
