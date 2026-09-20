@@ -12,6 +12,7 @@
 | Reveal panels + toast shell | `src/components/TrackRubOverlay.astro` |
 | Spin gesture | `src/lib/infinite-spin.ts` |
 | Achievement storage + toast | `src/lib/achievement-toast.ts` |
+| Demonic combo (666) + wild glitch | `src/lib/demonic-combo.ts` (+ test), `src/lib/glitch.ts` (`amplifyForWild`), `src/lib/glitch-ambient.ts` (wild field) |
 | Shared gesture-ignore selectors | `src/lib/gesture-ignore.ts` (+ test) |
 | Player-found achievement | `src/lib/stage-player.ts` (copy from `StagePlayer.astro` data attributes) |
 | Tagline pin | `applyRubSuccessTagline` in `src/lib/tagline-rotator.ts` |

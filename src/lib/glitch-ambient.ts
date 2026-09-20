@@ -1,9 +1,45 @@
+import { isWildGlitchActive } from './demonic-combo';
 import { isGlitchThemeActive, playElementGlitch } from './glitch';
 
 /** Live-safe idle class — same families as hover/press, no clip-path dead zones. */
 export const AMBIENT_GLITCH_CLASS = 'is-glitch-ambient';
 
+/** Stamped on surfaces that only become `.glitch-hit` while wild ambient runs. */
+export const WILD_SURFACE_ATTR = 'wildGlitchSurface';
+
 const INTERACTIVE_SEL = 'button, a, [role="button"], summary';
+
+/**
+ * Visible stage / HUD chunks for demonic wild mode.
+ * Leaves preferred over parents (see `preferLeafSurfaces`).
+ */
+export const WILD_SURFACE_SELECTORS = [
+  '.glitch-hit',
+  '.site-nav__brand',
+  '.site-nav__item',
+  '.site-nav__menu-btn',
+  '.site-nav__menu-item',
+  '.site-nav__menu-legal-item',
+  '.site-nav__menu-channel',
+  '.site-nav__menu-portal-title',
+  '.site-nav__menu-portal-head-text',
+  '.site-nav__menu-portal-listen',
+  '.site-nav__menu-portal-collection-cover',
+  '.stage-player__eyebrow',
+  '[data-stage-panels]',
+  '[data-stage-panel]',
+  '.volume-control',
+  '.identity',
+  '[data-tagline-root]',
+  '.footer a',
+  '[data-now-playing]',
+  '.discog__item',
+  '.discog__head-text__title',
+  '.stage-card',
+].join(', ');
+
+const WILD_SKIP_CLOSEST =
+  '[data-atmosphere], [data-track-rub-overlay], .ve-achievement, [data-legal-overlay], [data-landing-intro], .hud-label-reveal';
 
 export type AmbientGlitchEligibility = {
   glitchHit: boolean;
@@ -28,6 +64,11 @@ export function qualifiesAsAmbientGlitchTarget(flags: AmbientGlitchEligibility):
   );
 }
 
+/** Wild mode: any laid-out stage surface except sliders / hidden / overlays. */
+export function qualifiesAsWildAmbientGlitchTarget(flags: AmbientGlitchEligibility): boolean {
+  return !flags.disabled && !flags.hidden && !flags.placeholder && !flags.slider;
+}
+
 export function readAmbientGlitchEligibility(el: Element): AmbientGlitchEligibility {
   return {
     glitchHit: el.classList.contains('glitch-hit'),
@@ -42,6 +83,12 @@ export function readAmbientGlitchEligibility(el: Element): AmbientGlitchEligibil
 
 export function isAmbientGlitchTarget(el: Element): el is HTMLElement {
   return el instanceof HTMLElement && qualifiesAsAmbientGlitchTarget(readAmbientGlitchEligibility(el));
+}
+
+export function isWildAmbientGlitchTarget(el: Element): el is HTMLElement {
+  if (!(el instanceof HTMLElement)) return false;
+  if (el.closest(WILD_SKIP_CLOSEST)) return false;
+  return qualifiesAsWildAmbientGlitchTarget(readAmbientGlitchEligibility(el));
 }
 
 export type OpenPanelChromeFlags = {
@@ -67,8 +114,47 @@ export function isOpenStagePanelChrome(el: Element): boolean {
   return isOpenStagePanelChromeHit({ insideOpenStagePanel, isPanelChrome });
 }
 
+/** Drop parents when a descendant is also a candidate — more surfaces, more chaos. */
+export function preferLeafSurfaces(els: HTMLElement[]): HTMLElement[] {
+  return els.filter((el) => !els.some((other) => other !== el && el.contains(other)));
+}
+
 export function collectAmbientGlitchTargets(root: ParentNode): HTMLElement[] {
   return [...root.querySelectorAll<HTMLElement>('.glitch-hit')].filter(isAmbientGlitchTarget);
+}
+
+export function collectWildAmbientGlitchTargets(root: ParentNode = document): HTMLElement[] {
+  const raw = [...root.querySelectorAll<HTMLElement>(WILD_SURFACE_SELECTORS)].filter(
+    isWildAmbientGlitchTarget,
+  );
+  return preferLeafSurfaces(raw);
+}
+
+/** Temporary `.glitch-hit` so ambient keyframes apply to non-hit stage chrome. */
+export function ensureWildGlitchSurface(el: HTMLElement): void {
+  if (el.classList.contains('glitch-hit')) return;
+  el.classList.add('glitch-hit');
+  el.dataset[WILD_SURFACE_ATTR] = '1';
+}
+
+export function releaseWildGlitchSurface(el: HTMLElement): void {
+  if (el.dataset[WILD_SURFACE_ATTR] !== '1') return;
+  el.classList.remove(
+    'glitch-hit',
+    AMBIENT_GLITCH_CLASS,
+    'is-glitching',
+    'is-glitch-hover',
+    'is-glitch-continuous',
+  );
+  delete el.dataset[WILD_SURFACE_ATTR];
+  delete el.dataset.glitchStyle;
+  delete el.dataset.glitchPreset;
+}
+
+function releaseAllWildGlitchSurfaces(root: ParentNode = document): void {
+  root
+    .querySelectorAll<HTMLElement>(`[data-wild-glitch-surface='1']`)
+    .forEach(releaseWildGlitchSurface);
 }
 
 function prefersReducedMotion(): boolean {
@@ -110,7 +196,7 @@ export type AmbientGlitchField = {
 
 /**
  * Nightmare idle field: staggered one-shots on visible clickable `.glitch-hit`
- * controls. Reuses `playElementGlitch` presets — not a second effect.
+ * controls. Wild (666) expands to every visible stage/HUD surface.
  */
 export function createAmbientGlitchField(root: ParentNode = document): AmbientGlitchField {
   let timer: number | undefined;
@@ -131,6 +217,7 @@ export function createAmbientGlitchField(root: ParentNode = document): AmbientGl
       el.classList.remove(AMBIENT_GLITCH_CLASS);
     });
     pending.clear();
+    releaseAllWildGlitchSurfaces(root instanceof Document ? root : document);
   };
 
   const tick = () => {
@@ -144,26 +231,42 @@ export function createAmbientGlitchField(root: ParentNode = document): AmbientGl
       return;
     }
 
-    const idle = collectAmbientGlitchTargets(root).filter((el) => !isBusy(el) && isLaidOut(el));
-    if (idle.length > 0 && pending.size < 2) {
-      const pick = idle[Math.floor(Math.random() * idle.length)];
-      const dur = playElementGlitch(pick, AMBIENT_GLITCH_CLASS);
-      if (dur) {
-        pending.add(pick);
-        cleanups.push(
-          window.setTimeout(() => {
-            if (pick.classList.contains(AMBIENT_GLITCH_CLASS)) {
-              clearPending(pick);
-            } else {
-              pending.delete(pick);
-            }
-          }, dur + 80),
-        );
+    const wild = isWildGlitchActive();
+    const doc = root instanceof Document ? root : document;
+    if (!wild) releaseAllWildGlitchSurfaces(doc);
+
+    const maxPending = wild ? 7 : 2;
+    const candidates = wild
+      ? collectWildAmbientGlitchTargets(doc)
+      : collectAmbientGlitchTargets(root);
+    const idle = candidates.filter((el) => !isBusy(el) && isLaidOut(el));
+
+    if (idle.length > 0 && pending.size < maxPending) {
+      // Wild: a few surfaces per tick — stage-wide, not a strobe wall.
+      const burst = wild ? Math.min(3, idle.length, maxPending - pending.size) : 1;
+      for (let i = 0; i < burst; i++) {
+        const pool = idle.filter((el) => !pending.has(el));
+        if (pool.length === 0) break;
+        const pick = pool[Math.floor(Math.random() * pool.length)];
+        if (wild) ensureWildGlitchSurface(pick);
+        const dur = playElementGlitch(pick, AMBIENT_GLITCH_CLASS);
+        if (dur) {
+          pending.add(pick);
+          cleanups.push(
+            window.setTimeout(() => {
+              if (pick.classList.contains(AMBIENT_GLITCH_CLASS)) {
+                clearPending(pick);
+              } else {
+                pending.delete(pick);
+              }
+            }, dur + 80),
+          );
+        }
       }
     }
 
     // Irregular cadence so the field never reads as one global blink.
-    timer = window.setTimeout(tick, randMs(520, 1280));
+    timer = window.setTimeout(tick, wild ? randMs(140, 380) : randMs(520, 1280));
   };
 
   const onVisibility = () => {
