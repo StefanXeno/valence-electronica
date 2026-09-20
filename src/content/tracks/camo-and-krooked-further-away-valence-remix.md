@@ -6,5 +6,8 @@ cover: /images/covers/evolve.webp
 credits:
   - role: Artist
     name: "Camo & Krooked"
+listenLinks:
+  - platform: bandcamp
+    url: https://valenceelectronica.bandcamp.com/album/crystallize-2014-2015
 ---
 

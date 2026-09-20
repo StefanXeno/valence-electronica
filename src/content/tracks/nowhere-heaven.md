@@ -3,5 +3,12 @@ label: Nowhere / Heaven
 sortDate: 2020-01-11
 kind: EP (Heaven Is Acceptance EP)
 cover: /images/covers/heaven-is-acceptance.webp
+listenLinks:
+  - platform: bandcamp
+    url: https://valenceelectronica.bandcamp.com/album/heaven-is-acceptance
+  - platform: spotify
+    url: https://open.spotify.com/track/57znHaivgOSBuS5HQJeFkb
+  - platform: soundcloud
+    url: https://soundcloud.com/valence-music/nowhereheaven
 ---
 
