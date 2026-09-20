@@ -126,160 +126,165 @@ const menuChannels = site.channels
     data-site-nav-menu
     hidden
   >
-    <nav class="site-nav__menu-primary" aria-label="Primary">
-      {
-        shopUrl ? (
-          <a
-            class="site-nav__menu-item"
-            href={shopUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            data-site-nav-shop="external"
-            data-site-nav-menu-close
-            style="--nav-stagger: 0"
-          >
-            {chrome.shopTitle}
-          </a>
-        ) : (
-          <a
-            class="site-nav__menu-item"
-            href={withBase('/shop')}
-            data-legal-slug="shop"
-            data-site-nav-menu-close
-            style="--nav-stagger: 0"
-          >
-            {chrome.shopTitle}
-          </a>
-        )
-      }
-      {/* Mobile-only Tour expand: destinations strip, not a nested dropdown. */}
-      <div class="site-nav__menu-tour" data-site-nav-tour style="--nav-stagger: 1">
-        <button
-          type="button"
-          class="site-nav__menu-item site-nav__menu-tour-toggle"
-          data-site-nav-tour-toggle
-          aria-expanded="false"
-          aria-controls="site-nav-tour-panel"
-        >
-          <span>{chrome.tourTitle}</span>
-          <span class="site-nav__menu-tour-chevron" aria-hidden="true"></span>
-        </button>
-        <div
-          class="site-nav__menu-tour-panel"
-          id="site-nav-tour-panel"
-          data-site-nav-tour-panel
-          hidden
-        >
-          <div class="site-nav__menu-tour-panel-inner">
-            {
-              upcomingShows.length === 0 ? (
-                <p class="site-nav__menu-tour-empty">{chrome.emptyShows}</p>
-              ) : (
-                <ul class="site-nav__menu-tour-destinations" aria-label={chrome.tourTitle}>
-                  {upcomingShows.map((show, index) => {
-                    const eventTitle = resolveShowTitle(show.title, show.venue);
-                    const dateLabel = tourDateFmt.format(show.date);
-                    const href = show.ticketUrl || show.venueUrl || withBase('/tour');
-                    const external = Boolean(show.ticketUrl || show.venueUrl);
-                    return (
-                      <li style={`--dest-stagger: ${index}`}>
-                        <a
-                          class="site-nav__menu-tour-dest"
-                          href={href}
-                          target={external ? '_blank' : undefined}
-                          rel={external ? 'noopener noreferrer' : undefined}
-                          data-legal-slug={external ? undefined : 'tour'}
-                          data-site-nav-menu-close
-                        >
-                          <span class="site-nav__menu-tour-dest-city">{show.city}</span>
-                          <span class="site-nav__menu-tour-dest-meta">
-                            <time datetime={show.date.toISOString().slice(0, 10)}>
-                              {dateLabel}
-                            </time>
-                            {' · '}
-                            {eventTitle}
-                          </span>
-                        </a>
-                      </li>
-                    );
-                  })}
-                </ul>
-              )
-            }
+    {/* Full roster first; Tour expand is secondary content under Tour — not the whole menu. */}
+    <div class="site-nav__menu-body">
+      <nav class="site-nav__menu-primary" aria-label="Primary">
+        {
+          shopUrl ? (
             <a
-              class="site-nav__menu-tour-all"
-              href={withBase('/tour')}
-              data-legal-slug="tour"
+              class="site-nav__menu-item"
+              href={shopUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              data-site-nav-shop="external"
               data-site-nav-menu-close
+              style="--nav-stagger: 0"
             >
-              All dates
+              {chrome.shopTitle}
             </a>
+          ) : (
+            <a
+              class="site-nav__menu-item"
+              href={withBase('/shop')}
+              data-legal-slug="shop"
+              data-site-nav-menu-close
+              style="--nav-stagger: 0"
+            >
+              {chrome.shopTitle}
+            </a>
+          )
+        }
+        {/* Mobile-only Tour expand: destinations strip under Tour, not a takeover. */}
+        <div class="site-nav__menu-tour" data-site-nav-tour style="--nav-stagger: 1">
+          <button
+            type="button"
+            class="site-nav__menu-item site-nav__menu-tour-toggle"
+            data-site-nav-tour-toggle
+            aria-expanded="false"
+            aria-controls="site-nav-tour-panel"
+          >
+            <span>{chrome.tourTitle}</span>
+            <span class="site-nav__menu-tour-chevron" aria-hidden="true"></span>
+          </button>
+          <div
+            class="site-nav__menu-tour-panel"
+            id="site-nav-tour-panel"
+            data-site-nav-tour-panel
+            hidden
+          >
+            <div class="site-nav__menu-tour-panel-inner">
+              {
+                upcomingShows.length === 0 ? (
+                  <p class="site-nav__menu-tour-empty">{chrome.emptyShows}</p>
+                ) : (
+                  <ul class="site-nav__menu-tour-destinations" aria-label={chrome.tourTitle}>
+                    {upcomingShows.map((show, index) => {
+                      const eventTitle = resolveShowTitle(show.title, show.venue);
+                      const dateLabel = tourDateFmt.format(show.date);
+                      const href = show.ticketUrl || show.venueUrl || withBase('/tour');
+                      const external = Boolean(show.ticketUrl || show.venueUrl);
+                      return (
+                        <li style={`--dest-stagger: ${index}`}>
+                          <a
+                            class="site-nav__menu-tour-dest"
+                            href={href}
+                            target={external ? '_blank' : undefined}
+                            rel={external ? 'noopener noreferrer' : undefined}
+                            data-legal-slug={external ? undefined : 'tour'}
+                            data-site-nav-menu-close
+                          >
+                            <span class="site-nav__menu-tour-dest-city">{show.city}</span>
+                            <span class="site-nav__menu-tour-dest-meta">
+                              <time datetime={show.date.toISOString().slice(0, 10)}>
+                                {dateLabel}
+                              </time>
+                              {' · '}
+                              {eventTitle}
+                            </span>
+                          </a>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )
+              }
+              <a
+                class="site-nav__menu-tour-all"
+                href={withBase('/tour')}
+                data-legal-slug="tour"
+                data-site-nav-menu-close
+              >
+                All dates
+              </a>
+            </div>
           </div>
         </div>
-      </div>
+        {
+          about && (
+            <a
+              class="site-nav__menu-item"
+              href={withBase('/about')}
+              data-legal-slug="about"
+              data-site-nav-menu-close
+              style="--nav-stagger: 2"
+            >
+              {chrome.aboutTitle}
+            </a>
+          )
+        }
+        <a
+          class="site-nav__menu-item"
+          href={withBase('/discography')}
+          data-legal-slug="discography"
+          data-site-nav-menu-close
+          style="--nav-stagger: 3"
+        >
+          {chrome.discographyTitle}
+        </a>
+      </nav>
+
+      <nav class="site-nav__menu-legal" aria-label="Legal" style="--nav-stagger: 4">
+        <a
+          class="site-nav__menu-legal-item"
+          href={withBase('/legal/imprint')}
+          data-legal-slug="imprint"
+          data-site-nav-menu-close
+        >
+          {chrome.imprintButton}
+        </a>
+        <a
+          class="site-nav__menu-legal-item"
+          href={withBase('/legal/privacy')}
+          data-legal-slug="privacy"
+          data-site-nav-menu-close
+        >
+          {chrome.privacyButton}
+        </a>
+      </nav>
+
       {
-        about && (
-          <a
-            class="site-nav__menu-item"
-            href={withBase('/about')}
-            data-legal-slug="about"
-            data-site-nav-menu-close
-            style="--nav-stagger: 2"
-          >
-            {chrome.aboutTitle}
-          </a>
+        menuChannels.length > 0 && (
+          <div class="site-nav__menu-socials" style="--nav-stagger: 5">
+            <ul class="site-nav__menu-channels" aria-label={chrome.socialsLabel}>
+              {menuChannels.map((channel) => (
+                <li>
+                  <a
+                    class="site-nav__menu-channel glitch-hit"
+                    href={channel.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={channel.label}
+                    data-site-nav-menu-close
+                  >
+                    <ChannelIcon id={channel.id} label={channel.label} />
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
         )
       }
-      <a
-        class="site-nav__menu-item"
-        href={withBase('/discography')}
-        data-legal-slug="discography"
-        data-site-nav-menu-close
-        style="--nav-stagger: 3"
-      >
-        {chrome.discographyTitle}
-      </a>
-      <a
-        class="site-nav__menu-item"
-        href={withBase('/legal/imprint')}
-        data-legal-slug="imprint"
-        data-site-nav-menu-close
-        style="--nav-stagger: 4"
-      >
-        {chrome.imprintButton}
-      </a>
-      <a
-        class="site-nav__menu-item"
-        href={withBase('/legal/privacy')}
-        data-legal-slug="privacy"
-        data-site-nav-menu-close
-        style="--nav-stagger: 5"
-      >
-        {chrome.privacyButton}
-      </a>
-    </nav>
-    {
-      menuChannels.length > 0 && (
-        <div class="site-nav__menu-socials" style="--nav-stagger: 6">
-          <ul class="site-nav__menu-channels" aria-label={chrome.socialsLabel}>
-            {menuChannels.map((channel) => (
-              <li>
-                <a
-                  class="site-nav__menu-channel glitch-hit"
-                  href={channel.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={channel.label}
-                  data-site-nav-menu-close
-                >
-                  <ChannelIcon id={channel.id} label={channel.label} />
-                </a>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )
-    }
+    </div>
   </div>
 </header>
 
@@ -573,13 +578,14 @@ const menuChannels = site.channels
     --menu-morph-dur: 480ms;
     --menu-stagger-step: 55ms;
     --menu-stagger-base: 90ms;
+    --menu-stagger-max: 5;
     position: fixed;
     inset: 0;
     z-index: 9;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    gap: 2.5rem;
+    /* Top-align so Shop → legal → socials read as one coherent list, not a Tour-centered hero. */
+    justify-content: flex-start;
     padding: max(5.5rem, calc(env(safe-area-inset-top, 0px) + 4.5rem))
       clamp(1.25rem, 6vw, 2.5rem)
       max(2rem, env(safe-area-inset-bottom, 0px));
@@ -613,6 +619,21 @@ const menuChannels = site.channels
     display: none;
   }
 
+  .site-nav__menu-body {
+    display: flex;
+    flex-direction: column;
+    gap: 1.75rem;
+    width: 100%;
+    max-width: 28rem;
+    margin: 0 auto;
+    flex: 1 0 auto;
+    /* Fill the morph viewport so socials can sit low without absolute overlay. */
+    min-height: calc(
+      100dvh - max(5.5rem, calc(env(safe-area-inset-top, 0px) + 4.5rem)) -
+        max(2rem, env(safe-area-inset-bottom, 0px))
+    );
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .site-nav__menu,
     .site-nav.is-menu-open .site-nav__menu {
@@ -623,9 +644,11 @@ const menuChannels = site.channels
 
     .site-nav__menu-primary > .site-nav__menu-item,
     .site-nav__menu-primary > .site-nav__menu-tour,
+    .site-nav__menu-legal,
     .site-nav__menu-socials,
     .site-nav.is-menu-open .site-nav__menu-primary > .site-nav__menu-item,
     .site-nav.is-menu-open .site-nav__menu-primary > .site-nav__menu-tour,
+    .site-nav.is-menu-open .site-nav__menu-legal,
     .site-nav.is-menu-open .site-nav__menu-socials,
     .site-nav__menu-tour-dest,
     .site-nav__menu-tour.is-tour-open .site-nav__menu-tour-dest {
@@ -643,17 +666,19 @@ const menuChannels = site.channels
   .site-nav__menu-primary {
     display: flex;
     flex-direction: column;
-    gap: 0.35rem;
+    gap: 0.2rem;
     font-family: var(--font-display);
-    font-size: clamp(1.65rem, 8vw, 2.4rem);
+    /* Sized so Shop / Tour / About / Discography fit with legal + socials below. */
+    font-size: clamp(1.4rem, 7vw, 2rem);
     letter-spacing: 0.04em;
     text-transform: uppercase;
     line-height: 1.15;
   }
 
-  /* Staggered slide/fade for top-level entries (direct children only). */
+  /* Staggered slide/fade for top-level blocks (primary rows, legal, socials). */
   .site-nav__menu-primary > .site-nav__menu-item,
   .site-nav__menu-primary > .site-nav__menu-tour,
+  .site-nav__menu-legal,
   .site-nav__menu-socials {
     --nav-stagger: 0;
     opacity: 0;
@@ -666,6 +691,7 @@ const menuChannels = site.channels
 
   .site-nav.is-menu-open .site-nav__menu-primary > .site-nav__menu-item,
   .site-nav.is-menu-open .site-nav__menu-primary > .site-nav__menu-tour,
+  .site-nav.is-menu-open .site-nav__menu-legal,
   .site-nav.is-menu-open .site-nav__menu-socials {
     opacity: 1;
     transform: translate3d(0, 0, 0);
@@ -676,9 +702,10 @@ const menuChannels = site.channels
 
   .site-nav:not(.is-menu-open) .site-nav__menu-primary > .site-nav__menu-item,
   .site-nav:not(.is-menu-open) .site-nav__menu-primary > .site-nav__menu-tour,
+  .site-nav:not(.is-menu-open) .site-nav__menu-legal,
   .site-nav:not(.is-menu-open) .site-nav__menu-socials {
     /* Reverse: items drop out slightly ahead of the morph close. */
-    transition-delay: calc((5 - var(--nav-stagger)) * 28ms);
+    transition-delay: calc((var(--menu-stagger-max) - var(--nav-stagger)) * 28ms);
   }
 
   .site-nav__menu-item {
@@ -703,7 +730,7 @@ const menuChannels = site.channels
     outline: none;
   }
 
-  /* Tour: full-width expand + large destination typography (not a dropdown). */
+  /* Tour: compact destinations under Tour — special expand, not a takeover. */
   .site-nav__menu-tour {
     display: flex;
     flex-direction: column;
@@ -758,24 +785,24 @@ const menuChannels = site.channels
   .site-nav__menu-tour-panel-inner {
     overflow: hidden;
     min-height: 0;
-    padding: 0.35rem 0 0.85rem;
+    padding: 0.25rem 0 0.55rem;
   }
 
   .site-nav__menu-tour-destinations {
     list-style: none;
     margin: 0;
-    padding: 0.35rem 0 0.75rem;
+    padding: 0.3rem 0 0.55rem;
     display: flex;
     flex-direction: column;
-    gap: 0.55rem;
+    gap: 0.35rem;
     border-top: 1px solid color-mix(in srgb, #fff 14%, transparent);
   }
 
   .site-nav__menu-tour-dest {
     display: flex;
     flex-direction: column;
-    gap: 0.15rem;
-    padding: 0.35rem 0;
+    gap: 0.1rem;
+    padding: 0.25rem 0;
     text-decoration: none;
     color: color-mix(in srgb, #fff 88%, transparent);
     opacity: 0;
@@ -801,26 +828,27 @@ const menuChannels = site.channels
 
   .site-nav__menu-tour-dest-city {
     font-family: var(--font-display);
-    font-size: clamp(1.35rem, 6.5vw, 1.85rem);
-    letter-spacing: 0.03em;
+    /* Secondary to primary menu labels — Tour expand stays special, not dominant. */
+    font-size: clamp(0.95rem, 4.2vw, 1.15rem);
+    letter-spacing: 0.04em;
     text-transform: uppercase;
-    line-height: 1.1;
+    line-height: 1.15;
   }
 
   .site-nav__menu-tour-dest-meta {
     font-family: var(--font-body, inherit);
-    font-size: clamp(0.72rem, 3.2vw, 0.85rem);
+    font-size: clamp(0.7rem, 3vw, 0.8rem);
     letter-spacing: 0.02em;
     text-transform: none;
     color: color-mix(in srgb, #fff 58%, transparent);
   }
 
   .site-nav__menu-tour-empty {
-    margin: 0.55rem 0 0.75rem;
-    padding-top: 0.55rem;
+    margin: 0.45rem 0 0.55rem;
+    padding-top: 0.45rem;
     border-top: 1px solid color-mix(in srgb, #fff 14%, transparent);
     font-family: var(--font-body, inherit);
-    font-size: clamp(0.85rem, 3.5vw, 1rem);
+    font-size: clamp(0.8rem, 3.3vw, 0.95rem);
     letter-spacing: 0.02em;
     text-transform: none;
     color: color-mix(in srgb, #fff 55%, transparent);
@@ -828,9 +856,9 @@ const menuChannels = site.channels
 
   .site-nav__menu-tour-all {
     display: inline-block;
-    margin-top: 0.15rem;
+    margin-top: 0.1rem;
     font-family: var(--font-display);
-    font-size: clamp(0.78rem, 3.4vw, 0.92rem);
+    font-size: clamp(0.72rem, 3.2vw, 0.85rem);
     letter-spacing: 0.08em;
     text-transform: uppercase;
     text-decoration: none;
@@ -845,15 +873,39 @@ const menuChannels = site.channels
     outline: none;
   }
 
-  /* Bottom-middle of the fullscreen overlay (nav stays vertically centered). */
-  .site-nav__menu-socials {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: max(2rem, env(safe-area-inset-bottom, 0px));
+  /* Quiet legal row — still in the menu, not competing with primary labels. */
+  .site-nav__menu-legal {
     display: flex;
-    justify-content: center;
-    pointer-events: none;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.55rem 1.15rem;
+    padding-top: 0.35rem;
+    border-top: 1px solid color-mix(in srgb, #fff 12%, transparent);
+    font-family: var(--font-display);
+    font-size: clamp(0.78rem, 3.4vw, 0.92rem);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .site-nav__menu-legal-item {
+    color: color-mix(in srgb, #fff 62%, transparent);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+  }
+
+  .site-nav__menu-legal-item:hover,
+  .site-nav__menu-legal-item:focus-visible {
+    color: #fff;
+    border-bottom-color: color-mix(in srgb, var(--color-accent-alt, #c8ff4a) 55%, transparent);
+    outline: none;
+  }
+
+  /* In-flow under legal — no absolute overlay that buries Imprint / Privacy. */
+  .site-nav__menu-socials {
+    display: flex;
+    justify-content: flex-start;
+    padding-top: 0.15rem;
+    margin-top: auto;
   }
 
   .site-nav__menu-channels {
@@ -863,9 +915,8 @@ const menuChannels = site.channels
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     gap: 1rem 1.25rem;
-    pointer-events: auto;
   }
 
   /* Icon-only — no circular bordered chips (those stay on desktop stage socials). */
