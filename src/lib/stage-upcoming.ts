@@ -58,7 +58,8 @@ export function collectUpcomingShows(
   const items: UpcomingShowItem[] = [];
 
   for (const entry of entries) {
-    if (entry.id.startsWith('__empty__')) continue;
+    // Skip loader placeholders and underscore templates (e.g. `_example.md`).
+    if (entry.id.startsWith('__empty__') || entry.id.startsWith('_')) continue;
     if (!entry.date || !entry.city?.trim() || !entry.venue?.trim()) continue;
     if (dateKey(entry.date) < todayKey) continue;
     items.push({
@@ -73,4 +74,23 @@ export function collectUpcomingShows(
   }
 
   return items.sort((a, b) => a.date.getTime() - b.date.getTime());
+}
+
+export type ShowYearGroup<T extends { date: Date }> = {
+  year: number;
+  shows: T[];
+};
+
+/** Bucket an already-sorted upcoming list into ascending calendar-year groups. */
+export function groupShowsByYear<T extends { date: Date }>(shows: T[]): ShowYearGroup<T>[] {
+  const groups = new Map<number, T[]>();
+
+  for (const show of shows) {
+    const year = show.date.getUTCFullYear();
+    const bucket = groups.get(year);
+    if (bucket) bucket.push(show);
+    else groups.set(year, [show]);
+  }
+
+  return [...groups.entries()].map(([year, yearShows]) => ({ year, shows: yearShows }));
 }

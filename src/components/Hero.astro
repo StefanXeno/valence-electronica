@@ -71,7 +71,9 @@ const fallbackTagline = formatTagline(tagline.trim());
   .tagline {
     margin: 0.35em 0 0;
     font-family: var(--font-display);
-    font-size: clamp(calc(0.75rem * var(--hud-scale)), 3.6vw, calc(0.95rem * var(--hud-scale)));
+    /* Match SiteNav wordmark (unscaled) — do not multiply by --hud-scale or
+       the subtext outgrows the brand at desktop 1.5× HUD. */
+    font-size: clamp(0.55rem, 1.35vw, 0.68rem);
     color: var(--color-accent-alt);
     max-width: min(var(--tagline-max-width), 100%);
     overflow: hidden;
@@ -82,8 +84,16 @@ const fallbackTagline = formatTagline(tagline.trim());
     overflow-wrap: break-word;
   }
 
+  .identity--tagline {
+    /* Same footprint as SiteNav wordmark so text centers under the brand. */
+    width: min(11rem, 42vw);
+  }
+
   .identity--tagline .tagline {
     margin: 0;
+    width: 100%;
+    max-width: none;
+    text-align: center;
   }
 
   @media (max-width: 1023px) {

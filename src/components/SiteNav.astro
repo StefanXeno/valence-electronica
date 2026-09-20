@@ -6,7 +6,13 @@ import wordmark from '../assets/images/brand/valence-wordmark.png';
 import { getMergedDiscography } from '../lib/catalog-tracks';
 import { getValidJukeboxEntries } from '../lib/background';
 import type { UiChrome } from '../lib/stage';
-import { getAboutEntry, getSiteNavData, getUpcomingShows, resolveShowTitle } from '../lib/stage';
+import {
+  getAboutEntry,
+  getSiteNavData,
+  getUpcomingShows,
+  groupShowsByYear,
+  resolveShowTitle,
+} from '../lib/stage';
 import { withBase } from '../lib/url';
 import ChannelIcon from './ChannelIcon.astro';
 
@@ -19,6 +25,7 @@ const { shopUrl } = getSiteNavData();
 const about = await getAboutEntry();
 const AboutContent = about ? (await render(about)).Content : undefined;
 const upcomingShows = await getUpcomingShows();
+const tourYearGroups = groupShowsByYear(upcomingShows);
 const [legalEntries, stageVideos] = await Promise.all([
   getCollection('legal'),
   getValidJukeboxEntries(),
@@ -35,7 +42,6 @@ const tourPortalDateFmt = new Intl.DateTimeFormat('en-GB', {
   timeZone: 'Europe/Berlin',
   day: 'numeric',
   month: 'short',
-  year: 'numeric',
 });
 
 const menuChannels = site.channels
@@ -277,45 +283,60 @@ const menuChannels = site.channels
         >
           <h2 class="site-nav__menu-portal-title">{chrome.tourTitle}</h2>
           {
-            upcomingShows.length === 0 ? (
+            tourYearGroups.length === 0 ? (
               <p class="site-nav__menu-portal-empty">{chrome.emptyShows}</p>
             ) : (
-              <ul class="site-nav__menu-portal-dates" aria-label={chrome.tourTitle}>
-                {upcomingShows.map((show) => {
-                  const eventTitle = resolveShowTitle(show.title, show.venue);
-                  const dateLabel = tourPortalDateFmt.format(show.date);
-                  const href = show.ticketUrl || show.venueUrl;
-                  const dateAttrs = {
-                    class: 'site-nav__menu-portal-date',
-                    datetime: show.date.toISOString().slice(0, 10),
-                  };
-                  if (href) {
-                    return (
-                      <li>
-                        <a
-                          class="site-nav__menu-portal-date-row"
-                          href={href}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <time {...dateAttrs}>{dateLabel}</time>
-                          <span class="site-nav__menu-portal-date-city">{show.city}</span>
-                          <span class="site-nav__menu-portal-date-event">{eventTitle}</span>
-                        </a>
-                      </li>
-                    );
-                  }
-                  return (
-                    <li>
-                      <div class="site-nav__menu-portal-date-row">
-                        <time {...dateAttrs}>{dateLabel}</time>
-                        <span class="site-nav__menu-portal-date-city">{show.city}</span>
-                        <span class="site-nav__menu-portal-date-event">{eventTitle}</span>
-                      </div>
-                    </li>
-                  );
-                })}
-              </ul>
+              <div class="site-nav__menu-portal-tour" aria-label={chrome.tourTitle}>
+                {tourYearGroups.map(({ year, shows: yearShows }) => (
+                  <section
+                    class="site-nav__menu-portal-year"
+                    aria-labelledby={`site-nav-tour-year-${year}`}
+                  >
+                    <h3
+                      class="site-nav__menu-portal-year-label"
+                      id={`site-nav-tour-year-${year}`}
+                    >
+                      {year}
+                    </h3>
+                    <ul class="site-nav__menu-portal-dates">
+                      {yearShows.map((show) => {
+                        const eventTitle = resolveShowTitle(show.title, show.venue);
+                        const dateLabel = tourPortalDateFmt.format(show.date);
+                        const href = show.ticketUrl || show.venueUrl;
+                        const dateAttrs = {
+                          class: 'site-nav__menu-portal-date',
+                          datetime: show.date.toISOString().slice(0, 10),
+                        };
+                        if (href) {
+                          return (
+                            <li>
+                              <a
+                                class="site-nav__menu-portal-date-row"
+                                href={href}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                <time {...dateAttrs}>{dateLabel}</time>
+                                <span class="site-nav__menu-portal-date-city">{show.city}</span>
+                                <span class="site-nav__menu-portal-date-event">{eventTitle}</span>
+                              </a>
+                            </li>
+                          );
+                        }
+                        return (
+                          <li>
+                            <div class="site-nav__menu-portal-date-row">
+                              <time {...dateAttrs}>{dateLabel}</time>
+                              <span class="site-nav__menu-portal-date-city">{show.city}</span>
+                              <span class="site-nav__menu-portal-date-event">{eventTitle}</span>
+                            </div>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </section>
+                ))}
+              </div>
             )
           }
         </div>
@@ -999,6 +1020,23 @@ const menuChannels = site.channels
   .site-nav__menu-portal-prose--legal :global(strong) {
     color: color-mix(in srgb, #fff 88%, transparent);
     font-weight: 600;
+  }
+
+  .site-nav__menu-portal-tour {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(1.1rem, 4vw, 1.5rem);
+  }
+
+  .site-nav__menu-portal-year-label {
+    margin: 0 0 0.55rem;
+    font-family: var(--font-display);
+    font-size: clamp(0.72rem, 3vw, 0.82rem);
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    line-height: 1.2;
+    text-transform: uppercase;
+    color: color-mix(in srgb, #fff 55%, transparent);
   }
 
   .site-nav__menu-portal-dates,

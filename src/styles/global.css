@@ -118,11 +118,23 @@ a.channel-btn:focus-visible {
   pointer-events: none;
 }
 
+.stage__identity,
 .stage__socials,
 .stage-dock {
   pointer-events: auto;
   position: fixed;
   z-index: 2;
+}
+
+/*
+ * Rotating tagline under SiteNav wordmark (012).
+ * Top tracks nav padding + wordmark aspect (960×362) so the line stays glued
+ * under the brand without a duplicate logo.
+ */
+.stage__identity {
+  top: calc(0.55rem + 0.2rem + (min(11rem, 42vw) * 362 / 960) + 0.2rem);
+  left: clamp(0.65rem, 2vw, 1.1rem);
+  max-width: min(var(--tagline-max-width), calc(100vw - 2 * clamp(0.65rem, 2vw, 1.1rem)));
 }
 
 /* Bottom-right socials — tight to the viewport corner (same rhythm as icon gap). */
@@ -291,6 +303,11 @@ a.channel-btn:focus-visible {
   .jukebox::-webkit-resizer,
   .jukebox *::-webkit-resizer {
     display: none;
+  }
+
+  .stage__identity {
+    /* 100% of the fixed containing block — not 100vw (scrollbar / visual viewport). */
+    max-width: calc(100% - 2 * clamp(0.65rem, 2vw, 1.1rem));
   }
 
   .stage-dock {

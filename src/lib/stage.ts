@@ -4,7 +4,7 @@ import siteJson from '../data/site.json';
 import { resolveHudIcon, type HudIconToken } from './hud-icons';
 import { berlinToday, collectUpcomingShows, type ShowEntryInput } from './stage-upcoming';
 
-export { resolveShowTitle } from './stage-upcoming';
+export { groupShowsByYear, resolveShowTitle } from './stage-upcoming';
 
 export interface UiChrome {
   aboutTitle: string;
@@ -256,7 +256,8 @@ export async function getUpcomingShows(): Promise<ShowItem[]> {
   const entries: ShowEntryInput[] = [];
 
   for (const entry of raw) {
-    if (entry.id.startsWith('__empty__')) continue;
+    // Skip loader placeholders and underscore templates (e.g. `_example.md`).
+    if (entry.id.startsWith('__empty__') || entry.id.startsWith('_')) continue;
     const { date, city, venue, title, ticketUrl, venueUrl } = entry.data;
     if (!date || !city?.trim() || !venue?.trim()) {
       console.warn(`[stage] omitted show "${entry.id}" (missing date, city, or venue)`);

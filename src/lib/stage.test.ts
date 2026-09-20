@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { berlinToday, collectUpcomingShows, resolveShowTitle } from './stage-upcoming';
+import {
+  berlinToday,
+  collectUpcomingShows,
+  groupShowsByYear,
+  resolveShowTitle,
+} from './stage-upcoming';
 
 describe('berlinToday', () => {
   it('returns a UTC midnight date for the Berlin calendar day', () => {
@@ -86,6 +91,30 @@ describe('collectUpcomingShows', () => {
     expect(items[0]?.id).toBe('good');
   });
 
+  it('skips underscore template ids even when upcoming', () => {
+    const items = collectUpcomingShows(
+      [
+        {
+          id: '_example',
+          date: new Date(Date.UTC(2099, 0, 1)),
+          city: 'Example City',
+          venue: 'Example Venue',
+          title: 'Example Night',
+          ticketUrl: 'https://tickets.example.com',
+        },
+        {
+          id: 'real',
+          date: new Date(Date.UTC(2026, 9, 2)),
+          city: 'Berlin',
+          venue: 'Venue',
+        },
+      ],
+      today,
+    );
+
+    expect(items.map((item) => item.id)).toEqual(['real']);
+  });
+
   it('accepts https ticket URLs only', () => {
     const items = collectUpcomingShows(
       [
@@ -161,5 +190,49 @@ describe('resolveShowTitle', () => {
     expect(resolveShowTitle('Example Night', 'Example Club')).toBe('Example Night');
     expect(resolveShowTitle('   ', 'Example Club')).toBe('Example Club');
     expect(resolveShowTitle(undefined, 'Example Venue')).toBe('Example Venue');
+  });
+});
+
+describe('groupShowsByYear', () => {
+  it('groups sorted shows into ascending year buckets', () => {
+    const groups = groupShowsByYear([
+      {
+        id: 'augsburg',
+        date: new Date(Date.UTC(2026, 11, 5)),
+        city: 'Augsburg',
+        venue: 'Example Venue',
+      },
+      {
+        id: 'berlin',
+        date: new Date(Date.UTC(2027, 1, 20)),
+        city: 'Berlin',
+        venue: 'Example Club',
+      },
+    ]);
+
+    expect(groups.map((group) => group.year)).toEqual([2026, 2027]);
+    expect(groups[0]?.shows.map((show) => show.id)).toEqual(['augsburg']);
+    expect(groups[1]?.shows.map((show) => show.id)).toEqual(['berlin']);
+  });
+
+  it('keeps multiple shows in the same year', () => {
+    const groups = groupShowsByYear([
+      {
+        id: 'one',
+        date: new Date(Date.UTC(2026, 8, 1)),
+        city: 'Berlin',
+        venue: 'A',
+      },
+      {
+        id: 'two',
+        date: new Date(Date.UTC(2026, 10, 1)),
+        city: 'Hamburg',
+        venue: 'B',
+      },
+    ]);
+
+    expect(groups).toHaveLength(1);
+    expect(groups[0]?.year).toBe(2026);
+    expect(groups[0]?.shows.map((show) => show.id)).toEqual(['one', 'two']);
   });
 });

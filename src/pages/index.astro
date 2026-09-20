@@ -1,5 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
+import Hero from '../components/Hero.astro';
 import Channels from '../components/Channels.astro';
 import Jukebox from '../components/Jukebox.astro';
 import StageDock from '../components/StageDock.astro';
@@ -14,7 +15,10 @@ const chrome = await getChrome();
   <LandingIntro introLead={chrome.introLead} introName={chrome.introName} />
   <SiteNav chrome={chrome} />
   <div class="stage" id="stage">
-    {/* Brand lives in SiteNav; no tagline/subtext under the logo (020 feedback). */}
+    {/* Wordmark in SiteNav; rotating pool line sits under it (012). */}
+    <div class="stage__identity">
+      <Hero variant="tagline" />
+    </div>
     <div class="stage__socials" id="stage-socials">
       <Channels />
     </div>
