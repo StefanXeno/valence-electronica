@@ -43,88 +43,99 @@ for (const entry of [...jukeboxRaw, ...tracksRaw]) {
 
 {
   panels.length > 0 && (
-    <>
-      <div id="track-rub-overlay" data-track-rub-overlay>
-        {panels.map(({ id, title, artist, Content }) => {
-          const titleId = `track-rub-title-${id}`;
-          return (
-            <div
-              class="track-rub-panel"
-              id={`track-rub-panel-${id}`}
-              data-track-rub-panel={id}
-              role="dialog"
-              aria-modal="true"
-              aria-labelledby={titleId}
-              hidden
-            >
-              <div class="track-rub-panel__frame">
-                <header class="track-rub-panel__header">
-                  <button
-                    type="button"
-                    class="track-rub-panel__exit glitch-hit"
-                    data-track-rub-exit
-                    aria-label="Close"
-                    title="Close"
+    <div id="track-rub-overlay" data-track-rub-overlay>
+      {panels.map(({ id, title, artist, Content }) => {
+        const titleId = `track-rub-title-${id}`;
+        return (
+          <div
+            class="track-rub-panel"
+            id={`track-rub-panel-${id}`}
+            data-track-rub-panel={id}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={titleId}
+            hidden
+          >
+            <div class="track-rub-panel__frame">
+              <header class="track-rub-panel__header">
+                <button
+                  type="button"
+                  class="track-rub-panel__exit glitch-hit"
+                  data-track-rub-exit
+                  aria-label="Close"
+                  title="Close"
+                >
+                  <svg
+                    class="track-rub-panel__exit-icon"
+                    viewBox="0 0 24 24"
+                    width="18"
+                    height="18"
+                    aria-hidden="true"
+                    focusable="false"
                   >
-                    <svg
-                      class="track-rub-panel__exit-icon"
-                      viewBox="0 0 24 24"
-                      width="18"
-                      height="18"
-                      aria-hidden="true"
-                      focusable="false"
-                    >
-                      <path
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        d="M6 6l12 12M18 6L6 18"
-                      />
-                    </svg>
-                  </button>
-                  <h1 id={titleId}>{title}</h1>
-                  {artist && <p class="track-rub-panel__artist">{artist}</p>}
-                </header>
-                <div class="track-rub-panel__body">
-                  <Content />
-                </div>
+                    <path
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      d="M6 6l12 12M18 6L6 18"
+                    />
+                  </svg>
+                </button>
+                <h1 id={titleId}>{title}</h1>
+                {artist && <p class="track-rub-panel__artist">{artist}</p>}
+              </header>
+              <div class="track-rub-panel__body">
+                <Content />
               </div>
             </div>
-          );
-        })}
-      </div>
-
-      {/* One-shot game-style unlock toast — shown from track-rub.ts on first reveal. */}
-      <div
-        class="ve-achievement"
-        data-ve-achievement
-        role="status"
-        aria-live="polite"
-        aria-atomic="true"
-        hidden
-      >
-        <div class="ve-achievement__card" aria-hidden="true">
-          <span class="ve-achievement__glyph" data-ve-achievement-glyph>
-            {/* Same vinyl mark as desktop V-Flip (HudIcon token="jukebox"). */}
-            <HudIcon token="jukebox" />
-          </span>
-          <div class="ve-achievement__copy">
-            <p class="ve-achievement__eyebrow">Achievement unlocked</p>
-            <p class="ve-achievement__title" data-ve-achievement-title>
-              Why are you rubbing?!
-            </p>
-            <p class="ve-achievement__sub" data-ve-achievement-sub>
-              Rub a song in the discography for three times.
-            </p>
           </div>
-        </div>
-        {/* Screen-reader announcement text lives here; visual copy is aria-hidden. */}
-        <span class="ve-achievement__sr" data-ve-achievement-announce></span>
-      </div>
-    </>
+        );
+      })}
+    </div>
   )
 }
+
+{/* Shared one-shot achievement toast — driven by achievement-toast.ts (rub + infinite spin). */}
+<div
+  class="ve-achievement"
+  data-ve-achievement
+  role="status"
+  aria-live="polite"
+  aria-atomic="true"
+  hidden
+>
+  <div class="ve-achievement__card" aria-hidden="true">
+    <span class="ve-achievement__glyph" data-ve-achievement-glyph="rub">
+      {/* Same vinyl mark as desktop V-Flip (HudIcon token="jukebox"). */}
+      <HudIcon token="jukebox" />
+    </span>
+    <span class="ve-achievement__glyph" data-ve-achievement-glyph="infinite" hidden>
+      {/* Infinity mark — no HudIcon token for ∞; stroke matches accent via currentColor. */}
+      <svg class="hud-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.85"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M6.2 12c0-2.1 1.55-3.7 3.3-3.7 1.55 0 2.7.95 4.5 3.7 1.8 2.75 2.95 3.7 4.5 3.7 1.75 0 3.3-1.6 3.3-3.7s-1.55-3.7-3.3-3.7c-1.55 0-2.7.95-4.5 3.7-1.8 2.75-2.95 3.7-4.5 3.7-1.75 0-3.3-1.6-3.3-3.7z"
+        />
+      </svg>
+    </span>
+    <div class="ve-achievement__copy">
+      <p class="ve-achievement__eyebrow">Achievement unlocked</p>
+      <p class="ve-achievement__title" data-ve-achievement-title>
+        Why are you rubbing?!
+      </p>
+      <p class="ve-achievement__sub" data-ve-achievement-sub>
+        Rub a song in the discography for three times.
+      </p>
+    </div>
+  </div>
+  {/* Screen-reader announcement text lives here; visual copy is aria-hidden. */}
+  <span class="ve-achievement__sr" data-ve-achievement-announce></span>
+</div>
 
 <style>
   /* Above SiteNav menu (z≈10) and LegalOverlay (z≈5) so the secret wins. */
@@ -283,7 +294,11 @@ for (const entry of [...jukeboxRaw, ...tracksRaw]) {
     background: color-mix(in srgb, var(--color-bg) 55%, transparent);
   }
 
-  /* Fit desktop V-Flip vinyl mark inside the rounded glyph slot. */
+  .ve-achievement__glyph[hidden] {
+    display: none;
+  }
+
+  /* Fit desktop V-Flip vinyl / infinity mark inside the rounded glyph slot. */
   .ve-achievement__glyph :global(.hud-icon) {
     width: 1.9rem;
     height: 1.9rem;
