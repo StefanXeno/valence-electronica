@@ -22,7 +22,7 @@
     "typescript": "^6.0.3"
   },
   "devDependencies": {
-    "playwright": "1.62.1",
+    "playwright": "1.63.0",
     "vitest": "^4.1.11"
   }
 }
