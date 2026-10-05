@@ -29,7 +29,7 @@ Quick pointers:
 
 - **Site info & channels:** `src/data/site.json`
 - **Stage schedule:** `src/data/stage-schedule.json` — see [`docs/stage-schedule.md`](docs/stage-schedule.md)
-- **Tagline pool:** `src/data/tagline-pool.json` — rotating subtext under the wordmark (15 s cycle); see [`specs/012-rotating-tagline/contracts/tagline-pool.md`](specs/012-rotating-tagline/contracts/tagline-pool.md)
+- **Tagline pool:** `src/data/tagline-pool.json` — rotating subtext under the wordmark (15 s cycle); see [`docs/tagline-pool.md`](docs/tagline-pool.md)
 - **Everything else** (jukebox, bio, releases, shows, UI copy, legal, media): see the artist guide.
 
 **Do not rename ids** (jukebox slugs, `jukeboxId`, legal slugs, `themeId`s) without developer help.
@@ -49,13 +49,13 @@ Visual moods are **theme packs**: registry + CSS tokens. Jukebox `themeId` selec
 3. Update [`docs/artist-guide.md`](docs/artist-guide.md) theme table if artist-selectable.
 4. Run `npm run check && npm run build`.
 
-Full contract: [`specs/005-theme-packs/contracts/theme-packs.md`](specs/005-theme-packs/contracts/theme-packs.md).
+Full contract: [`specs/025-stage-atmosphere/`](specs/025-stage-atmosphere/spec.md) (spec + plan checklist).
 
 ## Landing intro
 
 First visit to `/` plays a portal intro (copy in `src/content/ui/chrome.md`). **Development
 only** replay: `/?replay-intro` or `/dev/intro` (omitted from production builds). Contract:
-[`specs/006-landing-intro/contracts/intro-ui.md`](specs/006-landing-intro/contracts/intro-ui.md).
+[`specs/030-brand-identity/`](specs/030-brand-identity/spec.md).
 
 ## Deploy
 
@@ -111,4 +111,6 @@ builds fall back to the hardcoded default in `astro.config.mjs`.
 
 This project uses [spec-kit](https://github.com/github/spec-kit): features are specified
 in `specs/` before implementation, governed by the project constitution in
-`.specify/memory/constitution.md`.
+`.specify/memory/constitution.md`. [`specs/README.md`](specs/README.md) lists the living
+capability specs that describe the site as built. Spec-kit commands are installed for both
+Cursor (`.cursor/skills/`) and Claude Code (`.claude/skills/`, e.g. `/speckit-specify`).

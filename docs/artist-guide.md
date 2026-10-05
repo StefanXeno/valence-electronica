@@ -304,7 +304,7 @@ late-night line (e.g. “Still awake?”) cannot sit unchanged for hours.
 **Fallback:** If nothing matches, the site shows `artist.tagline` from
 [`src/data/site.json`](../src/data/site.json) (also used when JavaScript is off).
 
-**Rule syntax:** [`specs/012-rotating-tagline/contracts/tagline-pool.md`](../specs/012-rotating-tagline/contracts/tagline-pool.md)
+**Rule syntax:** [`docs/tagline-pool.md`](tagline-pool.md)
 
 **Tips:**
 
@@ -510,7 +510,7 @@ Some areas have a **deeper how-to** (this hub stays the inventory; details live 
 | Topic | Guide |
 |-------|--------|
 | Stage schedule rules | [`docs/stage-schedule.md`](stage-schedule.md) |
-| Tagline pool (rotating subtext) | [`specs/012-rotating-tagline/contracts/tagline-pool.md`](../specs/012-rotating-tagline/contracts/tagline-pool.md) |
+| Tagline pool (rotating subtext) | [`docs/tagline-pool.md`](tagline-pool.md) |
 
 When a topic guide and this hub mention the same file, use the **same path** — the topic
 guide owns step-by-step detail.

@@ -8,7 +8,7 @@ default** on a given day — without touching components or code.
 **After edits:** run `npm run check` (invalid ids or dates fail the build).
 
 For the formal maintainer contract, see
-[`specs/007-scheduled-stage-default/contracts/stage-schedule.md`](../specs/007-scheduled-stage-default/contracts/stage-schedule.md).
+[`specs/025-stage-atmosphere/spec.md`](../specs/025-stage-atmosphere/spec.md).
 
 ---
 
@@ -134,4 +134,4 @@ Example (replace the date with today):
 
 - Jukebox entries (media, theme, lyrics): `src/content/jukebox/`
 - Theme packs: [README — Theme packs](../README.md#theme-packs)
-- Spec: [`specs/007-scheduled-stage-default/`](../specs/007-scheduled-stage-default/)
+- Spec: [`specs/025-stage-atmosphere/`](../specs/025-stage-atmosphere/spec.md)
