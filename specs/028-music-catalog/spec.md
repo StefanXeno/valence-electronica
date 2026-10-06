@@ -6,6 +6,8 @@
 
 **Status**: As-built (consolidated living spec)
 
+**Updated**: 2026-10-06 — stage-only play buttons (folded in from `035`)
+
 **Consolidates**: `010-track-catalog`, `014-discography-only-tracks`, discography parts of
 `004`, `013`, plus post-spec catalog work (2026-09-20: covers, expandable rows, EP /
 compilation grouping, `trackOrder`, listen links)
@@ -137,9 +139,12 @@ remains.
 - **FR-007**: The catalog MUST be available as the Discography overlay (laptop) and inside
   the phone menu (see `027`), with labels (`discographyTitle`, `listenOnLabel`,
   `releasedLabel`, `emptyReleases`, `stageButtonLabel`) from UI chrome.
-- **FR-008**: Rows whose release is a stage entry SHOULD let the fan put that song on stage
-  (see `026` FR-010). *(As-built: a play button renders on every catalog card but has no
-  action — see Known Gaps.)*
+- **FR-008**: Rows whose release is a stage song (has a jukebox entry) MUST show a play
+  button — or a "currently playing" EQ marker while that song is on stage — in the overlay
+  (single cards and nested EP rows) and in the phone menu. Catalog-only tracks and
+  collection headers MUST NOT show one. Pressing play MUST put the song on stage (see
+  `026` FR-010) and close the overlay (laptop) or menu (phone); it MUST NOT force the
+  player open.
 
 ### Key Entities
 
@@ -163,11 +168,10 @@ remains.
   `public/images/covers/`.
 - Per-track credits and mentions are stored but only the artist credit and blurb are shown.
 
-## Known Gaps *(as of 2026-10-05)*
+## Known Gaps *(as of 2026-10-06)*
 
-- **Dead play button**: every catalog card renders a play button (`data-discog-play`) that
-  has no handler; catalog-only tracks cannot play on stage at all.
 - The phone menu renders its own copy of the catalog markup separate from the
-  `Discography` component (two implementations to keep in sync).
+  `Discography` component (two implementations to keep in sync; the play control is shared
+  via `StagePlayButton`).
 - Unused helpers remain (`sortDiscographyEntriesAsc`, deprecated
   `getDiscographyFromJukebox`).

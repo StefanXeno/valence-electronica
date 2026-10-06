@@ -12,13 +12,13 @@ the site does **today**. They replaced 22 incremental feature specs (`001`–`02
 | [`023-site-foundation`](023-site-foundation/spec.md) | Hosting, live + preview publishing, SEO, legal reachability, privacy, content validation | As-built |
 | [`024-artist-content-editing`](024-artist-content-editing/spec.md) | Artist edit surfaces, artist guide, pre-release → main publishing | As-built |
 | [`025-stage-atmosphere`](025-stage-atmosphere/spec.md) | Background video/poster, audio opt-in, theme packs, scheduled default | As-built |
-| [`026-stage-player`](026-stage-player/spec.md) | Stage entries (jukebox), switching, shuffle, player chrome | As-built, open gaps |
+| [`026-stage-player`](026-stage-player/spec.md) | Stage entries (jukebox), switching, shuffle, hidden stage player | As-built |
 | [`027-site-navigation`](027-site-navigation/spec.md) | Top nav, content overlays + routes, phone menu, socials | As-built |
 | [`028-music-catalog`](028-music-catalog/spec.md) | Discography: merge, year/EP grouping, covers, listen links | As-built |
 | [`029-tour-dates`](029-tour-dates/spec.md) | Shows, ticket window, year groups | As-built |
 | [`030-brand-identity`](030-brand-identity/spec.md) | Wordmark, rotating tagline + eggs, landing intro | As-built |
 | [`031-glitch-motion`](031-glitch-motion/spec.md) | Glitch language, reduced motion, hover labels | As-built |
-| [`032-easter-eggs`](032-easter-eggs/spec.md) | Rub reveal, Infinite spin, achievements | As-built |
+| [`032-easter-eggs`](032-easter-eggs/spec.md) | Rub reveal, Infinite spin, player found, achievements | As-built |
 | [`033-dev-tooling`](033-dev-tooling/spec.md) | mise toolchain, CI, unit tests, HUD verify | As-built |
 | [`034-stage-artist-polish`](034-stage-artist-polish/spec.md) | Show Me How audio, brighter Taking Over, dual videos, NCS logo, shuffle look | Draft |
 
@@ -29,7 +29,7 @@ short `plan.md` (where it lives in the code). As-built specs have no `tasks.md`.
 
 1. **New feature or change**: run the spec-kit flow (`/speckit-specify` → `/speckit-clarify`
    → `/speckit-plan` → `/speckit-tasks` → `/speckit-implement`). It creates the next numbered
-   folder (`035-…`). Reference the capability specs it touches.
+   folder (`036-…`). Reference the capability specs it touches.
 2. **When it ships**: fold the essential behavior back into the affected capability
    spec(s) (update FRs, Known Gaps, and `plan.md` source map), then delete the feature
    folder in the same PR. Capability specs stay the single source of truth.
@@ -57,11 +57,12 @@ find where that behavior is specified now.
 | `012-rotating-tagline` | `030` (+ `docs/tagline-pool.md`) |
 | `013-codebase-hardening` | `026`, `028`, `033` |
 | `014-discography-only-tracks` | `028` |
-| `015-mobile-stage-hud` | `026` (dormant phone player), `027` (phone menu) |
+| `015-mobile-stage-hud` | `026` (player; phone sheet removed by `035`), `027` (phone menu) |
 | `016-agent-self-testing` | `033` |
 | `017-mise-toolchain` | `033` |
-| `018-player-animation-polish` | `026` (dormant phone player) |
+| `018-player-animation-polish` | `026` (phone sheet removed by `035`) |
 | `019-desktop-chrome-polish` | `026` (laptop player), `027` |
 | `020-site-nav-chrome` | `027` |
-| `021-jukebox-easter-egg` | `026` (vinyl is decorative; V-Flip egg retired), `032` |
+| `021-jukebox-easter-egg` | `026` (V-Flip retired; vinyl is now the hidden player), `032` |
+| `035-hidden-stage-player` | `026` (player states, discovery), `028` (FR-008 play), `032` (player achievement) |
 | `022-stage-artist-polish` | `034` (draft) |

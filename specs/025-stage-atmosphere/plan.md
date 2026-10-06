@@ -27,7 +27,7 @@ evaluation in Europe/Berlin, and entry switching cannot be done statically.
 | Schedule data | `src/data/stage-schedule.json` |
 | Schedule resolution (Berlin calendar) | `src/lib/stage-schedule.ts` (+ tests) |
 | Mute / volume / phone 50% | `src/components/MuteControl.astro`, `src/lib/mute-slot.ts` (+ tests) |
-| Pause / resume, paused flag | `initBgVideoToggle` in `src/lib/player-dock.ts`, `src/lib/playback.ts` |
+| Pause / resume, paused flag | `initBgVideoToggle` in `src/lib/stage-player.ts`, `src/lib/playback.ts` |
 | Entry switching + crossfade | `src/lib/stage-switch.ts` (see `026`) |
 | Artist docs | `docs/stage-schedule.md`, `docs/artist-guide.md` (Theme packs, Media assets) |
 

@@ -118,8 +118,8 @@ message.
 
 ## Known Gaps *(as of 2026-10-05)*
 
-- `verify:hud` flows still target the phone player, which is hidden since 2026-09-18 (see
-  `026`); the phone flows fail or test dead UI.
+- `verify:hud` flows were rewritten for the hidden stage player (2026-10-06, `026`) but have
+  not been run against a browser yet (operator-run).
 - No tests for `track-rub.ts`, `infinite-spin.ts`, `achievement-toast.ts`.
 - Node version is stated in three places (`.nvmrc`, `mise.toml`, `deploy.yml` hard-codes
   24) while `engines` allows ≥22.

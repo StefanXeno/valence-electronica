@@ -6,12 +6,15 @@
 
 **Status**: As-built (consolidated living spec) — first spec for this feature
 
+**Updated**: 2026-10-06 — "player found" achievement (folded in from `035`)
+
 **Consolidates**: post-spec work from 2026-09-20 (commits `beb17a0` … `5336b73`); replaces
 the vinyl → V-Flip easter egg idea from `021-jukebox-easter-egg`, which was retired
 
 **Input**: Document the hidden interactions that reward curious visitors: rubbing a song in
 the discography reveals its hidden text, spinning a circle on the Infinite stage, and the
-one-time "achievement unlocked" toasts both trigger.
+one-time "achievement unlocked" toasts they trigger. Finding the hidden stage player
+(see `026`) is the third achievement.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -97,12 +100,20 @@ confirm the toast appears once per browser.
 - **FR-006**: A successful rub MUST pin the tagline to the rub line for the page session
   only (no persistence).
 - **FR-007**: Easter eggs MUST NOT be required for any primary task and MUST NOT add
-  tracking.
+  tracking. (The hidden player is discovered by a tap gesture but always has a keyboard
+  path — see `026` FR-014.)
+- **FR-008**: The first reveal of the hidden stage player in a browser MUST unlock the
+  "player found" achievement (key `ve-achievement-player-found`); its title and subtitle
+  MUST come from UI chrome (`playerAchievementTitle`, `playerAchievementSub`).
+- **FR-009**: Rub, Infinite spin, and the player tap hint MUST share one gesture-ignore
+  selector set so no gesture starts on controls, navigation, overlays, or the player, and
+  a tap on empty stage never starts a rub or spin.
 
 ### Key Entities
 
 - **Rubbable entry**: catalog entry with `rubbable: true` and body text.
-- **Achievement**: storage key, title, subtitle, glyph (`rub`, `infinite`).
+- **Achievement**: storage key, title, subtitle, glyph (`rub`, `infinite`); three today:
+  rub, Infinite spin, player found.
 
 ## Success Criteria *(mandatory)*
 
@@ -119,11 +130,12 @@ confirm the toast appears once per browser.
 - Easter eggs are intentionally undocumented for visitors; the artist guide should still
   document the `rubbable` flag.
 
-## Known Gaps *(as of 2026-10-05)*
+## Known Gaps *(as of 2026-10-06)*
 
-- Achievement titles/subtitles and the rub tagline are hard-coded in TypeScript instead of
-  UI chrome content (constitution III).
+- Rub and Infinite achievement titles/subtitles and the rub tagline are hard-coded in
+  TypeScript instead of UI chrome content (constitution III); the player achievement
+  already uses chrome.
 - Only `taking-over` is `rubbable`, and its body is still placeholder lyrics.
-- No unit tests for the rub and spin gesture math; the two modules duplicate their
-  "ignore" selectors (lists already differ).
+- No unit tests for the rub and spin gesture math (the shared ignore selectors are tested).
 - `rubbable` is not documented in `docs/artist-guide.md`.
+- No achievements overview page (IDEA-026).

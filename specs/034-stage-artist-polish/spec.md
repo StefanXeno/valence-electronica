@@ -148,7 +148,7 @@ works with a clear pressed state.
 
 - **Dropped from `022`**: "Kill Minecraft sprites" — no sprite assets or code exist on
   `pre-release` as of 2026-10-05; nothing to remove.
-- **Parked from `022`**: "Mobile bottom player prefers tap" — moot while the phone player is
-  hidden (see `026` Known Gaps); revisit when a phone player returns.
+- **Parked from `022`**: "Mobile bottom player prefers tap" — resolved by the hidden stage
+  player (`026`): phone and laptop share one tap-driven player.
 - Which entries are "NCS-associated" and the logo asset must come from the artist.
 - Depends on `025` (atmosphere/theme packs) and `026` (stage entries).

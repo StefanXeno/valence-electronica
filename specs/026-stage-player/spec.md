@@ -4,15 +4,18 @@
 
 **Created**: 2026-10-05
 
-**Status**: As-built (consolidated living spec) — with open product gaps, see Known Gaps
+**Status**: As-built (consolidated living spec)
+
+**Updated**: 2026-10-06 — hidden stage player with song selection (folded in from `035`)
 
 **Consolidates**: jukebox parts of `004-landing-content-layout`, `011-vflip-now-playing`,
 playback parts of `013-codebase-hardening`, `015-mobile-stage-hud`,
-`018-player-animation-polish`, `019-desktop-chrome-polish`, `021-jukebox-easter-egg`
+`018-player-animation-polish`, `019-desktop-chrome-polish`, `021-jukebox-easter-egg`,
+`035-hidden-stage-player`
 
 **Input**: Consolidation of the "jukebox": the set of stage entries (songs bound to an
 atmosphere and a theme), how the stage switches between them, the shuffle auto-advance,
-and the player chrome that exposes shuffle, pause, and sound.
+and the hidden player that exposes song choice, shuffle, pause, and sound.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -43,31 +46,61 @@ different audio entry takes over with a crossfade and sound continues.
 
 ---
 
-### User Story 2 - Visitor controls playback from a compact player (Priority: P1)
+### User Story 2 - Curious visitor discovers the hidden player (Priority: P1)
 
-On a laptop, a compact pill at the bottom-left holds a decorative vinyl, a shuffle toggle,
-play/pause, and mute with volume slider. The pill is always visible and never changes
-width when sound is toggled.
+The stage starts clean — no player chrome. Tapping or clicking empty stage three times
+quickly makes a vinyl record peek in from the bottom-left edge; tapping it opens the full
+player. The first reveal in a browser shows a one-time achievement and is remembered:
+later visits start with the small vinyl button.
 
-**Why this priority**: Minimal, always-available control over the stage without covering
-the center.
+**Why this priority**: The artist wants a clean stage; discovery is how newcomers find
+the player.
 
-**Independent Test**: At 1280×800, toggle shuffle, pause, resume, unmute, and drag volume;
-confirm each control works by mouse and keyboard and the pill width never changes.
+**Independent Test**: Fresh browser at 390px and 1280px: tap empty stage three times
+within ~1.5 s, tap the peeking vinyl, confirm the full player and the achievement toast;
+reload and confirm the vinyl button is shown at rest.
 
 **Acceptance Scenarios**:
 
-1. **Given** a laptop-width viewport, **When** the landing is ready, **Then** the player
-   pill shows vinyl (decorative, not interactive), Shuffle, Play/Pause, and Mute in that
-   order at the bottom-left.
-2. **Given** shuffle is toggled, **When** its state changes, **Then** its pressed state is
-   obvious and auto-advance starts or stops accordingly.
-3. **Given** the active entry has no audio, **When** the player renders, **Then** mute
-   stays in place but is disabled, so the pill keeps its width.
+1. **Given** a clean stage and no prior discovery, **When** the visitor taps/clicks empty
+   stage 3 times within ~1.5 s, **Then** the vinyl peeks in with a short nudge and stays
+   ~4 s; without a tap on it, it slides away.
+2. **Given** the vinyl is peeking, **When** the visitor taps it, **Then** the full player
+   opens; the first time in this browser an achievement toast appears.
+3. **Given** taps land on navigation, overlays, links, controls, or during the intro,
+   **When** counted, **Then** they do not count toward the hint.
+4. **Given** a later visit in the same browser, **When** the landing loads, **Then** the
+   player starts as the minimal vinyl button.
 
 ---
 
-### User Story 3 - Visitor puts a specific song on stage (Priority: P2)
+### User Story 3 - Fan picks a song and controls playback (Priority: P1)
+
+The full player shows the song on stage, a list of all stage songs (cover + title,
+current marked), shuffle, play/pause, and mute (plus volume slider on laptop). Closing it
+collapses to the small vinyl in the corner, which spins while music plays.
+
+**Why this priority**: Song choice and sound control without covering the stage.
+
+**Independent Test**: Open the player, pick another song, toggle shuffle, pause, unmute;
+close via X, Escape, and outside tap; reopen via the vinyl.
+
+**Acceptance Scenarios**:
+
+1. **Given** the full player, **When** the fan taps another song, **Then** it goes on
+   stage with the manual-pick behavior (FR-010) and is marked current.
+2. **Given** the full player, **When** the visitor closes it (close button, Escape, tap
+   outside) or opens a content overlay / the phone menu, **Then** it collapses to the
+   minimal vinyl.
+3. **Given** the minimal vinyl, **When** music plays, **Then** it spins slowly (not when
+   paused or with reduced motion).
+4. **Given** keyboard navigation from a fresh browser, **When** the visitor tabs, **Then**
+   a "Show player" button appears on focus and opens the full player; Escape returns
+   focus to the vinyl.
+
+---
+
+### User Story 4 - Any UI puts a specific song on stage (Priority: P2)
 
 A visitor who knows a track wants it on stage now. Picking an entry starts it immediately
 with the same handoff as shuffle, keeps the sound preference, and restarts that entry's
@@ -88,8 +121,7 @@ timed from the pick.
 3. **Given** several picks in quick succession, **When** handoffs overlap, **Then** the
    last pick wins and the stage never ends in a mixed state.
 
-> **As-built note**: the selection mechanism exists, but **no visible control currently
-> triggers it** (see Known Gaps).
+Entry points: the player song list and the discography play buttons (see `028`).
 
 ---
 
@@ -127,19 +159,33 @@ timed from the pick.
 - **FR-006**: Auto-advance MUST NOT start audio by itself and MUST preserve the visit's
   mute preference.
 - **FR-007**: Loop (repeat current entry, wins over shuffle) MUST remain supported by the
-  playback logic with `loopDefault` in UI chrome; the loop control is currently hidden on
-  all viewports.
-- **FR-008**: On laptop widths (≥1024px) the player MUST be an always-visible compact pill
-  at the bottom-left with: decorative vinyl, Shuffle, Play/Pause, Mute (+ volume slider,
-  see `025`). Controls MUST be keyboard operable and expose accessible names from UI
-  chrome.
-- **FR-009**: On phone widths (<1024px) the player is currently **not shown**. The phone
-  player implementation (floor-pinned pill with tap/drag handle, solo now-playing card,
-  three-slot playlist window, idle handle nod) remains in the code but is disabled by CSS.
+  playback logic with `loopDefault` in UI chrome; there is no loop control.
+- **FR-008**: The player MUST have four states: **hidden** (no chrome), **hint** (vinyl
+  peeking at the bottom edge), **minimal** (vinyl-only corner button), **full** (title,
+  stage song list, Shuffle, Play/Pause, Mute + volume slider on laptop, close). Phone
+  (<1024px) and laptop use the same structure; only placement/size and the slider differ.
+- **FR-009**: The player MUST start **hidden** unless the browser has discovered it
+  (first-party `localStorage` key `ve-player-discovered`; blocked storage → hidden, and
+  discovery lasts for the page load). Three taps/clicks on empty stage within ~1.5 s MUST
+  move hidden → hint (controls, nav, overlays, the intro, and rub/spin gestures never
+  count); a tap on the peeking vinyl MUST open **full**; without it, hint returns to hidden
+  after ~4 s. The first reveal MUST unlock the "player found" achievement (see `032`).
 - **FR-010**: A manual pick MUST be requestable by any UI through one stage-select event
   (and by `data-stage-button` / `data-jukebox-option` controls); it MUST start the entry
   immediately and restart its advance clock without resetting shuffle.
 - **FR-011**: The player MUST stay at the periphery; it MUST NOT cover the stage center.
+  The minimal vinyl MUST cover less than 1% of a 390×844 viewport.
+- **FR-012**: The song list MUST show only stage songs (valid jukebox entries), newest
+  release first; catalog-only tracks MUST NOT appear.
+- **FR-013**: Closing the full player (close button, Escape, outside tap/click) or opening
+  a content overlay / the phone menu MUST collapse it to **minimal**; activating the vinyl
+  MUST open **full**.
+- **FR-014**: A "Show player" button, visually hidden until keyboard focus and present only
+  in the hidden state, MUST open the full player. On open, focus moves to the current
+  song; on close, focus returns to the vinyl. All player labels come from UI chrome.
+- **FR-015**: Reduced motion MUST remove the peek slide, nudge, vinyl spin, and panel
+  animation while keeping all states reachable.
+- **FR-016**: Without JavaScript there is no player; the stage shows the static default.
 
 ### Key Entities
 
@@ -156,22 +202,17 @@ timed from the pick.
   stage states.
 - **SC-002**: With shuffle on and the page untouched, the stage advances within ±2 s of
   the expected advance point.
-- **SC-003**: Toggling sound never changes the laptop player's width.
+- **SC-003**: From the full player, switching to a specific song takes exactly one action.
+- **SC-004**: On a first visit, 0 player pixels cover the stage at rest.
 
 ## Assumptions
 
 - Songs are first-party audio muxed into the stage videos; there is no separate audio
   player or third-party embed.
-- The name "V-Flip" survives only in UI copy and code naming; it is no longer a separate
-  visitor feature.
+- The name "V-Flip" is retired; "jukebox" survives in content folder and code naming.
 
-## Known Gaps *(as of 2026-10-05)*
+## Known Gaps *(as of 2026-10-06)*
 
-- **No visible way to pick a song.** The theme-track list lives in the player drawer,
-  which is closed on laptops (no control opens it) and the whole player is hidden on
-  phones. The play button on discography catalog rows has no handler (see `028`).
-- **Phones have no player at all**: no shuffle toggle, no pause, and no unmute; shuffle
-  still auto-advances silently in the background.
-- The dormant phone player (`initPlayerDock`, ~1,600 lines) and the hidden loop control
-  are still shipped.
-- `scripts/verify-hud.mjs` still asserts phone player flows that are hidden today.
+- Exact hint visuals (peek depth, nudge, spin speed) were tuned without a broad device
+  review; revisit after operator feedback.
+- The achievement toast reuses the rub glyph; a dedicated vinyl glyph is open.

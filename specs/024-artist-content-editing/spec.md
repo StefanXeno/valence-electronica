@@ -152,9 +152,9 @@ pack registry), plus ids that must not be renamed.
 
 ## Known Gaps *(as of 2026-10-05)*
 
-- The artist guide lags behind the code: it still describes the V-Flip drawer / Track info
-  and lyrics surfaces, references the removed `releases/` folder, and does not document
-  `rubbable`, `trackOrder`, or EP/compilation grouping via `kind`.
+- The artist guide lags behind the code: it still references the removed `releases/`
+  folder and does not document `rubbable`, `trackOrder`, or EP/compilation grouping via
+  `kind`. (Player sections were updated with `035` on 2026-10-06.)
 - `docs/stage-schedule.md` uses `example-cyan` in its examples, but that jukebox entry no
   longer exists.
 - The `contact` block in `site.json` is empty and the Contact route is not linked from the
