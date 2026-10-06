@@ -264,11 +264,16 @@ export function initStagePlayer(): void {
 
   /** Glitch packs (Nightmare): the panel opens/closes with a one-shot glitch instead of a slide. */
   let glitchTimer: number | undefined;
-  const glitchPanel = () => {
+  const glitchPanel = (opening: boolean) => {
     if (!prefersGlitchMotion()) return;
     window.clearTimeout(glitchTimer);
+    panel.classList.remove('is-glitch-open', 'is-glitch-close');
+    void panel.offsetWidth;
+    panel.classList.add(opening ? 'is-glitch-open' : 'is-glitch-close');
     const dur = playElementGlitch(panel, 'is-glitching');
-    glitchTimer = window.setTimeout(() => panel.classList.remove('is-glitching'), dur + 80);
+    glitchTimer = window.setTimeout(() => {
+      panel.classList.remove('is-glitching', 'is-glitch-open', 'is-glitch-close');
+    }, Math.max(dur, 280) + 80);
   };
 
   const focusCurrentSong = () => {
@@ -300,7 +305,7 @@ export function initStagePlayer(): void {
     if (effects.markDiscovered) unlockDiscovery();
     if (effects.focusVinyl && opts.restoreFocus !== false) vinyl.focus({ preventScroll: true });
     if (next === 'full' && previous !== 'full') focusCurrentSong();
-    if ((next === 'full') !== (previous === 'full')) glitchPanel();
+    if ((next === 'full') !== (previous === 'full')) glitchPanel(next === 'full');
 
     if (next !== previous) {
       root.dispatchEvent(

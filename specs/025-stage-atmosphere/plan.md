@@ -24,6 +24,7 @@ evaluation in Europe/Berlin, and entry switching cannot be done statically.
 | Default entry, valid entries | `src/lib/background.ts` |
 | Theme registry + capability helpers | `src/lib/theme-packs.ts` (+ tests) |
 | Theme tokens | `src/styles/themes.css` |
+| Theme colour handoff (frame-by-frame token tween) | `src/lib/theme-tween.ts` (+ test) |
 | Schedule data | `src/data/stage-schedule.json` |
 | Schedule resolution (Berlin calendar) | `src/lib/stage-schedule.ts` (+ tests) |
 | Mute / volume / phone 50% | `src/components/MuteControl.astro`, `src/lib/mute-slot.ts` (+ tests) |

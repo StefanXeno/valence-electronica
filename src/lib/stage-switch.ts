@@ -1,3 +1,4 @@
+import { cancelThemeTween, tweenTheme } from './theme-tween';
 import {
   applyThemeAttributes,
   packAllowsHudGlitch,
@@ -74,28 +75,27 @@ function applyThemeForHandoff(
   window.clearTimeout(themeCrossfadeTimer);
 
   if (!animated || handoff.mode === 'instant') {
+    cancelThemeTween();
     delete document.documentElement.dataset.stageCrossfade;
     document.documentElement.dataset.theme = attrs.themeId;
     document.documentElement.dataset.hudGlitch = attrs.hudGlitch;
     return;
   }
 
+  // Attribute still drives the video / atmosphere handoff timing; colours tween in JS.
   document.documentElement.dataset.stageCrossfade = handoff.mode;
+  tweenTheme(attrs.themeId, { durationMs: handoff.durationMs, mode: handoff.mode });
+  if (!handoff.leavingGlitch) {
+    document.documentElement.dataset.hudGlitch = attrs.hudGlitch;
+  }
 
-  requestAnimationFrame(() => {
-    document.documentElement.dataset.theme = attrs.themeId;
-    if (!handoff.leavingGlitch) {
+  themeCrossfadeTimer = window.setTimeout(() => {
+    delete document.documentElement.dataset.stageCrossfade;
+    if (handoff.leavingGlitch) {
       document.documentElement.dataset.hudGlitch = attrs.hudGlitch;
     }
-
-    themeCrossfadeTimer = window.setTimeout(() => {
-      delete document.documentElement.dataset.stageCrossfade;
-      if (handoff.leavingGlitch) {
-        document.documentElement.dataset.hudGlitch = attrs.hudGlitch;
-      }
-      syncPlaybackToggleGlitch?.();
-    }, handoff.durationMs);
-  });
+    syncPlaybackToggleGlitch?.();
+  }, handoff.durationMs);
 }
 
 function getAtmosphereVideos() {

@@ -413,12 +413,14 @@ const defaultLabel =
 
   :global(html[data-hud-glitch='true']) .stage-player[data-player-state='full'] .stage-player__panel {
     transition: none;
+  }
+
+  /* Set by stage-player.ts only on a real open/close — never on a theme switch. */
+  .stage-player__panel.is-glitch-open {
     animation: stage-player-glitch-in var(--player-dur) steps(1, end) both;
   }
 
-  :global(html[data-hud-glitch='true'])
-    .stage-player:not([data-player-state='full'])
-    .stage-player__panel {
+  .stage-player__panel.is-glitch-close {
     animation: stage-player-glitch-out var(--player-dur) steps(1, end) both;
   }
 
@@ -856,7 +858,8 @@ const defaultLabel =
     .stage-player__disc,
     .stage-player[data-player-state='hint'] .stage-player__vinyl,
     .stage-player__eq span,
-    :global(html[data-hud-glitch='true']) .stage-player .stage-player__panel {
+    .stage-player__panel.is-glitch-open,
+    .stage-player__panel.is-glitch-close {
       animation: none;
     }
   }
