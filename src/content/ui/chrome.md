@@ -48,4 +48,9 @@ loopDefault: false
 unmuteTooltip: Unmute
 muteTooltip: Mute
 volumeSliderTooltip: Drag to adjust volume
+playerShowLabel: Show player
+playerOpenLabel: Open player
+playerCloseLabel: Close player
+playerAchievementTitle: Found it!
+playerAchievementSub: You discovered the hidden player.
 ---

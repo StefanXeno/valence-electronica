@@ -1,4 +1,4 @@
-import { PHONE_MQ } from './player-dock';
+import { PHONE_MQ } from './viewport';
 
 const REDUCED_MOTION = '(prefers-reduced-motion: reduce)';
 const LABEL_GAP_PX = 6;
@@ -158,7 +158,7 @@ export function initLabelReveal(): void {
   const syncNativeTitles = () => {
     document
       .querySelectorAll<HTMLElement>(
-        '[data-now-playing], .jukebox__title, .jukebox__title-laptop, .jukebox__title-phone, .jukebox__header, .jukebox__track-select',
+        '[data-now-playing], .stage-player__header',
       )
       .forEach((el) => {
         el.removeAttribute('title');
@@ -169,7 +169,7 @@ export function initLabelReveal(): void {
   const show = (el: HTMLElement) => {
     if (phoneHud.matches) return;
     // In-box player titles already show the copy — no duplicate HUD floater.
-    if (el.closest('.jukebox__header, .jukebox__title')) return;
+    if (el.closest('.stage-player__header')) return;
     const label = el.dataset.hudLabel?.trim();
     if (!label) return;
     const panel = el.closest('details');

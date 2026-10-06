@@ -3,6 +3,8 @@
  * Visual shell lives in TrackRubOverlay.astro — this module only drives show/hide + copy/glyph.
  */
 
+import { prefersReducedMotion } from './viewport';
+
 export type AchievementGlyph = 'rub' | 'infinite';
 
 const ACHIEVEMENT_HOLD_MS = 4200;
@@ -11,9 +13,6 @@ const ACHIEVEMENT_EXIT_MS = 400;
 let achievementHideTimer: ReturnType<typeof setTimeout> | null = null;
 let achievementRemoveTimer: ReturnType<typeof setTimeout> | null = null;
 
-function prefersReducedMotion(): boolean {
-  return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-}
 
 function clearAchievementTimers() {
   if (achievementHideTimer) {

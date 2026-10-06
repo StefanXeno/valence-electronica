@@ -7,16 +7,14 @@ import Discography from './Discography.astro';
 import LegalPanel from './LegalPanel.astro';
 import ShopComingSoon from './ShopComingSoon.astro';
 import TourDates from './TourDates.astro';
-import { getBackgroundConfig } from '../lib/background';
 import { CONTENT_OVERLAY_SLUGS, slugFromOverlayPath } from '../lib/content-overlay';
 import { getAboutEntry, getChrome, getSiteNavData } from '../lib/stage';
 import { withBase } from '../lib/url';
 
-const [entries, chrome, about, { defaultVideoId }] = await Promise.all([
+const [entries, chrome, about] = await Promise.all([
   getCollection('legal'),
   getChrome(),
   getAboutEntry(),
-  getBackgroundConfig(),
 ]);
 const { shopUrl, contact } = getSiteNavData();
 
@@ -51,7 +49,7 @@ const openSlug = slugFromOverlayPath(Astro.url.pathname, basePath);
     slug="discography"
     open={openSlug === 'discography'}
   >
-    <Discography chrome={chrome} defaultId={defaultVideoId} />
+    <Discography chrome={chrome} />
   </LegalPanel>
   <LegalPanel title={chrome.tourTitle} slug="tour" open={openSlug === 'tour'}>
     <TourDates chrome={chrome} />

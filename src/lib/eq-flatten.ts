@@ -1,12 +1,12 @@
 /**
- * Pause flatten for `.player-dock__soundwave` and `.discog__eq`.
+ * Pause flatten for `.stage-player__eq` and `.discog__eq`.
  *
  * `animation: none` + height: 4px snaps in one frame (keyframes own transform).
  * Instead: freeze the dance, bake each bar's visual height, then transition
  * height to 4px. Does not touch `data-player-paused` (shuffle hold stays).
  */
 
-const ROOT_SEL = '.player-dock__soundwave, .discog__eq';
+const ROOT_SEL = '.stage-player__eq, .discog__eq';
 const FLAT_CLASS = 'is-eq-flat';
 
 let started = false;
@@ -91,6 +91,8 @@ export function initEqFlatten(): void {
   started = true;
 
   const html = document.documentElement;
+  // CSS keeps an instant no-JS flatten until this flag is set.
+  html.setAttribute('data-eq-flatten-js', '');
   const sync = () => {
     if (html.hasAttribute('data-player-paused')) flattenEq();
     else releaseEq();

@@ -171,6 +171,11 @@ const ui = defineCollection({
     unmuteTooltip: z.string().optional(),
     muteTooltip: z.string().optional(),
     volumeSliderTooltip: z.string().optional(),
+    playerShowLabel: z.string().optional(),
+    playerOpenLabel: z.string().optional(),
+    playerCloseLabel: z.string().optional(),
+    playerAchievementTitle: z.string().optional(),
+    playerAchievementSub: z.string().optional(),
   }),
 });
 

@@ -2,7 +2,7 @@
 import Base from '../layouts/Base.astro';
 import Hero from '../components/Hero.astro';
 import Channels from '../components/Channels.astro';
-import Jukebox from '../components/Jukebox.astro';
+import StagePlayer from '../components/StagePlayer.astro';
 import site from '../data/site.json';
 import {
   CONTENT_OVERLAY_SLUGS,
@@ -51,8 +51,6 @@ const { panelTitle } = Astro.props as Props;
     <div class="stage__socials">
       <Channels />
     </div>
-    <div class="stage__jukebox">
-      <Jukebox />
-    </div>
+    <StagePlayer />
   </div>
 </Base>

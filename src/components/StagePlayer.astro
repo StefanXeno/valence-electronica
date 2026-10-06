@@ -1,0 +1,618 @@
+---
+/**
+ * Hidden stage player (035). One structure for phone and laptop.
+ * States live in `data-player-state` (hidden | hint | minimal | full) and are driven
+ * by `src/lib/stage-player.ts`; this file only renders markup and state-scoped CSS.
+ */
+import { getCollection } from 'astro:content';
+import { getBackgroundConfig } from '../lib/background';
+import { getChrome } from '../lib/stage';
+import { coverOrPlaceholder, withBase } from '../lib/url';
+import HudIcon from './HudIcon.astro';
+import MuteControl from './MuteControl.astro';
+
+const chrome = await getChrome();
+const { videos, defaultVideoId, schedule } = await getBackgroundConfig();
+const jukeboxRaw = await getCollection('jukebox');
+const metaById = new Map(jukeboxRaw.map((entry) => [entry.id, entry.data]));
+
+const catalog = videos.map((entry) => ({
+  id: entry.id,
+  label: entry.label,
+  themeId: entry.themeId,
+  hasAudio: entry.hasAudio,
+  poster: withBase(entry.poster),
+  sources: entry.sources.map((source) => ({ ...source, src: withBase(source.src) })),
+}));
+
+// Stage songs only (entries with a stage video), newest release first, then title.
+const songs = videos
+  .map((entry) => {
+    const meta = metaById.get(entry.id);
+    return {
+      id: entry.id,
+      label: entry.label,
+      cover: coverOrPlaceholder(meta?.cover ?? entry.poster),
+      sortTime: meta?.sortDate ? meta.sortDate.getTime() : 0,
+    };
+  })
+  .sort((a, b) => b.sortTime - a.sortTime || a.label.localeCompare(b.label));
+
+const showMute = videos.some((entry) => entry.hasAudio);
+const defaultLabel =
+  videos.find((entry) => entry.id === defaultVideoId)?.label?.trim() ||
+  videos[0]?.label?.trim() ||
+  '';
+---
+
+{
+  videos.length > 0 && (
+    <div
+      class="stage-player"
+      data-stage-player
+      data-player-state="minimal"
+      data-stage-catalog={JSON.stringify(catalog)}
+      data-stage-schedule={JSON.stringify(schedule)}
+      data-stage-fallback={defaultVideoId}
+      data-shuffle-default={chrome.shuffleDefault ? 'true' : 'false'}
+      data-loop-default={chrome.loopDefault ? 'true' : 'false'}
+      data-achievement-title={chrome.playerAchievementTitle}
+      data-achievement-sub={chrome.playerAchievementSub}
+    >
+      <section
+        class="stage-player__panel"
+        id="stage-player-panel"
+        data-player-panel
+        aria-label={chrome.songsTitle}
+        inert
+      >
+        <header class="stage-player__header">
+          <div class="stage-player__heading">
+            <p class="stage-player__eyebrow">{chrome.currentlyPlayingLabel}</p>
+            <p class="stage-player__title" data-now-playing>{defaultLabel}</p>
+          </div>
+          <button
+            type="button"
+            class="stage-player__close glitch-hit"
+            data-player-close
+            aria-label={chrome.playerCloseLabel}
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                d="M6 6l12 12M18 6 6 18"
+              ></path>
+            </svg>
+          </button>
+        </header>
+
+        <ul class="stage-player__songs" data-player-songs aria-label={chrome.songsTitle}>
+          {songs.map((song) => (
+            <li>
+              <button
+                type="button"
+                class="stage-player__song glitch-hit"
+                data-jukebox-option={song.id}
+                aria-pressed={song.id === defaultVideoId ? 'true' : 'false'}
+              >
+                <img
+                  class="stage-player__cover"
+                  src={song.cover}
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                />
+                <span class="stage-player__song-title">{song.label}</span>
+                <span class="stage-player__eq" aria-hidden="true">
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </span>
+              </button>
+            </li>
+          ))}
+        </ul>
+
+        <div class="stage-player__controls">
+          <button
+            type="button"
+            class="stage-player__tool glitch-hit"
+            data-shuffle-toggle
+            data-glitch-live
+            aria-pressed={chrome.shuffleDefault ? 'true' : 'false'}
+            aria-label={chrome.shuffleLabel}
+            data-hud-label={chrome.shuffleLabel}
+            data-hud-label-anchor="above"
+          >
+            <HudIcon token={chrome.shuffleIcon} emoji={chrome.shuffleIconEmoji} />
+          </button>
+
+          <button
+            type="button"
+            class="stage-player__tool glitch-hit"
+            data-bg-play-toggle
+            data-glitch-live
+            data-play-label="Play"
+            data-pause-label="Pause"
+            data-hud-label="Pause"
+            data-hud-label-anchor="above"
+            aria-label="Pause"
+          >
+            <span class="stage-player__play-icon" data-bg-play-icon="play" hidden>
+              <HudIcon token="play" />
+            </span>
+            <span class="stage-player__play-icon" data-bg-play-icon="pause">
+              <HudIcon token="pause" />
+            </span>
+          </button>
+
+          {showMute && (
+            <div class="stage-player__tool stage-player__tool--mute" data-jukebox-mute-slot data-sound="off">
+              <MuteControl
+                unmuteTooltip={chrome.unmuteTooltip}
+                muteTooltip={chrome.muteTooltip}
+                volumeSliderTooltip={chrome.volumeSliderTooltip}
+                inJukebox
+              />
+            </div>
+          )}
+        </div>
+      </section>
+
+      <button
+        type="button"
+        class="stage-player__vinyl glitch-hit"
+        data-player-vinyl
+        aria-label={chrome.playerOpenLabel}
+        aria-expanded="false"
+        aria-controls="stage-player-panel"
+      >
+        <span class="stage-player__disc">
+          <HudIcon token="jukebox" />
+        </span>
+      </button>
+    </div>
+  )
+}
+
+<script>
+  import { initStagePlayer } from '../lib/stage-player';
+
+  initStagePlayer();
+</script>
+
+<style>
+  .stage-player {
+    --player-gap: var(--stage-corner-gap, 0.3rem);
+    --player-vinyl-size: calc(2.75rem * var(--hud-scale));
+    --player-radius: calc(0.85rem * var(--hud-scale));
+    --player-ease: cubic-bezier(0.4, 0, 0.2, 1);
+    --player-dur: 280ms;
+    --jukebox-volume-gap: calc(0.15rem * var(--hud-scale));
+    --jukebox-volume-slider-size: min(calc(5.5rem * var(--hud-scale)), 24vw);
+
+    position: fixed;
+    z-index: 3;
+    left: var(--player-gap);
+    bottom: var(--player-gap);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: calc(0.45rem * var(--hud-scale));
+    pointer-events: none;
+  }
+
+  /* —— Vinyl (hint / minimal / full) —— */
+
+  .stage-player__vinyl {
+    appearance: none;
+    display: grid;
+    place-items: center;
+    width: var(--player-vinyl-size);
+    height: var(--player-vinyl-size);
+    margin: 0;
+    padding: 0;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--color-surface) 92%, transparent);
+    backdrop-filter: blur(10px);
+    color: var(--color-text);
+    cursor: pointer;
+    pointer-events: auto;
+    box-shadow: 0 0.4rem 1.2rem color-mix(in srgb, black 40%, transparent);
+    transition:
+      transform var(--player-dur) var(--player-ease),
+      opacity var(--player-dur) var(--player-ease),
+      border-color 160ms ease,
+      color 160ms ease;
+  }
+
+  .stage-player__vinyl:hover,
+  .stage-player__vinyl[aria-expanded='true'] {
+    border-color: var(--color-accent);
+    color: var(--color-accent-alt);
+  }
+
+  .stage-player__disc {
+    display: grid;
+    place-items: center;
+    width: 78%;
+    height: 78%;
+  }
+
+  .stage-player__disc :global(.hud-icon) {
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Spins while the stage plays; paused / reduced motion stay still. */
+  .stage-player__disc {
+    animation: stage-player-spin 5.5s linear infinite;
+  }
+
+  :global(html[data-player-paused]) .stage-player__disc {
+    animation-play-state: paused;
+  }
+
+  @keyframes stage-player-spin {
+    to {
+      transform: rotate(1turn);
+    }
+  }
+
+  .stage-player[data-player-state='hidden'] .stage-player__vinyl {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(calc(100% + var(--player-gap) + 0.5rem));
+  }
+
+  /* Hint: half below the floor, then a little nudge so it reads as "pull me". */
+  .stage-player[data-player-state='hint'] .stage-player__vinyl {
+    transform: translateY(45%);
+    animation: stage-player-nudge 1.1s var(--player-ease) 2;
+  }
+
+  @keyframes stage-player-nudge {
+    0%,
+    100% {
+      transform: translateY(45%);
+    }
+    35% {
+      transform: translateY(20%);
+    }
+    60% {
+      transform: translateY(50%);
+    }
+  }
+
+  /* —— Panel (full only) —— */
+
+  .stage-player__panel {
+    display: flex;
+    flex-direction: column;
+    gap: calc(0.55rem * var(--hud-scale));
+    width: min(calc(16rem * var(--hud-scale)), calc(100vw - 2 * var(--player-gap)));
+    max-height: min(60vh, calc(30rem * var(--hud-scale)));
+    padding: calc(0.65rem * var(--hud-scale));
+    box-sizing: border-box;
+    border: 1px solid var(--color-border);
+    border-radius: var(--player-radius);
+    background: color-mix(in srgb, var(--color-surface) 92%, transparent);
+    backdrop-filter: blur(10px);
+    color: var(--color-text);
+    box-shadow: 0 0.6rem 1.6rem color-mix(in srgb, black 45%, transparent);
+    transform-origin: bottom left;
+    transition:
+      opacity var(--player-dur) var(--player-ease),
+      transform var(--player-dur) var(--player-ease),
+      visibility 0s linear var(--player-dur);
+  }
+
+  .stage-player:not([data-player-state='full']) .stage-player__panel {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(0.75rem) scale(0.97);
+    pointer-events: none;
+  }
+
+  .stage-player[data-player-state='full'] .stage-player__panel {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    pointer-events: auto;
+    transition-delay: 0s;
+  }
+
+  /* Collapsed panel must not reserve layout above the vinyl. */
+  .stage-player:not([data-player-state='full']) .stage-player__panel {
+    position: absolute;
+    left: 0;
+    bottom: calc(var(--player-vinyl-size) + calc(0.45rem * var(--hud-scale)));
+  }
+
+  .stage-player__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .stage-player__heading {
+    min-width: 0;
+  }
+
+  .stage-player__eyebrow {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: calc(0.6rem * var(--hud-scale));
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+  }
+
+  .stage-player__title {
+    margin: 0.15em 0 0;
+    font-family: var(--font-display);
+    font-size: calc(0.9rem * var(--hud-scale));
+    font-weight: 600;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+  }
+
+  .stage-player__close {
+    appearance: none;
+    flex: 0 0 auto;
+    display: grid;
+    place-items: center;
+    width: calc(1.9rem * var(--hud-scale));
+    height: calc(1.9rem * var(--hud-scale));
+    margin: 0;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+  }
+
+  .stage-player__close:hover {
+    border-color: var(--color-border);
+    color: var(--color-accent-alt);
+  }
+
+  .stage-player__close svg {
+    width: 55%;
+    height: 55%;
+  }
+
+  /* —— Song list —— */
+
+  .stage-player__songs {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: calc(0.3rem * var(--hud-scale));
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .stage-player__song {
+    appearance: none;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: calc(0.55rem * var(--hud-scale));
+    width: 100%;
+    margin: 0;
+    padding: calc(0.3rem * var(--hud-scale));
+    border: 1px solid transparent;
+    border-radius: calc(0.6rem * var(--hud-scale));
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .stage-player__song:hover {
+    border-color: color-mix(in srgb, var(--color-border) 80%, transparent);
+  }
+
+  .stage-player__song[aria-pressed='true'] {
+    border-color: var(--color-accent);
+    background: color-mix(in srgb, var(--color-accent) 14%, transparent);
+    color: var(--color-accent-alt);
+  }
+
+  .stage-player__cover {
+    display: block;
+    width: calc(2.4rem * var(--hud-scale));
+    height: calc(2.4rem * var(--hud-scale));
+    border-radius: calc(0.4rem * var(--hud-scale));
+    object-fit: cover;
+  }
+
+  .stage-player__song-title {
+    min-width: 0;
+    font-size: calc(0.8rem * var(--hud-scale));
+    font-weight: 600;
+    overflow-wrap: anywhere;
+  }
+
+  /* Current-song EQ (same bar rhythm as discography; flattened by eq-flatten on pause). */
+  .stage-player__eq {
+    --eq-bar-width: 3px;
+    --eq-bar-gap: 2px;
+    --eq-paused-bar-height: 3px;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--eq-bar-gap);
+    height: calc(1rem * var(--hud-scale));
+    visibility: hidden;
+  }
+
+  .stage-player__song[aria-pressed='true'] .stage-player__eq {
+    visibility: visible;
+  }
+
+  .stage-player__eq span {
+    display: block;
+    width: var(--eq-bar-width);
+    height: 60%;
+    border-radius: 1px;
+    background: currentColor;
+    animation: stage-player-eq 1.4s ease-in-out infinite;
+    transition: height 280ms var(--player-ease);
+  }
+
+  .stage-player__eq span:nth-child(2) {
+    animation-delay: -0.5s;
+    height: 90%;
+  }
+
+  .stage-player__eq span:nth-child(3) {
+    animation-delay: -0.9s;
+    height: 100%;
+  }
+
+  .stage-player__eq span:nth-child(4) {
+    animation-delay: -0.3s;
+    height: 80%;
+  }
+
+  .stage-player__eq span:nth-child(5) {
+    animation-delay: -1.1s;
+  }
+
+  @keyframes stage-player-eq {
+    0%,
+    100% {
+      transform: scaleY(0.4);
+    }
+    50% {
+      transform: scaleY(1);
+    }
+  }
+
+  :global(html[data-player-paused]) .stage-player__eq span {
+    animation-play-state: paused;
+  }
+
+  :global(html[data-player-paused]) .stage-player__eq.is-eq-flat span {
+    animation: none;
+    transform: none;
+    height: var(--eq-paused-bar-height);
+  }
+
+  /* —— Controls —— */
+
+  .stage-player__controls {
+    display: flex;
+    align-items: center;
+    gap: calc(0.35rem * var(--hud-scale));
+    padding-top: calc(0.45rem * var(--hud-scale));
+    border-top: 1px solid color-mix(in srgb, var(--color-border) 45%, transparent);
+  }
+
+  .stage-player__tool {
+    appearance: none;
+    display: inline-grid;
+    place-items: center;
+    flex: 0 0 var(--control-size);
+    width: var(--control-size);
+    height: var(--control-size);
+    margin: 0;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    box-sizing: border-box;
+    transition:
+      border-color 160ms ease,
+      color 160ms ease,
+      background-color 160ms ease;
+  }
+
+  .stage-player__tool:hover {
+    color: var(--color-accent-alt);
+    border-color: color-mix(in srgb, var(--color-border) 80%, transparent);
+  }
+
+  .stage-player__tool[aria-pressed='true'] {
+    border-color: var(--color-accent);
+    background: color-mix(in srgb, var(--color-accent) 16%, transparent);
+    color: var(--color-accent-alt);
+  }
+
+  .stage-player__play-icon[hidden] {
+    display: none;
+  }
+
+  /* Mute slot: MuteControl owns the button; slot widens for the laptop slider. */
+  .stage-player__tool--mute,
+  .stage-player__tool--mute:hover {
+    border-color: transparent;
+    background: transparent;
+    overflow: hidden;
+  }
+
+  .stage-player__tool--mute[hidden] {
+    display: none;
+  }
+
+  @media (min-width: 1024px) {
+    .stage-player__tool--mute[data-sound='on'] {
+      display: flex;
+      align-items: center;
+      flex: 0 0 auto;
+      width: auto;
+      min-width: calc(
+        var(--control-size) + var(--jukebox-volume-gap) + var(--jukebox-volume-slider-size)
+      );
+      overflow: visible;
+    }
+
+    /* Laptop: mute stays mounted; disabled when the entry has no audio. */
+    .stage-player__tool--mute[hidden] {
+      display: inline-grid;
+    }
+  }
+
+  /* —— Phone: panel spans the bottom with side insets —— */
+
+  @media (max-width: 1023px) {
+    .stage-player {
+      right: var(--player-gap);
+      bottom: calc(var(--player-gap) + env(safe-area-inset-bottom, 0px));
+    }
+
+    .stage-player__panel {
+      width: 100%;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .stage-player__vinyl,
+    .stage-player__panel {
+      transition: none;
+    }
+
+    .stage-player__disc,
+    .stage-player[data-player-state='hint'] .stage-player__vinyl,
+    .stage-player__eq span {
+      animation: none;
+    }
+  }
+</style>

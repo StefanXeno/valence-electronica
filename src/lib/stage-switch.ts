@@ -24,7 +24,7 @@ import {
   watchPlayerPause,
 } from './playback';
 import { createContinuousGlitch, isGlitchThemeActive } from './glitch';
-import { syncNowPlayingLabel } from './player-dock';
+import { syncNowPlayingLabel } from './stage-player';
 
 export type StageCatalogEntry = {
   id: string;
@@ -338,10 +338,6 @@ export function syncStageUi(activeId: string) {
     option.setAttribute('aria-pressed', on ? 'true' : 'false');
   });
 
-  document.querySelectorAll<HTMLElement>('[data-track-info-for]').forEach((node) => {
-    node.hidden = node.dataset.trackInfoFor !== activeId;
-  });
-
   document.querySelectorAll<HTMLButtonElement>('[data-stage-button]').forEach((button) => {
     const on = button.dataset.stageButton === activeId;
     button.setAttribute('aria-pressed', on ? 'true' : 'false');
@@ -351,19 +347,6 @@ export function syncStageUi(activeId: string) {
   document.querySelectorAll<HTMLElement>('[data-discog-playing]').forEach((node) => {
     const on = node.dataset.discogPlaying === activeId;
     node.hidden = !on;
-  });
-
-  document.querySelectorAll<HTMLElement>('[data-discog-item]').forEach((item) => {
-    const on = item.dataset.discogItem === activeId;
-    if (on) {
-      item.dataset.discogActive = 'true';
-    } else {
-      delete item.dataset.discogActive;
-    }
-    if (item.closest('.discog[data-theme-tracks]')) {
-      const listOpen = Boolean(item.closest('.jukebox')?.classList.contains('is-theme-tracks'));
-      item.classList.toggle('is-playlist-collapsed', !listOpen && !on);
-    }
   });
 
   document.querySelectorAll<HTMLButtonElement>('[data-shuffle-toggle]').forEach((button) => {

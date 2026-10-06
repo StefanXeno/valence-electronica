@@ -5,13 +5,11 @@
 
 import { applyRubSuccessTagline } from './tagline-rotator';
 import { maybeUnlockAchievement } from './achievement-toast';
+import { matchesGestureIgnore, OUTBOUND_AND_PLAY_SELECTOR } from './gesture-ignore';
 
 const MIN_STROKE_PX = 36;
 const RUBS_NEEDED = 3;
 const IDLE_RESET_MS = 1600;
-/** Outbound / play controls — never start a rub from these. */
-const IGNORE_SELECTOR =
-  'a, [data-discog-play], [data-stage-button], .discog__listen, .discog__listen-links, .site-nav__menu-portal-listen, .site-nav__menu-portal-listen-links, .site-nav__menu-portal-listen-glyphs';
 
 /** One-shot unlock toast after the first successful rub reveal. */
 export const ACHIEVEMENT_RUB_STORAGE_KEY = 've-achievement-why-are-you-rubbing';
@@ -115,7 +113,8 @@ function isRubPanelOpen(): boolean {
 }
 
 function shouldIgnoreTarget(target: EventTarget | null): boolean {
-  return target instanceof Element && Boolean(target.closest(IGNORE_SELECTOR));
+  // Outbound / play controls only — rubs may start on the row toggle.
+  return matchesGestureIgnore(target, OUTBOUND_AND_PLAY_SELECTOR);
 }
 
 function registerStroke(s: RubSession) {

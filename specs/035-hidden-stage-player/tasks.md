@@ -21,9 +21,9 @@ player, MVP) → US1 (discovery) → US5 (keyboard) → US4 (discography).
 
 **Purpose**: Content fields and small shared modules every story uses.
 
-- [ ] T001 Add optional chrome fields `playerShowLabel`, `playerOpenLabel`, `playerCloseLabel`, `playerAchievementTitle`, `playerAchievementSub` to the `ui` schema in `src/content.config.ts` and fallbacks in `getChrome()` in `src/lib/stage.ts`
-- [ ] T002 Add the five new strings (defaults from data-model.md) to `src/content/ui/chrome.md`
-- [ ] T003 [P] Create `src/lib/viewport.ts` exporting `PHONE_MQ = '(max-width: 1023px)'` and `prefersReducedMotion()`
+- [x] T001 Add optional chrome fields `playerShowLabel`, `playerOpenLabel`, `playerCloseLabel`, `playerAchievementTitle`, `playerAchievementSub` to the `ui` schema in `src/content.config.ts` and fallbacks in `getChrome()` in `src/lib/stage.ts`
+- [x] T002 Add the five new strings (defaults from data-model.md) to `src/content/ui/chrome.md`
+- [x] T003 [P] Create `src/lib/viewport.ts` exporting `PHONE_MQ = '(max-width: 1023px)'` and `prefersReducedMotion()`
 
 ---
 
@@ -31,14 +31,14 @@ player, MVP) → US1 (discovery) → US5 (keyboard) → US4 (discography).
 
 **Purpose**: Pure logic and shared gesture filtering. No UI yet.
 
-- [ ] T004 [P] Implement pure reducer `src/lib/player-state.ts` (states `hidden|hint|minimal|full`, events and transitions exactly as the table in data-model.md; returns next state + side-effect flags `{ markDiscovered, startHintTimer, extendHintTimer, focusVinyl }`)
-- [ ] T005 [P] Unit tests for every transition and no-op in `src/lib/player-state.test.ts`
-- [ ] T006 [P] Implement pure tap counter `src/lib/tap-hint.ts` (`createTapHint({ windowMs: 1500, taps: 3, slopPx: 10 })` with `down(x,y,t)`, `up(x,y,t) → boolean`, `reset()`)
-- [ ] T007 [P] Unit tests (3 taps in window → true; slow taps; moved pointer; reset after success) in `src/lib/tap-hint.test.ts`
-- [ ] T008 [P] Implement `src/lib/player-discovery.ts` (`isPlayerDiscovered()` → false when storage throws; `markPlayerDiscovered()` swallow errors; key `ve-player-discovered`)
-- [ ] T009 [P] Unit tests with a stubbed/throwing `localStorage` in `src/lib/player-discovery.test.ts`
-- [ ] T010 [P] Create `src/lib/gesture-ignore.ts` (base selector per contracts/stage-player-ui.md + `isGestureIgnored(target, extra?)`) and tests in `src/lib/gesture-ignore.test.ts` (selector string composition only)
-- [ ] T011 Switch `src/lib/track-rub.ts` and `src/lib/infinite-spin.ts` to `gesture-ignore.ts` (keep their module-specific extras); replace the duplicated `prefersReducedMotion` in `src/lib/achievement-toast.ts` with the one from `viewport.ts`
+- [x] T004 [P] Implement pure reducer `src/lib/player-state.ts` (states `hidden|hint|minimal|full`, events and transitions exactly as the table in data-model.md; returns next state + side-effect flags `{ markDiscovered, startHintTimer, extendHintTimer, focusVinyl }`)
+- [x] T005 [P] Unit tests for every transition and no-op in `src/lib/player-state.test.ts`
+- [x] T006 [P] Implement pure tap counter `src/lib/tap-hint.ts` (`createTapHint({ windowMs: 1500, taps: 3, slopPx: 10 })` with `down(x,y,t)`, `up(x,y,t) → boolean`, `reset()`)
+- [x] T007 [P] Unit tests (3 taps in window → true; slow taps; moved pointer; reset after success) in `src/lib/tap-hint.test.ts`
+- [x] T008 [P] Implement `src/lib/player-discovery.ts` (`isPlayerDiscovered()` → false when storage throws; `markPlayerDiscovered()` swallow errors; key `ve-player-discovered`)
+- [x] T009 [P] Unit tests with a stubbed/throwing `localStorage` in `src/lib/player-discovery.test.ts`
+- [x] T010 [P] Create `src/lib/gesture-ignore.ts` (base selector per contracts/stage-player-ui.md + `isGestureIgnored(target, extra?)`) and tests in `src/lib/gesture-ignore.test.ts` (selector string composition only)
+- [x] T011 Switch `src/lib/track-rub.ts` and `src/lib/infinite-spin.ts` to `gesture-ignore.ts` (keep their module-specific extras); replace the duplicated `prefersReducedMotion` in `src/lib/achievement-toast.ts` with the one from `viewport.ts`
 
 **Checkpoint**: `npm test` green with new suites.
 
@@ -51,15 +51,15 @@ song list, shuffle, play/pause, mute, close). Old player stack removed.
 
 **Independent Test**: quickstart Scenarios 4, 5, 7 (temporarily booting in `minimal`).
 
-- [ ] T012 [US2] Create `src/components/StagePlayer.astro`: root per contract (`data-stage-player`, `data-player-state`, catalog/schedule/fallback/shuffle/loop data attributes copied from `Jukebox.astro`), vinyl button (`HudIcon token="jukebox"`, `aria-label` = `playerOpenLabel`), panel region with now-playing title, song list from `getBackgroundConfig().videos` (cover → poster fallback, newest first then label, `button[data-jukebox-option]`, EQ marker), shuffle, play/pause, `MuteControl inJukebox` in `[data-jukebox-mute-slot]`, close button; scoped CSS driven only by `[data-player-state]` (bottom-left; laptop panel ~20rem; phone bottom panel with insets, max-height 60vh, scrolling list); vinyl spin while playing (not paused / reduced motion)
-- [ ] T013 [US2] Create `src/lib/stage-player.ts`: boot `initStageSwitch` from root data (port the JSON-parse + defaults logic from `Jukebox.astro` script), `syncNowPlayingLabel` (moved from `player-dock.ts`), background play/pause toggle (`initBgVideoToggle` moved from `player-dock.ts`), `initEqFlatten`, state wiring through `player-state.ts` (vinyl → full; close button / Escape / outside pointerdown → minimal + focus vinyl; emit `player-state-change`); temporary boot state `minimal`
-- [ ] T014 [US2] Update imports: `src/lib/stage-switch.ts` (`syncNowPlayingLabel` from `stage-player.ts`), `src/lib/label-reveal.ts` and `src/components/MuteControl.astro` (`PHONE_MQ` from `viewport.ts`)
-- [ ] T015 [US2] Mount `StagePlayer` instead of `Jukebox` in `src/pages/index.astro` (inside `StageDock`) and `src/pages/[slug].astro`; simplify `src/components/StageDock.astro` to a plain bottom-left wrapper
-- [ ] T016 [US2] Delete `src/components/Jukebox.astro`, `src/components/TrackInfoPanel.astro`, `src/lib/player-dock.ts`, `src/lib/player-sheet.ts`, `src/lib/player-sheet.test.ts`, `src/lib/playlist-window.ts`, `src/lib/playlist-window.test.ts`, `src/lib/player-handle-tap.ts`, `src/lib/player-handle-tap.test.ts`
-- [ ] T017 [US2] Remove phone player/dock rules (`.stage-dock` hide, `data-player-dock-*`, `--phone-player-*` dock geometry) from `src/styles/global.css`; keep `.stage__socials` phone hide
-- [ ] T018 [US2] Drop the `themeTracksOnly` branch from `src/components/Discography.astro` and remove `getThemeTrackDiscography` / `filterThemeTracks` / `isThemeTrack` from `src/lib/catalog-tracks.ts` if no callers remain (update `catalog-tracks.test.ts` accordingly)
-- [ ] T019 [US3] Update glitch wiring: add `glitch-hit` to vinyl, song buttons, close; update selector lists in `src/components/GlitchPress.astro` (`[data-player-vinyl]`, `[data-player-close]`) and remove `[data-stage-panel]`/`[data-loop-toggle]` references that no longer exist
-- [ ] T020 [US2] Run `npm run check && npm test && npm run build`; fix all type errors and dangling references (`git grep -n "player-dock\|data-jukebox-drawer\|is-theme-tracks"`)
+- [x] T012 [US2] Create `src/components/StagePlayer.astro`: root per contract (`data-stage-player`, `data-player-state`, catalog/schedule/fallback/shuffle/loop data attributes copied from `Jukebox.astro`), vinyl button (`HudIcon token="jukebox"`, `aria-label` = `playerOpenLabel`), panel region with now-playing title, song list from `getBackgroundConfig().videos` (cover → poster fallback, newest first then label, `button[data-jukebox-option]`, EQ marker), shuffle, play/pause, `MuteControl inJukebox` in `[data-jukebox-mute-slot]`, close button; scoped CSS driven only by `[data-player-state]` (bottom-left; laptop panel ~20rem; phone bottom panel with insets, max-height 60vh, scrolling list); vinyl spin while playing (not paused / reduced motion)
+- [x] T013 [US2] Create `src/lib/stage-player.ts`: boot `initStageSwitch` from root data (port the JSON-parse + defaults logic from `Jukebox.astro` script), `syncNowPlayingLabel` (moved from `player-dock.ts`), background play/pause toggle (`initBgVideoToggle` moved from `player-dock.ts`), `initEqFlatten`, state wiring through `player-state.ts` (vinyl → full; close button / Escape / outside pointerdown → minimal + focus vinyl; emit `player-state-change`); temporary boot state `minimal`
+- [x] T014 [US2] Update imports: `src/lib/stage-switch.ts` (`syncNowPlayingLabel` from `stage-player.ts`), `src/lib/label-reveal.ts` and `src/components/MuteControl.astro` (`PHONE_MQ` from `viewport.ts`)
+- [x] T015 [US2] Mount `StagePlayer` instead of `Jukebox` in `src/pages/index.astro` (inside `StageDock`) and `src/pages/[slug].astro`; simplify `src/components/StageDock.astro` to a plain bottom-left wrapper
+- [x] T016 [US2] Delete `src/components/Jukebox.astro`, `src/components/TrackInfoPanel.astro`, `src/lib/player-dock.ts`, `src/lib/player-sheet.ts`, `src/lib/player-sheet.test.ts`, `src/lib/playlist-window.ts`, `src/lib/playlist-window.test.ts`, `src/lib/player-handle-tap.ts`, `src/lib/player-handle-tap.test.ts`
+- [x] T017 [US2] Remove phone player/dock rules (`.stage-dock` hide, `data-player-dock-*`, `--phone-player-*` dock geometry) from `src/styles/global.css`; keep `.stage__socials` phone hide
+- [x] T018 [US2] Drop the `themeTracksOnly` branch from `src/components/Discography.astro` and remove `getThemeTrackDiscography` / `filterThemeTracks` / `isThemeTrack` from `src/lib/catalog-tracks.ts` if no callers remain (update `catalog-tracks.test.ts` accordingly)
+- [x] T019 [US3] Update glitch wiring: add `glitch-hit` to vinyl, song buttons, close; update selector lists in `src/components/GlitchPress.astro` (`[data-player-vinyl]`, `[data-player-close]`) and remove `[data-stage-panel]`/`[data-loop-toggle]` references that no longer exist
+- [x] T020 [US2] Run `npm run check && npm test && npm run build`; fix all type errors and dangling references (`git grep -n "player-dock\|data-jukebox-drawer\|is-theme-tracks"`)
 
 **Checkpoint**: MVP usable — vinyl opens the player, songs can be picked, sound works on phone and laptop. **Operator browser review #1** (quickstart 4, 5, 7, 12).
 

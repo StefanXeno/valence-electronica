@@ -77,7 +77,7 @@ const {
 <script>
   import { createContinuousGlitch, isGlitchThemeActive, playElementGlitch } from '../lib/glitch';
   import { applyMuteSlotSound } from '../lib/mute-slot';
-  import { PHONE_MQ } from '../lib/player-dock';
+  import { PHONE_MQ } from '../lib/viewport';
 
   /** Phone HUD unmuted level (no slider). Laptop keeps the 0.7 default. */
   const PHONE_VOLUME = 0.5;
@@ -111,7 +111,7 @@ const {
       return Boolean(video && !(video.muted || video.volume === 0));
     };
 
-    // In-jukebox hover glitch is owned by Jukebox.astro (all toolbar buttons).
+    // In-player hover glitch is owned by stage-player.ts (all player buttons).
     const hoverGlitch = createContinuousGlitch(
       button,
       () =>
@@ -145,7 +145,7 @@ const {
 
     const applySoundUi = (muted: boolean) => {
       control.dataset.sound = muted ? 'off' : 'on';
-      // Same-scope flag for Jukebox expand CSS (do not rely on :has(.volume-control)).
+      // Same-scope flag for the player mute-slot CSS (do not rely on :has(.volume-control)).
       applyMuteSlotSound(muteSlot, muted);
       button.setAttribute('aria-pressed', muted ? 'true' : 'false');
       const label = muted ? unmuteTooltip : muteTooltip;

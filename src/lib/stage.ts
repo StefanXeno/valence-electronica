@@ -68,6 +68,11 @@ export interface UiChrome {
   unmuteTooltip: string;
   muteTooltip: string;
   volumeSliderTooltip: string;
+  playerShowLabel: string;
+  playerOpenLabel: string;
+  playerCloseLabel: string;
+  playerAchievementTitle: string;
+  playerAchievementSub: string;
 }
 
 export interface SiteContactLink {
@@ -140,6 +145,11 @@ const CHROME_FALLBACK: UiChrome = {
   unmuteTooltip: 'Unmute',
   muteTooltip: 'Mute',
   volumeSliderTooltip: 'Drag to adjust volume',
+  playerShowLabel: 'Show player',
+  playerOpenLabel: 'Open player',
+  playerCloseLabel: 'Close player',
+  playerAchievementTitle: 'Found it!',
+  playerAchievementSub: 'You discovered the hidden player.',
 };
 
 export interface ShowItem {
@@ -244,6 +254,13 @@ export async function getChrome(): Promise<UiChrome> {
     muteTooltip: entry.data.muteTooltip?.trim() || CHROME_FALLBACK.muteTooltip,
     volumeSliderTooltip:
       entry.data.volumeSliderTooltip?.trim() || CHROME_FALLBACK.volumeSliderTooltip,
+    playerShowLabel: entry.data.playerShowLabel?.trim() || CHROME_FALLBACK.playerShowLabel,
+    playerOpenLabel: entry.data.playerOpenLabel?.trim() || CHROME_FALLBACK.playerOpenLabel,
+    playerCloseLabel: entry.data.playerCloseLabel?.trim() || CHROME_FALLBACK.playerCloseLabel,
+    playerAchievementTitle:
+      entry.data.playerAchievementTitle?.trim() || CHROME_FALLBACK.playerAchievementTitle,
+    playerAchievementSub:
+      entry.data.playerAchievementSub?.trim() || CHROME_FALLBACK.playerAchievementSub,
   };
 }
 

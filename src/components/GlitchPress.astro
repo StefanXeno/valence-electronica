@@ -15,25 +15,16 @@
 
   function isMorphOwned(el: Element): boolean {
     if (el.closest('[data-jukebox-option]')) return false;
-    if (
-      el.matches(
-        '[data-shuffle-toggle][aria-pressed="true"], [data-loop-toggle][aria-pressed="true"]',
-      )
-    ) {
-      return true;
-    }
-    // Toolbar / mute / stage-panel shells own hover+press.
+    if (el.matches('[data-shuffle-toggle][aria-pressed="true"]')) return true;
+    // Player tools own hover+press (stage-player.ts). Vinyl / close / songs use plain glitch-hit.
     return (
-      el.matches(
-        '[data-mute-control], [data-volume-control], [data-stage-panel], [data-shuffle-toggle], [data-loop-toggle], [data-bg-play-toggle]',
-      ) || Boolean(el.closest('[data-volume-control]'))
+      el.matches('[data-mute-control], [data-volume-control], [data-shuffle-toggle], [data-bg-play-toggle]') ||
+      Boolean(el.closest('[data-volume-control]'))
     );
   }
 
   function isLiveToggle(el: Element): boolean {
-    return el.matches(
-      '[data-mute-control], [data-shuffle-toggle][aria-pressed="true"], [data-loop-toggle][aria-pressed="true"]',
-    );
+    return el.matches('[data-mute-control], [data-shuffle-toggle][aria-pressed="true"]');
   }
 
   function runGlitch(el: HTMLElement, className: 'is-glitching' | 'is-glitch-hover') {

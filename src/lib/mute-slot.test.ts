@@ -1,7 +1,7 @@
 import { transform } from '@astrojs/compiler';
 import { describe, expect, it } from 'vitest';
 import { applyMuteSlotSound, muteSlotSoundAttr } from './mute-slot';
-import jukeboxSrc from '../components/Jukebox.astro?raw';
+import playerSrc from '../components/StagePlayer.astro?raw';
 import muteSrc from '../components/MuteControl.astro?raw';
 
 describe('muteSlotSoundAttr', () => {
@@ -101,23 +101,25 @@ describe('jukebox mute expand selector (Astro scoped CSS)', () => {
   });
 });
 
-describe('jukebox muted toolbar layout (regression)', () => {
-  it('must not slack-eat with flex:1 / toolbar width:100% on unmute (pinned mute right)', () => {
-    // The b1d45d6 pattern stretched a wide pill and pinned mute to the far edge.
-    expect(jukeboxSrc).not.toMatch(
-      /\.jukebox:has\(\.jukebox__tool--mute\[data-sound=['"]on['"]\]\)\s+\.jukebox__tool--mute\s*\{[^}]*flex:\s*1/,
+describe('stage player mute slot layout (regression)', () => {
+  it('muted mute slot is locked to --control-size like the other tools', () => {
+    expect(playerSrc).toMatch(
+      /\.stage-player__tool\s*\{[^}]*flex:\s*0\s+0\s+var\(--control-size\)/s,
     );
-    expect(jukeboxSrc).not.toMatch(
-      /\.jukebox:has\(\.jukebox__tool--mute\[data-sound=['"]on['"]\]\)\s+\.jukebox__toolbar\s*\{[^}]*width:\s*100%/,
-    );
+    expect(playerSrc).toMatch(/class="stage-player__tool stage-player__tool--mute"/);
   });
 
-  it('muted mute slot is locked to --control-size (no --jukebox-mute-width grow var)', () => {
-    expect(jukeboxSrc).toMatch(
-      /\.jukebox__tool--mute(?![^{]*data-sound)[^{]*\{[^}]*flex:\s*0\s+0\s+var\(--control-size\)/s,
+  it('unmuted slot sizes to speaker + gap + slider, never flex-grow', () => {
+    expect(playerSrc).toMatch(
+      /\.stage-player__tool--mute\[data-sound=['"]on['"]\]\s*\{[^}]*flex:\s*0\s+0\s+auto/s,
     );
-    expect(jukeboxSrc).not.toMatch(/--jukebox-mute-width/);
-    expect(jukeboxSrc).not.toMatch(/--jukebox-slider-extra/);
+    expect(playerSrc).not.toMatch(
+      /\.stage-player__tool--mute\[data-sound=['"]on['"]\]\s*\{[^}]*flex:\s*1/s,
+    );
+    expect(playerSrc).toMatch(/--jukebox-volume-gap/);
+    expect(muteSrc).toMatch(
+      /\[data-sound=['"]on['"]\]\s*\{[^}]*gap:\s*var\(--jukebox-volume-gap/s,
+    );
   });
 
   it('unmuted slider uses fixed track width, not flex-grow', () => {
@@ -129,46 +131,10 @@ describe('jukebox muted toolbar layout (regression)', () => {
     );
   });
 
-  it('toolbar inline padding uses --jukebox-toolbar-inline-pad (balanced pill ends)', () => {
-    expect(jukeboxSrc).toMatch(
-      /\.jukebox__toolbar\s*\{[^}]*padding:\s*var\(--jukebox-toolbar-pad\)\s+var\(--jukebox-toolbar-inline-pad\)/s,
-    );
-    // Always-on asymmetric end-pad stranded muted mute — unmuted-only is OK.
-    expect(jukeboxSrc).not.toMatch(/--jukebox-toolbar-end-pad(?![\w-])/);
-  });
-
-  it('unmuted toolbar gains end pad; mute→slider uses --jukebox-volume-gap', () => {
-    expect(jukeboxSrc).toMatch(/--jukebox-toolbar-unmuted-end-pad/);
-    expect(jukeboxSrc).toMatch(/--jukebox-volume-gap/);
-    expect(jukeboxSrc).toMatch(
-      /\.jukebox:has\(\.jukebox__tool--mute\[data-sound=['"]on['"]\]\)\s+\.jukebox__toolbar\s*\{[^}]*padding-right:\s*var\(--jukebox-toolbar-unmuted-end-pad\)/s,
-    );
-    expect(muteSrc).toMatch(
-      /\[data-sound=['"]on['"]\]\s*\{[^}]*gap:\s*var\(--jukebox-volume-gap/s,
-    );
-  });
-
-  it('desktop transport stays display:contents with no flex box props (Firefox double-gap)', () => {
-    // flex/margin/padding on a contents node can promote a real flex item in Firefox,
-    // nesting vinyl|shuffle|play and adding a second gap before mute.
-    const desktopTransport = jukeboxSrc.match(
-      /\.player-dock__transport\s*\{[^}]*display:\s*contents;[^}]*\}/gs,
-    );
-    expect(desktopTransport?.length).toBeGreaterThan(0);
-    for (const block of desktopTransport ?? []) {
-      if (!block.includes('display: contents')) continue;
-      // Phone overrides use display:flex !important — skip those.
-      if (block.includes('display: flex')) continue;
-      expect(block).not.toMatch(/\bflex\s*:/);
-      expect(block).not.toMatch(/\bmargin\s*:/);
-      expect(block).not.toMatch(/\bpadding\s*:/);
-    }
-    // Loop must not sit between play and mute in markup.
-    const playIdx = jukeboxSrc.indexOf('data-bg-play-toggle');
-    const muteIdx = jukeboxSrc.indexOf('data-jukebox-mute-slot');
-    const loopIdx = jukeboxSrc.indexOf('data-loop-toggle');
+  it('mute sits after play/pause in the controls row', () => {
+    const playIdx = playerSrc.indexOf('data-bg-play-toggle');
+    const muteIdx = playerSrc.indexOf('data-jukebox-mute-slot');
     expect(playIdx).toBeGreaterThan(-1);
     expect(muteIdx).toBeGreaterThan(playIdx);
-    expect(loopIdx).toBeGreaterThan(muteIdx);
   });
 });

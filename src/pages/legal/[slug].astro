@@ -4,7 +4,7 @@ import type { CollectionEntry } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import Hero from '../../components/Hero.astro';
 import Channels from '../../components/Channels.astro';
-import Jukebox from '../../components/Jukebox.astro';
+import StagePlayer from '../../components/StagePlayer.astro';
 import site from '../../data/site.json';
 
 export async function getStaticPaths() {
@@ -31,8 +31,6 @@ const { entry } = Astro.props as Props;
     <div class="stage__socials">
       <Channels />
     </div>
-    <div class="stage__jukebox">
-      <Jukebox />
-    </div>
+    <StagePlayer />
   </div>
 </Base>

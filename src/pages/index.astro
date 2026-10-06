@@ -2,8 +2,7 @@
 import Base from '../layouts/Base.astro';
 import Hero from '../components/Hero.astro';
 import Channels from '../components/Channels.astro';
-import Jukebox from '../components/Jukebox.astro';
-import StageDock from '../components/StageDock.astro';
+import StagePlayer from '../components/StagePlayer.astro';
 import SiteNav from '../components/SiteNav.astro';
 import LandingIntro from '../components/LandingIntro.astro';
 import { getChrome } from '../lib/stage';
@@ -22,8 +21,6 @@ const chrome = await getChrome();
     <div class="stage__socials" id="stage-socials">
       <Channels />
     </div>
-    <StageDock>
-      <Jukebox slot="jukebox" />
-    </StageDock>
+    <StagePlayer />
   </div>
 </Base>

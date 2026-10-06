@@ -1,0 +1,248 @@
+/*
+ * "Currently playing" EQ marker for stage songs (035). Shared by the
+ * discography overlay rows and the phone menu portal; `eq-flatten.ts`
+ * eases the bars flat while the stage is paused.
+ */
+
+/* Pressed HUD-tool language: accent ring + wash (matches shuffle/loop). */
+.discog__now-playing {
+  border: 1px solid var(--color-accent);
+  background: color-mix(in srgb, var(--color-accent) 16%, transparent);
+  color: var(--color-accent-alt);
+}
+
+.discog__now-playing[hidden] {
+  display: none;
+}
+
+/* Idle rest = diamond; playing = per-bar EQ. Reduced-motion: static. */
+.discog__eq {
+  /* Integer px tokens — no rem/hud-scale rounding. */
+  --eq-bar-width: 4px;
+  --eq-bar-gap: 3px;
+  --eq-paused-bar-height: 4px;
+  --eq-flatten-duration: 280ms;
+  --eq-flatten-easing: cubic-bezier(0.4, 0, 0.2, 1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--eq-bar-gap);
+  width: calc(5 * var(--eq-bar-width) + 4 * var(--eq-bar-gap));
+  height: calc(1.35rem * var(--hud-scale));
+  pointer-events: none;
+}
+
+.discog__eq span {
+  display: block;
+  box-sizing: border-box;
+  flex: 0 0 var(--eq-bar-width);
+  width: var(--eq-bar-width);
+  min-width: var(--eq-bar-width);
+  max-width: var(--eq-bar-width);
+  height: calc(100% / 3);
+  border-radius: 1px;
+  background: currentColor;
+  transform-origin: center center;
+  animation: discog-eq-1 2.16s cubic-bezier(0.3, 0, 0.2, 1) infinite;
+  transition:
+    height var(--eq-flatten-duration) var(--eq-flatten-easing),
+    min-height var(--eq-flatten-duration) var(--eq-flatten-easing),
+    max-height var(--eq-flatten-duration) var(--eq-flatten-easing);
+}
+
+.discog__eq span:nth-child(2) {
+  height: calc(200% / 3);
+  animation-name: discog-eq-2;
+  animation-duration: 1.64s;
+  animation-delay: -0.72s;
+}
+
+.discog__eq span:nth-child(3) {
+  height: 100%;
+  animation-name: discog-eq-3;
+  animation-duration: 1.32s;
+  animation-delay: -0.28s;
+}
+
+.discog__eq span:nth-child(4) {
+  height: calc(200% / 3);
+  animation-name: discog-eq-4;
+  animation-duration: 2.48s;
+  animation-delay: -1.16s;
+}
+
+.discog__eq span:nth-child(5) {
+  height: calc(100% / 3);
+  animation-name: discog-eq-5;
+  animation-duration: 1.88s;
+  animation-delay: -0.48s;
+}
+
+/* Pause: freeze the dance only. Height → 4px comes from .is-eq-flat (JS bake). */
+html[data-player-paused] .discog__eq span:nth-child(n) {
+  animation-play-state: paused;
+  flex: 0 0 var(--eq-bar-width);
+  width: var(--eq-bar-width);
+  min-width: var(--eq-bar-width);
+  max-width: var(--eq-bar-width);
+}
+
+/* After JS locks visual height, drop keyframes and ease to the flat line. */
+html[data-player-paused] .discog__eq.is-eq-flat span:nth-child(n) {
+  animation: none;
+  transform: none;
+  height: var(--eq-paused-bar-height);
+  min-height: var(--eq-paused-bar-height);
+  max-height: var(--eq-paused-bar-height);
+}
+
+/* No-JS: still flatten (instant). JS path must not use this — it snaps. */
+html:not([data-eq-flatten-js])[data-player-paused] .discog__eq span:nth-child(n) {
+  animation: none;
+  transform: none;
+  height: var(--eq-paused-bar-height);
+  min-height: var(--eq-paused-bar-height);
+  max-height: var(--eq-paused-bar-height);
+}
+
+@keyframes discog-eq-1 {
+  0%,
+  100% {
+    transform: scaleY(0.35);
+  }
+  14% {
+    transform: scaleY(2.55);
+  }
+  28% {
+    transform: scaleY(0.4);
+  }
+  43% {
+    transform: scaleY(1.7);
+  }
+  58% {
+    transform: scaleY(0.55);
+  }
+  74% {
+    transform: scaleY(2.9);
+  }
+  88% {
+    transform: scaleY(0.22);
+  }
+}
+
+@keyframes discog-eq-2 {
+  0%,
+  100% {
+    transform: scaleY(0.2);
+  }
+  16% {
+    transform: scaleY(1.32);
+  }
+  27% {
+    transform: scaleY(0.48);
+  }
+  42% {
+    transform: scaleY(0.82);
+  }
+  57% {
+    transform: scaleY(1.45);
+  }
+  71% {
+    transform: scaleY(0.28);
+  }
+  86% {
+    transform: scaleY(1.12);
+  }
+}
+
+@keyframes discog-eq-3 {
+  0%,
+  100% {
+    transform: scaleY(0.16);
+  }
+  11% {
+    transform: scaleY(0.92);
+  }
+  23% {
+    transform: scaleY(0.28);
+  }
+  36% {
+    transform: scaleY(1.06);
+  }
+  49% {
+    transform: scaleY(0.18);
+  }
+  62% {
+    transform: scaleY(0.68);
+  }
+  76% {
+    transform: scaleY(1.02);
+  }
+  89% {
+    transform: scaleY(0.34);
+  }
+}
+
+@keyframes discog-eq-4 {
+  0%,
+  100% {
+    transform: scaleY(0.88);
+  }
+  13% {
+    transform: scaleY(0.22);
+  }
+  30% {
+    transform: scaleY(1.42);
+  }
+  44% {
+    transform: scaleY(0.52);
+  }
+  59% {
+    transform: scaleY(1.18);
+  }
+  73% {
+    transform: scaleY(0.16);
+  }
+  87% {
+    transform: scaleY(1.36);
+  }
+}
+
+@keyframes discog-eq-5 {
+  0%,
+  100% {
+    transform: scaleY(1.55);
+  }
+  15% {
+    transform: scaleY(0.28);
+  }
+  32% {
+    transform: scaleY(2.35);
+  }
+  48% {
+    transform: scaleY(0.65);
+  }
+  64% {
+    transform: scaleY(0.2);
+  }
+  79% {
+    transform: scaleY(2.85);
+  }
+  91% {
+    transform: scaleY(1.05);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .discog__eq span {
+    animation: none;
+    transform: none;
+    transition: none;
+  }
+
+  html[data-player-paused] .discog__eq span:nth-child(n) {
+    height: var(--eq-paused-bar-height);
+    min-height: var(--eq-paused-bar-height);
+    max-height: var(--eq-paused-bar-height);
+  }
+}

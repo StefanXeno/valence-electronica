@@ -119,8 +119,7 @@ a.channel-btn:focus-visible {
 }
 
 .stage__identity,
-.stage__socials,
-.stage-dock {
+.stage__socials {
   pointer-events: auto;
   position: fixed;
   z-index: 2;
@@ -156,34 +155,6 @@ a.channel-btn:focus-visible {
   }
 }
 
-.stage-dock {
-  /* Same corner rhythm as socials (--stage-corner-gap).
-     Footer is hidden; do not lift the dock by --hud-footer. */
-  left: var(--stage-corner-gap);
-  right: var(--stage-corner-gap);
-  bottom: var(--stage-corner-gap);
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: calc(0.75rem * var(--hud-scale));
-  pointer-events: none;
-}
-
-.stage-dock__left,
-.stage-dock__right {
-  pointer-events: auto;
-  display: flex;
-  align-items: flex-end;
-  gap: calc(0.35rem * var(--hud-scale));
-}
-
-.stage-dock__right {
-  flex: 1 1 auto;
-  justify-content: flex-end;
-  flex-wrap: wrap;
-  max-width: min(calc(100% - var(--control-size) - 1rem), 100%);
-}
-
 /* Floating HUD label reveal (009-desktop-stage-ui) */
 .hud-label-reveal {
   position: fixed;
@@ -215,73 +186,10 @@ a.channel-btn:focus-visible {
     /* Full visual size on phones — desktop stays at 0.8 via :root default. */
     --site-scale: 1;
     --hud-scale: 1;
-    --phone-handle: 1.5rem;
-    /* Invisible grab strip — keep the chevron visual at --phone-handle. */
-    --phone-handle-hit: 2.75rem;
-    /* Icon bar ↔ player pill. Measured to the visible black bar, not the overflow hitbox. */
-    --phone-dock-gap: 6px;
-    --phone-stack-gap: var(--phone-dock-gap);
-    /* Collapsed player top corners — card/bar, not a stadium capsule. */
-    --phone-dock-radius: 14px;
-    --phone-safe-bottom: env(safe-area-inset-bottom, 0px);
-    /* Open-sheet air between expand handle and now-playing title. */
-    --phone-now-gap: 0.45rem;
-    /* Equal chrome air (collapsed pill): top === bottom. Keep compact so the 5-icon bar stays short. */
-    --phone-bar-pad: 0.28rem;
-    /* Visual collapsed chrome only — floor row (wave | title | mute). Do not add --phone-handle-hit. */
-    --phone-player-h: calc(
-      var(--control-size) + 2 * var(--phone-bar-pad) + var(--phone-safe-bottom)
-    );
-    /* SSR / first frame: same collapsed token JS writes after measure. */
-    --player-sheet-h: var(--phone-player-h);
-    /* Open sheet / socials: equal top+bottom, visibly roomier than collapsed. */
-    --phone-open-pad: 0.65rem;
-    /* Shared L/R inset: same as collapsed T/B so stadium end caps match the vertical pad. */
-    --phone-inline-pad: var(--phone-bar-pad);
-    /* Vertical air between sheet/socials row and the 5 dock icons. Grows the pill — do not steal chrome pad. */
-    --phone-body-gap: 0.65rem;
-    --phone-tray-gap: var(--phone-body-gap);
-    --phone-content-h: calc(var(--control-size) + 2 * var(--phone-bar-pad));
-    /* Collapsed-bar capsule radius. Keep constant on open — never interpolate 999px → 0.85rem. */
-    --phone-pill-radius: calc(var(--phone-content-h) / 2);
-    /* Phone content-pill morph (About / socials). Slightly longer than desktop 280ms. */
-    --phone-panel-morph-dur: 320ms;
-    /* Socials channel button row (Channels li = 2.5rem). Does not include bar/open pad. */
-    --phone-tray-h: calc(2.5rem * var(--hud-scale));
-    --hud-dock-bottom: 0px;
-    /* Collapsed player docks flush like the expanded sheet (bottom: 0).
-       Keep the token so content-dock / socials calcs stay in lockstep. */
-    --phone-dock-lift: 0px;
-    --phone-pill-shadow: 0 0.4rem 1.2rem color-mix(in srgb, black 45%, transparent);
-    /* Upward only — a downward shadow paints a fake gap under the floor. */
-    --phone-player-shadow: 0 -0.45rem 1.2rem color-mix(in srgb, black 45%, transparent);
-    --phone-rise-ease: cubic-bezier(0.4, 0, 0.2, 1);
-    /* Shared morph timing (width/height/chrome) — not a scale bloom. */
-    --phone-bloom-dur: 280ms;
-    --phone-bloom-ease: var(--phone-rise-ease);
-    /* Expanded sheet top radius. Collapsed player uses --phone-dock-radius. */
-    --phone-player-radius: 1.25rem;
-    --phone-chrome-pad: 0.65rem;
-    /* Shared left/right gutter for player + content + socials + footer. */
-    --phone-dock-inset: clamp(1rem, 5vw, 1.25rem);
-    /* Phone HUD stacking: player must beat the icon pill whenever it overlaps. */
-    --z-phone-pill: 2;
-    --z-phone-pill-sheet: 3;
-    --z-phone-player: 5;
-    /* Collapsed rest only — icons win the transparent handle hitbox. */
-    --z-phone-pill-hit: 6;
-    /* Expanded / drag / morph — above --z-phone-pill-hit. */
-    --z-phone-player-front: 7;
   }
 
   .stage {
     overflow-x: clip;
-    overscroll-behavior-y: none;
-  }
-
-  /* Expanded player: block document rubber-band / pull-to-refresh. */
-  html[data-player-dock-expanded],
-  html[data-player-dock-expanded] body {
     overscroll-behavior-y: none;
   }
 
@@ -293,114 +201,9 @@ a.channel-btn:focus-visible {
     pointer-events: none;
   }
 
-  .jukebox,
-  .jukebox *,
-  .jukebox textarea,
-  .jukebox input {
-    resize: none;
-  }
-
-  .jukebox::-webkit-resizer,
-  .jukebox *::-webkit-resizer {
-    display: none;
-  }
-
   .stage__identity {
     /* 100% of the fixed containing block — not 100vw (scrollbar / visual viewport). */
     max-width: calc(100% - 2 * clamp(0.65rem, 2vw, 1.1rem));
-  }
-
-  .stage-dock {
-    z-index: 3;
-    left: var(--phone-dock-inset);
-    right: var(--phone-dock-inset);
-    width: auto;
-    max-width: 100%;
-    box-sizing: border-box;
-    flex-direction: column-reverse;
-    align-items: stretch;
-    justify-content: flex-end;
-    gap: 0;
-    bottom: var(--hud-dock-bottom);
-  }
-
-  .stage-dock__left,
-  .stage-dock__right {
-    position: absolute;
-    left: 0;
-    right: 0;
-    width: auto;
-    max-width: 100%;
-    min-width: 0;
-    box-sizing: border-box;
-    flex: 0 0 auto;
-    justify-content: stretch;
-    flex-wrap: nowrap;
-  }
-
-  /* Player always paints over content dock / footer during expand+collapse.
-     Height-0 floor anchor: the pill is position:absolute; bottom:0 inside this. */
-  .stage-dock__left {
-    bottom: 0;
-    z-index: var(--z-phone-player);
-    overflow: visible;
-    overscroll-behavior: none;
-  }
-
-  /*
-   * Collapsed player shadow — must not live on .jukebox.
-   * That box has backdrop-filter + isolation:isolate, which drops box-shadow
-   * (Chromium). This pseudo is overflow:visible and has no filter, so it
-   * still paints when the HUD sheet is open (player z=5 over pill z=3).
-   */
-  html:not([data-player-dock-expanded]):not([data-player-sheet-dragging]):not([data-player-sheet-morphing])
-    .stage-dock__left:not(:has(.is-player-expanded)):not(:has(.is-open)):not(:has(.is-sheet-dragging)):not(:has(.is-sheet-morphing))::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: var(--phone-player-h);
-    border-radius: var(--phone-dock-radius, 14px) var(--phone-dock-radius, 14px) 0 0;
-    box-shadow: var(--phone-player-shadow);
-    pointer-events: none;
-  }
-
-  .stage-dock__right {
-    bottom: calc(var(--phone-player-h) + var(--phone-dock-gap) + var(--phone-dock-lift));
-    z-index: var(--z-phone-pill);
-    /* stretch is not valid on justify-content — keep the pill full dock width. */
-    align-items: stretch;
-    justify-content: flex-start;
-    /* Shadow here — .stage-panels backdrop-filter drops box-shadow in Chromium. */
-    border-radius: var(--phone-pill-radius);
-    box-shadow: var(--phone-pill-shadow);
-  }
-
-  /*
-   * Collapsed rest only: icon buttons win slight overlap with the transparent
-   * handle. Never while the player is expanded, mid-drag, or morphing — click-
-   * outside / lost capture must not restack the pill over a still-tall sheet.
-   */
-  html:not([data-player-dock-expanded]):not([data-player-sheet-dragging]):not([data-player-sheet-morphing]):not([data-socials-open]):not([data-sheet-open])
-    .stage-dock__right {
-    z-index: var(--z-phone-pill-hit);
-  }
-
-  html[data-socials-open] .stage-dock__right,
-  html[data-sheet-open] .stage-dock__right,
-  .stage-dock__right:has([data-stage-panel][open]) {
-    z-index: var(--z-phone-pill-sheet);
-  }
-
-  /* Open / drag / morph: player paints above the pill even if hit z-index is on. */
-  html[data-player-dock-expanded] .stage-dock__left,
-  html[data-player-sheet-dragging] .stage-dock__left,
-  html[data-player-sheet-morphing] .stage-dock__left,
-  .stage-dock__left:has(.is-player-expanded),
-  .stage-dock__left:has(.is-sheet-dragging),
-  .stage-dock__left:has(.is-sheet-morphing) {
-    z-index: var(--z-phone-player-front);
   }
 
   /*
@@ -411,24 +214,5 @@ a.channel-btn:focus-visible {
     display: none !important;
     visibility: hidden;
     pointer-events: none;
-  }
-
-  /* Phone: hide V-Flip / player dock for now (desktop StageDock unchanged). */
-  .stage-dock {
-    display: none !important;
-    visibility: hidden;
-    pointer-events: none;
-  }
-
-  /* Legacy park target — keep harmless if JS ever re-parents. */
-  .stage-panels__sheet .stage__socials {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: auto;
-    z-index: 1;
-    max-width: none;
-    transform: none;
   }
 }

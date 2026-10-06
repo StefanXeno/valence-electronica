@@ -5,6 +5,7 @@
  */
 
 import { hasAchievement, maybeUnlockAchievement } from './achievement-toast';
+import { matchesGestureIgnore, STAGE_GESTURE_IGNORE_SELECTOR } from './gesture-ignore';
 
 /** Stage / jukebox id for the Infinite track (not the steel-slate theme pack id). */
 const INFINITE_STAGE_ID = 'infinite';
@@ -27,33 +28,6 @@ const ANGLE_DEADZONE_RAD = 0.04; // ~2.3°
  * accumulated progress. Only a sustained reverse past this cancels the gesture.
  */
 const REVERSE_CANCEL_RAD = Math.PI * 0.65; // ~117° clear reverse → reset
-
-/** Controls / chrome — observe only; never start a spin session from these. */
-const IGNORE_SELECTOR = [
-  'a',
-  'button',
-  'input',
-  'textarea',
-  'select',
-  'label',
-  'summary',
-  '[role="button"]',
-  '[data-discog-play]',
-  '[data-stage-button]',
-  '[data-stage-panel]',
-  '[data-stage-panel-trigger]',
-  '[data-jukebox]',
-  '[data-player-dock]',
-  '[data-track-rub-panel]',
-  '[data-mute-control]',
-  '[data-volume-control]',
-  '[data-shuffle-toggle]',
-  '[data-loop-toggle]',
-  '[data-bg-play-toggle]',
-  '.site-nav',
-  '.discog__listen',
-  '.discog__listen-links',
-].join(', ');
 
 type SpinSession = {
   pointerId: number;
@@ -98,7 +72,7 @@ function endSession() {
 }
 
 function shouldIgnoreTarget(target: EventTarget | null): boolean {
-  return target instanceof Element && Boolean(target.closest(IGNORE_SELECTOR));
+  return matchesGestureIgnore(target, STAGE_GESTURE_IGNORE_SELECTOR);
 }
 
 function normalizeDelta(delta: number): number {
