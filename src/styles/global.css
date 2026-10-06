@@ -4,8 +4,10 @@
 
   /* Whole-site visual scale (chrome, stage, overlays, legal). Prefer zoom over
      transform:scale so position:fixed stays viewport-relative.
-     Desktop/laptop: 0.8; phone (≤1023px) restores 1 — see media query below. */
-  --site-scale: 0.8;
+     Desktop/laptop: 1.2; phone (≤1023px) restores 1 — see media query below. */
+  --site-scale: 1.2;
+  /* One viewport height under the root zoom (zoom scales svh too — plain 100svh scrolls). */
+  --viewport-h: calc(100svh / var(--site-scale));
   /* Relative HUD chrome density (desktop vs phone) — multiplied under --site-scale. */
   --hud-scale: 1.5;
 
@@ -37,7 +39,7 @@ html {
 
 body {
   margin: 0;
-  min-height: 100svh;
+  min-height: var(--viewport-h);
   overflow-x: clip;
   background: var(--color-bg);
   color: var(--color-text);
@@ -122,7 +124,7 @@ html {
 /* Full-viewport stage: center stays empty (atmosphere only). */
 .stage {
   position: relative;
-  min-height: 100svh;
+  min-height: var(--viewport-h);
   pointer-events: none;
 }
 
@@ -191,7 +193,7 @@ html {
 /* Phone HUD (015): ≤1023px. Laptop HUD unchanged from 1024px. */
 @media (max-width: 1023px) {
   :root {
-    /* Full visual size on phones — desktop stays at 0.8 via :root default. */
+    /* Full visual size on phones — desktop uses 1.2 via :root default. */
     --site-scale: 1;
     --hud-scale: 1;
   }
