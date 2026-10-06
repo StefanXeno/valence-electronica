@@ -9,7 +9,12 @@
 import { maybeUnlockAchievement } from './achievement-toast';
 import { initEqFlatten } from './eq-flatten';
 import { matchesGestureIgnore, STAGE_GESTURE_IGNORE_SELECTOR } from './gesture-ignore';
-import { createContinuousGlitch, isGlitchThemeActive } from './glitch';
+import {
+  createContinuousGlitch,
+  isGlitchThemeActive,
+  playElementGlitch,
+  prefersGlitchMotion,
+} from './glitch';
 import { isIntroActive, setPlayerPaused } from './playback';
 import { isPlayerDiscovered, markPlayerDiscovered } from './player-discovery';
 import {
@@ -257,6 +262,15 @@ export function initStagePlayer(): void {
     });
   };
 
+  /** Glitch packs (Nightmare): the panel opens/closes with a one-shot glitch instead of a slide. */
+  let glitchTimer: number | undefined;
+  const glitchPanel = () => {
+    if (!prefersGlitchMotion()) return;
+    window.clearTimeout(glitchTimer);
+    const dur = playElementGlitch(panel, 'is-glitching');
+    glitchTimer = window.setTimeout(() => panel.classList.remove('is-glitching'), dur + 80);
+  };
+
   const focusCurrentSong = () => {
     const current =
       root.querySelector<HTMLElement>('[data-jukebox-option][aria-pressed="true"]') ??
@@ -286,6 +300,7 @@ export function initStagePlayer(): void {
     if (effects.markDiscovered) unlockDiscovery();
     if (effects.focusVinyl && opts.restoreFocus !== false) vinyl.focus({ preventScroll: true });
     if (next === 'full' && previous !== 'full') focusCurrentSong();
+    if ((next === 'full') !== (previous === 'full')) glitchPanel();
 
     if (next !== previous) {
       root.dispatchEvent(

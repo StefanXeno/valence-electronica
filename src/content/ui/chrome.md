@@ -8,9 +8,10 @@ contactTitle: Contact
 shopComingSoonTitle: Coming soon
 shopComingSoonBody: Merch is on the way. Check back soon.
 contactEmpty: Contact details are not ready yet — check back soon.
-stageButtonLabel: Play on stage
+stageButtonLabel: Play on V-Flip
 currentlyPlayingLabel: Currently playing
 songsTitle: Songs
+jukeboxLabel: V-Flip
 emptyReleases: No releases yet
 emptyShows: No tour dates
 socialsLabel: Links
@@ -33,9 +34,9 @@ loopDefault: false
 unmuteTooltip: Unmute
 muteTooltip: Mute
 volumeSliderTooltip: Drag to adjust volume
-playerShowLabel: Show player
-playerOpenLabel: Open player
-playerCloseLabel: Close player
+playerShowLabel: Show V-Flip
+playerOpenLabel: Open V-Flip
+playerCloseLabel: Close V-Flip
 playerAchievementTitle: Found it!
-playerAchievementSub: You discovered the hidden player.
+playerAchievementSub: You discovered V-Flip, the hidden player.
 ---

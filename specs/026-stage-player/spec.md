@@ -174,7 +174,8 @@ Entry points: the player song list and the discography play buttons (see `028`).
   (and by `data-stage-button` / `data-jukebox-option` controls); it MUST start the entry
   immediately and restart its advance clock without resetting shuffle.
 - **FR-011**: The player MUST stay at the periphery; it MUST NOT cover the stage center.
-  The minimal vinyl MUST cover less than 1% of a 390×844 viewport.
+  The minimal vinyl is the only chrome at rest (phone ~70px, about 1.5% of a 390×844
+  viewport) and MUST keep its position when the player opens or closes.
 - **FR-012**: The song list MUST show only stage songs (valid jukebox entries), newest
   release first; catalog-only tracks MUST NOT appear.
 - **FR-013**: Closing the full player (close button, Escape, outside tap/click) or opening
@@ -182,7 +183,8 @@ Entry points: the player song list and the discography play buttons (see `028`).
   MUST open **full**.
 - **FR-014**: A "Show player" button, visually hidden until keyboard focus and present only
   in the hidden state, MUST open the full player. On open, focus moves to the current
-  song; on close, focus returns to the vinyl. All player labels come from UI chrome.
+  song; on close, focus returns to the vinyl. All player labels come from UI chrome; the
+  player shows its name (`jukeboxLabel`, V-Flip) and uses the display font.
 - **FR-015**: Reduced motion MUST remove the peek slide, nudge, vinyl spin, and panel
   animation while keeping all states reachable.
 - **FR-016**: Without JavaScript there is no player; the stage shows the static default.
@@ -209,7 +211,8 @@ Entry points: the player song list and the discography play buttons (see `028`).
 
 - Songs are first-party audio muxed into the stage videos; there is no separate audio
   player or third-party embed.
-- The name "V-Flip" is retired; "jukebox" survives in content folder and code naming.
+- The player is called **V-Flip** in visitor copy (`jukeboxLabel`); "jukebox" survives in the
+  content folder and code naming.
 
 ## Known Gaps *(as of 2026-10-06)*
 

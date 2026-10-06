@@ -314,7 +314,7 @@ async function closeMinimal(page, prefix, touch) {
   const box = await boxOf(page.locator('[data-player-vinyl]'));
   const vp = page.viewportSize();
   const share = (box.width * box.height) / (vp.width * vp.height);
-  if (share > 0.01) errors.push(`minimal vinyl covers ${(share * 100).toFixed(2)}% of the viewport`);
+  if (share > 0.02) errors.push(`minimal vinyl covers ${(share * 100).toFixed(2)}% of the viewport`);
 
   // Reopen, then Escape and outside press.
   await pressLocator(page.locator('[data-player-vinyl]'), touch);

@@ -90,7 +90,7 @@ Discography merges **two** content sources into one panel:
 
 | Goal | Edit surface |
 |------|----------------|
-| Play on stage **and** list in Discography | [`src/content/jukebox/`](jukebox/) |
+| Play on V-Flip **and** list in Discography | [`src/content/jukebox/`](jukebox/) |
 | Discography **only** (no stage clip) | [`src/content/tracks/`](tracks/) |
 
 #### Jukebox-backed releases (stage + discography)
@@ -103,7 +103,7 @@ Discography merges **two** content sources into one panel:
 - **Title** ← plain text from `label`
 - **Year · kind** ← year from `sortDate`; optional `kind`
 - **Listen On** ← platform icon links when `listenLinks` are set (jukebox or tracks)
-- **Play on stage** ← icon-only play control, only for songs with a stage video (catalog-only
+- **Play on V-Flip** ← icon-only play control, only for songs with a stage video (catalog-only
   tracks never get one). Pressing it puts the song on stage and closes the Discography
   overlay / phone menu (accessible name: `stageButtonLabel`)
 - **Currently playing** ← five-bar soundwave replaces the play control while that track is active (accessible name: `currentlyPlayingLabel`)
@@ -199,7 +199,7 @@ empty copy (`contactEmpty`), phone/side **Links** label (`socialsLabel` — defa
 **About** / **Discography** / **Info** are quieter secondary text under the band — not
 primary top-bar items. Legal opens from **Info** (Imprint / Privacy).
 
-**Hidden player:** The stage starts clean — no player is visible on a first visit. Tapping
+**Hidden player (V-Flip):** The stage starts clean — no player is visible on a first visit. Tapping
 or clicking empty stage **three times quickly** makes a vinyl record peek in from the
 bottom-left corner for a few seconds; tapping the vinyl opens the full player (song title,
 list of all stage songs, shuffle, play/pause, mute; volume slider on laptop) and unlocks a
@@ -210,6 +210,7 @@ Phone and laptop use the same player.
 
 **Player chrome (optional):**
 
+- `jukeboxLabel` — the player's name, shown above the song title (default: V-Flip)
 - `playerShowLabel` — keyboard reveal button (default: Show player)
 - `playerOpenLabel` / `playerCloseLabel` — accessible names for the vinyl and the close
   button (defaults: Open player / Close player)
@@ -232,7 +233,7 @@ Phone and laptop use the same player.
 
 - `releasedLabel` — label before the release date (default: Released)
 - `stageButtonLabel` — accessible name for the discography play control (icon-only; not
-  shown as button text; default: Play on stage)
+  shown as button text; default: Play on V-Flip)
 - `listenOnLabel` — label before streaming platform icons (default: Listen On)
 
 **Icon overrides (optional):**

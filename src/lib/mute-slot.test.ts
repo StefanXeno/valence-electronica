@@ -109,17 +109,21 @@ describe('stage player mute slot layout (regression)', () => {
     expect(playerSrc).toMatch(/class="stage-player__tool stage-player__tool--mute"/);
   });
 
-  it('unmuted slot sizes to speaker + gap + slider, never flex-grow', () => {
-    expect(playerSrc).toMatch(
-      /\.stage-player__tool--mute\[data-sound=['"]on['"]\]\s*\{[^}]*flex:\s*0\s+0\s+auto/s,
-    );
-    expect(playerSrc).not.toMatch(
-      /\.stage-player__tool--mute\[data-sound=['"]on['"]\]\s*\{[^}]*flex:\s*1/s,
-    );
+  it('unmuted slot fills the rest of the control row and can shrink (never overflows)', () => {
+    const block = playerSrc.match(
+      /\.stage-player__tool--mute\[data-sound=['"]on['"]\]\s*\{[^}]*\}/s,
+    )?.[0];
+    expect(block).toMatch(/flex:\s*1\s+1\s+auto/);
+    expect(block).toMatch(/min-width:\s*0/);
     expect(playerSrc).toMatch(/--jukebox-volume-gap/);
     expect(muteSrc).toMatch(
       /\[data-sound=['"]on['"]\]\s*\{[^}]*gap:\s*var\(--jukebox-volume-gap/s,
     );
+  });
+
+  it('tool row reserves the vinyl slot in every state (no shift on close)', () => {
+    const block = playerSrc.match(/\.stage-player__controls\s*\{[^}]*\}/s)?.[0];
+    expect(block).toMatch(/padding-left:\s*calc\(var\(--player-vinyl-size\)/);
   });
 
   it('unmuted slider uses fixed track width, not flex-grow', () => {
