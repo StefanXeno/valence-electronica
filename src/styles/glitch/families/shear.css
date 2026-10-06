@@ -1,0 +1,53 @@
+/* --- Style: shear (skew-forward) --- */
+@keyframes ui-glitch-shear {
+  0% {
+    transform: none;
+    filter: none;
+    clip-path: inset(0);
+    animation-timing-function: steps(1, end);
+  }
+  22% {
+    transform: skewX(calc(var(--g-sa) * 1deg)) translateX(calc(var(--g-xa) * 0.5px));
+    filter: drop-shadow(calc(var(--g-xa) * -0.35px) 0 var(--glitch-red));
+    animation-timing-function: steps(1, end);
+  }
+  44% {
+    transform: skewY(calc(var(--g-sb) * 0.55deg)) translateY(calc(var(--g-ya) * 0.4px));
+    filter: drop-shadow(0 calc(var(--g-ya) * -0.3px) var(--glitch-white));
+    clip-path: polygon(0 0, 100% 4%, 100% 100%, 0 96%);
+    animation-timing-function: steps(1, end);
+  }
+  66% {
+    transform: skewX(calc(var(--g-sc) * -0.85deg)) translateX(calc(var(--g-xb) * 0.4px));
+    filter: drop-shadow(calc(var(--g-xb) * -0.3px) 0 var(--glitch-red));
+    animation-timing-function: steps(1, end);
+  }
+  100% {
+    transform: none;
+    filter: none;
+    clip-path: inset(0);
+  }
+}
+
+/* Live-safe variant (mute / volume / panels — no clip-path, keeps hit-testing). */
+@keyframes ui-glitch-live-shear {
+  0% {
+    transform: none;
+    filter: none;
+    animation-timing-function: steps(1, end);
+  }
+  28% {
+    transform: skewX(calc(var(--g-sa) * 1deg)) translateX(calc(var(--g-xa) * 0.45px));
+    filter: drop-shadow(calc(var(--g-xa) * -0.35px) 0 var(--glitch-red));
+    animation-timing-function: steps(1, end);
+  }
+  55% {
+    transform: skewY(calc(var(--g-sb) * 0.5deg));
+    filter: drop-shadow(0 calc(var(--g-ya) * -0.25px) var(--glitch-white));
+    animation-timing-function: steps(1, end);
+  }
+  100% {
+    transform: none;
+    filter: none;
+  }
+}

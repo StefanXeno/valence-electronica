@@ -1,0 +1,103 @@
+/*
+  Mute / live controls: NO clip-path (keeps hit-testing).
+*/
+.stage-panel.glitch-hit.is-glitching,
+[data-glitch-live].glitch-hit.is-glitching,
+.stage-panel.glitch-hit.is-glitch-hover,
+[data-glitch-live].glitch-hit.is-glitch-hover,
+.volume-control.is-glitching,
+[data-player-panel].is-glitching,
+[data-stage-panels].is-glitching,
+[data-stage-panel].is-glitching {
+  animation-name: ui-glitch-live-tear;
+}
+.stage-panel.glitch-hit.is-glitching,
+[data-glitch-live].glitch-hit.is-glitching[data-glitch-style='chroma'],
+.stage-panel.glitch-hit.is-glitch-hover,
+[data-glitch-live].glitch-hit.is-glitch-hover[data-glitch-style='chroma'],
+.volume-control.is-glitching[data-glitch-style='chroma'],
+[data-player-panel].is-glitching[data-glitch-style='chroma'],
+[data-stage-panels].is-glitching[data-glitch-style='chroma'] {
+  animation-name: ui-glitch-live-chroma;
+}
+.stage-panel.glitch-hit.is-glitching,
+[data-glitch-live].glitch-hit.is-glitching[data-glitch-style='stutter'],
+.stage-panel.glitch-hit.is-glitch-hover,
+[data-glitch-live].glitch-hit.is-glitch-hover[data-glitch-style='stutter'],
+.volume-control.is-glitching[data-glitch-style='stutter'],
+[data-player-panel].is-glitching[data-glitch-style='stutter'],
+[data-stage-panels].is-glitching[data-glitch-style='stutter'] {
+  animation-name: ui-glitch-live-stutter;
+}
+.stage-panel.glitch-hit.is-glitching,
+[data-glitch-live].glitch-hit.is-glitching[data-glitch-style='slice'],
+.stage-panel.glitch-hit.is-glitch-hover,
+[data-glitch-live].glitch-hit.is-glitch-hover[data-glitch-style='slice'],
+.volume-control.is-glitching[data-glitch-style='slice'],
+[data-player-panel].is-glitching[data-glitch-style='slice'],
+[data-stage-panels].is-glitching[data-glitch-style='slice'] {
+  animation-name: ui-glitch-live-slice;
+}
+.stage-panel.glitch-hit.is-glitching,
+[data-glitch-live].glitch-hit.is-glitching[data-glitch-style='ripple'],
+.stage-panel.glitch-hit.is-glitch-hover,
+[data-glitch-live].glitch-hit.is-glitch-hover[data-glitch-style='ripple'],
+.volume-control.is-glitching[data-glitch-style='ripple'],
+[data-player-panel].is-glitching[data-glitch-style='ripple'],
+[data-stage-panels].is-glitching[data-glitch-style='ripple'] {
+  animation-name: ui-glitch-live-ripple;
+}
+.stage-panel.glitch-hit.is-glitching,
+[data-glitch-live].glitch-hit.is-glitching[data-glitch-style='static'],
+.stage-panel.glitch-hit.is-glitch-hover,
+[data-glitch-live].glitch-hit.is-glitch-hover[data-glitch-style='static'],
+.volume-control.is-glitching[data-glitch-style='static'],
+[data-player-panel].is-glitching[data-glitch-style='static'],
+[data-stage-panels].is-glitching[data-glitch-style='static'] {
+  animation-name: ui-glitch-live-static;
+}
+.stage-panel.glitch-hit.is-glitching,
+[data-glitch-live].glitch-hit.is-glitching[data-glitch-style='shear'],
+.stage-panel.glitch-hit.is-glitch-hover,
+[data-glitch-live].glitch-hit.is-glitch-hover[data-glitch-style='shear'],
+.volume-control.is-glitching[data-glitch-style='shear'],
+[data-player-panel].is-glitching[data-glitch-style='shear'],
+[data-stage-panels].is-glitching[data-glitch-style='shear'] {
+  animation-name: ui-glitch-live-shear;
+}
+.stage-panel.glitch-hit.is-glitching,
+[data-glitch-live].glitch-hit.is-glitching[data-glitch-style='blink'],
+.stage-panel.glitch-hit.is-glitch-hover,
+[data-glitch-live].glitch-hit.is-glitch-hover[data-glitch-style='blink'],
+.volume-control.is-glitching[data-glitch-style='blink'],
+[data-player-panel].is-glitching[data-glitch-style='blink'],
+[data-stage-panels].is-glitching[data-glitch-style='blink'] {
+  animation-name: ui-glitch-live-blink;
+}
+.stage-panel.glitch-hit.is-glitching,
+[data-glitch-live].glitch-hit.is-glitching[data-glitch-style='wave'],
+.stage-panel.glitch-hit.is-glitch-hover,
+[data-glitch-live].glitch-hit.is-glitch-hover[data-glitch-style='wave'],
+.volume-control.is-glitching[data-glitch-style='wave'],
+[data-player-panel].is-glitching[data-glitch-style='wave'],
+[data-stage-panels].is-glitching[data-glitch-style='wave'] {
+  animation-name: ui-glitch-live-wave;
+}
+.stage-panel.glitch-hit.is-glitching,
+[data-glitch-live].glitch-hit.is-glitching[data-glitch-style='punch'],
+.stage-panel.glitch-hit.is-glitch-hover,
+[data-glitch-live].glitch-hit.is-glitch-hover[data-glitch-style='punch'],
+.volume-control.is-glitching[data-glitch-style='punch'],
+[data-player-panel].is-glitching[data-glitch-style='punch'],
+[data-stage-panels].is-glitching[data-glitch-style='punch'] {
+  animation-name: ui-glitch-live-punch;
+}
+.stage-panel.glitch-hit.is-glitching,
+[data-glitch-live].glitch-hit.is-glitching[data-glitch-style='tear'],
+.stage-panel.glitch-hit.is-glitch-hover,
+[data-glitch-live].glitch-hit.is-glitch-hover[data-glitch-style='tear'],
+.volume-control.is-glitching[data-glitch-style='tear'],
+[data-player-panel].is-glitching[data-glitch-style='tear'],
+[data-stage-panels].is-glitching[data-glitch-style='tear'] {
+  animation-name: ui-glitch-live-tear;
+}

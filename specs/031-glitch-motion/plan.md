@@ -11,7 +11,6 @@
 | Presets, one-shots, continuous, transition flavor | `src/lib/glitch.ts` |
 | Ambient field scheduling | `src/lib/glitch-ambient.ts` (+ tests) |
 | Press glitch wiring | `src/components/GlitchPress.astro` |
-| Keyframes and families | `src/styles/glitch.css` |
+| Keyframes and families | `src/styles/glitch.css` (entry, import order = cascade) → `src/styles/glitch/` (`base`, `press-hover`, `live`, `continuous`, `ambient`, `scanlines`, `gating`) and `glitch/families/<name>.css` (one per family) |
 | Hover/focus labels | `src/lib/label-reveal.ts` (+ tests), `#hud-label-reveal` in `Base.astro` |
-| Panel motion constants | `src/lib/panel-motion.ts` (contains unused exports) |
 | Site scale | `--site-scale` in `src/styles/global.css` |

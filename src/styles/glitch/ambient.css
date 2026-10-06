@@ -1,0 +1,38 @@
+/*
+  Ambient idle field (Nightmare / hudGlitch): same language, live-safe keyframes
+  so staggered one-shots never punch clip-path holes in hit targets.
+*/
+.glitch-hit.is-glitch-ambient {
+  animation: ui-glitch-live-tear var(--g-dur) both;
+  z-index: 1;
+}
+.glitch-hit.is-glitch-ambient[data-glitch-style='chroma'] {
+  animation-name: ui-glitch-live-chroma;
+}
+.glitch-hit.is-glitch-ambient[data-glitch-style='stutter'] {
+  animation-name: ui-glitch-live-stutter;
+}
+.glitch-hit.is-glitch-ambient[data-glitch-style='slice'] {
+  animation-name: ui-glitch-live-slice;
+}
+.glitch-hit.is-glitch-ambient[data-glitch-style='ripple'] {
+  animation-name: ui-glitch-live-ripple;
+}
+.glitch-hit.is-glitch-ambient[data-glitch-style='static'] {
+  animation-name: ui-glitch-live-static;
+}
+.glitch-hit.is-glitch-ambient[data-glitch-style='shear'] {
+  animation-name: ui-glitch-live-shear;
+}
+.glitch-hit.is-glitch-ambient[data-glitch-style='blink'] {
+  animation-name: ui-glitch-live-blink;
+}
+.glitch-hit.is-glitch-ambient[data-glitch-style='wave'] {
+  animation-name: ui-glitch-live-wave;
+}
+.glitch-hit.is-glitch-ambient[data-glitch-style='punch'] {
+  animation-name: ui-glitch-live-punch;
+}
+.glitch-hit.is-glitch-ambient[data-glitch-style='tear'] {
+  animation-name: ui-glitch-live-tear;
+}

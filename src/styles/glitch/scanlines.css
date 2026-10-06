@@ -1,0 +1,244 @@
+/*
+  Scanline layers (::before horizontal, ::after vertical): which keyframes each
+  state / family uses, followed by the glitch-scan-* keyframes.
+*/
+
+.glitch-hit.is-glitching::before,
+.glitch-hit.is-glitch-hover::before,
+.glitch-hit.is-glitch-continuous::before,
+.glitch-hit.is-glitch-ambient::before,
+.volume-control.is-glitching::before,
+[data-player-panel].is-glitching::before,
+[data-stage-panels].is-glitching::before {
+  animation: glitch-scan-a var(--g-dur) both;
+}
+
+.glitch-hit.is-glitching::after,
+.glitch-hit.is-glitch-hover::after,
+.glitch-hit.is-glitch-continuous::after,
+.glitch-hit.is-glitch-ambient::after,
+.volume-control.is-glitching::after,
+[data-player-panel].is-glitching::after,
+[data-stage-panels].is-glitching::after {
+  animation: glitch-scan-b var(--g-dur) both;
+}
+
+/* Chroma: quieter scanlines; stutter: punchier; slice: mostly horizontal */
+.glitch-hit[data-glitch-style='chroma'].is-glitching::before,
+.glitch-hit[data-glitch-style='chroma'].is-glitch-hover::before,
+.glitch-hit[data-glitch-style='chroma'].is-glitch-continuous::before,
+.glitch-hit[data-glitch-style='chroma'].is-glitch-ambient::before {
+  animation-name: glitch-scan-soft;
+}
+
+.glitch-hit[data-glitch-style='chroma'].is-glitching::after,
+.glitch-hit[data-glitch-style='chroma'].is-glitch-hover::after,
+.glitch-hit[data-glitch-style='chroma'].is-glitch-continuous::after,
+.glitch-hit[data-glitch-style='chroma'].is-glitch-ambient::after {
+  animation-name: glitch-scan-soft-v;
+}
+
+.glitch-hit[data-glitch-style='stutter'].is-glitching::before,
+.glitch-hit[data-glitch-style='stutter'].is-glitch-hover::before,
+.glitch-hit[data-glitch-style='stutter'].is-glitch-continuous::before,
+.glitch-hit[data-glitch-style='stutter'].is-glitch-ambient::before {
+  animation-name: glitch-scan-stutter;
+}
+
+.glitch-hit[data-glitch-style='slice'].is-glitching::after,
+.glitch-hit[data-glitch-style='slice'].is-glitch-hover::after,
+.glitch-hit[data-glitch-style='slice'].is-glitch-continuous::after,
+.glitch-hit[data-glitch-style='slice'].is-glitch-ambient::after {
+  animation: none;
+  opacity: 0;
+}
+
+.stage-panel.glitch-hit.is-glitch-continuous,
+[data-glitch-live].glitch-hit.is-glitch-continuous::before {
+  animation: glitch-scan-a var(--g-dur, 560ms) both;
+}
+
+.stage-panel.glitch-hit.is-glitch-continuous,
+[data-glitch-live].glitch-hit.is-glitch-continuous::after {
+  animation: glitch-scan-b var(--g-dur, 560ms) both;
+}
+
+.stage-panel.glitch-hit.is-glitch-continuous,
+[data-glitch-live].glitch-hit.is-glitch-continuous[data-glitch-style='chroma']::before {
+  animation-name: glitch-scan-soft;
+}
+
+.stage-panel.glitch-hit.is-glitch-continuous,
+[data-glitch-live].glitch-hit.is-glitch-continuous[data-glitch-style='chroma']::after {
+  animation-name: glitch-scan-soft-v;
+}
+
+.stage-panel.glitch-hit.is-glitch-continuous,
+[data-glitch-live].glitch-hit.is-glitch-continuous[data-glitch-style='stutter']::before {
+  animation-name: glitch-scan-stutter;
+}
+
+.stage-panel.glitch-hit.is-glitch-continuous,
+[data-glitch-live].glitch-hit.is-glitch-continuous[data-glitch-style='slice']::after {
+  animation: none;
+  opacity: 0;
+}
+
+/* Horizontal line layer */
+@keyframes glitch-scan-a {
+  0%,
+  100% {
+    opacity: 0;
+    transform: none;
+    animation-timing-function: steps(1, end);
+  }
+  14% {
+    opacity: calc(var(--g-scan, 0.9) * 0.95);
+    transform: translateX(calc(var(--g-xa) * 0.6px));
+    animation-timing-function: steps(1, end);
+  }
+  28% {
+    opacity: calc(var(--g-scan, 0.9) * 0.35);
+    transform: translateY(calc(var(--g-ya) * 0.35px));
+    animation-timing-function: steps(1, end);
+  }
+  42% {
+    opacity: var(--g-scan, 0.9);
+    transform: translateX(calc(var(--g-xb) * 0.7px));
+    animation-timing-function: steps(1, end);
+  }
+  56% {
+    opacity: calc(var(--g-scan, 0.9) * 0.25);
+    transform: none;
+    animation-timing-function: steps(1, end);
+  }
+  70% {
+    opacity: calc(var(--g-scan, 0.9) * 0.8);
+    transform: translateX(calc(var(--g-xc) * 0.5px));
+    animation-timing-function: steps(1, end);
+  }
+  84% {
+    opacity: calc(var(--g-scan, 0.9) * 0.2);
+    transform: none;
+    animation-timing-function: steps(1, end);
+  }
+}
+
+/* Vertical line layer */
+@keyframes glitch-scan-b {
+  0%,
+  100% {
+    opacity: 0;
+    transform: none;
+    animation-timing-function: steps(1, end);
+  }
+  14% {
+    opacity: calc(var(--g-scan, 0.9) * 0.35);
+    transform: translateX(calc(var(--g-xa) * 0.3px));
+    animation-timing-function: steps(1, end);
+  }
+  28% {
+    opacity: var(--g-scan, 0.9);
+    transform: translateY(calc(var(--g-ya) * 0.55px));
+    animation-timing-function: steps(1, end);
+  }
+  42% {
+    opacity: calc(var(--g-scan, 0.9) * 0.4);
+    transform: translateX(calc(var(--g-xb) * 0.35px));
+    animation-timing-function: steps(1, end);
+  }
+  56% {
+    opacity: calc(var(--g-scan, 0.9) * 0.95);
+    transform: translateY(calc(var(--g-yb) * 0.5px));
+    animation-timing-function: steps(1, end);
+  }
+  70% {
+    opacity: calc(var(--g-scan, 0.9) * 0.3);
+    transform: translateX(calc(var(--g-xc) * 0.25px));
+    animation-timing-function: steps(1, end);
+  }
+  84% {
+    opacity: calc(var(--g-scan, 0.9) * 0.75);
+    transform: translateY(calc(var(--g-yc) * -0.35px));
+    animation-timing-function: steps(1, end);
+  }
+}
+
+@keyframes glitch-scan-soft {
+  0%,
+  100% {
+    opacity: 0;
+    transform: none;
+    animation-timing-function: steps(1, end);
+  }
+  25% {
+    opacity: calc(var(--g-scan, 0.4) * 0.7);
+    transform: translateX(calc(var(--g-xa) * 0.4px));
+    animation-timing-function: steps(1, end);
+  }
+  55% {
+    opacity: calc(var(--g-scan, 0.4) * 0.45);
+    transform: translateX(calc(var(--g-xb) * 0.35px));
+    animation-timing-function: steps(1, end);
+  }
+  80% {
+    opacity: calc(var(--g-scan, 0.4) * 0.25);
+    transform: none;
+    animation-timing-function: steps(1, end);
+  }
+}
+
+@keyframes glitch-scan-soft-v {
+  0%,
+  100% {
+    opacity: 0;
+    transform: none;
+    animation-timing-function: steps(1, end);
+  }
+  30% {
+    opacity: calc(var(--g-scan, 0.4) * 0.55);
+    transform: translateY(calc(var(--g-ya) * 0.3px));
+    animation-timing-function: steps(1, end);
+  }
+  60% {
+    opacity: calc(var(--g-scan, 0.4) * 0.35);
+    transform: translateY(calc(var(--g-yb) * 0.25px));
+    animation-timing-function: steps(1, end);
+  }
+}
+
+@keyframes glitch-scan-stutter {
+  0%,
+  100% {
+    opacity: 0;
+    transform: none;
+    animation-timing-function: steps(1, end);
+  }
+  10% {
+    opacity: var(--g-scan, 0.7);
+    transform: translateX(calc(var(--g-xa) * 0.5px));
+    animation-timing-function: steps(1, end);
+  }
+  22% {
+    opacity: 0;
+    animation-timing-function: steps(1, end);
+  }
+  34% {
+    opacity: calc(var(--g-scan, 0.7) * 0.9);
+    transform: translateX(calc(var(--g-xb) * 0.45px));
+    animation-timing-function: steps(1, end);
+  }
+  48% {
+    opacity: 0;
+    animation-timing-function: steps(1, end);
+  }
+  62% {
+    opacity: calc(var(--g-scan, 0.7) * 0.7);
+    transform: translateX(calc(var(--g-xc) * 0.35px));
+    animation-timing-function: steps(1, end);
+  }
+  78% {
+    opacity: 0;
+    animation-timing-function: steps(1, end);
+  }
+}

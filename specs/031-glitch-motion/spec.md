@@ -145,6 +145,9 @@ a label appears next to each; at 390px confirm no hover labels appear.
 
 - Final intensity is owner-approved by eye; no automated photosensitivity tooling.
 
-## Known Gaps *(as of 2026-10-05)*
+## Known Gaps *(as of 2026-10-06)*
 
-- `src/styles/glitch.css` is ~1,300 lines in one file (IDEA-018).
+- The `live`, `continuous`, and scanline mappings list `.stage-panel.glitch-hit.is-glitching`
+  (and the `is-glitch-continuous` twin) without a `data-glitch-style` qualifier in every
+  family rule, so those elements always end on the last family. `.stage-panel` no longer
+  renders anywhere, so this is dead but harmless; drop it in a cleanup.

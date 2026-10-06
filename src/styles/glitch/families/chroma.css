@@ -1,0 +1,68 @@
+/* --- Style: chroma (RGB split / soft drift, minimal geometry) --- */
+@keyframes ui-glitch-chroma {
+  0% {
+    transform: none;
+    filter: none;
+    clip-path: inset(0);
+    animation-timing-function: steps(1, end);
+  }
+  18% {
+    transform: translateX(calc(var(--g-xa) * 0.7px));
+    filter: drop-shadow(calc(var(--g-xa) * -0.9px) 0 var(--glitch-red))
+      drop-shadow(calc(var(--g-xa) * 0.9px) 0 var(--glitch-white));
+    animation-timing-function: steps(1, end);
+  }
+  36% {
+    transform: translateY(calc(var(--g-ya) * 0.6px)) scale(var(--g-scale));
+    filter: drop-shadow(calc(var(--g-xb) * -0.7px) calc(var(--g-ya) * 0.2px) var(--glitch-red))
+      drop-shadow(calc(var(--g-xb) * 0.7px) 0 var(--glitch-white)) brightness(1.08);
+    animation-timing-function: steps(1, end);
+  }
+  54% {
+    transform: translateX(calc(var(--g-xb) * 0.55px));
+    filter: drop-shadow(calc(var(--g-xb) * 0.85px) 0 var(--glitch-red))
+      drop-shadow(calc(var(--g-xb) * -0.85px) 0 var(--glitch-white));
+    animation-timing-function: steps(1, end);
+  }
+  72% {
+    transform: translateY(calc(var(--g-yc) * -0.45px));
+    filter: drop-shadow(0 calc(var(--g-yc) * -0.5px) var(--glitch-white)) contrast(1.08);
+    animation-timing-function: steps(1, end);
+  }
+  100% {
+    transform: none;
+    filter: none;
+    clip-path: inset(0);
+  }
+}
+
+/* Live-safe variant (mute / volume / panels — no clip-path, keeps hit-testing). */
+@keyframes ui-glitch-live-chroma {
+  0% {
+    transform: none;
+    filter: none;
+    animation-timing-function: steps(1, end);
+  }
+  20% {
+    transform: translateX(calc(var(--g-xa) * 0.6px));
+    filter: drop-shadow(calc(var(--g-xa) * -1px) 0 var(--glitch-red))
+      drop-shadow(calc(var(--g-xa) * 1px) 0 var(--glitch-white));
+    animation-timing-function: steps(1, end);
+  }
+  40% {
+    transform: scale(var(--g-scale));
+    filter: drop-shadow(calc(var(--g-xb) * -0.8px) 0 var(--glitch-red))
+      drop-shadow(calc(var(--g-xb) * 0.8px) 0 var(--glitch-white)) brightness(1.1);
+    animation-timing-function: steps(1, end);
+  }
+  65% {
+    transform: translateY(calc(var(--g-ya) * 0.5px));
+    filter: drop-shadow(calc(var(--g-xc) * 0.7px) 0 var(--glitch-red))
+      drop-shadow(calc(var(--g-xc) * -0.7px) 0 var(--glitch-white));
+    animation-timing-function: steps(1, end);
+  }
+  100% {
+    transform: none;
+    filter: none;
+  }
+}

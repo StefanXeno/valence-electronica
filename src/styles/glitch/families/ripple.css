@@ -1,0 +1,53 @@
+/* --- Style: ripple (soft scale bloom) --- */
+@keyframes ui-glitch-ripple {
+  0% {
+    transform: none;
+    filter: none;
+    clip-path: inset(0);
+    animation-timing-function: steps(1, end);
+  }
+  25% {
+    transform: scale(var(--g-scale)) translateX(calc(var(--g-xa) * 0.4px));
+    filter: drop-shadow(calc(var(--g-xa) * -0.3px) 0 var(--glitch-red)) brightness(1.06);
+    animation-timing-function: steps(1, end);
+  }
+  50% {
+    transform: scale(calc(var(--g-scale) * 1.02)) translateY(calc(var(--g-ya) * 0.35px));
+    filter: drop-shadow(0 calc(var(--g-ya) * -0.25px) var(--glitch-white));
+    clip-path: inset(4% 2% 4% 2%);
+    animation-timing-function: steps(1, end);
+  }
+  75% {
+    transform: scale(var(--g-scale)) translateX(calc(var(--g-xb) * 0.3px));
+    filter: drop-shadow(calc(var(--g-xb) * -0.25px) 0 var(--glitch-red));
+    animation-timing-function: steps(1, end);
+  }
+  100% {
+    transform: none;
+    filter: none;
+    clip-path: inset(0);
+  }
+}
+
+/* Live-safe variant (mute / volume / panels — no clip-path, keeps hit-testing). */
+@keyframes ui-glitch-live-ripple {
+  0% {
+    transform: none;
+    filter: none;
+    animation-timing-function: steps(1, end);
+  }
+  30% {
+    transform: scale(var(--g-scale));
+    filter: drop-shadow(calc(var(--g-xa) * -0.3px) 0 var(--glitch-red)) brightness(1.06);
+    animation-timing-function: steps(1, end);
+  }
+  60% {
+    transform: scale(calc(var(--g-scale) * 1.02)) translateY(calc(var(--g-ya) * 0.3px));
+    filter: drop-shadow(0 calc(var(--g-ya) * -0.25px) var(--glitch-white));
+    animation-timing-function: steps(1, end);
+  }
+  100% {
+    transform: none;
+    filter: none;
+  }
+}

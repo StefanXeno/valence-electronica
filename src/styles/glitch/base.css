@@ -1,0 +1,97 @@
+/*
+  Glitch base: shared tokens (set per element by applyGlitchPreset), the
+  scanline pseudo-element scaffolding, and hit-target guards.
+*/
+
+.glitch-hit,
+.volume-control,
+[data-player-panel],
+[data-stage-panels] {
+  --glitch-red: var(--color-accent);
+  --glitch-white: var(--color-text);
+  --g-xa: 8;
+  --g-xb: -9;
+  --g-xc: 5;
+  --g-ya: 4;
+  --g-yb: -5;
+  --g-yc: 3;
+  --g-sa: 10;
+  --g-sb: -8;
+  --g-sc: 6;
+  --g-line1: 22;
+  --g-line2: 48;
+  --g-line3: 74;
+  --g-vline1: 24;
+  --g-vline2: 52;
+  --g-vline3: 78;
+  --g-scale: 1.04;
+  --g-dur: 560ms;
+  --g-scan: 0.85;
+  isolation: isolate;
+  overflow: visible;
+}
+
+.glitch-hit {
+  position: relative;
+}
+
+.glitch-hit::before,
+.glitch-hit::after,
+.volume-control::before,
+.volume-control::after,
+[data-player-panel]::before,
+[data-player-panel]::after,
+[data-stage-panels]::before,
+[data-stage-panels]::after {
+  content: '';
+  position: absolute;
+  pointer-events: none;
+  opacity: 0;
+  z-index: 3;
+  mix-blend-mode: screen;
+}
+
+/* Keep interactive controls receiving clicks even while glitching */
+.volume-control,
+.volume-control__toggle,
+.stage-panel.glitch-hit,
+[data-glitch-live].glitch-hit,
+[data-player-panel],
+[data-stage-panel],
+[data-stage-panels] {
+  pointer-events: auto;
+}
+
+[data-stage-panels] {
+  position: relative;
+}
+
+/* Horizontal scanlines */
+.glitch-hit::before,
+.volume-control::before,
+[data-player-panel]::before,
+[data-stage-panels]::before {
+  left: -12%;
+  width: 124%;
+  height: 2px;
+  top: calc(var(--g-line1) * 1%);
+  background: var(--glitch-red);
+  box-shadow:
+    0 calc((var(--g-line2) - var(--g-line1)) * 1%) 0 0 var(--glitch-white),
+    0 calc((var(--g-line3) - var(--g-line1)) * 1%) 0 0 var(--glitch-red);
+}
+
+/* Vertical scanlines */
+.glitch-hit::after,
+.volume-control::after,
+[data-player-panel]::after,
+[data-stage-panels]::after {
+  top: -12%;
+  height: 124%;
+  width: 2px;
+  left: calc(var(--g-vline1) * 1%);
+  background: var(--glitch-white);
+  box-shadow:
+    calc((var(--g-vline2) - var(--g-vline1)) * 1%) 0 0 0 var(--glitch-red),
+    calc((var(--g-vline3) - var(--g-vline1)) * 1%) 0 0 0 var(--glitch-white);
+}

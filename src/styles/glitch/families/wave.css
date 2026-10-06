@@ -1,0 +1,65 @@
+/* --- Style: wave (horizontal undulation) --- */
+@keyframes ui-glitch-wave {
+  0% {
+    transform: none;
+    filter: none;
+    clip-path: inset(0);
+    animation-timing-function: steps(1, end);
+  }
+  16% {
+    transform: translateX(calc(var(--g-xa) * 1px)) skewX(calc(var(--g-sa) * 0.35deg));
+    filter: drop-shadow(calc(var(--g-xa) * -0.35px) 0 var(--glitch-red));
+    clip-path: polygon(0 0, 100% 0, 100% 35%, 0 40%, 0 100%, 100% 100%);
+    animation-timing-function: steps(1, end);
+  }
+  33% {
+    transform: translateX(calc(var(--g-xb) * 0.9px)) skewX(calc(var(--g-sa) * -0.3deg));
+    filter: drop-shadow(calc(var(--g-xb) * -0.3px) 0 var(--glitch-white));
+    clip-path: polygon(0 0, 100% 0, 100% 55%, 0 50%, 0 100%, 100% 100%);
+    animation-timing-function: steps(1, end);
+  }
+  50% {
+    transform: translateX(calc(var(--g-xc) * -0.85px)) skewX(calc(var(--g-sc) * 0.25deg));
+    filter: drop-shadow(calc(var(--g-xc) * 0.3px) 0 var(--glitch-red));
+    clip-path: polygon(0 0, 100% 0, 100% 70%, 0 75%, 0 100%, 100% 100%);
+    animation-timing-function: steps(1, end);
+  }
+  70% {
+    transform: translateX(calc(var(--g-xa) * 0.45px));
+    filter: drop-shadow(calc(var(--g-xa) * -0.2px) 0 var(--glitch-white));
+    animation-timing-function: steps(1, end);
+  }
+  100% {
+    transform: none;
+    filter: none;
+    clip-path: inset(0);
+  }
+}
+
+/* Live-safe variant (mute / volume / panels — no clip-path, keeps hit-testing). */
+@keyframes ui-glitch-live-wave {
+  0% {
+    transform: none;
+    filter: none;
+    animation-timing-function: steps(1, end);
+  }
+  20% {
+    transform: translateX(calc(var(--g-xa) * 1px)) skewX(calc(var(--g-sa) * 0.3deg));
+    filter: drop-shadow(calc(var(--g-xa) * -0.35px) 0 var(--glitch-red));
+    animation-timing-function: steps(1, end);
+  }
+  40% {
+    transform: translateX(calc(var(--g-xb) * 0.85px)) skewX(calc(var(--g-sa) * -0.25deg));
+    filter: drop-shadow(calc(var(--g-xb) * -0.3px) 0 var(--glitch-white));
+    animation-timing-function: steps(1, end);
+  }
+  65% {
+    transform: translateX(calc(var(--g-xc) * -0.7px));
+    filter: drop-shadow(calc(var(--g-xc) * 0.25px) 0 var(--glitch-red));
+    animation-timing-function: steps(1, end);
+  }
+  100% {
+    transform: none;
+    filter: none;
+  }
+}

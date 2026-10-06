@@ -1,0 +1,90 @@
+/* --- Style: tear (classic fracture) --- */
+@keyframes ui-glitch-tear {
+  0% {
+    transform: none;
+    filter: none;
+    clip-path: inset(0);
+    animation-timing-function: steps(1, end);
+  }
+  14% {
+    transform: translateX(calc(var(--g-xa) * 1px)) skewX(calc(var(--g-sa) * 0.75deg))
+      scaleX(var(--g-scale));
+    filter: drop-shadow(calc(var(--g-xa) * -0.35px) 0 var(--glitch-red)) contrast(1.15);
+    clip-path: polygon(0 0, 100% 0, 100% 30%, 0 32%, 0 58%, 100% 56%, 100% 100%, 0 100%);
+    animation-timing-function: steps(1, end);
+  }
+  28% {
+    transform: translateY(calc(var(--g-ya) * 1px)) skewY(calc(var(--g-sb) * 0.4deg));
+    filter: drop-shadow(0 calc(var(--g-ya) * -0.35px) var(--glitch-white));
+    clip-path: polygon(0 0, 28% 0, 26% 100%, 55% 100%, 57% 0, 100% 0, 100% 100%, 0 100%);
+    animation-timing-function: steps(1, end);
+  }
+  42% {
+    transform: translateX(calc(var(--g-xb) * 1px)) skewX(calc(var(--g-sa) * -0.65deg));
+    filter: drop-shadow(calc(var(--g-xb) * -0.35px) 0 var(--glitch-red));
+    clip-path: polygon(0 0, 100% 0, 100% 38%, 0 40%, 0 100%, 100% 100%);
+    animation-timing-function: steps(1, end);
+  }
+  56% {
+    transform: translateY(calc(var(--g-yb) * 1px)) skewY(calc(var(--g-sb) * -0.35deg));
+    filter: drop-shadow(0 calc(var(--g-yb) * -0.35px) var(--glitch-white));
+    clip-path: polygon(0 0, 40% 0, 38% 100%, 100% 100%, 100% 0);
+    animation-timing-function: steps(1, end);
+  }
+  70% {
+    transform: translateX(calc(var(--g-xc) * 1px)) skewX(calc(var(--g-sc) * 0.7deg));
+    filter: drop-shadow(calc(var(--g-xc) * -0.3px) 0 var(--glitch-red));
+    clip-path: inset(0 6% 0 0);
+    animation-timing-function: steps(1, end);
+  }
+  84% {
+    transform: translateY(calc(var(--g-yc) * 1px));
+    filter: drop-shadow(0 calc(var(--g-yc) * -0.25px) var(--glitch-white));
+    clip-path: inset(0);
+    animation-timing-function: steps(1, end);
+  }
+  100% {
+    transform: none;
+    clip-path: inset(0);
+    filter: none;
+  }
+}
+
+/* Live-safe variant (mute / volume / panels — no clip-path, keeps hit-testing). */
+@keyframes ui-glitch-live-tear {
+  0% {
+    transform: none;
+    filter: none;
+    animation-timing-function: steps(1, end);
+  }
+  14% {
+    transform: translateX(calc(var(--g-xa) * 1px)) skewX(calc(var(--g-sa) * 0.85deg))
+      scaleX(var(--g-scale));
+    filter: drop-shadow(calc(var(--g-xa) * -0.4px) 0 var(--glitch-red)) contrast(1.2);
+    animation-timing-function: steps(1, end);
+  }
+  28% {
+    transform: translateY(calc(var(--g-ya) * 1px)) skewY(calc(var(--g-sb) * 0.45deg));
+    filter: drop-shadow(0 calc(var(--g-ya) * -0.4px) var(--glitch-white));
+    animation-timing-function: steps(1, end);
+  }
+  42% {
+    transform: translateX(calc(var(--g-xb) * 1px)) skewX(calc(var(--g-sa) * -0.75deg));
+    filter: drop-shadow(calc(var(--g-xb) * -0.4px) 0 var(--glitch-red));
+    animation-timing-function: steps(1, end);
+  }
+  56% {
+    transform: translateY(calc(var(--g-yb) * 1px)) skewY(calc(var(--g-sb) * -0.4deg));
+    filter: drop-shadow(0 calc(var(--g-yb) * -0.4px) var(--glitch-white));
+    animation-timing-function: steps(1, end);
+  }
+  70% {
+    transform: translateX(calc(var(--g-xc) * 1px)) skewX(calc(var(--g-sc) * 0.75deg));
+    filter: drop-shadow(calc(var(--g-xc) * -0.35px) 0 var(--glitch-red));
+    animation-timing-function: steps(1, end);
+  }
+  100% {
+    transform: none;
+    filter: none;
+  }
+}

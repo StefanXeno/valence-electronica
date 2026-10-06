@@ -1,0 +1,76 @@
+/* --- Style: blink (opacity flicker + light chroma) --- */
+@keyframes ui-glitch-blink {
+  0% {
+    transform: none;
+    filter: none;
+    opacity: 1;
+    clip-path: inset(0);
+    animation-timing-function: steps(1, end);
+  }
+  12% {
+    opacity: 0.35;
+    filter: drop-shadow(calc(var(--g-xa) * -0.6px) 0 var(--glitch-red));
+    animation-timing-function: steps(1, end);
+  }
+  24% {
+    opacity: 1;
+    transform: translateX(calc(var(--g-xa) * 0.5px));
+    filter: drop-shadow(calc(var(--g-xa) * 0.6px) 0 var(--glitch-white));
+    animation-timing-function: steps(1, end);
+  }
+  40% {
+    opacity: 0.45;
+    transform: translateY(calc(var(--g-ya) * 0.3px));
+    animation-timing-function: steps(1, end);
+  }
+  55% {
+    opacity: 1;
+    filter: drop-shadow(calc(var(--g-xb) * -0.5px) 0 var(--glitch-red))
+      drop-shadow(calc(var(--g-xb) * 0.5px) 0 var(--glitch-white));
+    animation-timing-function: steps(1, end);
+  }
+  70% {
+    opacity: 0.55;
+    animation-timing-function: steps(1, end);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+    filter: none;
+    clip-path: inset(0);
+  }
+}
+
+/* Live-safe variant (mute / volume / panels — no clip-path, keeps hit-testing). */
+@keyframes ui-glitch-live-blink {
+  0% {
+    transform: none;
+    filter: none;
+    opacity: 1;
+    animation-timing-function: steps(1, end);
+  }
+  15% {
+    opacity: 0.4;
+    filter: drop-shadow(calc(var(--g-xa) * -0.55px) 0 var(--glitch-red));
+    animation-timing-function: steps(1, end);
+  }
+  30% {
+    opacity: 1;
+    transform: translateX(calc(var(--g-xa) * 0.4px));
+    animation-timing-function: steps(1, end);
+  }
+  50% {
+    opacity: 0.5;
+    animation-timing-function: steps(1, end);
+  }
+  70% {
+    opacity: 1;
+    filter: drop-shadow(calc(var(--g-xb) * 0.45px) 0 var(--glitch-white));
+    animation-timing-function: steps(1, end);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}

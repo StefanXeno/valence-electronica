@@ -1,0 +1,82 @@
+/* --- Style: static (TV snow micro-shakes) --- */
+@keyframes ui-glitch-static {
+  0% {
+    transform: none;
+    filter: none;
+    clip-path: inset(0);
+    animation-timing-function: steps(1, end);
+  }
+  8% {
+    transform: translate(calc(var(--g-xa) * 0.5px), calc(var(--g-ya) * 0.4px));
+    filter: contrast(1.25) brightness(1.05);
+    animation-timing-function: steps(1, end);
+  }
+  16% {
+    transform: translate(calc(var(--g-xb) * 0.45px), calc(var(--g-yb) * -0.35px));
+    filter: drop-shadow(calc(var(--g-xa) * -0.2px) 0 var(--glitch-red));
+    clip-path: inset(8% 0 12% 0);
+    animation-timing-function: steps(1, end);
+  }
+  28% {
+    transform: translate(calc(var(--g-xc) * -0.4px), calc(var(--g-yc) * 0.3px));
+    filter: contrast(1.15);
+    clip-path: inset(0 6% 0 4%);
+    animation-timing-function: steps(1, end);
+  }
+  40% {
+    transform: translate(calc(var(--g-xa) * 0.35px), calc(var(--g-yb) * 0.25px));
+    filter: drop-shadow(0 calc(var(--g-ya) * -0.2px) var(--glitch-white));
+    animation-timing-function: steps(1, end);
+  }
+  55% {
+    transform: translate(calc(var(--g-xb) * -0.3px), calc(var(--g-ya) * -0.25px));
+    clip-path: inset(15% 0 5% 0);
+    animation-timing-function: steps(1, end);
+  }
+  70% {
+    transform: translate(calc(var(--g-xc) * 0.25px), 0);
+    filter: contrast(1.1);
+    animation-timing-function: steps(1, end);
+  }
+  100% {
+    transform: none;
+    filter: none;
+    clip-path: inset(0);
+  }
+}
+
+/* Live-safe variant (mute / volume / panels — no clip-path, keeps hit-testing). */
+@keyframes ui-glitch-live-static {
+  0% {
+    transform: none;
+    filter: none;
+    animation-timing-function: steps(1, end);
+  }
+  12% {
+    transform: translate(calc(var(--g-xa) * 0.55px), calc(var(--g-ya) * 0.4px));
+    filter: contrast(1.22);
+    animation-timing-function: steps(1, end);
+  }
+  24% {
+    transform: translate(calc(var(--g-xb) * 0.5px), calc(var(--g-yb) * -0.35px));
+    filter: drop-shadow(calc(var(--g-xa) * -0.2px) 0 var(--glitch-red));
+    animation-timing-function: steps(1, end);
+  }
+  40% {
+    transform: translate(calc(var(--g-xc) * -0.4px), calc(var(--g-yc) * 0.3px));
+    animation-timing-function: steps(1, end);
+  }
+  55% {
+    transform: translate(calc(var(--g-xa) * 0.3px), calc(var(--g-yb) * 0.25px));
+    filter: contrast(1.12);
+    animation-timing-function: steps(1, end);
+  }
+  72% {
+    transform: translate(calc(var(--g-xb) * -0.25px), 0);
+    animation-timing-function: steps(1, end);
+  }
+  100% {
+    transform: none;
+    filter: none;
+  }
+}

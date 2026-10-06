@@ -1,0 +1,51 @@
+/* --- Style: punch (one hard hit, then settle) --- */
+@keyframes ui-glitch-punch {
+  0% {
+    transform: none;
+    filter: none;
+    clip-path: inset(0);
+    animation-timing-function: steps(1, end);
+  }
+  18% {
+    transform: translate(calc(var(--g-xa) * 1.3px), calc(var(--g-ya) * 0.8px))
+      scale(var(--g-scale)) skewX(calc(var(--g-sa) * 0.6deg));
+    filter: drop-shadow(calc(var(--g-xa) * -0.5px) 0 var(--glitch-red)) contrast(1.2);
+    clip-path: inset(0 8% 0 0);
+    animation-timing-function: steps(1, end);
+  }
+  40% {
+    transform: translate(calc(var(--g-xb) * 0.4px), calc(var(--g-yb) * -0.3px));
+    filter: drop-shadow(0 calc(var(--g-yb) * -0.25px) var(--glitch-white));
+    clip-path: inset(0);
+    animation-timing-function: steps(1, end);
+  }
+  100% {
+    transform: none;
+    filter: none;
+    clip-path: inset(0);
+  }
+}
+
+/* Live-safe variant (mute / volume / panels — no clip-path, keeps hit-testing). */
+@keyframes ui-glitch-live-punch {
+  0% {
+    transform: none;
+    filter: none;
+    animation-timing-function: steps(1, end);
+  }
+  22% {
+    transform: translate(calc(var(--g-xa) * 1.25px), calc(var(--g-ya) * 0.7px))
+      scale(var(--g-scale));
+    filter: drop-shadow(calc(var(--g-xa) * -0.45px) 0 var(--glitch-red)) contrast(1.18);
+    animation-timing-function: steps(1, end);
+  }
+  45% {
+    transform: translate(calc(var(--g-xb) * 0.35px), 0);
+    filter: drop-shadow(0 calc(var(--g-yb) * -0.2px) var(--glitch-white));
+    animation-timing-function: steps(1, end);
+  }
+  100% {
+    transform: none;
+    filter: none;
+  }
+}

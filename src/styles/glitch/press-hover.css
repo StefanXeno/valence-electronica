@@ -1,0 +1,51 @@
+/*
+  Press / hover one-shots on `.glitch-hit`: data-glitch-style → family keyframes.
+  Adding a family: one rule here (and in live / continuous / ambient) + families/<name>.css.
+*/
+
+.glitch-hit.is-glitching,
+.glitch-hit.is-glitch-hover {
+  animation: ui-glitch-tear var(--g-dur) both;
+  z-index: 1;
+}
+
+.glitch-hit.is-glitching[data-glitch-style='tear'],
+.glitch-hit.is-glitch-hover[data-glitch-style='tear'] {
+  animation-name: ui-glitch-tear;
+}
+.glitch-hit.is-glitching[data-glitch-style='chroma'],
+.glitch-hit.is-glitch-hover[data-glitch-style='chroma'] {
+  animation-name: ui-glitch-chroma;
+}
+.glitch-hit.is-glitching[data-glitch-style='stutter'],
+.glitch-hit.is-glitch-hover[data-glitch-style='stutter'] {
+  animation-name: ui-glitch-stutter;
+}
+.glitch-hit.is-glitching[data-glitch-style='slice'],
+.glitch-hit.is-glitch-hover[data-glitch-style='slice'] {
+  animation-name: ui-glitch-slice;
+}
+.glitch-hit.is-glitching[data-glitch-style='ripple'],
+.glitch-hit.is-glitch-hover[data-glitch-style='ripple'] {
+  animation-name: ui-glitch-ripple;
+}
+.glitch-hit.is-glitching[data-glitch-style='static'],
+.glitch-hit.is-glitch-hover[data-glitch-style='static'] {
+  animation-name: ui-glitch-static;
+}
+.glitch-hit.is-glitching[data-glitch-style='shear'],
+.glitch-hit.is-glitch-hover[data-glitch-style='shear'] {
+  animation-name: ui-glitch-shear;
+}
+.glitch-hit.is-glitching[data-glitch-style='blink'],
+.glitch-hit.is-glitch-hover[data-glitch-style='blink'] {
+  animation-name: ui-glitch-blink;
+}
+.glitch-hit.is-glitching[data-glitch-style='wave'],
+.glitch-hit.is-glitch-hover[data-glitch-style='wave'] {
+  animation-name: ui-glitch-wave;
+}
+.glitch-hit.is-glitching[data-glitch-style='punch'],
+.glitch-hit.is-glitch-hover[data-glitch-style='punch'] {
+  animation-name: ui-glitch-punch;
+}
