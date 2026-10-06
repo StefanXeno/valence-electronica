@@ -815,12 +815,11 @@ const defaultLabel =
       bottom: calc(var(--player-gap) + env(safe-area-inset-bottom, 0px));
     }
 
-    /* Phone: one bigger, even row — vinyl and tools share the same size. */
+    /* Phone: one even row — vinyl, shuffle, play/pause, and mute share one size. */
     .stage-player {
-      --control-size: 3.6rem;
-      /* Vinyl is the main phone target — a size up from the other tools. */
-      --player-vinyl-size: 4.4rem;
-      --player-tool-gap: 0.6rem;
+      --control-size: 4.25rem;
+      --player-vinyl-size: var(--control-size);
+      --player-tool-gap: 0.5rem;
     }
 
     .stage-player__panel {
@@ -842,8 +841,8 @@ const defaultLabel =
 
     .stage-player__tool :global(.hud-icon),
     .stage-player__tool--mute :global(.volume-control__icon) {
-      width: 1.6rem;
-      height: 1.6rem;
+      width: 1.85rem;
+      height: 1.85rem;
     }
   }
 
