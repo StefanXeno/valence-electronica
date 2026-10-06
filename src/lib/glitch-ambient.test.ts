@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { clampTransitionGlitchMs } from './glitch';
 import {
-  isOpenStagePanelChromeHit,
   preferLeafSurfaces,
   qualifiesAsAmbientGlitchTarget,
   qualifiesAsWildAmbientGlitchTarget,
@@ -83,25 +82,5 @@ describe('preferLeafSurfaces', () => {
     parent.contains = (node: Node) => node === child;
     child.contains = () => false;
     expect(preferLeafSurfaces([parent, child])).toEqual([child]);
-  });
-});
-
-describe('isOpenStagePanelChromeHit', () => {
-  it('skips only the open panel summary/shell', () => {
-    expect(isOpenStagePanelChromeHit({ insideOpenStagePanel: true, isPanelChrome: true })).toBe(
-      true,
-    );
-  });
-
-  it('lets listen-on and other inner HUD hits through while the panel is open', () => {
-    expect(isOpenStagePanelChromeHit({ insideOpenStagePanel: true, isPanelChrome: false })).toBe(
-      false,
-    );
-  });
-
-  it('does not skip a closed panel summary', () => {
-    expect(isOpenStagePanelChromeHit({ insideOpenStagePanel: false, isPanelChrome: true })).toBe(
-      false,
-    );
   });
 });

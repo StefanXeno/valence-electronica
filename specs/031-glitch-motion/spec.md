@@ -147,7 +147,5 @@ a label appears next to each; at 390px confirm no hover labels appear.
 
 ## Known Gaps *(as of 2026-10-06)*
 
-- The `live`, `continuous`, and scanline mappings list `.stage-panel.glitch-hit.is-glitching`
-  (and the `is-glitch-continuous` twin) without a `data-glitch-style` qualifier in every
-  family rule, so those elements always end on the last family. `.stage-panel` no longer
-  renders anywhere, so this is dead but harmless; drop it in a cleanup.
+- None open. (Dead `.stage-panel` / `[data-stage-panel(s)]` glitch selectors and the
+  open-panel skip helper were removed 2026-10-06.)

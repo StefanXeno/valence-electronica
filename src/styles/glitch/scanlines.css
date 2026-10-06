@@ -8,8 +8,7 @@
 .glitch-hit.is-glitch-continuous::before,
 .glitch-hit.is-glitch-ambient::before,
 .volume-control.is-glitching::before,
-[data-player-panel].is-glitching::before,
-[data-stage-panels].is-glitching::before {
+[data-player-panel].is-glitching::before {
   animation: glitch-scan-a var(--g-dur) both;
 }
 
@@ -18,8 +17,7 @@
 .glitch-hit.is-glitch-continuous::after,
 .glitch-hit.is-glitch-ambient::after,
 .volume-control.is-glitching::after,
-[data-player-panel].is-glitching::after,
-[data-stage-panels].is-glitching::after {
+[data-player-panel].is-glitching::after {
   animation: glitch-scan-b var(--g-dur) both;
 }
 
@@ -53,32 +51,26 @@
   opacity: 0;
 }
 
-.stage-panel.glitch-hit.is-glitch-continuous,
 [data-glitch-live].glitch-hit.is-glitch-continuous::before {
   animation: glitch-scan-a var(--g-dur, 560ms) both;
 }
 
-.stage-panel.glitch-hit.is-glitch-continuous,
 [data-glitch-live].glitch-hit.is-glitch-continuous::after {
   animation: glitch-scan-b var(--g-dur, 560ms) both;
 }
 
-.stage-panel.glitch-hit.is-glitch-continuous,
 [data-glitch-live].glitch-hit.is-glitch-continuous[data-glitch-style='chroma']::before {
   animation-name: glitch-scan-soft;
 }
 
-.stage-panel.glitch-hit.is-glitch-continuous,
 [data-glitch-live].glitch-hit.is-glitch-continuous[data-glitch-style='chroma']::after {
   animation-name: glitch-scan-soft-v;
 }
 
-.stage-panel.glitch-hit.is-glitch-continuous,
 [data-glitch-live].glitch-hit.is-glitch-continuous[data-glitch-style='stutter']::before {
   animation-name: glitch-scan-stutter;
 }
 
-.stage-panel.glitch-hit.is-glitch-continuous,
 [data-glitch-live].glitch-hit.is-glitch-continuous[data-glitch-style='slice']::after {
   animation: none;
   opacity: 0;

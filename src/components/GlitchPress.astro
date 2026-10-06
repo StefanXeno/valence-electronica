@@ -2,11 +2,7 @@
 ---
 
 <script>
-  import {
-    createAmbientGlitchField,
-    isAmbientGlitchTarget,
-    isOpenStagePanelChrome,
-  } from '../lib/glitch-ambient';
+  import { createAmbientGlitchField, isAmbientGlitchTarget } from '../lib/glitch-ambient';
   import { isGlitchThemeActive, playElementGlitch } from '../lib/glitch';
 
   function prefersReducedMotion(): boolean {
@@ -111,7 +107,6 @@
 
         // Mute button continuous hover is owned by MuteControl
         if (isLiveToggle(hit) || isMorphOwned(hit)) return;
-        if (isOpenStagePanelChrome(hit)) return;
 
         const related = event.relatedTarget;
         if (related instanceof Node && hit.contains(related)) return;
@@ -127,7 +122,6 @@
         if (prefersReducedMotion() || !isGlitchThemeActive()) return;
         const target = event.target;
         if (!(target instanceof HTMLElement) || !isAmbientGlitchTarget(target)) return;
-        if (isOpenStagePanelChrome(target)) return;
         // Keyboard-visible focus only — mouse-click focus must not glitch
         if (!target.matches(':focus-visible')) return;
         runGlitch(target, 'is-glitch-hover');
@@ -145,7 +139,6 @@
         if (!(hit instanceof HTMLElement) || !isAmbientGlitchTarget(hit)) return;
         // Morph-owned controls handle their own press / open-close glitch
         if (isMorphOwned(hit)) return;
-        if (isOpenStagePanelChrome(hit)) return;
         runGlitch(hit, 'is-glitching');
       },
       true,

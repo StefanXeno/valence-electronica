@@ -26,8 +26,6 @@ export const WILD_SURFACE_SELECTORS = [
   '.site-nav__menu-portal-listen',
   '.site-nav__menu-portal-collection-cover',
   '.stage-player__eyebrow',
-  '[data-stage-panels]',
-  '[data-stage-panel]',
   '.volume-control',
   '.identity',
   '[data-tagline-root]',
@@ -89,29 +87,6 @@ export function isWildAmbientGlitchTarget(el: Element): el is HTMLElement {
   if (!(el instanceof HTMLElement)) return false;
   if (el.closest(WILD_SKIP_CLOSEST)) return false;
   return qualifiesAsWildAmbientGlitchTarget(readAmbientGlitchEligibility(el));
-}
-
-export type OpenPanelChromeFlags = {
-  /** Hit lives under an open `[data-stage-panels] details`. */
-  insideOpenStagePanel: boolean;
-  /** The panel's own summary / details shell — not inner HUD hits. */
-  isPanelChrome: boolean;
-};
-
-/**
- * Open-panel skip is shell-only. Listen-on / discog play / tour pills still
- * one-shot via `playElementGlitch`. Closed summaries are not skipped.
- */
-export function isOpenStagePanelChromeHit(flags: OpenPanelChromeFlags): boolean {
-  return flags.insideOpenStagePanel && flags.isPanelChrome;
-}
-
-/** True for an open on-demand summary/details — not `.discog` listen-on `<a>`s. */
-export function isOpenStagePanelChrome(el: Element): boolean {
-  const box = el.closest('[data-stage-panels] details');
-  const insideOpenStagePanel = box instanceof HTMLDetailsElement && box.open;
-  const isPanelChrome = el === box || el.matches('summary, .stage-panel__summary');
-  return isOpenStagePanelChromeHit({ insideOpenStagePanel, isPanelChrome });
 }
 
 /** Drop parents when a descendant is also a candidate — more surfaces, more chaos. */

@@ -1,45 +1,34 @@
 /* Mute-only continuous hover — one cycle at a time; JS re-rolls style after each end. */
-.stage-panel.glitch-hit.is-glitch-continuous,
 [data-glitch-live].glitch-hit.is-glitch-continuous {
   animation: ui-glitch-live-tear var(--g-dur, 560ms) both;
 }
-.stage-panel.glitch-hit.is-glitch-continuous,
 [data-glitch-live].glitch-hit.is-glitch-continuous[data-glitch-style='chroma'] {
   animation-name: ui-glitch-live-chroma;
 }
-.stage-panel.glitch-hit.is-glitch-continuous,
 [data-glitch-live].glitch-hit.is-glitch-continuous[data-glitch-style='stutter'] {
   animation-name: ui-glitch-live-stutter;
 }
-.stage-panel.glitch-hit.is-glitch-continuous,
 [data-glitch-live].glitch-hit.is-glitch-continuous[data-glitch-style='slice'] {
   animation-name: ui-glitch-live-slice;
 }
-.stage-panel.glitch-hit.is-glitch-continuous,
 [data-glitch-live].glitch-hit.is-glitch-continuous[data-glitch-style='ripple'] {
   animation-name: ui-glitch-live-ripple;
 }
-.stage-panel.glitch-hit.is-glitch-continuous,
 [data-glitch-live].glitch-hit.is-glitch-continuous[data-glitch-style='static'] {
   animation-name: ui-glitch-live-static;
 }
-.stage-panel.glitch-hit.is-glitch-continuous,
 [data-glitch-live].glitch-hit.is-glitch-continuous[data-glitch-style='shear'] {
   animation-name: ui-glitch-live-shear;
 }
-.stage-panel.glitch-hit.is-glitch-continuous,
 [data-glitch-live].glitch-hit.is-glitch-continuous[data-glitch-style='blink'] {
   animation-name: ui-glitch-live-blink;
 }
-.stage-panel.glitch-hit.is-glitch-continuous,
 [data-glitch-live].glitch-hit.is-glitch-continuous[data-glitch-style='wave'] {
   animation-name: ui-glitch-live-wave;
 }
-.stage-panel.glitch-hit.is-glitch-continuous,
 [data-glitch-live].glitch-hit.is-glitch-continuous[data-glitch-style='punch'] {
   animation-name: ui-glitch-live-punch;
 }
-.stage-panel.glitch-hit.is-glitch-continuous,
 [data-glitch-live].glitch-hit.is-glitch-continuous[data-glitch-style='tear'] {
   animation-name: ui-glitch-live-tear;
 }

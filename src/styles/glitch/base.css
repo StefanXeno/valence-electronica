@@ -5,8 +5,7 @@
 
 .glitch-hit,
 .volume-control,
-[data-player-panel],
-[data-stage-panels] {
+[data-player-panel] {
   --glitch-red: var(--color-accent);
   --glitch-white: var(--color-text);
   --g-xa: 8;
@@ -40,9 +39,7 @@
 .volume-control::before,
 .volume-control::after,
 [data-player-panel]::before,
-[data-player-panel]::after,
-[data-stage-panels]::before,
-[data-stage-panels]::after {
+[data-player-panel]::after {
   content: '';
   position: absolute;
   pointer-events: none;
@@ -54,23 +51,15 @@
 /* Keep interactive controls receiving clicks even while glitching */
 .volume-control,
 .volume-control__toggle,
-.stage-panel.glitch-hit,
 [data-glitch-live].glitch-hit,
-[data-player-panel],
-[data-stage-panel],
-[data-stage-panels] {
+[data-player-panel] {
   pointer-events: auto;
-}
-
-[data-stage-panels] {
-  position: relative;
 }
 
 /* Horizontal scanlines */
 .glitch-hit::before,
 .volume-control::before,
-[data-player-panel]::before,
-[data-stage-panels]::before {
+[data-player-panel]::before {
   left: -12%;
   width: 124%;
   height: 2px;
@@ -84,8 +73,7 @@
 /* Vertical scanlines */
 .glitch-hit::after,
 .volume-control::after,
-[data-player-panel]::after,
-[data-stage-panels]::after {
+[data-player-panel]::after {
   top: -12%;
   height: 124%;
   width: 2px;
