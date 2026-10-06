@@ -102,7 +102,7 @@ const CHROME_FALLBACK: UiChrome = {
   shopComingSoonTitle: 'Coming soon',
   shopComingSoonBody: 'Merch is on the way. Check back soon.',
   contactEmpty: 'Contact details are not ready yet — check back soon.',
-  stageButtonLabel: 'Play on V-Flip',
+  stageButtonLabel: 'Play on stage',
   currentlyPlayingLabel: 'Currently playing',
   currentlyPausingLabel: 'Currently pausing',
   songsTitle: 'Songs',

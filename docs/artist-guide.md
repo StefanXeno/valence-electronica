@@ -46,31 +46,30 @@ filename slug is the stable id (e.g. `nightmare.md` → `nightmare`).
 
 **Frontmatter you may edit:**
 
-- `label` — name shown in the jukebox (required)
+- `label` — song title shown in the player song list and Discography (required)
 - `themeId` — visual mood (see [Theme packs](#theme-packs-selection-only); use only listed ids)
 - `hasAudio` — whether mute/unmute applies
 - `default: true` — exactly **one** usable entry should have this (static fallback when no
   schedule rule matches)
 - `poster` (required), `sources` — paths to images/video under `public/`, always starting with
   `/` (see [Media assets](#media-assets))
-- `sortDate` — release date shown in **Track info** and used for **Discography** year (ISO
-  date, e.g. `2025-06-01`). Required for both panels; omit → track still works on stage but
-  is hidden from discography and track-info release line
-- `blurb` — optional one-line hook shown in V-Flip track detail
-- `credits` — optional list of `{ role, name }` rows shown in V-Flip track detail
-- `mentions` — optional thank-you / shout-out line shown in V-Flip track detail
+- `sortDate` — release date (ISO date, e.g. `2025-06-01`): **Discography** year and the
+  order of the player song list (newest first). Omit → the song still plays on stage but is
+  hidden from Discography
+- `blurb` — optional one-line hook shown when the Discography row is expanded
+- `credits` — optional list of `{ role, name }` rows (used by the rub easter egg)
+- `mentions` — optional thank-you / shout-out line (stored for future use)
 - `kind` — optional release type in discography (e.g. `single`, `ep`, `album`)
-- `inDiscography` — optional; set `false` to hide from discography while keeping `sortDate`
-  for track info
+- `inDiscography` — optional; set `false` to hide from discography while the song stays in
+  the player
 - `themeId` — visual mood for this track on stage; ties the release to its theme pack (see
   [Theme packs](#theme-packs-selection-only))
 - `listenLinks` — optional outbound links (`platform`: `bandcamp`, `spotify`, `youtube`,
-  `soundcloud`, or `tidal`; `url` must start with `https://`). Used in Track info; discography
-  title link uses Bandcamp first, then Spotify, then other platforms
+  `soundcloud`, or `tidal`; `url` must start with `https://`). Shown as **Listen On** icons in
+  Discography; the cover link uses Bandcamp first, then Spotify, then other platforms
 
 **Body:** Lyrics for that record (leave empty for instrumentals). **Lyrics are not shown on
-the live site in v1** — the body is kept for a future feature; only frontmatter fields above
-appear in the open V-Flip drawer.
+the live site in v1** — the body is kept for a future feature.
 
 **Do not break:** Do not rename the file slug (`nightmare`, `infinite`, etc.) unless a
 developer updates every reference (releases, schedule, etc.).
@@ -91,7 +90,7 @@ Discography merges **two** content sources into one panel:
 
 | Goal | Edit surface |
 |------|----------------|
-| Play on V-Flip **and** list in Discography | [`src/content/jukebox/`](jukebox/) |
+| Play on stage **and** list in Discography | [`src/content/jukebox/`](jukebox/) |
 | Discography **only** (no stage clip) | [`src/content/tracks/`](tracks/) |
 
 #### Jukebox-backed releases (stage + discography)
@@ -104,7 +103,9 @@ Discography merges **two** content sources into one panel:
 - **Title** ← plain text from `label`
 - **Year · kind** ← year from `sortDate`; optional `kind`
 - **Listen On** ← platform icon links when `listenLinks` are set (jukebox or tracks)
-- **Play on V-Flip** ← icon-only play control when the file is a valid stage entry and not currently active (accessible name: `stageButtonLabel`)
+- **Play on stage** ← icon-only play control, only for songs with a stage video (catalog-only
+  tracks never get one). Pressing it puts the song on stage and closes the Discography
+  overlay / phone menu (accessible name: `stageButtonLabel`)
 - **Currently playing** ← five-bar soundwave replaces the play control while that track is active (accessible name: `currentlyPlayingLabel`)
 
 #### Catalog-only releases (discography without stage)
@@ -112,7 +113,7 @@ Discography merges **two** content sources into one panel:
 **Folder:** [`src/content/tracks/`](../src/content/tracks/)
 
 One Markdown file per song that belongs in your public discography but does **not** need a
-V-Flip stage clip. **Do not** add a jukebox file for the same release unless you want it
+stage clip. **Do not** add a jukebox file for the same release unless you want it
 playable on stage.
 
 **Required frontmatter:**
@@ -143,7 +144,7 @@ intentionally want two Discography rows.
 
 | Situation | Use |
 |-----------|-----|
-| New single with a stage video on V-Flip | `jukebox/` + `sortDate` |
+| New single with a stage video | `jukebox/` + `sortDate` |
 | Old back-catalog single, streaming links only | `tracks/` |
 | On stage but hidden from Discography | `jukebox/` + `inDiscography: false` |
 
@@ -186,54 +187,53 @@ All dated shows are listed (past and future), newest first (year headings and da
 
 **File:** [`src/content/ui/chrome.md`](../src/content/ui/chrome.md)
 
-**Controls:** Region titles, empty-state strings, jukebox/social labels, stage-button label,
+**Controls:** Region titles, empty-state strings, player/social labels, stage-button label,
 landing intro copy (`introLead`, `introName`), tour pill labels (`ticketLabel`,
 `venueInfoLabel`), **top nav labels** (`homeTitle`, `shopTitle`, `tourTitle`,
 `contactTitle`), Shop empty copy (`shopComingSoonTitle`, `shopComingSoonBody`), Contact
 empty copy (`contactEmpty`), phone/side **Links** label (`socialsLabel` — default
 **Links**), and optional **HUD icon overrides**
-(`jukeboxIcon`, `aboutIcon`, `discographyIcon`, `tourIcon`, `trackInfoIcon`, `shuffleIcon`,
-`loopIcon`, `socialsIcon`, `infoIcon`).
+(`aboutIcon`, `discographyIcon`, `tourIcon`, `shuffleIcon`, `socialsIcon`, `infoIcon`).
 
 **Top nav (020):** Primary bar is **Home · Shop · Tour · Contact** plus brand mark.
 **About** / **Discography** / **Info** are quieter secondary text under the band — not
 primary top-bar items. Legal opens from **Info** (Imprint / Privacy).
 
-**Laptop player chrome (1024px up):** always-open boxed player — **phone now-playing
-card** + **Playlist**, **Shuffle**, **Play/pause**, **Mute**. No vinyl / V-Flip toggle,
-no Loop control. Unmute shows the **volume slider** and widens the player; mute hides
-it. Playlist is the phone **theme-track card** list (background-available tracks),
-not the old laptop text list. `loopDefault` stays off on laptop. Legal is via **Info**
-in secondary chrome (not the footer).
+**Hidden player:** The stage starts clean — no player is visible on a first visit. Tapping
+or clicking empty stage **three times quickly** makes a vinyl record peek in from the
+bottom-left corner for a few seconds; tapping the vinyl opens the full player (song title,
+list of all stage songs, shuffle, play/pause, mute; volume slider on laptop) and unlocks a
+one-time achievement. After that the browser remembers the find: the player sits as a small
+vinyl button bottom-left, and the vinyl spins while music plays. Keyboard users get a
+**Show player** button on Tab. Only songs from `jukebox/` (with a stage video) are listed.
+Phone and laptop use the same player.
 
-**Phone / shared player chrome (optional):**
+**Player chrome (optional):**
 
-- `shuffleLabel` / `loopLabel` — transport toggle labels (default: Shuffle / Loop). Loop is
-  phone-only; laptop hides Loop.
+- `playerShowLabel` — keyboard reveal button (default: Show player)
+- `playerOpenLabel` / `playerCloseLabel` — accessible names for the vinyl and the close
+  button (defaults: Open player / Close player)
+- `playerAchievementTitle` / `playerAchievementSub` — toast when the player is found the
+  first time (defaults: Found it! / You discovered the hidden player.)
+- `songsTitle` — accessible name of the song list (default: Songs)
+- `currentlyPlayingLabel` — small heading above the song title in the player, and the name of
+  the "currently playing" marker in Discography
+- `shuffleLabel` — shuffle button label (default: Shuffle)
 - `shuffleDefault` — `true` (default) or `false` for load-time shuffle
-- `loopDefault` — `false` (default) or `true` for load-time loop (phone only; laptop stays off)
+- `loopDefault` — `false` (default); `true` keeps the current song instead of advancing
 - `unmuteTooltip` / `muteTooltip` — mute button hint
-- `volumeSliderTooltip` — laptop slider hint when unmuted (phone hides the slider)
-- `playerExpandLabel` / `playerCollapseLabel` — accessible names for the **phone player
-  handle** (arrow on top of the pill). Phone HUD is below 1024px.
-- `socialsLabel` / `socialsIcon` — phone **Links** trigger (default label: Links; default
+- `volumeSliderTooltip` — laptop slider hint when unmuted (phone has mute only)
+- `socialsLabel` / `socialsIcon` — phone **Links** label (default label: Links; default
   token: `socials`)
-- `infoTitle` / `infoIcon` — Info sheet on **phone and laptop** (© + English
-  **Imprint** / **Privacy Policy** pills that open the existing legal overlay). Default
-  title: Info. Default token: `info` (circled i). Laptop does **not** use a footer.
+- `infoTitle` / `infoIcon` — Info sheet (© + **Imprint** / **Privacy Policy**). Default
+  title: Info. Default token: `info` (circled i).
 
-**Track info in V-Flip (optional):**
+**Discography (optional):**
 
-- `trackInfoTitle` — section heading inside open V-Flip (default: Track info)
 - `releasedLabel` — label before the release date (default: Released)
-- `stageButtonLabel` — accessible name for the discography play control (icon-only; not shown as button text)
-- `currentlyPlayingLabel` — discography now-playing indicator name; on **phone
-  and laptop** the player header while playlist is off (visible). Playlist on
-  uses `jukeboxPanelTitle` (`V-Flip aka. Jukebox`). Those header titles do
-  **not** show HUD hover tooltips. `jukeboxPanelTooltip` is unused on the
-  player chrome.
+- `stageButtonLabel` — accessible name for the discography play control (icon-only; not
+  shown as button text; default: Play on stage)
 - `listenOnLabel` — label before streaming platform icons (default: Listen On)
-- `emptyTrackLinks` — when a track has no `listenLinks`
 
 **Icon overrides (optional):**
 
@@ -241,18 +241,9 @@ in secondary chrome (not the footer).
 - Set a **token** to pick a built-in icon: `jukebox`, `about`, `discography`, `tour`,
   `catalog`, `info`, `shuffle`, `loop`, `socials`, `play`, `pause`, or `playlist`.
 
-**Label reveal (visitor-facing):** On **laptop** (1024px up), dock icons show a floating
-label **above** the control on hover/focus. Mute inside the always-open player uses the
-same floater. **Currently Playing / Jukebox header titles do not.** Social icons show
-the label **below**. On **phone** (viewport below 1024px)
-those floaters are **off** (no hover tooltips, no “pick a track” title). Phone HUD:
-floor-pinned player pill (expand **is** V-Flip; shuffle + play/pause + playlist; no loop)
-+ one **five-icon** content pill (About, Discography, Tour, Socials, Info). Socials open
-**inside** that pill. Legal is Info on both phone and laptop (no landing footer).
-
-**Do not break:** Region title fields still control readable labels and accessibility.
-Track metadata (blurb, credits, mentions, listen links) appears **inside open V-Flip**, not
-as separate dock icons.
+**Label reveal (visitor-facing):** On **laptop** (1024px up), player and dock icons show a
+floating label **above** the control on hover/focus; social icons show it **below**. The
+player's song title does not. On **phone** (viewport below 1024px) those floaters are off.
 
 **Shuffle timing:** When shuffle is on and loop is off, the stage advances after **one full
 atmosphere video file length** for audio entries (`hasAudio: true`). Entries with no audio
