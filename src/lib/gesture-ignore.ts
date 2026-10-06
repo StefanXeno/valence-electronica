@@ -7,7 +7,6 @@
 /** Outbound links and play controls — no gesture may start here. */
 export const OUTBOUND_AND_PLAY_SELECTOR = [
   'a',
-  '[data-discog-play]',
   '[data-stage-button]',
   '.discog__listen',
   '.discog__listen-links',
@@ -31,7 +30,6 @@ export const INTERACTIVE_SELECTOR = [
   '[data-mute-control]',
   '[data-volume-control]',
   '[data-shuffle-toggle]',
-  '[data-loop-toggle]',
   '[data-bg-play-toggle]',
 ].join(', ');
 

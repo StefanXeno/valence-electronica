@@ -1,0 +1,110 @@
+---
+/**
+ * Discography "put on stage" control (035). Rendered only for stage songs
+ * (releases with a jukebox id). `stage-switch.ts` handles the click and keeps
+ * the play button / EQ marker pair in sync with the active stage entry.
+ */
+import { getBackgroundConfig } from '../lib/background';
+import type { UiChrome } from '../lib/stage';
+import HudIcon from './HudIcon.astro';
+
+interface Props {
+  chrome: UiChrome;
+  stageId: string;
+  /** `compact` for nested EP rows and the phone menu. */
+  size?: 'card' | 'compact';
+}
+
+const { chrome, stageId, size = 'card' } = Astro.props;
+const { defaultVideoId } = await getBackgroundConfig();
+const isActive = stageId === defaultVideoId;
+---
+
+<span class:list={['stage-play', { 'stage-play--compact': size === 'compact' }]}>
+  <button
+    type="button"
+    class="discog__play stage-play__control glitch-hit"
+    data-stage-button={stageId}
+    aria-pressed={isActive ? 'true' : 'false'}
+    aria-label={chrome.stageButtonLabel}
+    data-hud-label={chrome.stageButtonLabel}
+    data-hud-label-anchor="above"
+    hidden={isActive}
+  >
+    <HudIcon token="play" />
+  </button>
+  <span
+    class="discog__now-playing stage-play__control"
+    data-discog-playing={stageId}
+    role="status"
+    aria-label={chrome.currentlyPlayingLabel}
+    hidden={!isActive}
+  >
+    <span class="discog__eq" aria-hidden="true">
+      <span></span>
+      <span></span>
+      <span></span>
+      <span></span>
+      <span></span>
+    </span>
+  </span>
+</span>
+
+<style>
+  .stage-play {
+    --stage-play-size: calc(2.35rem * var(--hud-scale));
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+  }
+
+  .stage-play--compact {
+    --stage-play-size: calc(2rem * var(--hud-scale));
+  }
+
+  .stage-play__control {
+    appearance: none;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    width: var(--stage-play-size);
+    height: var(--stage-play-size);
+    border-radius: 999px;
+    display: grid;
+    place-items: center;
+    font: inherit;
+  }
+
+  .discog__play {
+    color: var(--color-text-muted);
+    border: 1px solid color-mix(in srgb, var(--color-border) 70%, transparent);
+    background: transparent;
+    cursor: pointer;
+    transition:
+      border-color 160ms ease,
+      color 160ms ease,
+      background-color 160ms ease;
+  }
+
+  .discog__play:hover {
+    color: var(--color-accent-alt);
+    border-color: var(--color-accent);
+    background: color-mix(in srgb, var(--color-accent) 10%, transparent);
+  }
+
+  .discog__play[hidden] {
+    display: none;
+  }
+
+  .discog__play :global(.hud-icon) {
+    width: calc(var(--stage-play-size) * 0.47);
+    height: calc(var(--stage-play-size) * 0.47);
+    /* Optical center for the play triangle */
+    translate: 0.08em 0;
+  }
+
+  .stage-play .discog__eq {
+    height: calc(var(--stage-play-size) * 0.5);
+  }
+</style>

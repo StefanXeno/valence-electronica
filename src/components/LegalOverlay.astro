@@ -216,6 +216,12 @@ const openSlug = slugFromOverlayPath(Astro.url.pathname, basePath);
     closePanel({ historyMode: 'push' });
   });
 
+  // Discography play (035): close like Exit so the stage change is visible.
+  document.addEventListener('stage-overlay-close', function () {
+    if (!activeSlug()) return;
+    closePanel({ historyMode: 'push' });
+  });
+
   window.addEventListener('popstate', function () {
     var slug = slugFromPath(location.pathname);
     if (slug && panelFor(slug)) {

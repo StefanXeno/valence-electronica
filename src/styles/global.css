@@ -111,6 +111,14 @@ a.channel-btn:focus-visible {
   border: 0;
 }
 
+/*
+ * Hidden player hint (035) counts quick taps on the stage — no double-tap zoom.
+ * Pinch zoom stays available.
+ */
+html {
+  touch-action: manipulation;
+}
+
 /* Full-viewport stage: center stays empty (atmosphere only). */
 .stage {
   position: relative;

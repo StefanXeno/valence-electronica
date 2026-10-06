@@ -16,6 +16,7 @@ import {
 import { withBase, coverOrPlaceholder } from '../lib/url';
 import ChannelIcon from './ChannelIcon.astro';
 import HudIcon from './HudIcon.astro';
+import StagePlayButton from './StagePlayButton.astro';
 
 interface Props {
   chrome: UiChrome;
@@ -460,6 +461,13 @@ const menuChannels = site.channels
                                           ))}
                                         </ul>
                                       )}
+                                      {release.jukeboxId && (
+                                        <StagePlayButton
+                                          chrome={chrome}
+                                          stageId={release.jukeboxId}
+                                          size="compact"
+                                        />
+                                      )}
                                     </div>
                                   </li>
                                 ))}
@@ -497,6 +505,9 @@ const menuChannels = site.channels
                                   {release.artist ?? defaultArtist}
                                 </span>
                               </div>
+                              {release.jukeboxId && (
+                                <StagePlayButton chrome={chrome} stageId={release.jukeboxId} />
+                              )}
                             </div>
                             {release.listenLinks.length > 0 && (
                               <div class="site-nav__menu-portal-listen">
@@ -866,6 +877,9 @@ const menuChannels = site.channels
     window.matchMedia('(min-width: 1024px)').addEventListener('change', (event) => {
       if (event.matches) setMenuOpen(false);
     });
+
+    // Discography play in the menu portal (035): close so the stage change is visible.
+    document.addEventListener('stage-overlay-close', () => setMenuOpen(false));
   }
 
   initSiteNav();
@@ -1286,6 +1300,11 @@ const menuChannels = site.channels
   /* Singles: same card chrome as EP, no tracklist below the head. */
   .site-nav__menu-portal-collection--single .site-nav__menu-portal-collection-head {
     margin-bottom: 0;
+  }
+
+  /* Stage songs: cover | text | play (035). */
+  .site-nav__menu-portal-collection-head:has(> .stage-play) {
+    grid-template-columns: auto minmax(0, 1fr) auto;
   }
 
   /* Desktop-style Listen On row — singles only. */

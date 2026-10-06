@@ -72,11 +72,11 @@ per browser; one-time achievement.
 
 **Independent Test**: quickstart Scenarios 1, 2, 3, 6, 11.
 
-- [ ] T021 [US1] Boot state from `isPlayerDiscovered()` in `src/lib/stage-player.ts` (`minimal` if true, else `hidden`); remove the temporary `minimal` boot
-- [ ] T022 [US1] Tap listener in `src/lib/stage-player.ts`: document `pointerdown`/`pointerup` → `tap-hint.ts`; skip when `isGestureIgnored`, intro active (`isIntroActive()`), legal overlay or nav menu open, rub/spin session active; on success dispatch `TAP_HINT`; manage 4 s hint timer (`HINT_TIMEOUT`, single extension)
-- [ ] T023 [US1] Hint visuals in `src/components/StagePlayer.astro`: `[data-player-state="hint"]` vinyl half below the bottom edge with a nudge keyframe; slide-away on return to hidden; `touch-action: manipulation` on the stage area to avoid double-tap zoom
-- [ ] T024 [US1] On first `full` from hint: `markPlayerDiscovered()` and `maybeUnlockAchievement({ storageKey: 've-achievement-player-found', title: playerAchievementTitle, sub: playerAchievementSub, glyph: 'rub' })` with copy read from root data attributes in `src/lib/stage-player.ts` (add `data-achievement-title`/`-sub` in `StagePlayer.astro`)
-- [ ] T025 [US1] Collapse `full` → `minimal` when a legal/content overlay or the phone menu opens (`OVERLAY_OPENED`; observe `#legal-overlay` panels and `[data-site-nav-menu]` hidden state) in `src/lib/stage-player.ts`
+- [x] T021 [US1] Boot state from `isPlayerDiscovered()` in `src/lib/stage-player.ts` (`minimal` if true, else `hidden`); remove the temporary `minimal` boot
+- [x] T022 [US1] Tap listener in `src/lib/stage-player.ts`: document `pointerdown`/`pointerup` → `tap-hint.ts`; skip when `isGestureIgnored`, intro active (`isIntroActive()`), legal overlay or nav menu open, rub/spin session active; on success dispatch `TAP_HINT`; manage 4 s hint timer (`HINT_TIMEOUT`, single extension)
+- [x] T023 [US1] Hint visuals in `src/components/StagePlayer.astro`: `[data-player-state="hint"]` vinyl half below the bottom edge with a nudge keyframe; slide-away on return to hidden; `touch-action: manipulation` on the stage area to avoid double-tap zoom
+- [x] T024 [US1] On first `full` from hint: `markPlayerDiscovered()` and `maybeUnlockAchievement({ storageKey: 've-achievement-player-found', title: playerAchievementTitle, sub: playerAchievementSub, glyph: 'rub' })` with copy read from root data attributes in `src/lib/stage-player.ts` (add `data-achievement-title`/`-sub` in `StagePlayer.astro`)
+- [x] T025 [US1] Collapse `full` → `minimal` when a legal/content overlay or the phone menu opens (`OVERLAY_OPENED`; observe `#legal-overlay` panels and `[data-site-nav-menu]` hidden state) in `src/lib/stage-player.ts`
 
 **Checkpoint**: **Operator browser review #2** (quickstart 1, 2, 3, 6, 11).
 
@@ -88,8 +88,8 @@ per browser; one-time achievement.
 
 **Independent Test**: quickstart Scenario 9.
 
-- [ ] T026 [US5] Add `[data-player-reveal]` button (label `playerShowLabel`) to `src/components/StagePlayer.astro`, visually hidden until `:focus-visible`, rendered/active only in `hidden` state; dispatch `KEYBOARD_REVEAL` (also marks discovered + achievement) in `src/lib/stage-player.ts`
-- [ ] T027 [US5] Focus management in `src/lib/stage-player.ts`: on `full` focus the current song button; on close focus the vinyl; `aria-expanded` on vinyl reflects `full`; Escape only acts when focus/pointer context is the player or no overlay is open
+- [x] T026 [US5] Add `[data-player-reveal]` button (label `playerShowLabel`) to `src/components/StagePlayer.astro`, visually hidden until `:focus-visible`, rendered/active only in `hidden` state; dispatch `KEYBOARD_REVEAL` (also marks discovered + achievement) in `src/lib/stage-player.ts`
+- [x] T027 [US5] Focus management in `src/lib/stage-player.ts`: on `full` focus the current song button; on close focus the vinyl; `aria-expanded` on vinyl reflects `full`; Escape only acts when focus/pointer context is the player or no overlay is open
 
 ---
 
@@ -99,17 +99,17 @@ per browser; one-time achievement.
 
 **Independent Test**: quickstart Scenario 8.
 
-- [ ] T028 [P] [US4] `src/components/DiscographyTrackRow.astro`: render play only when `release.jukeboxId` (card and nested variants) as `button.discog__play[data-stage-button={jukeboxId}]` plus `[data-discog-playing={jukeboxId}]` EQ marker; remove `data-discog-play`
-- [ ] T029 [P] [US4] `src/components/DiscographyCollectionCard.astro`: remove the collection-level play slot
-- [ ] T030 [P] [US4] `src/components/SiteNav.astro` discography portal: add the same stage-only play button + EQ marker for singles and nested rows; reuse `.discog__play` styling or a small portal variant
-- [ ] T031 [US4] Emit `stage-overlay-close` from `src/lib/stage-player.ts` when a `[data-stage-button]` click originates inside `#legal-overlay` or `[data-site-nav-menu]`; listen in `src/components/LegalOverlay.astro` (`closePanel({ historyMode: 'push' })`) and in `src/components/SiteNav.astro` (`setMenuOpen(false)`)
-- [ ] T032 [US4] Update `src/components/Discography.astro` click handler and the ignore extras in `src/lib/track-rub.ts` / `src/lib/infinite-spin.ts` for the removed `data-discog-play`
+- [x] T028 [P] [US4] `src/components/DiscographyTrackRow.astro`: render play only when `release.jukeboxId` (card and nested variants) as `button.discog__play[data-stage-button={jukeboxId}]` plus `[data-discog-playing={jukeboxId}]` EQ marker; remove `data-discog-play`
+- [x] T029 [P] [US4] `src/components/DiscographyCollectionCard.astro`: remove the collection-level play slot
+- [x] T030 [P] [US4] `src/components/SiteNav.astro` discography portal: add the same stage-only play button + EQ marker for singles and nested rows; reuse `.discog__play` styling or a small portal variant
+- [x] T031 [US4] Emit `stage-overlay-close` from `src/lib/stage-player.ts` when a `[data-stage-button]` click originates inside `#legal-overlay` or `[data-site-nav-menu]`; listen in `src/components/LegalOverlay.astro` (`closePanel({ historyMode: 'push' })`) and in `src/components/SiteNav.astro` (`setMenuOpen(false)`)
+- [x] T032 [US4] Update `src/components/Discography.astro` click handler and the ignore extras in `src/lib/track-rub.ts` / `src/lib/infinite-spin.ts` for the removed `data-discog-play`
 
 ---
 
 ## Phase 7: Polish & Cross-Cutting
 
-- [ ] T033 [P] Reduced-motion pass in `src/components/StagePlayer.astro` (no peek slide, nudge, spin, panel animation) — quickstart 10
+- [x] T033 [P] Reduced-motion pass in `src/components/StagePlayer.astro` (no peek slide, nudge, spin, panel animation) — quickstart 10
 - [ ] T034 [P] Remove now-unused chrome lines from `src/content/ui/chrome.md` (list in data-model.md; keep schema fields optional) and unused exports in `src/lib/panel-motion.ts`
 - [ ] T035 [P] Rewrite flows in `scripts/verify-hud.mjs` for the new states (`fresh-hidden`, `tap-hint`, `hint-reveal`, `pick-song`, `close-minimal`, `keyboard-reveal`, `discog-play-close`) at 390 and 1280 — operator runs it
 - [ ] T036 [P] Artist guide: short "Hidden player" paragraph + new chrome fields; remove V-Flip/Track info wording in `docs/artist-guide.md`

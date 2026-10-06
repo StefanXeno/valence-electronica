@@ -3,7 +3,7 @@ import type { DiscographyEntry } from '../lib/catalog-tracks';
 import type { UiChrome } from '../lib/stage';
 import { coverOrPlaceholder } from '../lib/url';
 import ChannelIcon from './ChannelIcon.astro';
-import HudIcon from './HudIcon.astro';
+import StagePlayButton from './StagePlayButton.astro';
 
 interface Props {
   chrome: UiChrome;
@@ -44,6 +44,8 @@ const coverListenLabel = primaryListen
   ? `${chrome.listenOnLabel} ${release.title} (${primaryListen.label})`
   : undefined;
 const expandedType = typeDetail ?? release.kind;
+/** Only stage songs (with a jukebox entry) can go on stage — catalog-only rows get no play. */
+const stageId = release.jukeboxId;
 ---
 
 <li
@@ -54,15 +56,18 @@ const expandedType = typeDetail ?? release.kind;
   {
     nested ? (
       <div class="discog__main">
-        <button
-          type="button"
-          class="discog__toggle"
-          aria-expanded="false"
-          aria-controls={detailsId}
-        >
-          <span class="discog__head-text__title">{release.title}</span>
-          <span class="discog__head-text__artist">{artistName}</span>
-        </button>
+        <div class="discog__nested-head">
+          <button
+            type="button"
+            class="discog__toggle"
+            aria-expanded="false"
+            aria-controls={detailsId}
+          >
+            <span class="discog__head-text__title">{release.title}</span>
+            <span class="discog__head-text__artist">{artistName}</span>
+          </button>
+          {stageId && <StagePlayButton chrome={chrome} stageId={stageId} size="compact" />}
+        </div>
         {release.listenLinks.length > 0 && (
           <div class="discog__listen discog__listen--summary">
             <span class="discog__listen-label">{chrome.listenOnLabel}</span>
@@ -176,18 +181,11 @@ const expandedType = typeDetail ?? release.kind;
               <span class="discog__head-text__artist">{artistName}</span>
             </button>
           </div>
-          <div class="discog__play-slot">
-            <button
-              type="button"
-              class="discog__play glitch-hit"
-              data-discog-play
-              aria-label={chrome.stageButtonLabel}
-              data-hud-label={chrome.stageButtonLabel}
-              data-hud-label-anchor="above"
-            >
-              <HudIcon token="play" />
-            </button>
-          </div>
+          {stageId && (
+            <div class="discog__play-slot">
+              <StagePlayButton chrome={chrome} stageId={stageId} />
+            </div>
+          )}
         </div>
         {release.listenLinks.length > 0 && (
           <div class="discog__listen discog__listen--summary">
@@ -563,37 +561,11 @@ const expandedType = typeDetail ?? release.kind;
     justify-content: center;
   }
 
-  .discog__play {
-    appearance: none;
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-    width: calc(2.35rem * var(--hud-scale));
-    height: calc(2.35rem * var(--hud-scale));
-    border-radius: 999px;
+  .discog__nested-head {
     display: grid;
-    place-items: center;
-    font: inherit;
-    color: var(--color-text-muted);
-    border: 1px solid color-mix(in srgb, var(--color-border) 70%, transparent);
-    background: transparent;
-    cursor: pointer;
-    transition:
-      border-color 160ms ease,
-      color 160ms ease,
-      background-color 160ms ease;
-  }
-
-  .discog__play:hover {
-    color: var(--color-accent-alt);
-    border-color: var(--color-accent);
-    background: color-mix(in srgb, var(--color-accent) 10%, transparent);
-  }
-
-  .discog__play :global(.hud-icon) {
-    width: calc(1.1rem * var(--hud-scale));
-    height: calc(1.1rem * var(--hud-scale));
-    translate: 0.08em 0;
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: calc(0.6rem * var(--hud-scale));
+    align-items: center;
   }
 
   @media (prefers-reduced-motion: reduce) {

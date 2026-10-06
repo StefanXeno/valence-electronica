@@ -50,7 +50,7 @@ const defaultLabel =
     <div
       class="stage-player"
       data-stage-player
-      data-player-state="minimal"
+      data-player-state="hidden"
       data-stage-catalog={JSON.stringify(catalog)}
       data-stage-schedule={JSON.stringify(schedule)}
       data-stage-fallback={defaultVideoId}
@@ -59,6 +59,14 @@ const defaultLabel =
       data-achievement-title={chrome.playerAchievementTitle}
       data-achievement-sub={chrome.playerAchievementSub}
     >
+      <button
+        type="button"
+        class="stage-player__reveal"
+        data-player-reveal
+      >
+        {chrome.playerShowLabel}
+      </button>
+
       <section
         class="stage-player__panel"
         id="stage-player-panel"
@@ -228,6 +236,7 @@ const defaultLabel =
     transition:
       transform var(--player-dur) var(--player-ease),
       opacity var(--player-dur) var(--player-ease),
+      visibility 0s linear 0s,
       border-color 160ms ease,
       color 160ms ease;
   }
@@ -265,17 +274,22 @@ const defaultLabel =
     }
   }
 
+  /* Hidden: below the floor. Visibility flips after the slide so the peek can slide away. */
   .stage-player[data-player-state='hidden'] .stage-player__vinyl {
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
     transform: translateY(calc(100% + var(--player-gap) + 0.5rem));
+    transition:
+      transform var(--player-dur) var(--player-ease),
+      opacity var(--player-dur) var(--player-ease),
+      visibility 0s linear var(--player-dur);
   }
 
-  /* Hint: half below the floor, then a little nudge so it reads as "pull me". */
+  /* Hint: slide up half above the floor, then nudge so it reads as "tap me". */
   .stage-player[data-player-state='hint'] .stage-player__vinyl {
     transform: translateY(45%);
-    animation: stage-player-nudge 1.1s var(--player-ease) 2;
+    animation: stage-player-nudge 1.1s var(--player-ease) var(--player-dur) 2;
   }
 
   @keyframes stage-player-nudge {
@@ -289,6 +303,40 @@ const defaultLabel =
     60% {
       transform: translateY(50%);
     }
+  }
+
+  /* —— Keyboard reveal (hidden only; skip-link pattern) —— */
+
+  .stage-player__reveal {
+    appearance: none;
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    margin: 0;
+    padding: 0.5em 0.9em;
+    border: 1px solid var(--color-accent);
+    border-radius: 999px;
+    background: var(--color-surface);
+    color: var(--color-text);
+    font-family: var(--font-display);
+    font-size: calc(0.72rem * var(--hud-scale));
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    cursor: pointer;
+    pointer-events: auto;
+    /* Visually hidden until keyboard focus. */
+    clip-path: inset(50%);
+    opacity: 0;
+  }
+
+  .stage-player__reveal:focus-visible {
+    clip-path: none;
+    opacity: 1;
+  }
+
+  .stage-player__reveal[hidden] {
+    display: none;
   }
 
   /* —— Panel (full only) —— */
@@ -603,8 +651,10 @@ const defaultLabel =
     }
   }
 
+  /* Reduced motion: states still change, without slide, nudge, spin, or panel motion. */
   @media (prefers-reduced-motion: reduce) {
     .stage-player__vinyl,
+    .stage-player[data-player-state='hidden'] .stage-player__vinyl,
     .stage-player__panel {
       transition: none;
     }

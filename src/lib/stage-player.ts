@@ -8,19 +8,28 @@
 
 import { maybeUnlockAchievement } from './achievement-toast';
 import { initEqFlatten } from './eq-flatten';
+import { matchesGestureIgnore, STAGE_GESTURE_IGNORE_SELECTOR } from './gesture-ignore';
 import { createContinuousGlitch, isGlitchThemeActive } from './glitch';
-import { setPlayerPaused } from './playback';
-import { markPlayerDiscovered } from './player-discovery';
+import { isIntroActive, setPlayerPaused } from './playback';
+import { isPlayerDiscovered, markPlayerDiscovered } from './player-discovery';
 import {
+  initialPlayerState,
   nextPlayerState,
   type PlayerEvent,
   type PlayerState,
 } from './player-state';
 import { initStageSwitch, type StageCatalogEntry } from './stage-switch';
 import type { StageSchedule } from './stage-schedule';
+import { createTapHint } from './tap-hint';
+import { prefersReducedMotion } from './viewport';
 
 export const PLAYER_STATE_EVENT = 'player-state-change';
+/** Ask the content overlay / phone menu to close after a discography play (035). */
+export const STAGE_OVERLAY_CLOSE_EVENT = 'stage-overlay-close';
 export const ACHIEVEMENT_PLAYER_FOUND_STORAGE_KEY = 've-achievement-player-found';
+
+/** How long the peeking vinyl waits for a tap before sliding away. */
+const HINT_MS = 4000;
 
 function playerRoot(): HTMLElement | null {
   return document.querySelector<HTMLElement>('[data-stage-player]');
@@ -136,8 +145,6 @@ function initBgVideoToggle(root: HTMLElement): void {
 
 /** Continuous hover glitch on player controls (Nightmare pack only). */
 function bindHoverGlitch(root: HTMLElement): void {
-  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-
   root
     .querySelectorAll<HTMLElement>(
       '[data-shuffle-toggle], [data-bg-play-toggle], [data-jukebox-option], [data-mute-control]',
@@ -145,7 +152,7 @@ function bindHoverGlitch(root: HTMLElement): void {
     .forEach((btn) => {
       let over = false;
       const glitch = createContinuousGlitch(btn, () => {
-        if (!over || reduceMotion.matches || !isGlitchThemeActive()) return false;
+        if (!over || prefersReducedMotion() || !isGlitchThemeActive()) return false;
         if (btn.classList.contains('is-glitching')) return false;
         if (btn.matches('[data-shuffle-toggle]') && btn.getAttribute('aria-pressed') === 'true') {
           return false;
@@ -168,6 +175,37 @@ function isLegalOverlayOpen(): boolean {
   return Boolean(document.querySelector('#legal-overlay [data-legal-panel]:not([hidden])'));
 }
 
+function isNavMenuOpen(): boolean {
+  return document.documentElement.classList.contains('site-nav-menu-open');
+}
+
+function isRubPanelOpen(): boolean {
+  return Boolean(document.querySelector('[data-track-rub-panel]:not([hidden])'));
+}
+
+function isOverlayOpen(): boolean {
+  return isLegalOverlayOpen() || isNavMenuOpen() || isRubPanelOpen();
+}
+
+/** Primary taps on empty stage only — chrome, overlays and the intro never count. */
+function isStageTap(event: PointerEvent): boolean {
+  if (!event.isPrimary) return false;
+  if (event.pointerType === 'mouse' && event.button !== 0) return false;
+  if (matchesGestureIgnore(event.target, STAGE_GESTURE_IGNORE_SELECTOR)) return false;
+  return !isIntroActive() && !isOverlayOpen();
+}
+
+/** Discography play inside the overlay / phone menu → close it so the stage change shows. */
+function bindOverlayCloseOnPlay(): void {
+  document.addEventListener('click', (event) => {
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+    if (!target.closest('[data-stage-button]')) return;
+    if (!target.closest('#legal-overlay, [data-site-nav-menu]')) return;
+    document.dispatchEvent(new CustomEvent(STAGE_OVERLAY_CLOSE_EVENT));
+  });
+}
+
 export function initStagePlayer(): void {
   const root = playerRoot();
   if (!root || root.dataset.stagePlayerReady === 'true') return;
@@ -176,23 +214,37 @@ export function initStagePlayer(): void {
   const panel = root.querySelector<HTMLElement>('[data-player-panel]');
   const vinyl = root.querySelector<HTMLButtonElement>('[data-player-vinyl]');
   const closeBtn = root.querySelector<HTMLButtonElement>('[data-player-close]');
+  const reveal = root.querySelector<HTMLButtonElement>('[data-player-reveal]');
   if (!panel || !vinyl) return;
 
   bootStageSwitch(root);
   initBgVideoToggle(root);
   initEqFlatten();
   bindHoverGlitch(root);
+  bindOverlayCloseOnPlay();
 
-  // MVP: start in the minimal vinyl until discovery (US1) lands.
-  let state: PlayerState = 'minimal';
+  let state: PlayerState = initialPlayerState(isPlayerDiscovered());
+  let hintTimer: number | undefined;
+  let hintExtended = false;
 
   const render = () => {
     root.dataset.playerState = state;
     const full = state === 'full';
     panel.inert = !full;
     vinyl.setAttribute('aria-expanded', full ? 'true' : 'false');
-    // Hidden player must not be reachable by Tab; hint/minimal/full keep the vinyl.
+    // Hidden player is not reachable by Tab — the reveal button stands in for it.
     vinyl.tabIndex = state === 'hidden' ? -1 : 0;
+    if (reveal) reveal.hidden = state !== 'hidden';
+  };
+
+  const clearHintTimer = () => {
+    window.clearTimeout(hintTimer);
+    hintTimer = undefined;
+  };
+
+  const startHintTimer = () => {
+    clearHintTimer();
+    hintTimer = window.setTimeout(() => dispatch('HINT_TIMEOUT'), HINT_MS);
   };
 
   const unlockDiscovery = () => {
@@ -205,24 +257,41 @@ export function initStagePlayer(): void {
     });
   };
 
-  const dispatch = (event: PlayerEvent, opts: { restoreFocus?: boolean } = {}) => {
+  const focusCurrentSong = () => {
+    const current =
+      root.querySelector<HTMLElement>('[data-jukebox-option][aria-pressed="true"]') ??
+      root.querySelector<HTMLElement>('[data-jukebox-option]');
+    current?.scrollIntoView({ block: 'nearest' });
+    current?.focus({ preventScroll: true });
+  };
+
+  // Arrow (not a hoisted function) so TS keeps the narrowed root/vinyl/panel.
+  const dispatch = (event: PlayerEvent, opts: { restoreFocus?: boolean } = {}): void => {
     const { state: next, effects } = nextPlayerState(state, event);
     if (next === state && !Object.values(effects).some(Boolean)) return;
     const previous = state;
     state = next;
     render();
 
+    if (effects.startHintTimer) {
+      hintExtended = false;
+      startHintTimer();
+    }
+    if (effects.extendHintTimer && !hintExtended) {
+      hintExtended = true;
+      startHintTimer();
+    }
+    if (next !== 'hint') clearHintTimer();
+
     if (effects.markDiscovered) unlockDiscovery();
     if (effects.focusVinyl && opts.restoreFocus !== false) vinyl.focus({ preventScroll: true });
-    if (next === 'full' && previous !== 'full') {
-      root
-        .querySelector<HTMLElement>('[data-jukebox-option][aria-pressed="true"]')
-        ?.scrollIntoView({ block: 'nearest' });
-    }
+    if (next === 'full' && previous !== 'full') focusCurrentSong();
 
-    root.dispatchEvent(
-      new CustomEvent(PLAYER_STATE_EVENT, { bubbles: true, detail: { state: next } }),
-    );
+    if (next !== previous) {
+      root.dispatchEvent(
+        new CustomEvent(PLAYER_STATE_EVENT, { bubbles: true, detail: { state: next } }),
+      );
+    }
   };
 
   vinyl.addEventListener('click', (event) => {
@@ -234,6 +303,11 @@ export function initStagePlayer(): void {
     dispatch('ACTIVATE_VINYL');
   });
 
+  reveal?.addEventListener('click', (event) => {
+    event.stopPropagation();
+    dispatch('KEYBOARD_REVEAL');
+  });
+
   closeBtn?.addEventListener('click', (event) => {
     event.stopPropagation();
     dispatch('CLOSE');
@@ -241,8 +315,8 @@ export function initStagePlayer(): void {
 
   document.addEventListener('keydown', (event) => {
     if (event.key !== 'Escape' || state !== 'full') return;
-    // The legal/content overlay owns Escape while it is open.
-    if (isLegalOverlayOpen()) return;
+    // Overlays and the phone menu own Escape while they are open.
+    if (isOverlayOpen()) return;
     dispatch('CLOSE');
   });
 
@@ -252,6 +326,50 @@ export function initStagePlayer(): void {
     const target = event.target;
     if (target instanceof Node && root.contains(target)) return;
     dispatch('CLOSE', { restoreFocus: false });
+  });
+
+  // Hidden → hint: three quick taps on empty stage.
+  const taps = createTapHint();
+  const tapsCount = () => state === 'hidden' || state === 'hint';
+
+  document.addEventListener(
+    'pointerdown',
+    (event) => {
+      if (!tapsCount() || !isStageTap(event)) {
+        taps.reset();
+        return;
+      }
+      taps.down(event.clientX, event.clientY, event.timeStamp);
+    },
+    { passive: true },
+  );
+
+  document.addEventListener(
+    'pointerup',
+    (event) => {
+      if (!tapsCount() || !isStageTap(event)) return;
+      if (taps.up(event.clientX, event.clientY, event.timeStamp)) dispatch('TAP_HINT');
+    },
+    { passive: true },
+  );
+
+  document.addEventListener('pointercancel', () => taps.reset(), { passive: true });
+
+  // A content overlay or the phone menu opening collapses the full player (no stacking).
+  const collapseForOverlay = () => {
+    if (state === 'full' && (isLegalOverlayOpen() || isNavMenuOpen())) dispatch('OVERLAY_OPENED');
+  };
+  const legalOverlay = document.getElementById('legal-overlay');
+  if (legalOverlay) {
+    new MutationObserver(collapseForOverlay).observe(legalOverlay, {
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['hidden'],
+    });
+  }
+  new MutationObserver(collapseForOverlay).observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ['class'],
   });
 
   render();

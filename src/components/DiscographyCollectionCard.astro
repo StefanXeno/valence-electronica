@@ -3,7 +3,6 @@ import type { DiscographyBlock } from '../lib/catalog-tracks';
 import type { UiChrome } from '../lib/stage';
 import { coverOrPlaceholder } from '../lib/url';
 import DiscographyTrackRow from './DiscographyTrackRow.astro';
-import HudIcon from './HudIcon.astro';
 
 interface Props {
   chrome: UiChrome;
@@ -38,18 +37,6 @@ const coverSrc = coverOrPlaceholder(block.coverUrl);
     <div class="discog__head-text">
       <span class="discog__head-text__kind">{block.kindType}</span>
       <span class="discog__head-text__title" id={collectionId}>{block.collection}</span>
-    </div>
-    <div class="discog__play-slot">
-      <button
-        type="button"
-        class="discog__play glitch-hit"
-        data-discog-play
-        aria-label={chrome.stageButtonLabel}
-        data-hud-label={chrome.stageButtonLabel}
-        data-hud-label-anchor="above"
-      >
-        <HudIcon token="play" />
-      </button>
     </div>
   </div>
   <ul class="discog__collection-tracks">
@@ -92,7 +79,7 @@ const coverSrc = coverOrPlaceholder(block.coverUrl);
 
   .discog__collection-head {
     display: grid;
-    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-columns: auto minmax(0, 1fr);
     column-gap: calc(0.75rem * var(--hud-scale));
     align-items: center;
   }
@@ -165,45 +152,6 @@ const coverSrc = coverOrPlaceholder(block.coverUrl);
     flex-direction: column;
     gap: 0;
     border-top: 1px solid color-mix(in srgb, var(--color-border) 40%, transparent);
-  }
-
-  .discog__play-slot {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .discog__play {
-    appearance: none;
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-    width: calc(2.35rem * var(--hud-scale));
-    height: calc(2.35rem * var(--hud-scale));
-    border-radius: 999px;
-    display: grid;
-    place-items: center;
-    font: inherit;
-    color: var(--color-text-muted);
-    border: 1px solid color-mix(in srgb, var(--color-border) 70%, transparent);
-    background: transparent;
-    cursor: pointer;
-    transition:
-      border-color 160ms ease,
-      color 160ms ease,
-      background-color 160ms ease;
-  }
-
-  .discog__play:hover {
-    color: var(--color-accent-alt);
-    border-color: var(--color-accent);
-    background: color-mix(in srgb, var(--color-accent) 10%, transparent);
-  }
-
-  .discog__play :global(.hud-icon) {
-    width: calc(1.1rem * var(--hud-scale));
-    height: calc(1.1rem * var(--hud-scale));
-    translate: 0.08em 0;
   }
 
   @media (prefers-reduced-motion: reduce) {
