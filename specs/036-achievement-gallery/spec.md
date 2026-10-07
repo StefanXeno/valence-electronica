@@ -25,7 +25,7 @@ overlays), `031-glitch-motion` (glitch language, reduced motion).
 - Q: Should secret achievements stay hidden from people reading the page source? → A: Yes, as far as a static site allows (option C): the unlocked copy of secret achievements is not in the HTML, is stored encoded (not plain text) in what the browser downloads, and the secret achievement gets a neutral id; the old storage key is migrated once so progress survives. Determined code readers can still decode it; that is accepted.
 - Q: (Operator review after the first build) How should the gallery look? → A: Exactly like the V-Flip player, mirrored: a panel that grows out of the trophy corner (bottom-right) with the trophy in its bottom row, not a centered window. The trophy glyph is larger on phones, the reset is an icon button, and the laptop socials move to bottom-center so they no longer collide with the trophy.
 - Q: Can visitors control the ultra glitch (wild) mode themselves once they found 666? → A: Yes — a switch "Ultra glitch" on the unlocked Demonic Combination tile. Turning it on also puts Nightmare on stage (like 666); turning it off leaves the stage as is. The setting lasts until reload only (no new storage key).
-- Q: (Operator review) Photosensitivity: the ultra glitch mode flickers hard (opacity jumps, red/white fringes, ~180 ms cycles on several surfaces). How do we handle it? → A: Opt-in only — 666 / `#666` unlock the achievement and start Nightmare but no longer start the wild mode; the switch lives in an expandable Demonic Combination tile right under a photosensitive-epilepsy warning; the wild mode itself is tamed (no opacity-flicker family, no speed-up, each surface at most one glitch per second). The operator measures Nightmare with a flash-analysis tool; the base Nightmare glitch may be toned down afterwards.
+- Q: (Operator review) Photosensitivity: the ultra glitch mode flickers hard (opacity jumps, red/white fringes, ~180 ms cycles on several surfaces). How do we handle it? → A: Opt-in only — 666 / `#666` unlock the achievement and start Nightmare but no longer start the wild mode; the switch lives in an expandable Demonic Combination tile right under a photosensitive-epilepsy warning; the wild mode was first tamed, then restored to its original intensity at the operator's request (the warning + opt-in are the safeguard). The operator measures Nightmare with a flash-analysis tool; the base Nightmare glitch may be toned down afterwards.
 - Q: Add an achievement for looking at the source code? → A: Yes — "Coder" ("Take a look at the source code"), last in the gallery, with a hint (not secret). Since a page cannot detect view-source, an HTML comment hidden mid-document (not at the top) tells readers to type "coder"; typing it unlocks the achievement.
 - Q: How do phone users (no hardware keyboard) trigger the typed combos? → A: Each typed combo also works as a URL hash: `#coder` unlocks Coder (the source comment mentions it for phones), and `#666` triggers the full demonic combo. The hash is removed from the address bar right after it fires. Shareable links are accepted.
 
@@ -302,10 +302,9 @@ reload → mode is off.
   session. Turning it on MUST also put Nightmare on stage; turning it off MUST NOT change
   the stage. No storage is used. A re-locked tile (reset) collapses.
 - **FR-023**: The ultra glitch mode MUST be opt-in only: 666 / `#666` (`032` FR-010) MUST
-  unlock the achievement and put Nightmare on stage but MUST NOT start it. While it runs it
-  MUST NOT use the opacity-flicker (`blink`) family, MUST NOT run glitches faster than the
-  base presets, and MUST NOT glitch the same surface more than once per second. Reduced
-  motion keeps disabling it entirely.
+  unlock the achievement and put Nightmare on stage but MUST NOT start it. Its intensity
+  stays as in `032` (operator decision: the opt-in switch and the warning are the
+  safeguard). Reduced motion keeps disabling it entirely.
 - **FR-016a**: On laptop widths the social icons MUST sit bottom-center (labels reveal
   above), so the bottom corners stay free for the vinyl (left) and trophy (right).
 - **FR-016**: UI wording that is not per-achievement (icon label, panel title, counter

@@ -149,7 +149,7 @@ with the old rub key keeps it.
 ### Operator review: photosensitivity
 
 - [X] T051 [US6] `src/lib/demonic-combo.ts`: 666 / `#666` no longer call `enableWildGlitch()` (opt-in only)
-- [X] T052 [US6] `src/lib/glitch.ts`: wild mode excludes the `blink` family and keeps base preset speed; `src/lib/glitch-ambient.ts`: per-surface 1 s cooldown, burst ≤ 2, slower wild tick
+- [X] T052 [US6] Tamed wild mode (no `blink`, base speed, 1 s cooldown) — reverted at the operator's request; original intensity kept behind the opt-in warning
 - [X] T053 [US6] `src/components/AchievementGallery.astro` + `src/lib/achievement-gallery.ts`: expandable Demonic tile with warning (`achievementWildWarning`) above a styled switch; tiles list `overflow-x: hidden`
 - [ ] T054 Operator: record Nightmare (normal and ultra glitch) and run a flash analysis (e.g. PEAT); tone down base presets if it fails
 
