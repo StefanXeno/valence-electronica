@@ -18,6 +18,7 @@ const { glyph } = Astro.props;
     /* Same vinyl mark as the stage player. */
     <HudIcon token="jukebox" />
   ) : glyph === 'infinite' ? (
+    /* Path spans x 6.2–21.8; the translate centres it on 12. */
     <svg class="hud-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
       <path
         fill="none"
@@ -25,6 +26,7 @@ const { glyph } = Astro.props;
         stroke-width="1.85"
         stroke-linecap="round"
         stroke-linejoin="round"
+        transform="translate(-2 0)"
         d="M6.2 12c0-2.1 1.55-3.7 3.3-3.7 1.55 0 2.7.95 4.5 3.7 1.8 2.75 2.95 3.7 4.5 3.7 1.75 0 3.3-1.6 3.3-3.7s-1.55-3.7-3.3-3.7c-1.55 0-2.7.95-4.5 3.7-1.8 2.75-2.95 3.7-4.5 3.7-1.75 0-3.3-1.6-3.3-3.7z"
       />
     </svg>
