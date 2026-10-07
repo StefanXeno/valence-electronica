@@ -98,8 +98,8 @@ with the old rub key keeps it.
 **Independent Test**: Change title, hint, secret flag, order in `src/data/achievements.json`; rebuild; toast and gallery reflect all; removing a required hint fails `npm run build` naming the entry (quickstart #16 + registry failure check).
 
 - [X] T029 [US3] Verify the build-time failure path: temporarily break `src/data/achievements.json` (remove `infinite-spin` hint), confirm `npm run build` fails with a message naming `infinite-spin`, then revert
-- [ ] T030 [P] [US3] Add an "Achievements (easter eggs)" section to `docs/artist-guide.md`: file path, fields (`id`, `title`, `subtitle`, `glyph`, `secret`, `hint`), array order = tile order, secret behavior (write plain text; the site hides it automatically; ids must not hint at a secret), new achievements need a developer, run `npm run check` after edits
-- [ ] T031 [P] [US3] In `docs/artist-guide.md`, list the new gallery fields (and `achievementsIcon` override) in the UI chrome section, drop `playerAchievementTitle/Sub` mentions if any, and add achievement `id`s to "Stable ids — do not rename casually" (renaming resets visitors' progress)
+- [X] T030 [P] [US3] Add an "Achievements (easter eggs)" section to `docs/artist-guide.md`: file path, fields (`id`, `title`, `subtitle`, `glyph`, `secret`, `hint`), array order = tile order, secret behavior (write plain text; the site hides it automatically; ids must not hint at a secret), new achievements need a developer, run `npm run check` after edits
+- [X] T031 [P] [US3] In `docs/artist-guide.md`, list the new gallery fields (and `achievementsIcon` override) in the UI chrome section, drop `playerAchievementTitle/Sub` mentions if any, and add achievement `id`s to "Stable ids — do not rename casually" (renaming resets visitors' progress)
 
 **Checkpoint**: Copy is fully artist-owned (Constitution III + VII).
 
@@ -139,9 +139,9 @@ with the old rub key keeps it.
 ## Phase 8: Polish & Cross-Cutting Concerns
 
 - [X] T041 [P] Ambient glitch on locked/secret tiles while the gallery is open, only when `prefersGlitchMotion()`, using the existing `createContinuousGlitch` pattern from `src/lib/glitch.ts`; stopped on close (research R10)
-- [ ] T042 [P] Mark IDEA-026 `promoted` in `docs/ideas.md` with **Promoted to** `specs/036-achievement-gallery/`
-- [ ] T043 Run `npm test`, `npm run check`, `npm run build` (incl. `check-secrets.mjs`); confirm `dist/index.html` has no `data-achievement-reset` (SC-006) and `grep -ri "rubbing" dist/` returns nothing (SC-007)
-- [ ] T044 Hand quickstart.md manual checks (#1–#20) to the operator for browser verification (do not run browser automation)
+- [X] T042 [P] Mark IDEA-026 `promoted` in `docs/ideas.md` with **Promoted to** `specs/036-achievement-gallery/`
+- [X] T043 Run `npm test`, `npm run check`, `npm run build` (incl. `check-secrets.mjs`); confirm `dist/index.html` has no `data-achievement-reset` (SC-006) and `grep -ri "rubbing" dist/` returns nothing (SC-007)
+- [X] T044 Hand quickstart.md manual checks (#1–#20) to the operator for browser verification (do not run browser automation)
 - [ ] T045 After operator sign-off: fold behavior into `specs/032-easter-eggs/spec.md` (FRs for gallery, registry, toast, secret obfuscation, rub key migration; remove the "copy hard-coded" achievements gap, the "No achievements overview page" gap, and the "demonic combo is keyboard-only" gap; add Coder and the hash triggers), note the bottom-right trophy in `specs/026-stage-player/spec.md`, update `specs/032-easter-eggs/plan.md` source map, add the `036` row to the mapping in `specs/README.md`, and delete `specs/036-achievement-gallery/`
 
 ---

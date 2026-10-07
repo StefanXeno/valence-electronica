@@ -193,7 +193,8 @@ landing intro copy (`introLead`, `introName`), tour pill labels (`ticketLabel`,
 `contactTitle`), Shop empty copy (`shopComingSoonTitle`, `shopComingSoonBody`), Contact
 empty copy (`contactEmpty`), phone/side **Links** label (`socialsLabel` — default
 **Links**), and optional **HUD icon overrides**
-(`aboutIcon`, `discographyIcon`, `tourIcon`, `shuffleIcon`, `socialsIcon`, `infoIcon`).
+(`aboutIcon`, `discographyIcon`, `tourIcon`, `shuffleIcon`, `socialsIcon`, `infoIcon`,
+`achievementsIcon`).
 
 **Top nav (020):** Primary bar is **Home · Shop · Tour · Contact** plus brand mark.
 **About** / **Discography** / **Info** are quieter secondary text under the band — not
@@ -214,8 +215,6 @@ Phone and laptop use the same player.
 - `playerShowLabel` — keyboard reveal button (default: Show player)
 - `playerOpenLabel` / `playerCloseLabel` — accessible names for the vinyl and the close
   button (defaults: Open player / Close player)
-- `playerAchievementTitle` / `playerAchievementSub` — toast when the player is found the
-  first time (defaults: Found it! / You discovered the hidden player.)
 - `songsTitle` — accessible name of the song list (default: Songs)
 - `currentlyPlayingLabel` — small heading above the song title in the player, and the name of
   the "currently playing" marker in Discography
@@ -229,6 +228,22 @@ Phone and laptop use the same player.
 - `infoTitle` / `infoIcon` — Info sheet (© + **Imprint** / **Privacy Policy**). Default
   title: Info. Default token: `info` (circled i).
 
+**Achievement gallery (optional):** labels around the achievements; the achievements
+themselves live in their own file (see **Achievements** below).
+
+- `achievementsLabel` / `achievementsIcon` — trophy button bottom-right (default label:
+  Achievements; default token: `trophy`)
+- `achievementsTitle` — gallery heading (default: Achievements)
+- `achievementsCounter` — progress line; `{found}` and `{total}` are filled in
+  (default: `{found} / {total} found`)
+- `achievementLockedTitle` — title of a locked tile (default: ???)
+- `achievementSecretTitle` — text of a locked secret tile (default: Secret achievement)
+- `achievementUnlockedLabel` — small heading on the unlock toast (default: Achievement
+  unlocked)
+- `achievementsCloseLabel` — close button name (default: Close)
+- `achievementsResetLabel` — reset button, shown only on your computer and on the
+  `/pre-release/` preview, never live (default: Reset achievements)
+
 **Discography (optional):**
 
 - `releasedLabel` — label before the release date (default: Released)
@@ -240,7 +255,7 @@ Phone and laptop use the same player.
 
 - Leave an `*Icon` field out to use the default pictogram for that control.
 - Set a **token** to pick a built-in icon: `jukebox`, `about`, `discography`, `tour`,
-  `catalog`, `info`, `shuffle`, `loop`, `socials`, `play`, `pause`, or `playlist`.
+  `catalog`, `info`, `shuffle`, `loop`, `socials`, `play`, `pause`, `playlist`, or `trophy`.
 
 **Label reveal (visitor-facing):** On **laptop** (1024px up), player and dock icons show a
 floating label **above** the control on hover/focus; social icons show it **below**. The
@@ -250,6 +265,35 @@ player's song title does not. On **phone** (viewport below 1024px) those floater
 atmosphere video file length** for audio entries (`hasAudio: true`). Entries with no audio
 advance after **45 seconds**. Today’s short loop-bed mp4s hop on file length until you ship
 longer stage videos.
+
+---
+
+### Achievements (easter eggs)
+
+**File:** [`src/data/achievements.json`](../src/data/achievements.json)
+
+**Controls:** The name, description, and hint of every achievement, whether it is secret,
+and the order of the tiles in the achievement gallery (the trophy button bottom-right that
+appears after a visitor's first find). The order in the file is the order on the site.
+
+| Field | What it does |
+| ----- | ------------ |
+| `id` | Fixed name the site uses — **do not change** (see Stable ids) |
+| `title` | Name on the unlock toast and the gallery tile |
+| `subtitle` | Description under the name |
+| `glyph` | Small picture: `vinyl`, `infinite`, `demonic` (666), or `code` (`</>`) |
+| `secret` | `true` → a locked tile shows only that something exists; no hint |
+| `hint` | Teaser on a locked tile; required unless `secret` is `true` |
+
+**Tips:**
+
+- Write secret titles in plain text like the others; the site hides them from the page
+  source automatically, and `npm run build` fails if a secret ever leaks.
+- Reorder tiles by moving whole entries (each `{ … }` block, with its comma).
+- New achievements need a developer: each one is unlocked by code (a gesture, a typed word).
+  Adding an entry with a new `id` makes the build fail.
+- Run `npm run build` after edits (or let the preview build do it); a missing title,
+  subtitle, or hint is reported with the entry's position and id.
 
 ---
 
@@ -375,6 +419,8 @@ Without developer help, **do not rename**:
 - **`jukeboxId`** on releases or schedule rules
 - Legal **file slugs** (`imprint.md`, `privacy.md`)
 - Channel **`id`** values in `site.json`
+- Achievement **`id`** values in `achievements.json` — renaming one resets that achievement
+  for every visitor who already found it
 
 Renaming breaks links between content files until a developer updates all references.
 
