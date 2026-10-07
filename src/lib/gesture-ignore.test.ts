@@ -30,6 +30,12 @@ describe('gesture ignore selectors', () => {
     );
   });
 
+  it('covers the achievement gallery and its toggle', () => {
+    expect(parts(STAGE_GESTURE_IGNORE_SELECTOR)).toEqual(
+      expect.arrayContaining(['[data-achievement-gallery]', '[data-achievement-toggle]']),
+    );
+  });
+
   it('has no empty or duplicate parts', () => {
     const all = parts(STAGE_GESTURE_IGNORE_SELECTOR);
     expect(all.every(Boolean)).toBe(true);

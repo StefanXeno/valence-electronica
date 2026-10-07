@@ -39,6 +39,8 @@ export const CHROME_SELECTOR = [
   '.site-nav',
   '#legal-overlay',
   '[data-track-rub-overlay]',
+  '[data-achievement-gallery]',
+  '[data-achievement-toggle]',
 ].join(', ');
 
 /** Stage-only gestures (spin, player hint): ignore controls and chrome layers. */

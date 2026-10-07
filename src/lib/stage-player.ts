@@ -187,8 +187,13 @@ function isRubPanelOpen(): boolean {
   return Boolean(document.querySelector('[data-track-rub-panel]:not([hidden])'));
 }
 
+/** Achievement gallery (036) sets this class on <html> while open. */
+function isAchievementGalleryOpen(): boolean {
+  return document.documentElement.classList.contains('achievement-gallery-open');
+}
+
 function isOverlayOpen(): boolean {
-  return isLegalOverlayOpen() || isNavMenuOpen() || isRubPanelOpen();
+  return isLegalOverlayOpen() || isNavMenuOpen() || isRubPanelOpen() || isAchievementGalleryOpen();
 }
 
 /** Primary taps on empty stage only — chrome, overlays and the intro never count. */
@@ -371,7 +376,9 @@ export function initStagePlayer(): void {
 
   // A content overlay or the phone menu opening collapses the full player (no stacking).
   const collapseForOverlay = () => {
-    if (state === 'full' && (isLegalOverlayOpen() || isNavMenuOpen())) dispatch('OVERLAY_OPENED');
+    if (state === 'full' && (isLegalOverlayOpen() || isNavMenuOpen() || isAchievementGalleryOpen())) {
+      dispatch('OVERLAY_OPENED');
+    }
   };
   const legalOverlay = document.getElementById('legal-overlay');
   if (legalOverlay) {

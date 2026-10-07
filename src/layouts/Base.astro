@@ -10,6 +10,7 @@ import BackgroundAtmosphere from '../components/BackgroundAtmosphere.astro';
 import GlitchPress from '../components/GlitchPress.astro';
 import LegalOverlay from '../components/LegalOverlay.astro';
 import TrackRubOverlay from '../components/TrackRubOverlay.astro';
+import AchievementGallery from '../components/AchievementGallery.astro';
 import { getDefaultVideo } from '../lib/background';
 import { applyThemeAttributes, resolveThemePack } from '../lib/theme-packs';
 import { isPreviewBuild, withBase } from '../lib/url';
@@ -70,6 +71,7 @@ const indexable = site.seo.indexable && !isPreviewBuild();
     {/* Body-level overlay: legal + content sheets (About/Tour/…) share LegalPanel. */}
     <LegalOverlay />
     <TrackRubOverlay />
+    <AchievementGallery />
     <GlitchPress />
     <div id="hud-label-reveal" class="hud-label-reveal" aria-hidden="true" hidden></div>
     <script>
@@ -78,12 +80,14 @@ const indexable = site.seo.indexable && !isPreviewBuild();
       import { initInfiniteSpin } from '../lib/infinite-spin';
       import { initDemonicCombo } from '../lib/demonic-combo';
       import { migrateLegacyKeys } from '../lib/achievements';
+      import { initAchievementGallery } from '../lib/achievement-gallery';
       // Before anything reads achievement state (pre-036 rub key → `ve-achievement-rub`).
       migrateLegacyKeys();
       initLabelReveal();
       initTrackRub();
       initInfiniteSpin();
       initDemonicCombo();
+      initAchievementGallery();
     </script>
   </body>
 </html>

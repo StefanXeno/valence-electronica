@@ -1,0 +1,403 @@
+---
+/**
+ * Achievement gallery (036): trophy toggle bottom-right + dialog with one tile per achievement.
+ * Driven by `src/lib/achievement-gallery.ts`; unlock state is client-side only.
+ *
+ * Secret tiles ship with the placeholder only — their copy is filled from the obfuscated
+ * registry payload after unlock, so it never sits in the HTML.
+ */
+import { ACHIEVEMENT_GLYPHS } from '../lib/achievements';
+import { loadAchievementRegistry } from '../lib/achievements-registry';
+import { getChrome } from '../lib/stage';
+import { isPreviewBuild } from '../lib/url';
+import AchievementGlyph from './AchievementGlyph.astro';
+import HudIcon from './HudIcon.astro';
+
+const chrome = await getChrome();
+const achievements = loadAchievementRegistry();
+const showReset = import.meta.env.DEV || isPreviewBuild();
+---
+
+<button
+  type="button"
+  class="achievement-toggle glitch-hit"
+  data-achievement-toggle
+  aria-label={chrome.achievementsLabel}
+  title={chrome.achievementsLabel}
+  aria-haspopup="dialog"
+  aria-controls="achievement-gallery"
+  aria-expanded="false"
+  hidden
+>
+  <HudIcon token={chrome.achievementsIcon} emoji={chrome.achievementsIconEmoji} />
+</button>
+
+<div
+  id="achievement-gallery"
+  class="achievement-gallery"
+  data-achievement-gallery
+  data-counter-template={chrome.achievementsCounter}
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="achievement-gallery-title"
+  hidden
+>
+  <div class="achievement-gallery__frame" data-achievement-gallery-frame>
+    <header class="achievement-gallery__header">
+      <button
+        type="button"
+        class="achievement-gallery__close glitch-hit"
+        data-achievement-gallery-close
+        aria-label={chrome.achievementsCloseLabel}
+        title={chrome.achievementsCloseLabel}
+      >
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
+          <path
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            d="M6 6l12 12M18 6L6 18"
+          />
+        </svg>
+      </button>
+      <h1 id="achievement-gallery-title">{chrome.achievementsTitle}</h1>
+      <p class="achievement-gallery__counter" data-achievement-counter aria-live="polite"></p>
+    </header>
+
+    <ol class="achievement-gallery__tiles">
+      {
+        achievements.map((achievement) => (
+          <li
+            class="achievement-tile"
+            data-achievement-tile={achievement.id}
+            data-tile-kind={achievement.secret ? 'secret' : 'locked'}
+          >
+            {achievement.secret ? (
+              <div class="achievement-tile__variant achievement-tile__variant--secret" data-variant="secret">
+                <span class="achievement-tile__glyph achievement-tile__glyph--locked" aria-hidden="true">
+                  ?
+                </span>
+                <span class="achievement-tile__copy">
+                  <span class="achievement-tile__title achievement-tile__title--locked">
+                    {chrome.achievementSecretTitle}
+                  </span>
+                </span>
+              </div>
+            ) : (
+              <>
+                <div class="achievement-tile__variant" data-variant="unlocked" hidden>
+                  <span class="achievement-tile__glyph" aria-hidden="true">
+                    <AchievementGlyph glyph={achievement.glyph} />
+                  </span>
+                  <span class="achievement-tile__copy">
+                    <span class="achievement-tile__title">{achievement.title}</span>
+                    <span class="achievement-tile__sub">{achievement.subtitle}</span>
+                  </span>
+                </div>
+                <div class="achievement-tile__variant" data-variant="locked">
+                  <span class="achievement-tile__glyph achievement-tile__glyph--locked" aria-hidden="true">
+                    ?
+                  </span>
+                  <span class="achievement-tile__copy">
+                    <span class="achievement-tile__title achievement-tile__title--locked">
+                      {chrome.achievementLockedTitle}
+                    </span>
+                    <span class="achievement-tile__sub">{achievement.hint}</span>
+                  </span>
+                </div>
+              </>
+            )}
+          </li>
+        ))
+      }
+    </ol>
+
+    {
+      showReset && (
+        <footer class="achievement-gallery__footer">
+          <button type="button" class="achievement-gallery__reset" data-achievement-reset>
+            {chrome.achievementsResetLabel}
+          </button>
+        </footer>
+      )
+    }
+  </div>
+
+  {/* Filled client-side for unlocked secret achievements. */}
+  <template data-achievement-unlocked-template>
+    <div class="achievement-tile__variant" data-variant="unlocked">
+      <span class="achievement-tile__glyph" aria-hidden="true" data-slot="glyph"></span>
+      <span class="achievement-tile__copy">
+        <span class="achievement-tile__title" data-slot="title"></span>
+        <span class="achievement-tile__sub" data-slot="subtitle"></span>
+      </span>
+    </div>
+  </template>
+  {
+    ACHIEVEMENT_GLYPHS.map((glyph) => (
+      <template data-achievement-glyph={glyph}>
+        <AchievementGlyph glyph={glyph} />
+      </template>
+    ))
+  }
+</div>
+
+<style>
+  /* Mirrors the stage vinyl (bottom-left) at the bottom-right corner. */
+  .achievement-toggle {
+    --toggle-size: var(--control-size);
+    --toggle-inset: calc(var(--stage-corner-gap, 0.3rem) + 0.65rem * var(--hud-scale) + 1px);
+
+    position: fixed;
+    right: var(--toggle-inset);
+    bottom: var(--toggle-inset);
+    /* Below the stage player (z=3): an open player panel covers the toggle on phones. */
+    z-index: 2;
+    appearance: none;
+    display: grid;
+    place-items: center;
+    width: var(--toggle-size);
+    height: var(--toggle-size);
+    margin: 0;
+    padding: 0;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--color-surface) 92%, transparent);
+    backdrop-filter: blur(10px);
+    color: var(--color-text);
+    cursor: pointer;
+    box-shadow: 0 0.4rem 1.2rem color-mix(in srgb, black 40%, transparent);
+  }
+
+  .achievement-toggle[hidden],
+  :global(html[data-intro-pending]) .achievement-toggle,
+  :global(html[data-intro-active]) .achievement-toggle {
+    display: none;
+  }
+
+  .achievement-toggle:hover,
+  .achievement-toggle[aria-expanded='true'] {
+    border-color: var(--color-accent);
+  }
+
+  .achievement-toggle:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+  }
+
+  .achievement-toggle.is-pulse {
+    animation: achievement-toggle-pulse 900ms ease-out;
+  }
+
+  @media (max-width: 1023px) {
+    .achievement-toggle {
+      --toggle-size: 4.25rem;
+      bottom: calc(var(--toggle-inset) + env(safe-area-inset-bottom, 0px));
+    }
+  }
+
+  /* Same layer and look as the rub reveal panel. */
+  .achievement-gallery {
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    display: grid;
+    place-items: center;
+    padding: clamp(0.75rem, 3vw, 1.5rem);
+    background: color-mix(in srgb, var(--color-bg) 55%, transparent);
+  }
+
+  .achievement-gallery[hidden] {
+    display: none;
+  }
+
+  .achievement-gallery__frame {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    width: min(34rem, 100%);
+    max-height: 100%;
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    border-radius: 0.75rem;
+    background: color-mix(in srgb, var(--color-surface) 92%, transparent);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 1rem 3rem rgb(0 0 0 / 35%);
+    animation: achievement-gallery-in 320ms ease-out both;
+  }
+
+  .achievement-gallery__header {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 0.25rem var(--space-s);
+    padding: var(--space-m) var(--space-m) var(--space-s);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .achievement-gallery__header h1 {
+    grid-column: 1;
+    grid-row: 1;
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(1.4rem, 5vw, 2rem);
+  }
+
+  .achievement-gallery__close {
+    grid-column: 2;
+    grid-row: 1;
+    appearance: none;
+    display: inline-grid;
+    place-items: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    margin: 0;
+    padding: 0;
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    background: var(--color-bg);
+    cursor: pointer;
+  }
+
+  .achievement-gallery__close:hover {
+    border-color: var(--color-accent);
+  }
+
+  .achievement-gallery__counter {
+    grid-column: 1 / -1;
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 0.8rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-accent-alt);
+  }
+
+  .achievement-gallery__tiles {
+    display: grid;
+    gap: 0.6rem;
+    margin: 0;
+    padding: var(--space-m);
+    overflow: auto;
+    list-style: none;
+  }
+
+  .achievement-tile__variant {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 0.9rem;
+    align-items: center;
+    padding: 0.75rem 0.9rem;
+    border: 1px solid var(--color-border);
+    border-radius: 0.6rem;
+    background: color-mix(in srgb, var(--color-bg) 45%, transparent);
+  }
+
+  .achievement-tile__variant[hidden] {
+    display: none;
+  }
+
+  .achievement-tile[data-tile-kind='unlocked'] .achievement-tile__variant {
+    border-left: 3px solid var(--color-accent);
+  }
+
+  .achievement-tile__glyph {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    color: var(--color-accent-alt);
+    border: 1px solid color-mix(in srgb, var(--color-border) 70%, var(--color-accent));
+    border-radius: 0.45rem;
+    background: color-mix(in srgb, var(--color-bg) 55%, transparent);
+  }
+
+  .achievement-tile__glyph :global(.hud-icon) {
+    width: 1.6rem;
+    height: 1.6rem;
+  }
+
+  .achievement-tile__glyph--locked {
+    font-family: var(--font-display);
+    font-weight: 700;
+    color: var(--color-text-muted);
+    border-style: dashed;
+  }
+
+  .achievement-tile__copy {
+    min-width: 0;
+    display: grid;
+    gap: 0.15rem;
+  }
+
+  .achievement-tile__title {
+    font-family: var(--font-display);
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.25;
+    color: var(--color-text);
+    overflow-wrap: anywhere;
+  }
+
+  .achievement-tile__title--locked {
+    color: var(--color-text-muted);
+    letter-spacing: 0.08em;
+  }
+
+  .achievement-tile__sub {
+    font-size: 0.85rem;
+    line-height: 1.35;
+    color: var(--color-text-muted);
+    overflow-wrap: anywhere;
+  }
+
+  .achievement-gallery__footer {
+    padding: var(--space-s) var(--space-m) var(--space-m);
+    border-top: 1px solid var(--color-border);
+  }
+
+  .achievement-gallery__reset {
+    appearance: none;
+    padding: 0.45rem 0.8rem;
+    font: inherit;
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+    border: 1px dashed var(--color-border);
+    border-radius: 999px;
+    background: transparent;
+    cursor: pointer;
+  }
+
+  .achievement-gallery__reset:hover {
+    color: var(--color-text);
+    border-color: var(--color-accent);
+  }
+
+  @keyframes achievement-gallery-in {
+    from {
+      opacity: 0;
+      transform: translateY(0.75rem) scale(0.985);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  @keyframes achievement-toggle-pulse {
+    0% {
+      box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-accent) 70%, transparent);
+    }
+    100% {
+      box-shadow: 0 0 0 1.1rem color-mix(in srgb, var(--color-accent) 0%, transparent);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .achievement-gallery__frame,
+    .achievement-toggle.is-pulse {
+      animation: none;
+    }
+  }
+</style>

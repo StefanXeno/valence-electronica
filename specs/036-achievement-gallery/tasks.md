@@ -64,14 +64,14 @@ with the old rub key keeps it.
 **Independent Test**: With two achievements unlocked, open via the icon; counter, unlocked/locked/secret tiles correct; closes via X, Escape, outside click; exclusive with player and overlays; `npm run build` passes the secret check (quickstart #7–#9, #18).
 
 - [X] T017 [US1] Add gallery chrome fields `achievementsLabel`, `achievementsIcon`, `achievementsTitle`, `achievementsCounter`, `achievementLockedTitle`, `achievementSecretTitle`, `achievementUnlockedLabel`, `achievementsCloseLabel`, `achievementsResetLabel` to the `ui` schema in `src/content.config.ts`, to `UiChrome`, `CHROME_FALLBACK` (defaults from data-model.md), and `getChrome` in `src/lib/stage.ts`, and set them in `src/content/ui/chrome.md`
-- [ ] T018 [US1] Create `src/components/AchievementGallery.astro` per contracts/gallery-ui.md using `loadAchievementRegistry()`: `hidden` trophy toggle (`resolveHudIcon(chrome.achievementsIcon, 'trophy')`), dialog with close button, title, `aria-live` counter, `<ol>` of tiles — non-secret tiles with unlocked (`AchievementGlyph` + title + subtitle) and locked (`achievementLockedTitle` + hint) variants; secret tiles with only the `achievementSecretTitle` placeholder; plus `<template data-achievement-unlocked-template>` and one `<template data-achievement-glyph="{token}">` per glyph
-- [ ] T019 [US1] Style `src/components/AchievementGallery.astro`: toggle fixed bottom-right mirroring the vinyl's offsets/size from `src/components/StagePlayer.astro`, hidden under `html[data-intro-pending]`/`html[data-intro-active]`; dialog frame reusing the rub panel look (dark rounded, theme tokens), internal scroll, no horizontal scroll at 320px; tile variants shown by `data-tile-kind`; reduced-motion removes entrance motion
-- [ ] T020 [US1] Implement `src/lib/achievement-gallery.ts` `initAchievementGallery()`: on boot read `readAchievementState`, unhide toggle when available with ≥1 unlock, apply `tileViews` to `data-tile-kind`, fill unlocked secret tiles from the template with decoded copy from `getAchievement`, fill counter via `formatCounter`; open (focus close button, set `aria-expanded`, add `html.achievement-gallery-open`, dispatch `stage-overlay-close`, close any visible `[data-track-rub-panel]`), close on X / Escape / outside pointerdown with focus restore; also open on `achievement-gallery-open` event
-- [ ] T021 [US1] Exclusivity in `src/lib/achievement-gallery.ts`: close on `player-state-change` with `state === 'full'`, on `#legal-overlay [data-legal-panel]` becoming visible (MutationObserver), and on `html.site-nav-menu-open`
-- [ ] T022 [P] [US1] In `src/lib/stage-player.ts`, treat `html.achievement-gallery-open` as an open overlay in `isOverlayOpen()` and `collapseForOverlay()` so the full player collapses when the gallery opens
-- [ ] T023 [P] [US1] Add `[data-achievement-gallery]` and `[data-achievement-toggle]` to `CHROME_SELECTOR` in `src/lib/gesture-ignore.ts` and cover them in `src/lib/gesture-ignore.test.ts`
-- [ ] T024 [US1] Render `<AchievementGallery />` in `src/layouts/Base.astro` next to `TrackRubOverlay` and call `initAchievementGallery()` in the boot script (after `migrateLegacyKeys()`)
-- [ ] T025 [P] [US1] Create `scripts/check-secrets.mjs` (Node built-ins only) per contracts/achievements-module.md and chain it in `package.json` as `"build": "astro check && astro build && node scripts/check-secrets.mjs"`
+- [X] T018 [US1] Create `src/components/AchievementGallery.astro` per contracts/gallery-ui.md using `loadAchievementRegistry()`: `hidden` trophy toggle (`resolveHudIcon(chrome.achievementsIcon, 'trophy')`), dialog with close button, title, `aria-live` counter, `<ol>` of tiles — non-secret tiles with unlocked (`AchievementGlyph` + title + subtitle) and locked (`achievementLockedTitle` + hint) variants; secret tiles with only the `achievementSecretTitle` placeholder; plus `<template data-achievement-unlocked-template>` and one `<template data-achievement-glyph="{token}">` per glyph
+- [X] T019 [US1] Style `src/components/AchievementGallery.astro`: toggle fixed bottom-right mirroring the vinyl's offsets/size from `src/components/StagePlayer.astro`, hidden under `html[data-intro-pending]`/`html[data-intro-active]`; dialog frame reusing the rub panel look (dark rounded, theme tokens), internal scroll, no horizontal scroll at 320px; tile variants shown by `data-tile-kind`; reduced-motion removes entrance motion
+- [X] T020 [US1] Implement `src/lib/achievement-gallery.ts` `initAchievementGallery()`: on boot read `readAchievementState`, unhide toggle when available with ≥1 unlock, apply `tileViews` to `data-tile-kind`, fill unlocked secret tiles from the template with decoded copy from `getAchievement`, fill counter via `formatCounter`; open (focus close button, set `aria-expanded`, add `html.achievement-gallery-open`, dispatch `stage-overlay-close`, close any visible `[data-track-rub-panel]`), close on X / Escape / outside pointerdown with focus restore; also open on `achievement-gallery-open` event
+- [X] T021 [US1] Exclusivity in `src/lib/achievement-gallery.ts`: close on `player-state-change` with `state === 'full'`, on `#legal-overlay [data-legal-panel]` becoming visible (MutationObserver), and on `html.site-nav-menu-open`
+- [X] T022 [P] [US1] In `src/lib/stage-player.ts`, treat `html.achievement-gallery-open` as an open overlay in `isOverlayOpen()` and `collapseForOverlay()` so the full player collapses when the gallery opens
+- [X] T023 [P] [US1] Add `[data-achievement-gallery]` and `[data-achievement-toggle]` to `CHROME_SELECTOR` in `src/lib/gesture-ignore.ts` and cover them in `src/lib/gesture-ignore.test.ts`
+- [X] T024 [US1] Render `<AchievementGallery />` in `src/layouts/Base.astro` next to `TrackRubOverlay` and call `initAchievementGallery()` in the boot script (after `migrateLegacyKeys()`)
+- [X] T025 [P] [US1] Create `scripts/check-secrets.mjs` (Node built-ins only) per contracts/achievements-module.md and chain it in `package.json` as `"build": "astro check && astro build && node scripts/check-secrets.mjs"`
 
 **Checkpoint**: US1 works for visitors who already have unlocks (MVP); the build fails if secret copy leaks.
 
@@ -83,7 +83,7 @@ with the old rub key keeps it.
 
 **Independent Test**: Fresh browser → no icon; trigger an egg → icon appears with pulse; hover holds toast; click or Tab+Enter on toast opens gallery; no focus jump (quickstart #1–#6, #11).
 
-- [ ] T026 [US2] In `src/lib/achievement-gallery.ts`, listen for `achievement-unlocked`: unhide the toggle, refresh tiles (incl. filling a secret tile) and counter in place, and play a one-shot pulse with `playElementGlitch` only when `prefersGlitchMotion()` (no pulse under reduced motion)
+- [X] T026 [US2] In `src/lib/achievement-gallery.ts`, listen for `achievement-unlocked`: unhide the toggle, refresh tiles (incl. filling a secret tile) and counter in place, and play a one-shot pulse with `playElementGlitch` only when `prefersGlitchMotion()` (no pulse under reduced motion)
 - [X] T027 [US2] Turn the toast card in `src/components/TrackRubOverlay.astro` into `<button type="button" data-ve-achievement-open>` with `pointer-events: auto`; move `role="status"`/`aria-live` from the root to the `data-ve-achievement-announce` span; eyebrow text from `chrome.achievementUnlockedLabel` (via `getChrome()`), also exposed as `data-achievement-unlocked-label` on the root; visible focus style
 - [X] T028 [US2] In `src/lib/achievement-toast.ts`, pause hide timers on `pointerenter`/`focusin` and restart the hold on `pointerleave`/`focusout`; on card activation hide the toast immediately and dispatch `achievement-gallery-open`; never call `focus()`; SR announcement prefix from `data-achievement-unlocked-label`
 
@@ -97,7 +97,7 @@ with the old rub key keeps it.
 
 **Independent Test**: Change title, hint, secret flag, order in `src/data/achievements.json`; rebuild; toast and gallery reflect all; removing a required hint fails `npm run build` naming the entry (quickstart #16 + registry failure check).
 
-- [ ] T029 [US3] Verify the build-time failure path: temporarily break `src/data/achievements.json` (remove `infinite-spin` hint), confirm `npm run build` fails with a message naming `infinite-spin`, then revert
+- [X] T029 [US3] Verify the build-time failure path: temporarily break `src/data/achievements.json` (remove `infinite-spin` hint), confirm `npm run build` fails with a message naming `infinite-spin`, then revert
 - [ ] T030 [P] [US3] Add an "Achievements (easter eggs)" section to `docs/artist-guide.md`: file path, fields (`id`, `title`, `subtitle`, `glyph`, `secret`, `hint`), array order = tile order, secret behavior (write plain text; the site hides it automatically; ids must not hint at a secret), new achievements need a developer, run `npm run check` after edits
 - [ ] T031 [P] [US3] In `docs/artist-guide.md`, list the new gallery fields (and `achievementsIcon` override) in the UI chrome section, drop `playerAchievementTitle/Sub` mentions if any, and add achievement `id`s to "Stable ids — do not rename casually" (renaming resets visitors' progress)
 
@@ -111,8 +111,8 @@ with the old rub key keeps it.
 
 **Independent Test**: On dev, reset → reload → newcomer state; live build HTML has no reset control (quickstart #14–#15).
 
-- [ ] T032 [US4] In `src/components/AchievementGallery.astro`, render `<button data-achievement-reset>{achievementsResetLabel}</button>` only when `import.meta.env.DEV || isPreviewBuild()`
-- [ ] T033 [US4] In `src/lib/achievement-gallery.ts`, wire the reset button: `resetProgress()`, close the gallery, hide the toggle, reset tiles to locked/secret (remove filled secret content) and the counter
+- [X] T032 [US4] In `src/components/AchievementGallery.astro`, render `<button data-achievement-reset>{achievementsResetLabel}</button>` only when `import.meta.env.DEV || isPreviewBuild()`
+- [X] T033 [US4] In `src/lib/achievement-gallery.ts`, wire the reset button: `resetProgress()`, close the gallery, hide the toggle, reset tiles to locked/secret (remove filled secret content) and the counter
 
 **Checkpoint**: US1–US4 functional.
 
@@ -138,7 +138,7 @@ with the old rub key keeps it.
 
 ## Phase 8: Polish & Cross-Cutting Concerns
 
-- [ ] T041 [P] Ambient glitch on locked/secret tiles while the gallery is open, only when `prefersGlitchMotion()`, using the existing `createContinuousGlitch` pattern from `src/lib/glitch.ts`; stopped on close (research R10)
+- [X] T041 [P] Ambient glitch on locked/secret tiles while the gallery is open, only when `prefersGlitchMotion()`, using the existing `createContinuousGlitch` pattern from `src/lib/glitch.ts`; stopped on close (research R10)
 - [ ] T042 [P] Mark IDEA-026 `promoted` in `docs/ideas.md` with **Promoted to** `specs/036-achievement-gallery/`
 - [ ] T043 Run `npm test`, `npm run check`, `npm run build` (incl. `check-secrets.mjs`); confirm `dist/index.html` has no `data-achievement-reset` (SC-006) and `grep -ri "rubbing" dist/` returns nothing (SC-007)
 - [ ] T044 Hand quickstart.md manual checks (#1–#20) to the operator for browser verification (do not run browser automation)
