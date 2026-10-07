@@ -136,6 +136,16 @@ with the old rub key keeps it.
 
 ---
 
+## Phase 7b: User Story 6 - Fan controls the ultra glitch mode (Priority: P3)
+
+- [X] T046 [US6] Add chrome field `achievementWildToggleLabel` (default "Ultra glitch") to `src/content.config.ts`, `src/lib/stage.ts`, `src/content/ui/chrome.md`, and the artist guide's gallery chrome list
+- [X] T047 [US6] In `src/lib/demonic-combo.ts`, export `disableWildGlitch()` and `switchToNightmare()`
+- [X] T048 [US6] In `src/components/AchievementGallery.astro`, render a `role="switch"` button (`data-wild-toggle`) inside the unlocked variant of the `demonic-combo` tile, styled as an on/off pill
+- [X] T049 [US6] In `src/lib/achievement-gallery.ts`, sync the switch's `aria-checked` from `isWildGlitchActive()` on render and on `data-glitch-wild` changes; on click turn on (wild + Nightmare) or off (wild only)
+- [X] T050 [US6] Run `npm test` and `npm run build`; add quickstart check #21
+
+---
+
 ## Phase 8: Polish & Cross-Cutting Concerns
 
 - [X] T041 [P] Ambient glitch on locked/secret tiles while the gallery is open, only when `prefersGlitchMotion()`, using the existing `createContinuousGlitch` pattern from `src/lib/glitch.ts`; stopped on close (research R10)

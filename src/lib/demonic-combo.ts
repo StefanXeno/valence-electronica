@@ -32,11 +32,16 @@ export function enableWildGlitch(): void {
   document.documentElement.dataset[GLITCH_WILD_ATTR] = 'true';
 }
 
+/** Gallery switch (036): calm the stage again without a reload. */
+export function disableWildGlitch(): void {
+  delete document.documentElement.dataset[GLITCH_WILD_ATTR];
+}
+
 function unlockDemonicCombo() {
   unlockAchievement('demonic-combo');
 }
 
-function switchToNightmare() {
+export function switchToNightmare(): void {
   document.dispatchEvent(
     new CustomEvent(STAGE_SELECT_EVENT, { detail: { id: NIGHTMARE_STAGE_ID } }),
   );

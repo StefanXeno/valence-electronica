@@ -23,6 +23,12 @@ import {
 } from './achievements';
 import { closeTrackRubPanel } from './track-rub';
 import { playElementGlitch, prefersGlitchMotion } from './glitch';
+import {
+  disableWildGlitch,
+  enableWildGlitch,
+  isWildGlitchActive,
+  switchToNightmare,
+} from './demonic-combo';
 
 /** Must match `PLAYER_STATE_EVENT` / `STAGE_OVERLAY_CLOSE_EVENT` in stage-player.ts. */
 const PLAYER_STATE_EVENT = 'player-state-change';
@@ -56,6 +62,12 @@ export function initAchievementGallery(): void {
     'template[data-achievement-unlocked-template]',
   );
   const counterTemplate = gallery.dataset.counterTemplate || '{found} / {total} found';
+  const wildToggle = gallery.querySelector<HTMLButtonElement>('[data-wild-toggle]');
+
+  /** Ultra glitch switch mirrors `html[data-glitch-wild]` (666, #666, or the switch itself). */
+  const syncWildToggle = () => {
+    wildToggle?.setAttribute('aria-checked', isWildGlitchActive() ? 'true' : 'false');
+  };
 
   let returnFocus: HTMLElement | null = null;
   let lockedGlitchTimer: number | undefined;
@@ -104,6 +116,7 @@ export function initAchievementGallery(): void {
     }
     if (counter) counter.textContent = formatCounter(counterTemplate, countFound(list, state), list.length);
     toggle.hidden = !(state.available && countFound(list, state) > 0);
+    syncWildToggle();
   };
 
   const stopLockedGlitch = () => {
@@ -206,6 +219,20 @@ export function initAchievementGallery(): void {
   new MutationObserver(closeForOverlay).observe(document.documentElement, {
     attributes: true,
     attributeFilter: ['class'],
+  });
+
+  wildToggle?.addEventListener('click', () => {
+    if (isWildGlitchActive()) {
+      disableWildGlitch();
+    } else {
+      enableWildGlitch();
+      switchToNightmare();
+    }
+    syncWildToggle();
+  });
+  new MutationObserver(syncWildToggle).observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ['data-glitch-wild'],
   });
 
   resetBtn?.addEventListener('click', () => {

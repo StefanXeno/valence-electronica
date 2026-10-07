@@ -108,6 +108,22 @@ const showReset = import.meta.env.DEV || isPreviewBuild();
                   <span class="achievement-tile__copy">
                     <span class="achievement-tile__title">{achievement.title}</span>
                     <span class="achievement-tile__sub">{achievement.subtitle}</span>
+                    {achievement.id === 'demonic-combo' && (
+                      <button
+                        type="button"
+                        class="achievement-tile__switch glitch-hit"
+                        role="switch"
+                        aria-checked="false"
+                        data-wild-toggle
+                      >
+                        <span class="achievement-tile__switch-label">
+                          {chrome.achievementWildToggleLabel}
+                        </span>
+                        <span class="achievement-tile__switch-track" aria-hidden="true">
+                          <span class="achievement-tile__switch-thumb"></span>
+                        </span>
+                      </button>
+                    )}
                   </span>
                 </div>
                 <div class="achievement-tile__variant" data-variant="locked">
@@ -466,6 +482,68 @@ const showReset = import.meta.env.DEV || isPreviewBuild();
     overflow-wrap: anywhere;
   }
 
+  /* Ultra glitch on/off (Demonic Combination tile). */
+  .achievement-tile__switch {
+    appearance: none;
+    justify-self: start;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin: 0.35rem 0 0;
+    padding: 0.2rem 0;
+    border: 0;
+    background: transparent;
+    color: var(--color-text);
+    font-family: var(--font-display);
+    font-size: calc(0.6rem * var(--hud-scale));
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+
+  .achievement-tile__switch:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+    border-radius: 0.3rem;
+  }
+
+  .achievement-tile__switch-track {
+    position: relative;
+    width: 2.4em;
+    height: 1.35em;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--color-bg) 70%, transparent);
+    transition:
+      background 160ms ease,
+      border-color 160ms ease;
+  }
+
+  .achievement-tile__switch-thumb {
+    position: absolute;
+    top: 50%;
+    left: 0.15em;
+    width: 0.95em;
+    height: 0.95em;
+    border-radius: 999px;
+    background: var(--color-text-muted);
+    transform: translateY(-50%);
+    transition:
+      left 160ms ease,
+      background 160ms ease;
+  }
+
+  .achievement-tile__switch[aria-checked='true'] .achievement-tile__switch-track {
+    border-color: var(--color-accent);
+    background: color-mix(in srgb, var(--color-accent) 35%, transparent);
+  }
+
+  .achievement-tile__switch[aria-checked='true'] .achievement-tile__switch-thumb {
+    left: calc(100% - 1.1em);
+    background: var(--color-accent-alt);
+  }
+
   @keyframes achievement-toggle-pulse {
     0% {
       box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-accent) 70%, transparent);
@@ -506,7 +584,9 @@ const showReset = import.meta.env.DEV || isPreviewBuild();
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .achievement-dock__panel {
+    .achievement-dock__panel,
+    .achievement-tile__switch-track,
+    .achievement-tile__switch-thumb {
       transition: none;
     }
 

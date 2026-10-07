@@ -243,6 +243,9 @@ themselves live in their own file (see **Achievements** below).
 - `achievementsCloseLabel` — close button name (default: Close)
 - `achievementsResetLabel` — reset button, shown only on your computer and on the
   `/pre-release/` preview, never live (default: Reset achievements)
+- `achievementWildToggleLabel` — on/off switch on the unlocked Demonic Combination tile that
+  turns the extra-strong glitch mode on (and puts Nightmare on stage) or off for the visit
+  (default: Ultra glitch)
 
 **Discography (optional):**
 

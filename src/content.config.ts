@@ -183,6 +183,7 @@ const ui = defineCollection({
     achievementUnlockedLabel: z.string().optional(),
     achievementsCloseLabel: z.string().optional(),
     achievementsResetLabel: z.string().optional(),
+    achievementWildToggleLabel: z.string().optional(),
   }),
 });
 

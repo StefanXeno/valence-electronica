@@ -45,4 +45,5 @@ achievementSecretTitle: Secret achievement
 achievementUnlockedLabel: Achievement unlocked
 achievementsCloseLabel: Close
 achievementsResetLabel: Reset achievements
+achievementWildToggleLabel: Ultra glitch
 ---

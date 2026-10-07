@@ -24,6 +24,7 @@ overlays), `031-glitch-motion` (glitch language, reduced motion).
 - Q: How do keyboard users reach the toast? → A: The toast never takes focus on appear; it is reachable by Tab while visible and stays open while focused; the trophy icon is the primary keyboard path.
 - Q: Should secret achievements stay hidden from people reading the page source? → A: Yes, as far as a static site allows (option C): the unlocked copy of secret achievements is not in the HTML, is stored encoded (not plain text) in what the browser downloads, and the secret achievement gets a neutral id; the old storage key is migrated once so progress survives. Determined code readers can still decode it; that is accepted.
 - Q: (Operator review after the first build) How should the gallery look? → A: Exactly like the V-Flip player, mirrored: a panel that grows out of the trophy corner (bottom-right) with the trophy in its bottom row, not a centered window. The trophy glyph is larger on phones, the reset is an icon button, and the laptop socials move to bottom-center so they no longer collide with the trophy.
+- Q: Can visitors control the ultra glitch (wild) mode themselves once they found 666? → A: Yes — a switch "Ultra glitch" on the unlocked Demonic Combination tile. Turning it on also puts Nightmare on stage (like 666); turning it off leaves the stage as is. The setting lasts until reload only (no new storage key).
 - Q: Add an achievement for looking at the source code? → A: Yes — "Coder" ("Take a look at the source code"), last in the gallery, with a hint (not secret). Since a page cannot detect view-source, an HTML comment hidden mid-document (not at the top) tells readers to type "coder"; typing it unlocks the achievement.
 - Q: How do phone users (no hardware keyboard) trigger the typed combos? → A: Each typed combo also works as a URL hash: `#coder` unlocks Coder (the source comment mentions it for phones), and `#666` triggers the full demonic combo. The hash is removed from the address bar right after it fires. Shareable links are accepted.
 
@@ -186,6 +187,34 @@ confirm the toast and the unlocked tile.
 
 ---
 
+### User Story 6 - Fan controls the ultra glitch mode (Priority: P3)
+
+A visitor who unlocked "Demonic Combination" opens the gallery and finds an "Ultra glitch"
+switch on that tile. They switch it off to calm the stage, and back on to bring the
+Nightmare back.
+
+**Why this priority**: A reward for the 666 find; until now the wild mode could not be
+turned off without reloading.
+
+**Independent Test**: Unlock 666 (wild mode on), open the gallery, switch off → glitches
+calm down; switch on while another stage plays → Nightmare starts with wild glitches;
+reload → mode is off.
+
+**Acceptance Scenarios**:
+
+1. **Given** Demonic Combination is locked, **When** the gallery opens, **Then** no switch
+   is shown.
+2. **Given** it is unlocked, **When** the gallery opens, **Then** the switch shows the
+   current mode (on right after typing 666, otherwise off).
+3. **Given** the switch is off, **When** the visitor turns it on, **Then** wild mode starts
+   and Nightmare goes on stage.
+4. **Given** the switch is on, **When** the visitor turns it off, **Then** wild mode stops
+   and the stage stays as it is.
+5. **Given** any setting, **When** the page reloads, **Then** wild mode is off until 666 or
+   the switch turns it on again.
+
+---
+
 ### Edge Cases
 
 - **Storage blocked** (private mode, disabled site data): the icon never appears and the
@@ -265,6 +294,11 @@ confirm the toast and the unlocked tile.
 - **FR-015**: The feature MUST NOT add tracking, network requests, accounts, or storage
   beyond the achievement keys (existing ones plus the renamed `ve-achievement-rub`;
   constitution I, V).
+- **FR-022**: The unlocked Demonic Combination tile MUST offer an accessible on/off switch
+  (label from UI chrome) that reflects and sets the ultra glitch mode (`032` FR-010) for the
+  page session. Turning it on MUST also put Nightmare on stage; turning it off MUST NOT
+  change the stage. It MUST stay in sync when 666 / `#666` turns the mode on while the
+  gallery is open. No storage is used.
 - **FR-016a**: On laptop widths the social icons MUST sit bottom-center (labels reveal
   above), so the bottom corners stay free for the vinyl (left) and trophy (right).
 - **FR-016**: UI wording that is not per-achievement (icon label, panel title, counter
