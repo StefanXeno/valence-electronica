@@ -184,6 +184,7 @@ const ui = defineCollection({
     achievementsCloseLabel: z.string().optional(),
     achievementsResetLabel: z.string().optional(),
     achievementWildToggleLabel: z.string().optional(),
+    achievementWildWarning: z.string().optional(),
   }),
 });
 

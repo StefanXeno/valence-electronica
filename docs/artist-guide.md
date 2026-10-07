@@ -243,9 +243,12 @@ themselves live in their own file (see **Achievements** below).
 - `achievementsCloseLabel` — close button name (default: Close)
 - `achievementsResetLabel` — reset button, shown only on your computer and on the
   `/pre-release/` preview, never live (default: Reset achievements)
-- `achievementWildToggleLabel` — on/off switch on the unlocked Demonic Combination tile that
-  turns the extra-strong glitch mode on (and puts Nightmare on stage) or off for the visit
-  (default: Ultra glitch)
+- `achievementWildToggleLabel` — on/off switch inside the unlocked Demonic Combination tile
+  (tap the tile to expand it) that turns the extra-strong glitch mode on (and puts Nightmare
+  on stage) or off for the visit (default: Ultra glitch). Typing 666 no longer starts this
+  mode by itself.
+- `achievementWildWarning` — photosensitivity warning shown right above that switch. Keep a
+  clear warning here; do not remove it.
 
 **Discography (optional):**
 

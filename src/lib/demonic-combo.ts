@@ -1,6 +1,7 @@
 /**
- * Easter egg: type 666 (or open the page with `#666`) → switch to the Nightmare stage,
- * unlock achievement, and crank HUD glitch intensity for the rest of the page session.
+ * Easter egg: type 666 (or open the page with `#666`) → switch to the Nightmare stage and
+ * unlock the achievement. The ultra glitch mode it rewards is opt-in only (gallery switch,
+ * behind a photosensitivity warning), so it never starts on its own (036).
  */
 
 import { unlockAchievement } from './achievement-toast';
@@ -32,7 +33,7 @@ export function enableWildGlitch(): void {
   document.documentElement.dataset[GLITCH_WILD_ATTR] = 'true';
 }
 
-/** Gallery switch (036): calm the stage again without a reload. */
+/** Gallery switch (036): back to normal Nightmare glitches without a reload. */
 export function disableWildGlitch(): void {
   delete document.documentElement.dataset[GLITCH_WILD_ATTR];
 }
@@ -48,7 +49,6 @@ export function switchToNightmare(): void {
 }
 
 function fireDemonicCombo() {
-  enableWildGlitch();
   switchToNightmare();
   unlockDemonicCombo();
 }

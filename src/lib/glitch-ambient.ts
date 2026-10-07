@@ -164,6 +164,9 @@ function randMs(min: number, max: number): number {
   return min + Math.random() * (max - min);
 }
 
+/** Photosensitivity guard (036): one wild glitch per surface per second at most. */
+const WILD_SURFACE_COOLDOWN_MS = 1000;
+
 export type AmbientGlitchField = {
   start(): void;
   stop(): void;
@@ -177,6 +180,8 @@ export function createAmbientGlitchField(root: ParentNode = document): AmbientGl
   let timer: number | undefined;
   const pending = new Set<HTMLElement>();
   const cleanups: number[] = [];
+  /** Wild: when each surface last glitched — at most once per WILD_SURFACE_COOLDOWN_MS. */
+  const lastWildAt = new WeakMap<HTMLElement, number>();
 
   const clearPending = (el: HTMLElement) => {
     pending.delete(el);
@@ -214,16 +219,25 @@ export function createAmbientGlitchField(root: ParentNode = document): AmbientGl
     const candidates = wild
       ? collectWildAmbientGlitchTargets(doc)
       : collectAmbientGlitchTargets(root);
-    const idle = candidates.filter((el) => !isBusy(el) && isLaidOut(el));
+    const now = performance.now();
+    const idle = candidates.filter(
+      (el) =>
+        !isBusy(el) &&
+        isLaidOut(el) &&
+        (!wild || now - (lastWildAt.get(el) ?? -Infinity) >= WILD_SURFACE_COOLDOWN_MS),
+    );
 
     if (idle.length > 0 && pending.size < maxPending) {
       // Wild: a few surfaces per tick — stage-wide, not a strobe wall.
-      const burst = wild ? Math.min(3, idle.length, maxPending - pending.size) : 1;
+      const burst = wild ? Math.min(2, idle.length, maxPending - pending.size) : 1;
       for (let i = 0; i < burst; i++) {
         const pool = idle.filter((el) => !pending.has(el));
         if (pool.length === 0) break;
         const pick = pool[Math.floor(Math.random() * pool.length)];
-        if (wild) ensureWildGlitchSurface(pick);
+        if (wild) {
+          ensureWildGlitchSurface(pick);
+          lastWildAt.set(pick, now);
+        }
         const dur = playElementGlitch(pick, AMBIENT_GLITCH_CLASS);
         if (dur) {
           pending.add(pick);
@@ -241,7 +255,7 @@ export function createAmbientGlitchField(root: ParentNode = document): AmbientGl
     }
 
     // Irregular cadence so the field never reads as one global blink.
-    timer = window.setTimeout(tick, wild ? randMs(140, 380) : randMs(520, 1280));
+    timer = window.setTimeout(tick, wild ? randMs(320, 700) : randMs(520, 1280));
   };
 
   const onVisibility = () => {

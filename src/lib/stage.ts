@@ -82,6 +82,7 @@ export interface UiChrome {
   achievementsCloseLabel: string;
   achievementsResetLabel: string;
   achievementWildToggleLabel: string;
+  achievementWildWarning: string;
 }
 
 export interface SiteContactLink {
@@ -167,6 +168,8 @@ const CHROME_FALLBACK: UiChrome = {
   achievementsCloseLabel: 'Close',
   achievementsResetLabel: 'Reset achievements',
   achievementWildToggleLabel: 'Ultra glitch',
+  achievementWildWarning:
+    'Contains rapid flashing and flickering. It may trigger seizures in people with photosensitive epilepsy.',
 };
 
 export interface ShowItem {
@@ -293,6 +296,8 @@ export async function getChrome(): Promise<UiChrome> {
       entry.data.achievementsResetLabel?.trim() || CHROME_FALLBACK.achievementsResetLabel,
     achievementWildToggleLabel:
       entry.data.achievementWildToggleLabel?.trim() || CHROME_FALLBACK.achievementWildToggleLabel,
+    achievementWildWarning:
+      entry.data.achievementWildWarning?.trim() || CHROME_FALLBACK.achievementWildWarning,
   };
 }
 

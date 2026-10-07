@@ -64,6 +64,22 @@ export function initAchievementGallery(): void {
   const counterTemplate = gallery.dataset.counterTemplate || '{found} / {total} found';
   const wildToggle = gallery.querySelector<HTMLButtonElement>('[data-wild-toggle]');
 
+  /** Accordion rows: unlocked tiles with options (Demonic Combination → ultra glitch). */
+  const setExpanded = (tile: HTMLElement, expanded: boolean) => {
+    const button = tile.querySelector<HTMLElement>('[data-tile-expand]');
+    const options = tile.querySelector<HTMLElement>('[data-tile-options]');
+    if (!button || !options) return;
+    button.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+    options.hidden = !expanded;
+  };
+
+  gallery.querySelectorAll<HTMLElement>('[data-tile-expand]').forEach((button) => {
+    button.addEventListener('click', () => {
+      const tile = button.closest<HTMLElement>('[data-achievement-tile]');
+      if (tile) setExpanded(tile, button.getAttribute('aria-expanded') !== 'true');
+    });
+  });
+
   /** Ultra glitch switch mirrors `html[data-glitch-wild]` (666, #666, or the switch itself). */
   const syncWildToggle = () => {
     wildToggle?.setAttribute('aria-checked', isWildGlitchActive() ? 'true' : 'false');
@@ -107,7 +123,11 @@ export function initAchievementGallery(): void {
       if (!tile) continue;
       tile.dataset.tileKind = view.kind;
       if (view.kind === 'unlocked') fillSecretTile(tile);
-      else clearSecretTile(tile);
+      else {
+        clearSecretTile(tile);
+        // A re-locked tile (reset) must not leave its options open.
+        setExpanded(tile, false);
+      }
       tile.querySelectorAll<HTMLElement>('[data-variant]').forEach((variant) => {
         const name = variant.dataset.variant;
         variant.hidden =

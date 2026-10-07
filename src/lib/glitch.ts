@@ -193,7 +193,10 @@ export const GLITCH_PRESETS: readonly GlitchPreset[] = Array.from({ length: PRES
   makePreset(i),
 );
 
-function pickPreset(previousIndex?: number): { preset: GlitchPreset; index: number } {
+function pickPreset(
+  previousIndex?: number,
+  excludeStyle?: GlitchPreset['style'],
+): { preset: GlitchPreset; index: number } {
   if (GLITCH_PRESETS.length === 1) {
     return { preset: GLITCH_PRESETS[0], index: 0 };
   }
@@ -205,6 +208,7 @@ function pickPreset(previousIndex?: number): { preset: GlitchPreset; index: numb
 
   // Prefer a different style family than last time on this element
   const candidates = GLITCH_PRESETS.map((_, i) => i).filter((i) => {
+    if (excludeStyle && GLITCH_PRESETS[i].style === excludeStyle) return false;
     if (previousIndex !== undefined && i === previousIndex) return false;
     if (prevStyle && GLITCH_PRESETS[i].style === prevStyle) return false;
     return true;
@@ -213,14 +217,19 @@ function pickPreset(previousIndex?: number): { preset: GlitchPreset; index: numb
   const pool =
     candidates.length > 0
       ? candidates
-      : GLITCH_PRESETS.map((_, i) => i).filter((i) => i !== previousIndex);
+      : GLITCH_PRESETS.map((_, i) => i).filter(
+          (i) => i !== previousIndex && GLITCH_PRESETS[i].style !== excludeStyle,
+        );
   const index = pool[Math.floor(Math.random() * pool.length)] ?? 0;
   return { preset: GLITCH_PRESETS[index], index };
 }
 
 const STYLE_ATTR = 'data-glitch-style';
 
-/** Demonic combo (666) — hotter than base Nightmare, not full seizure. */
+/**
+ * Ultra glitch (opt-in via the gallery switch) — bigger moves than base Nightmare, but never
+ * faster: photosensitivity (036). Speed stays at the base preset; `blink` is excluded.
+ */
 function amplifyForWild(preset: GlitchPreset): GlitchPreset {
   const move = 2.4;
   const skew = 2.6;
@@ -236,7 +245,7 @@ function amplifyForWild(preset: GlitchPreset): GlitchPreset {
     sb: preset.sb * skew,
     sc: preset.sc * skew,
     scale: 1 + (preset.scale - 1) * 2.8,
-    dur: Math.min(640, Math.max(180, Math.floor(preset.dur * 0.55))),
+    dur: preset.dur,
     scan: Math.min(1, preset.scan * 1.35),
   };
 }
@@ -244,8 +253,13 @@ function amplifyForWild(preset: GlitchPreset): GlitchPreset {
 /** Apply one preset onto an element as CSS custom properties + style family. */
 export function applyGlitchPreset(el: HTMLElement): GlitchPreset {
   const prev = Number.parseInt(el.dataset.glitchPreset ?? '', 10);
-  const { preset: base, index } = pickPreset(Number.isFinite(prev) ? prev : undefined);
-  const preset = isWildGlitchActive() ? amplifyForWild(base) : base;
+  const wild = isWildGlitchActive();
+  // Wild mode drops the opacity-flicker family: hard brightness jumps are the flash risk.
+  const { preset: base, index } = pickPreset(
+    Number.isFinite(prev) ? prev : undefined,
+    wild ? 'blink' : undefined,
+  );
+  const preset = wild ? amplifyForWild(base) : base;
   el.dataset.glitchPreset = String(index);
   el.setAttribute(STYLE_ATTR, preset.style);
 

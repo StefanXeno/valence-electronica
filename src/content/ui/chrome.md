@@ -46,4 +46,5 @@ achievementUnlockedLabel: Achievement unlocked
 achievementsCloseLabel: Close
 achievementsResetLabel: Reset achievements
 achievementWildToggleLabel: Ultra glitch
+achievementWildWarning: Contains rapid flashing and flickering. It may trigger seizures in people with photosensitive epilepsy.
 ---

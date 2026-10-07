@@ -16,6 +16,8 @@ import HudIcon from './HudIcon.astro';
 const chrome = await getChrome();
 const achievements = loadAchievementRegistry();
 const showReset = import.meta.env.DEV || isPreviewBuild();
+/** Unlocked tiles that expand to show options (Demonic Combination → ultra glitch). */
+const OPTION_TILES = new Set(['demonic-combo']);
 ---
 
 <div
@@ -101,31 +103,85 @@ const showReset = import.meta.env.DEV || isPreviewBuild();
               </div>
             ) : (
               <>
-                <div class="achievement-tile__variant" data-variant="unlocked" hidden>
-                  <span class="achievement-tile__glyph" aria-hidden="true">
-                    <AchievementGlyph glyph={achievement.glyph} />
-                  </span>
-                  <span class="achievement-tile__copy">
-                    <span class="achievement-tile__title">{achievement.title}</span>
-                    <span class="achievement-tile__sub">{achievement.subtitle}</span>
-                    {achievement.id === 'demonic-combo' && (
-                      <button
-                        type="button"
-                        class="achievement-tile__switch glitch-hit"
-                        role="switch"
-                        aria-checked="false"
-                        data-wild-toggle
-                      >
-                        <span class="achievement-tile__switch-label">
+                {OPTION_TILES.has(achievement.id) ? (
+                  <>
+                    {/* Tiles with options expand like an accordion row. */}
+                    <button
+                      type="button"
+                      class="achievement-tile__variant achievement-tile__variant--expandable"
+                      data-variant="unlocked"
+                      data-tile-expand
+                      aria-expanded="false"
+                      aria-controls={`achievement-options-${achievement.id}`}
+                      hidden
+                    >
+                      <span class="achievement-tile__glyph" aria-hidden="true">
+                        <AchievementGlyph glyph={achievement.glyph} />
+                      </span>
+                      <span class="achievement-tile__copy">
+                        <span class="achievement-tile__title">{achievement.title}</span>
+                        <span class="achievement-tile__sub">{achievement.subtitle}</span>
+                      </span>
+                      <svg class="achievement-tile__chevron" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          d="m6 9 6 6 6-6"
+                        />
+                      </svg>
+                    </button>
+                    <div
+                      class="achievement-tile__options"
+                      id={`achievement-options-${achievement.id}`}
+                      data-tile-options
+                      hidden
+                    >
+                      <p class="achievement-tile__warning" id="achievement-wild-warning">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                          <path
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="1.8"
+                            stroke-linejoin="round"
+                            d="M12 3.5 2.8 19.5h18.4L12 3.5z"
+                          />
+                          <path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M12 9.5v4.5" />
+                          <circle cx="12" cy="16.8" r="1.05" fill="currentColor" />
+                        </svg>
+                        <span>{chrome.achievementWildWarning}</span>
+                      </p>
+                      <div class="achievement-tile__setting">
+                        <span class="achievement-tile__setting-label" id="achievement-wild-label">
                           {chrome.achievementWildToggleLabel}
                         </span>
-                        <span class="achievement-tile__switch-track" aria-hidden="true">
+                        <button
+                          type="button"
+                          class="achievement-tile__switch"
+                          role="switch"
+                          aria-checked="false"
+                          aria-labelledby="achievement-wild-label"
+                          aria-describedby="achievement-wild-warning"
+                          data-wild-toggle
+                        >
                           <span class="achievement-tile__switch-thumb"></span>
-                        </span>
-                      </button>
-                    )}
-                  </span>
-                </div>
+                        </button>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <div class="achievement-tile__variant" data-variant="unlocked" hidden>
+                    <span class="achievement-tile__glyph" aria-hidden="true">
+                      <AchievementGlyph glyph={achievement.glyph} />
+                    </span>
+                    <span class="achievement-tile__copy">
+                      <span class="achievement-tile__title">{achievement.title}</span>
+                      <span class="achievement-tile__sub">{achievement.subtitle}</span>
+                    </span>
+                  </div>
+                )}
                 <div class="achievement-tile__variant" data-variant="locked">
                   <span class="achievement-tile__glyph achievement-tile__glyph--locked" aria-hidden="true">
                     ?
@@ -391,7 +447,9 @@ const showReset = import.meta.env.DEV || isPreviewBuild();
     min-height: 0;
     margin: 0;
     padding: 0;
-    overflow: auto;
+    /* Glitch scanline pseudo-elements must not spawn a horizontal scrollbar. */
+    overflow-x: hidden;
+    overflow-y: auto;
     list-style: none;
   }
 
@@ -482,50 +540,119 @@ const showReset = import.meta.env.DEV || isPreviewBuild();
     overflow-wrap: anywhere;
   }
 
-  /* Ultra glitch on/off (Demonic Combination tile). */
-  .achievement-tile__switch {
+  /* —— Expandable tile (Demonic Combination → ultra glitch) —— */
+
+  .achievement-tile__variant--expandable {
     appearance: none;
-    justify-self: start;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.6rem;
-    margin: 0.35rem 0 0;
-    padding: 0.2rem 0;
-    border: 0;
-    background: transparent;
-    color: var(--color-text);
-    font-family: var(--font-display);
-    font-size: calc(0.6rem * var(--hud-scale));
-    font-weight: 600;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
+    width: 100%;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    margin: 0;
+    font: inherit;
+    text-align: left;
+    color: inherit;
     cursor: pointer;
   }
 
-  .achievement-tile__switch:focus-visible {
-    outline: 2px solid var(--color-accent);
-    outline-offset: 3px;
-    border-radius: 0.3rem;
+  .achievement-tile__variant--expandable:hover {
+    border-color: color-mix(in srgb, var(--color-accent) 60%, var(--color-border));
   }
 
-  .achievement-tile__switch-track {
-    position: relative;
-    width: 2.4em;
+  .achievement-tile__variant--expandable:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  .achievement-tile__chevron {
+    width: calc(1rem * var(--hud-scale));
+    height: calc(1rem * var(--hud-scale));
+    color: var(--color-text-muted);
+    transition: transform var(--dock-dur) var(--dock-ease);
+  }
+
+  .achievement-tile__variant--expandable[aria-expanded='true'] {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+
+  .achievement-tile__variant--expandable[aria-expanded='true'] .achievement-tile__chevron {
+    transform: rotate(180deg);
+  }
+
+  .achievement-tile__options {
+    display: grid;
+    gap: calc(0.45rem * var(--hud-scale));
+    padding: 0.6rem 0.75rem 0.7rem;
+    border: 1px solid color-mix(in srgb, var(--color-border) 70%, transparent);
+    border-top: 0;
+    border-left: 3px solid var(--color-accent);
+    border-radius: 0 0 0.55rem 0.55rem;
+    background: color-mix(in srgb, var(--color-bg) 60%, transparent);
+  }
+
+  .achievement-tile__options[hidden] {
+    display: none;
+  }
+
+  .achievement-tile__warning {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 0.5rem;
+    align-items: start;
+    margin: 0;
+    font-size: calc(0.55rem * var(--hud-scale));
+    line-height: 1.4;
+    color: var(--color-text-muted);
+  }
+
+  .achievement-tile__warning svg {
+    width: 1.35em;
     height: 1.35em;
+    color: var(--color-accent-alt);
+  }
+
+  .achievement-tile__setting {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+
+  .achievement-tile__setting-label {
+    font-size: calc(0.6rem * var(--hud-scale));
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  /* Switch = the track itself; the thumb slides inside. */
+  .achievement-tile__switch {
+    appearance: none;
+    position: relative;
+    flex: 0 0 auto;
+    width: calc(2.3rem * var(--hud-scale));
+    height: calc(1.3rem * var(--hud-scale));
+    margin: 0;
+    padding: 0;
     border: 1px solid var(--color-border);
     border-radius: 999px;
-    background: color-mix(in srgb, var(--color-bg) 70%, transparent);
+    background: color-mix(in srgb, var(--color-bg) 75%, transparent);
+    cursor: pointer;
     transition:
       background 160ms ease,
       border-color 160ms ease;
   }
 
+  .achievement-tile__switch:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+  }
+
   .achievement-tile__switch-thumb {
     position: absolute;
     top: 50%;
-    left: 0.15em;
-    width: 0.95em;
-    height: 0.95em;
+    left: 3px;
+    width: calc(1.3rem * var(--hud-scale) - 8px);
+    height: calc(1.3rem * var(--hud-scale) - 8px);
     border-radius: 999px;
     background: var(--color-text-muted);
     transform: translateY(-50%);
@@ -534,14 +661,14 @@ const showReset = import.meta.env.DEV || isPreviewBuild();
       background 160ms ease;
   }
 
-  .achievement-tile__switch[aria-checked='true'] .achievement-tile__switch-track {
+  .achievement-tile__switch[aria-checked='true'] {
     border-color: var(--color-accent);
-    background: color-mix(in srgb, var(--color-accent) 35%, transparent);
+    background: color-mix(in srgb, var(--color-accent) 40%, transparent);
   }
 
   .achievement-tile__switch[aria-checked='true'] .achievement-tile__switch-thumb {
-    left: calc(100% - 1.1em);
-    background: var(--color-accent-alt);
+    left: calc(100% - 3px - (1.3rem * var(--hud-scale) - 8px));
+    background: var(--color-text);
   }
 
   @keyframes achievement-toggle-pulse {
@@ -581,11 +708,40 @@ const showReset = import.meta.env.DEV || isPreviewBuild();
     .achievement-dock__counter {
       font-size: 1.15rem;
     }
+
+    .achievement-tile__warning {
+      font-size: 0.85rem;
+    }
+
+    .achievement-tile__setting-label {
+      font-size: 0.85rem;
+    }
+
+    .achievement-tile__chevron {
+      width: 1.4rem;
+      height: 1.4rem;
+    }
+
+    /* Thumb-friendly switch on phones. */
+    .achievement-tile__switch {
+      width: 3.4rem;
+      height: 1.95rem;
+    }
+
+    .achievement-tile__switch-thumb {
+      width: calc(1.95rem - 8px);
+      height: calc(1.95rem - 8px);
+    }
+
+    .achievement-tile__switch[aria-checked='true'] .achievement-tile__switch-thumb {
+      left: calc(100% - 3px - (1.95rem - 8px));
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {
     .achievement-dock__panel,
-    .achievement-tile__switch-track,
+    .achievement-tile__chevron,
+    .achievement-tile__switch,
     .achievement-tile__switch-thumb {
       transition: none;
     }
