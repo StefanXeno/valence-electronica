@@ -7,6 +7,7 @@ import {
   loadTaglinePool,
   matchesTimeRule,
   nextRotationIndex,
+  splitTaglineLink,
   validateTaglinePool,
   type TaglineLine,
   type TaglinePool,
@@ -102,7 +103,10 @@ describe('buildEligibleSet', () => {
     const wednesdayNight = new Date('2026-09-08T22:30:00Z'); // 00:30 Europe/Berlin, Wed 9 Sep
     const eligible = buildEligibleSet(shipped, wednesdayNight);
     expect(eligible[0]).toEqual({ text: 'Still awake?' });
-    expect(eligible.some((line) => line.text === "Something's coming for you.")).toBe(true);
+    // Any normal (rule-free) line from the shipped pool — copy edits must not break this test.
+    const normal = shipped.lines.find((line) => !line.rules?.length)?.text.trim();
+    expect(normal).toBeTruthy();
+    expect(eligible.some((line) => line.text === normal)).toBe(true);
     expect(eligible.some((line) => line.text === 'Friday night mode.')).toBe(false);
     expect(eligible.length).toBeGreaterThan(2);
   });
@@ -190,5 +194,42 @@ describe('tagline rotation interval', () => {
       true,
     );
     expect(taglineTextsEqual('Line A.', 'Line B.')).toBe(false);
+  });
+});
+
+describe('tagline links', () => {
+  const linked: TaglineLine = {
+    text: 'Made by StefanXeno',
+    url: 'https://github.com/StefanXeno',
+    linkText: 'StefanXeno',
+  };
+
+  it('accepts an https url with a linkText inside the line', () => {
+    expect(() => validateTaglinePool({ timezone: BERLIN_TIMEZONE, lines: [linked] })).not.toThrow();
+  });
+
+  it.each([
+    ['a non-https url', { ...linked, url: 'http://github.com/StefanXeno' }, /https/],
+    ['a relative url', { ...linked, url: '/about' }, /https/],
+    ['linkText without url', { text: 'Made by StefanXeno', linkText: 'StefanXeno' }, /needs a "url"/],
+    ['linkText outside the line', { ...linked, linkText: 'Valence' }, /part of "text"/],
+  ])('rejects %s', (_label, line, message) => {
+    expect(() => validateTaglinePool({ timezone: BERLIN_TIMEZONE, lines: [line as TaglineLine] })).toThrow(
+      message,
+    );
+  });
+
+  it('keeps url and linkText on eligible lines', () => {
+    const [line] = buildEligibleSet({ timezone: BERLIN_TIMEZONE, lines: [linked] });
+    expect(line).toEqual(linked);
+  });
+
+  it('splits only the linkText into the link', () => {
+    expect(splitTaglineLink(linked)).toEqual({ before: 'Made by ', link: 'StefanXeno', after: '' });
+  });
+
+  it('links the whole line without linkText, and nothing without url', () => {
+    expect(splitTaglineLink({ text: 'Hi', url: 'https://x.test' })).toEqual({ before: '', link: 'Hi', after: '' });
+    expect(splitTaglineLink({ text: 'Hi' })).toBeNull();
   });
 });

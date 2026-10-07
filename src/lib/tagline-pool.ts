@@ -27,6 +27,10 @@ export type TaglineRule = TaglineDateRule | TaglineRangeRule | TaglineWeekdayRul
 
 export type TaglineLine = {
   text: string;
+  /** Optional link target (https) — opens in a new tab. */
+  url?: string;
+  /** Part of `text` that becomes the link; the whole line when omitted. */
+  linkText?: string;
   weight?: number;
   rules?: TaglineRule[];
 };
@@ -38,7 +42,34 @@ export type TaglinePool = {
 
 export type EligibleTagline = {
   text: string;
+  url?: string;
+  linkText?: string;
 };
+
+function eligibleLine(line: TaglineLine): EligibleTagline {
+  const text = line.text.trim();
+  const url = line.url?.trim();
+  if (!url) return { text };
+  const linkText = line.linkText?.trim();
+  return linkText ? { text, url, linkText } : { text, url };
+}
+
+/** Split a line around its link so only `linkText` (or the whole line) is clickable. */
+export function splitTaglineLink(line: EligibleTagline): {
+  before: string;
+  link: string;
+  after: string;
+} | null {
+  if (!line.url) return null;
+  const linkText = line.linkText ?? line.text;
+  const at = line.text.indexOf(linkText);
+  if (at < 0) return { before: '', link: line.text, after: '' };
+  return {
+    before: line.text.slice(0, at),
+    link: linkText,
+    after: line.text.slice(at + linkText.length),
+  };
+}
 
 export type BerlinTimeParts = {
   hour: number;
@@ -186,11 +217,10 @@ function isEasterEggLine(line: TaglineLine): boolean {
 function expandNormalLines(lines: TaglineLine[]): EligibleTagline[] {
   const expanded: EligibleTagline[] = [];
   for (const line of lines) {
-    const text = line.text.trim();
-    if (!text) continue;
+    if (!line.text.trim()) continue;
     const weight = line.weight ?? 1;
     for (let step = 0; step < weight; step += 1) {
-      expanded.push({ text });
+      expanded.push(eligibleLine(line));
     }
   }
   return expanded;
@@ -204,7 +234,7 @@ export function buildEligibleSet(pool: TaglinePool, now: Date = new Date()): Eli
   for (const line of pool.lines) {
     if (!isEasterEggLine(line)) continue;
     if (lineRulesMatch(line, calendar, clock)) {
-      easterEggs.push({ text: line.text.trim() });
+      easterEggs.push(eligibleLine(line));
     }
   }
 
@@ -307,6 +337,25 @@ export function validateTaglinePool(pool: TaglinePool): void {
     const label = lineLabel(index, line?.text ?? '');
     if (!line || typeof line.text !== 'string' || !line.text.trim()) {
       throw new Error(`[tagline-pool] ${label}: missing non-empty "text"`);
+    }
+    if (line.url !== undefined) {
+      let parsed: URL | undefined;
+      try {
+        parsed = new URL(line.url);
+      } catch {
+        parsed = undefined;
+      }
+      if (parsed?.protocol !== 'https:') {
+        throw new Error(`[tagline-pool] ${label}: url must be a full https:// link`);
+      }
+    }
+    if (line.linkText !== undefined) {
+      if (line.url === undefined) {
+        throw new Error(`[tagline-pool] ${label}: linkText needs a "url"`);
+      }
+      if (!line.linkText.trim() || !line.text.includes(line.linkText.trim())) {
+        throw new Error(`[tagline-pool] ${label}: linkText must be part of "text"`);
+      }
     }
     if (line.weight !== undefined) {
       if (!Number.isInteger(line.weight) || line.weight < 1) {

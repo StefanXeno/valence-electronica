@@ -7,6 +7,7 @@ import {
   loadTaglinePool,
   nextRotationIndex,
   readTaglineRotationMsFromLocation,
+  splitTaglineLink,
   taglineTextsEqual,
   type EligibleTagline,
 } from './tagline-pool';
@@ -16,6 +17,22 @@ const GLITCH_SWAP_RATIO = 0.45;
 
 /** Shown under the Valence logo after a successful rub reveal — page lifetime only. */
 export const RUB_SUCCESS_TAGLINE = 'You know how to rub ^^';
+
+/** Write one line into the tagline node; `linkText` (or the whole line) links to `url`. */
+function renderLine(root: HTMLElement, line: EligibleTagline): void {
+  const parts = splitTaglineLink(line);
+  if (!parts || !line.url) {
+    root.textContent = formatTagline(line.text);
+    return;
+  }
+  const link = document.createElement('a');
+  link.className = 'tagline__link';
+  link.href = line.url;
+  link.target = '_blank';
+  link.rel = 'noopener noreferrer';
+  link.textContent = parts.link;
+  root.replaceChildren(formatTagline(parts.before), link, formatTagline(parts.after));
+}
 
 type ActiveRotator = {
   pin: (text: string) => void;
@@ -122,15 +139,15 @@ export function initTaglineRotator(root: HTMLElement, fallbackText: string): () 
     }, rotationMs);
   };
 
-  const applyInstant = (text: string) => {
+  const applyInstant = (line: EligibleTagline) => {
     if (pinned) return;
-    root.textContent = formatTagline(text);
+    renderLine(root, line);
     root.removeAttribute('data-tagline-phase');
-    currentText = text;
+    currentText = line.text;
   };
 
-  const applyWithFade = async (text: string) => {
-    if (pinned || taglineTextsEqual(text, currentText)) return;
+  const applyWithFade = async (line: EligibleTagline) => {
+    if (pinned || taglineTextsEqual(line.text, currentText)) return;
 
     root.removeAttribute('data-tagline-phase');
     await nextFrame();
@@ -141,24 +158,24 @@ export function initTaglineRotator(root: HTMLElement, fallbackText: string): () 
     await waitForMotionEnd(root);
     if (disposed || pinned) return;
 
-    root.textContent = formatTagline(text);
+    renderLine(root, line);
     root.dataset.taglinePhase = 'in';
     await waitForMotionEnd(root);
     if (disposed || pinned) return;
 
     root.removeAttribute('data-tagline-phase');
-    currentText = text;
+    currentText = line.text;
   };
 
-  const applyWithGlitch = async (text: string) => {
-    if (pinned || taglineTextsEqual(text, currentText)) return;
+  const applyWithGlitch = async (line: EligibleTagline) => {
+    if (pinned || taglineTextsEqual(line.text, currentText)) return;
 
     root.removeAttribute('data-tagline-phase');
     clearGlitchState();
 
     const dur = playElementGlitch(root, 'is-glitching');
     if (!dur) {
-      applyInstant(text);
+      applyInstant(line);
       return;
     }
 
@@ -166,8 +183,8 @@ export function initTaglineRotator(root: HTMLElement, fallbackText: string): () 
     await waitMs(swapAt);
     if (disposed || pinned) return;
 
-    root.textContent = formatTagline(text);
-    currentText = text;
+    renderLine(root, line);
+    currentText = line.text;
 
     await waitMs(dur + 80 - swapAt);
     if (disposed || pinned) return;
@@ -175,16 +192,16 @@ export function initTaglineRotator(root: HTMLElement, fallbackText: string): () 
     clearGlitchState();
   };
 
-  const showLine = (text: string, animate: boolean) => {
-    if (pinned || taglineTextsEqual(text, currentText)) return Promise.resolve();
+  const showLine = (line: EligibleTagline, animate: boolean) => {
+    if (pinned || taglineTextsEqual(line.text, currentText)) return Promise.resolve();
     if (!animate || prefersReducedMotion()) {
-      applyInstant(text);
+      applyInstant(line);
       return Promise.resolve();
     }
     if (isGlitchThemeActive()) {
-      return applyWithGlitch(text);
+      return applyWithGlitch(line);
     }
-    return applyWithFade(text);
+    return applyWithFade(line);
   };
 
   const syncEligibleSet = () => {
@@ -197,21 +214,21 @@ export function initTaglineRotator(root: HTMLElement, fallbackText: string): () 
 
     syncEligibleSet();
     if (eligible.length === 0) {
-      applyInstant(fallbackText);
+      applyInstant({ text: fallbackText });
       clearRotationTimer();
       return;
     }
 
     const nextIndex = nextRotationIndex(index, eligible.length);
-    const nextText = eligible[nextIndex]?.text;
-    if (!nextText) {
+    const next = eligible[nextIndex];
+    if (!next?.text) {
       scheduleNextRotation();
       return;
     }
 
     index = nextIndex;
-    const animate = !taglineTextsEqual(nextText, currentText);
-    await showLine(nextText, animate);
+    const animate = !taglineTextsEqual(next.text, currentText);
+    await showLine(next, animate);
     if (disposed || pinned) return;
     scheduleNextRotation();
   };
@@ -220,18 +237,18 @@ export function initTaglineRotator(root: HTMLElement, fallbackText: string): () 
     if (pinned) return;
     syncEligibleSet();
     if (eligible.length === 0) {
-      applyInstant(fallbackText);
+      applyInstant({ text: fallbackText });
       return;
     }
 
     index = 0;
-    const first = eligible[0]?.text;
-    if (!first) {
-      applyInstant(fallbackText);
+    const first = eligible[0];
+    if (!first?.text) {
+      applyInstant({ text: fallbackText });
       return;
     }
 
-    await showLine(first, !taglineTextsEqual(first, currentText));
+    await showLine(first, !taglineTextsEqual(first.text, currentText));
     if (disposed || pinned) return;
     scheduleNextRotation();
   };

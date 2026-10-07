@@ -30,3 +30,16 @@
     opacity: 1 !important;
   }
 }
+
+/* Tagline line with a `url` (tagline-pool.json): only `linkText` is the link. */
+.tagline__link {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+}
+
+.tagline__link:hover,
+.tagline__link:focus-visible {
+  color: var(--color-text);
+}

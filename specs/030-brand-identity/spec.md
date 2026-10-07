@@ -121,6 +121,10 @@ then never again on reload. Click during the intro; confirm it ends immediately.
   one config.
 - **FR-008**: The intro MUST NOT play audio, trap focus, or remove the stage from the DOM.
 - **FR-009**: Taglines and intro MUST NOT use cookies, tracking, or analytics.
+- **FR-009a**: A tagline line MAY set `url` (https only) and optionally `linkText` (a part of
+  `text`); that part, or the whole line, MUST render as an outbound link in a new tab
+  (`noopener noreferrer`). The build MUST reject non-https URLs and a `linkText` that is not
+  in the line.
 
 ### Key Entities
 

@@ -173,6 +173,16 @@ Optional positive integer; default `1`. Higher weight → **more steps per rotat
 
 Do not put `weight` on easter-egg lines in v1 (prefer omitting).
 
+## Links (optional, any line)
+
+Add `url` (a full `https://` link) to make a line clickable; it opens in a new tab. Add
+`linkText` to link only part of the line — it must appear exactly in `text`. Without
+`linkText` the whole line is the link.
+
+```json
+{ "text": "Made by StefanXeno", "url": "https://github.com/StefanXeno", "linkText": "StefanXeno" }
+```
+
 ## Validation (build)
 
 `npm run check` / `npm run build` MUST fail when:

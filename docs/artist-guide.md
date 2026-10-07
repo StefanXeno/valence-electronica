@@ -352,6 +352,8 @@ late-night line (e.g. “Still awake?”) cannot sit unchanged for hours.
 
 - Normal line: `{ "text": "Your hook." }` — optional `"weight": 2` for more airtime per cycle.
 - Easter egg: add `"rules": [ … ]` (date, range, weekday, and/or time windows).
+- Link: add `"url": "https://…"` (opens in a new tab) and optionally `"linkText"` — the part of
+  the line that becomes the link, e.g. `"linkText": "StefanXeno"`.
 - Keep hooks short (one line on desktop). Run `npm run check` after edits.
 
 ---
