@@ -2,16 +2,7 @@
   "timezone": "Europe/Berlin",
   "lines": [
     {
-      "text": "Something's coming for you."
-    },
-    {
-      "text": "Electronic moods from Augsburg."
-    },
-    {
-      "text": "Press play on the night."
-    },
-    {
-      "text": "Something wicked this way loops.",
+      "text": "Happy Halloween!",
       "rules": [
         {
           "type": "date",
@@ -20,7 +11,7 @@
       ]
     },
     {
-      "text": "Unwrap the drop.",
+      "text": "Merry Christmas!",
       "rules": [
         {
           "type": "range",
@@ -164,16 +155,13 @@
       "text": "Let's add smooth jazz at the end"
     },
     {
-      "text": "Attention please! The next song is going to be a banger."
+      "text": "The next song is going to be a banger."
     },
     {
       "text": "Will the real Slim Shady please stand up?"
     },
     {
       "text": "Check out my cool website"
-    },
-    {
-      "text": "Attention please! The next song is going to be a banger."
     }
   ]
 }
