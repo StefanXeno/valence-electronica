@@ -1,0 +1,16 @@
+---
+/**
+ * Hidden note for people reading the page source (036, "Coder" achievement).
+ * Rendered mid-document from Base.astro (after the stage, before the footer and overlays).
+ * Not visitor UI, so the copy lives here; the word comes from the listener's constant.
+ */
+import { CODER_WORD } from '../lib/coder-combo';
+
+const note = `
+  Hey, ${CODER_WORD}. You found the source.
+  Type "${CODER_WORD}" anywhere on the stage.
+  On a phone? Add #${CODER_WORD} to the URL.
+`;
+---
+
+<Fragment set:html={`<!--${note}-->`} />

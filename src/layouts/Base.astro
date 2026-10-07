@@ -11,6 +11,7 @@ import GlitchPress from '../components/GlitchPress.astro';
 import LegalOverlay from '../components/LegalOverlay.astro';
 import TrackRubOverlay from '../components/TrackRubOverlay.astro';
 import AchievementGallery from '../components/AchievementGallery.astro';
+import SourceNote from '../components/SourceNote.astro';
 import { getDefaultVideo } from '../lib/background';
 import { applyThemeAttributes, resolveThemePack } from '../lib/theme-packs';
 import { isPreviewBuild, withBase } from '../lib/url';
@@ -66,6 +67,7 @@ const indexable = site.seo.indexable && !isPreviewBuild();
       <main>
         <slot />
       </main>
+      <SourceNote />
       <Footer />
     </div>
     {/* Body-level overlay: legal + content sheets (About/Tour/…) share LegalPanel. */}
@@ -79,6 +81,7 @@ const indexable = site.seo.indexable && !isPreviewBuild();
       import { initTrackRub } from '../lib/track-rub';
       import { initInfiniteSpin } from '../lib/infinite-spin';
       import { initDemonicCombo } from '../lib/demonic-combo';
+      import { initCoderCombo } from '../lib/coder-combo';
       import { migrateLegacyKeys } from '../lib/achievements';
       import { initAchievementGallery } from '../lib/achievement-gallery';
       // Before anything reads achievement state (pre-036 rub key → `ve-achievement-rub`).
@@ -87,6 +90,7 @@ const indexable = site.seo.indexable && !isPreviewBuild();
       initTrackRub();
       initInfiniteSpin();
       initDemonicCombo();
+      initCoderCombo();
       initAchievementGallery();
     </script>
   </body>

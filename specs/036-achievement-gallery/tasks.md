@@ -124,13 +124,13 @@ with the old rub key keeps it.
 
 **Independent Test**: View source → comment mid-body mentioning `coder` and `#coder`; typing `coder` or opening `…/#coder` unlocks Coder; `…/#666` runs the demonic combo; the hash disappears without a history entry (quickstart #19–#20).
 
-- [ ] T034 [P] [US5] Create `src/lib/key-combo.ts` per contracts/achievements-module.md (`appendComboKey`, `isComboKeyEvent`, `bindKeyCombo`, `hashMatches`, `bindHashCombo` with initial check after DOMContentLoaded and on `hashchange`, stripping via `history.replaceState(history.state, '', location.pathname + location.search)`) and refactor `src/lib/demonic-combo.ts` onto it, keeping `appendDemonicDigit` as a thin wrapper so `src/lib/demonic-combo.test.ts` still passes
-- [ ] T035 [P] [US5] Write `src/lib/key-combo.test.ts`: word buffer (letters case-insensitive, digits, reset on other keys), separate buffers for `666` and `coder` do not reset each other, `hashMatches` for `#coder`, `#CODER`, `#%36%36%36`, `#666`, and non-matches (`#6666`, `#coderx`, empty)
-- [ ] T036 [US5] Create `src/lib/coder-combo.ts`: export `CODER_WORD = 'coder'`; `initCoderCombo()` registers `bindKeyCombo` and `bindHashCombo` with one handler calling `unlockAchievement('coder')`
-- [ ] T037 [US5] In `src/lib/demonic-combo.ts`, register `bindHashCombo('666', …)` with the same handler as the keyboard combo (Nightmare + achievement + wild glitch)
-- [ ] T038 [US5] Create `src/components/SourceNote.astro` emitting the comment from contracts/achievements-module.md (word from `CODER_WORD`, mentions `#coder` for phones) and render it in `src/layouts/Base.astro` between `</main>` and `<Footer />`
-- [ ] T039 [US5] Call `initCoderCombo()` in the boot script of `src/layouts/Base.astro` next to `initDemonicCombo()`
-- [ ] T040 [US5] After `npm run build`, confirm the comment is present in `dist/index.html` and a content route (e.g. `dist/tour/index.html`), inside `<body>` after the stage markup and not in `<head>`; if the compiler stripped it, switch `SourceNote.astro` to `set:html`
+- [X] T034 [P] [US5] Create `src/lib/key-combo.ts` per contracts/achievements-module.md (`appendComboKey`, `isComboKeyEvent`, `bindKeyCombo`, `hashMatches`, `bindHashCombo` with initial check after DOMContentLoaded and on `hashchange`, stripping via `history.replaceState(history.state, '', location.pathname + location.search)`) and refactor `src/lib/demonic-combo.ts` onto it, keeping `appendDemonicDigit` as a thin wrapper so `src/lib/demonic-combo.test.ts` still passes
+- [X] T035 [P] [US5] Write `src/lib/key-combo.test.ts`: word buffer (letters case-insensitive, digits, reset on other keys), separate buffers for `666` and `coder` do not reset each other, `hashMatches` for `#coder`, `#CODER`, `#%36%36%36`, `#666`, and non-matches (`#6666`, `#coderx`, empty)
+- [X] T036 [US5] Create `src/lib/coder-combo.ts`: export `CODER_WORD = 'coder'`; `initCoderCombo()` registers `bindKeyCombo` and `bindHashCombo` with one handler calling `unlockAchievement('coder')`
+- [X] T037 [US5] In `src/lib/demonic-combo.ts`, register `bindHashCombo('666', …)` with the same handler as the keyboard combo (Nightmare + achievement + wild glitch)
+- [X] T038 [US5] Create `src/components/SourceNote.astro` emitting the comment from contracts/achievements-module.md (word from `CODER_WORD`, mentions `#coder` for phones) and render it in `src/layouts/Base.astro` between `</main>` and `<Footer />`
+- [X] T039 [US5] Call `initCoderCombo()` in the boot script of `src/layouts/Base.astro` next to `initDemonicCombo()`
+- [X] T040 [US5] After `npm run build`, confirm the comment is present in `dist/index.html` and a content route (e.g. `dist/tour/index.html`), inside `<body>` after the stage markup and not in `<head>`; if the compiler stripped it, switch `SourceNote.astro` to `set:html`
 
 **Checkpoint**: All stories functional.
 

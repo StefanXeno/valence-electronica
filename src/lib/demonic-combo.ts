@@ -1,9 +1,10 @@
 /**
- * Easter egg: type 666 → switch to the Nightmare stage, unlock achievement,
- * and crank HUD glitch intensity for the rest of the page session.
+ * Easter egg: type 666 (or open the page with `#666`) → switch to the Nightmare stage,
+ * unlock achievement, and crank HUD glitch intensity for the rest of the page session.
  */
 
 import { unlockAchievement } from './achievement-toast';
+import { appendComboKey, bindHashCombo, bindKeyCombo } from './key-combo';
 
 /** Must match `STAGE_SELECT_EVENT` in stage-switch.ts (avoid importing that module here). */
 const STAGE_SELECT_EVENT = 'stage-select';
@@ -13,17 +14,6 @@ export const NIGHTMARE_STAGE_ID = 'nightmare';
 export const GLITCH_WILD_ATTR = 'glitchWild';
 
 const TARGET = '666';
-/** Max gap between digit keys before the buffer resets. */
-const KEY_GAP_MS = 1600;
-
-let buffer = '';
-let lastKeyAt = 0;
-
-function isTypingContext(target: EventTarget | null): boolean {
-  if (!(target instanceof Element)) return false;
-  if (target.closest('input, textarea, select, [contenteditable="true"]')) return true;
-  return false;
-}
 
 /** Pure helper — append a digit char; returns whether the combo just completed. */
 export function appendDemonicDigit(
@@ -31,9 +21,7 @@ export function appendDemonicDigit(
   digit: string,
   target = TARGET,
 ): { next: string; matched: boolean } {
-  if (!/^\d$/.test(digit)) return { next: '', matched: false };
-  const next = (current + digit).slice(-target.length);
-  return { next, matched: next === target };
+  return appendComboKey(current, digit, target);
 }
 
 export function isWildGlitchActive(): boolean {
@@ -54,28 +42,7 @@ function switchToNightmare() {
   );
 }
 
-function onKeyDown(event: KeyboardEvent) {
-  if (event.defaultPrevented) return;
-  if (event.ctrlKey || event.metaKey || event.altKey) return;
-  if (isTypingContext(event.target)) return;
-  if (event.repeat) return;
-
-  const digit = event.key.length === 1 && /\d/.test(event.key) ? event.key : null;
-
-  if (!digit) {
-    buffer = '';
-    return;
-  }
-
-  const now = performance.now();
-  if (now - lastKeyAt > KEY_GAP_MS) buffer = '';
-  lastKeyAt = now;
-
-  const { next, matched } = appendDemonicDigit(buffer, digit);
-  buffer = next;
-  if (!matched) return;
-
-  buffer = '';
+function fireDemonicCombo() {
   enableWildGlitch();
   switchToNightmare();
   unlockDemonicCombo();
@@ -86,5 +53,7 @@ export function initDemonicCombo(): void {
   if (typeof document === 'undefined') return;
   if (document.documentElement.dataset.demonicComboInit === '1') return;
   document.documentElement.dataset.demonicComboInit = '1';
-  document.addEventListener('keydown', onKeyDown, true);
+  bindKeyCombo(TARGET, fireDemonicCombo);
+  // Phones have no hardware keyboard: `#666` in the URL does the same (036).
+  bindHashCombo(TARGET, fireDemonicCombo);
 }
