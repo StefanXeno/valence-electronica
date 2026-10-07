@@ -4,6 +4,11 @@ export function withBase(path: string): string {
   return `${base}${path}`;
 }
 
+/** True for the `/pre-release/` preview build (shares an origin with the live site). */
+export function isPreviewBuild(): boolean {
+  return import.meta.env.BASE_URL.replace(/\/$/, '').endsWith('/pre-release');
+}
+
 /** Square artwork shown when a release has no `cover` asset yet. */
 export const COVER_PLACEHOLDER_PATH = '/images/covers/placeholder.svg';
 

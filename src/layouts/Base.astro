@@ -12,7 +12,7 @@ import LegalOverlay from '../components/LegalOverlay.astro';
 import TrackRubOverlay from '../components/TrackRubOverlay.astro';
 import { getDefaultVideo } from '../lib/background';
 import { applyThemeAttributes, resolveThemePack } from '../lib/theme-packs';
-import { withBase } from '../lib/url';
+import { isPreviewBuild, withBase } from '../lib/url';
 
 interface Props {
   title?: string;
@@ -31,8 +31,7 @@ const shareImage = Astro.site
 
 // The pre-release preview shares an origin with the live site, so it must never
 // be indexed as duplicate content regardless of the seo.indexable switch.
-const isPreview = import.meta.env.BASE_URL.replace(/\/$/, '').endsWith('/pre-release');
-const indexable = site.seo.indexable && !isPreview;
+const indexable = site.seo.indexable && !isPreviewBuild();
 ---
 
 <!doctype html>
@@ -78,6 +77,9 @@ const indexable = site.seo.indexable && !isPreview;
       import { initTrackRub } from '../lib/track-rub';
       import { initInfiniteSpin } from '../lib/infinite-spin';
       import { initDemonicCombo } from '../lib/demonic-combo';
+      import { migrateLegacyKeys } from '../lib/achievements';
+      // Before anything reads achievement state (pre-036 rub key → `ve-achievement-rub`).
+      migrateLegacyKeys();
       initLabelReveal();
       initTrackRub();
       initInfiniteSpin();

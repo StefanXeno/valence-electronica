@@ -6,7 +6,10 @@
 import { getCollection, render } from 'astro:content';
 import { parseCredits, pickArtistName } from '../lib/catalog-tracks';
 import site from '../data/site.json';
-import HudIcon from './HudIcon.astro';
+import { ACHIEVEMENT_GLYPHS, toClientPayload } from '../lib/achievements';
+import { loadAchievementRegistry } from '../lib/achievements-registry';
+import { getChrome } from '../lib/stage';
+import AchievementGlyph from './AchievementGlyph.astro';
 
 type RubPanel = {
   id: string;
@@ -14,6 +17,10 @@ type RubPanel = {
   artist?: string;
   Content: Awaited<ReturnType<typeof render>>['Content'];
 };
+
+const chrome = await getChrome();
+// Validated at build: a broken achievements.json fails `npm run build` here.
+const achievementPayload = toClientPayload(loadAchievementRegistry());
 
 const [jukeboxRaw, tracksRaw] = await Promise.all([
   getCollection('jukebox'),
@@ -96,52 +103,35 @@ for (const entry of [...jukeboxRaw, ...tracksRaw]) {
   )
 }
 
-{/* Shared one-shot achievement toast — driven by achievement-toast.ts (rub + infinite spin). */}
+{/* Shared one-shot achievement toast — driven by achievement-toast.ts. Ships without copy:
+   text comes from the registry payload so secret titles never sit in the HTML (036). */}
 <div
   class="ve-achievement"
   data-ve-achievement
-  role="status"
-  aria-live="polite"
-  aria-atomic="true"
+  data-achievement-registry={achievementPayload}
+  data-achievement-unlocked-label={chrome.achievementUnlockedLabel}
   hidden
 >
-  <div class="ve-achievement__card" aria-hidden="true">
-    <span class="ve-achievement__glyph" data-ve-achievement-glyph="rub">
-      {/* Same vinyl mark as the stage player (HudIcon token="jukebox"). */}
-      <HudIcon token="jukebox" />
+  <button type="button" class="ve-achievement__card" data-ve-achievement-open>
+    {ACHIEVEMENT_GLYPHS.map((glyph) => (
+      <span class="ve-achievement__glyph" data-ve-achievement-glyph={glyph} hidden>
+        <AchievementGlyph glyph={glyph} />
+      </span>
+    ))}
+    <span class="ve-achievement__copy">
+      <span class="ve-achievement__eyebrow">{chrome.achievementUnlockedLabel}</span>
+      <span class="ve-achievement__title" data-ve-achievement-title></span>
+      <span class="ve-achievement__sub" data-ve-achievement-sub></span>
     </span>
-    <span class="ve-achievement__glyph" data-ve-achievement-glyph="infinite" hidden>
-      {/* Infinity mark — no HudIcon token for ∞; stroke matches accent via currentColor. */}
-      <svg class="hud-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-        <path
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.85"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          d="M6.2 12c0-2.1 1.55-3.7 3.3-3.7 1.55 0 2.7.95 4.5 3.7 1.8 2.75 2.95 3.7 4.5 3.7 1.75 0 3.3-1.6 3.3-3.7s-1.55-3.7-3.3-3.7c-1.55 0-2.7.95-4.5 3.7-1.8 2.75-2.95 3.7-4.5 3.7-1.75 0-3.3-1.6-3.3-3.7z"
-        />
-      </svg>
-    </span>
-    <span
-      class="ve-achievement__glyph ve-achievement__glyph--demonic"
-      data-ve-achievement-glyph="demonic"
-      hidden
-    >
-      666
-    </span>
-    <div class="ve-achievement__copy">
-      <p class="ve-achievement__eyebrow">Achievement unlocked</p>
-      <p class="ve-achievement__title" data-ve-achievement-title>
-        Why are you rubbing?!
-      </p>
-      <p class="ve-achievement__sub" data-ve-achievement-sub>
-        Rub a song in the discography for three times.
-      </p>
-    </div>
-  </div>
-  {/* Screen-reader announcement text lives here; visual copy is aria-hidden. */}
-  <span class="ve-achievement__sr" data-ve-achievement-announce></span>
+  </button>
+  {/* Screen-reader announcement lives here, so the button content is not announced twice. */}
+  <span
+    class="ve-achievement__sr"
+    role="status"
+    aria-live="polite"
+    aria-atomic="true"
+    data-ve-achievement-announce
+  ></span>
 </div>
 
 <style>
@@ -257,6 +247,12 @@ for (const entry of [...jukeboxRaw, ...tracksRaw]) {
   }
 
   .ve-achievement__card {
+    width: 100%;
+    font: inherit;
+    text-align: left;
+    color: inherit;
+    cursor: pointer;
+    pointer-events: auto;
     display: grid;
     grid-template-columns: auto 1fr;
     gap: 1rem;
@@ -282,6 +278,11 @@ for (const entry of [...jukeboxRaw, ...tracksRaw]) {
     transform: translateY(-1.1rem) scale(0.94);
   }
 
+  .ve-achievement__card:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+  }
+
   .ve-achievement.is-in .ve-achievement__card {
     animation: ve-achievement-in 520ms cubic-bezier(0.16, 0.84, 0.28, 1) both;
   }
@@ -299,14 +300,6 @@ for (const entry of [...jukeboxRaw, ...tracksRaw]) {
     border: 1px solid color-mix(in srgb, var(--color-border) 70%, var(--color-accent));
     border-radius: 0.45rem;
     background: color-mix(in srgb, var(--color-bg) 55%, transparent);
-  }
-
-  .ve-achievement__glyph--demonic {
-    font-family: var(--font-display);
-    font-size: 0.78rem;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    line-height: 1;
   }
 
   .ve-achievement__glyph[hidden] {

@@ -1,0 +1,39 @@
+{
+  "achievements": [
+    {
+      "id": "rub",
+      "title": "Why are you rubbing?!",
+      "subtitle": "Rub a song in the discography for three times.",
+      "glyph": "vinyl",
+      "secret": true
+    },
+    {
+      "id": "infinite-spin",
+      "title": "Infinite",
+      "subtitle": "You tried to spin infinitely on the Infinite track",
+      "glyph": "infinite",
+      "hint": "On one track, going in circles is the whole point."
+    },
+    {
+      "id": "player-found",
+      "title": "Found it!",
+      "subtitle": "You discovered V-Flip, the hidden player.",
+      "glyph": "vinyl",
+      "hint": "Knock on the stage and someone might answer."
+    },
+    {
+      "id": "demonic-combo",
+      "title": "Demonic Combination",
+      "subtitle": "Unleash the Nightmare by 666",
+      "glyph": "demonic",
+      "hint": "Some numbers wake the Nightmare."
+    },
+    {
+      "id": "coder",
+      "title": "Coder",
+      "subtitle": "Take a look at the source code",
+      "glyph": "code",
+      "hint": "Real fans read the fine print."
+    }
+  ]
+}

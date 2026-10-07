@@ -174,8 +174,15 @@ const ui = defineCollection({
     playerShowLabel: z.string().optional(),
     playerOpenLabel: z.string().optional(),
     playerCloseLabel: z.string().optional(),
-    playerAchievementTitle: z.string().optional(),
-    playerAchievementSub: z.string().optional(),
+    achievementsLabel: z.string().optional(),
+    achievementsIcon: z.string().optional(),
+    achievementsTitle: z.string().optional(),
+    achievementsCounter: z.string().optional(),
+    achievementLockedTitle: z.string().optional(),
+    achievementSecretTitle: z.string().optional(),
+    achievementUnlockedLabel: z.string().optional(),
+    achievementsCloseLabel: z.string().optional(),
+    achievementsResetLabel: z.string().optional(),
   }),
 });
 

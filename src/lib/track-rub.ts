@@ -4,15 +4,12 @@
  */
 
 import { applyRubSuccessTagline } from './tagline-rotator';
-import { maybeUnlockAchievement } from './achievement-toast';
+import { unlockAchievement } from './achievement-toast';
 import { matchesGestureIgnore, OUTBOUND_AND_PLAY_SELECTOR } from './gesture-ignore';
 
 const MIN_STROKE_PX = 36;
 const RUBS_NEEDED = 3;
 const IDLE_RESET_MS = 1600;
-
-/** One-shot unlock toast after the first successful rub reveal. */
-export const ACHIEVEMENT_RUB_STORAGE_KEY = 've-achievement-why-are-you-rubbing';
 
 type RubSession = {
   el: HTMLElement;
@@ -65,15 +62,6 @@ function panelFor(trackId: string): HTMLElement | null {
   return document.querySelector(`[data-track-rub-panel="${trackId}"]`);
 }
 
-function maybeShowRubAchievement() {
-  maybeUnlockAchievement({
-    storageKey: ACHIEVEMENT_RUB_STORAGE_KEY,
-    title: 'Why are you rubbing?!',
-    sub: 'Rub a song in the discography for three times.',
-    glyph: 'rub',
-  });
-}
-
 function openRubPanel(trackId: string, source: HTMLElement) {
   const panel = panelFor(trackId);
   if (!panel) return;
@@ -97,7 +85,8 @@ function openRubPanel(trackId: string, source: HTMLElement) {
 
   // Page-lifetime brand wink — resets on full reload (no storage).
   applyRubSuccessTagline();
-  maybeShowRubAchievement();
+  // One-shot unlock toast after the first successful rub reveal (copy lives in the registry).
+  unlockAchievement('rub');
 }
 
 export function closeTrackRubPanel() {

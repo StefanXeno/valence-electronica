@@ -4,13 +4,12 @@
  * Tuned to be forgiving — imperfect circles / wobble still count.
  */
 
-import { hasAchievement, maybeUnlockAchievement } from './achievement-toast';
+import { unlockAchievement } from './achievement-toast';
+import { shouldToast } from './achievements';
 import { matchesGestureIgnore, STAGE_GESTURE_IGNORE_SELECTOR } from './gesture-ignore';
 
 /** Stage / jukebox id for the Infinite track (not the steel-slate theme pack id). */
 const INFINITE_STAGE_ID = 'infinite';
-
-export const ACHIEVEMENT_INFINITE_SPIN_STORAGE_KEY = 've-achievement-infinite-spin';
 
 const TAU = Math.PI * 2;
 /** Just under one full turn — easy easter egg, not a precision test. */
@@ -85,18 +84,13 @@ function normalizeDelta(delta: number): number {
 
 function unlockInfiniteSpin() {
   endSession();
-  maybeUnlockAchievement({
-    storageKey: ACHIEVEMENT_INFINITE_SPIN_STORAGE_KEY,
-    title: 'Infinite',
-    sub: 'You tried to spin infinitely on the Infinite track',
-    glyph: 'infinite',
-  });
+  unlockAchievement('infinite-spin');
 }
 
 function onPointerDown(event: PointerEvent) {
   if (event.button !== 0 && event.pointerType === 'mouse') return;
   if (!isInfiniteStageActive()) return;
-  if (hasAchievement(ACHIEVEMENT_INFINITE_SPIN_STORAGE_KEY)) return;
+  if (!shouldToast('infinite-spin')) return;
   if (shouldIgnoreTarget(event.target)) return;
 
   endSession();

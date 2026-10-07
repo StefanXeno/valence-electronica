@@ -71,8 +71,16 @@ export interface UiChrome {
   playerShowLabel: string;
   playerOpenLabel: string;
   playerCloseLabel: string;
-  playerAchievementTitle: string;
-  playerAchievementSub: string;
+  achievementsLabel: string;
+  achievementsIcon: HudIconToken;
+  achievementsIconEmoji?: string;
+  achievementsTitle: string;
+  achievementsCounter: string;
+  achievementLockedTitle: string;
+  achievementSecretTitle: string;
+  achievementUnlockedLabel: string;
+  achievementsCloseLabel: string;
+  achievementsResetLabel: string;
 }
 
 export interface SiteContactLink {
@@ -148,8 +156,15 @@ const CHROME_FALLBACK: UiChrome = {
   playerShowLabel: 'Show player',
   playerOpenLabel: 'Open player',
   playerCloseLabel: 'Close player',
-  playerAchievementTitle: 'Found it!',
-  playerAchievementSub: 'You discovered the hidden player.',
+  achievementsLabel: 'Achievements',
+  achievementsIcon: 'trophy',
+  achievementsTitle: 'Achievements',
+  achievementsCounter: '{found} / {total} found',
+  achievementLockedTitle: '???',
+  achievementSecretTitle: 'Secret achievement',
+  achievementUnlockedLabel: 'Achievement unlocked',
+  achievementsCloseLabel: 'Close',
+  achievementsResetLabel: 'Reset achievements',
 };
 
 export interface ShowItem {
@@ -220,7 +235,10 @@ export async function getChrome(): Promise<UiChrome> {
       const loop = resolveHudIcon(entry.data.loopIcon, 'loop');
       const socials = resolveHudIcon(entry.data.socialsIcon, 'socials');
       const info = resolveHudIcon(entry.data.infoIcon, 'info');
+      const achievements = resolveHudIcon(entry.data.achievementsIcon, 'trophy');
       return {
+        achievementsIcon: achievements.token,
+        achievementsIconEmoji: achievements.emoji,
         jukeboxIcon: jukebox.token,
         jukeboxIconEmoji: jukebox.emoji,
         aboutIcon: about.token,
@@ -257,10 +275,20 @@ export async function getChrome(): Promise<UiChrome> {
     playerShowLabel: entry.data.playerShowLabel?.trim() || CHROME_FALLBACK.playerShowLabel,
     playerOpenLabel: entry.data.playerOpenLabel?.trim() || CHROME_FALLBACK.playerOpenLabel,
     playerCloseLabel: entry.data.playerCloseLabel?.trim() || CHROME_FALLBACK.playerCloseLabel,
-    playerAchievementTitle:
-      entry.data.playerAchievementTitle?.trim() || CHROME_FALLBACK.playerAchievementTitle,
-    playerAchievementSub:
-      entry.data.playerAchievementSub?.trim() || CHROME_FALLBACK.playerAchievementSub,
+    achievementsLabel: entry.data.achievementsLabel?.trim() || CHROME_FALLBACK.achievementsLabel,
+    achievementsTitle: entry.data.achievementsTitle?.trim() || CHROME_FALLBACK.achievementsTitle,
+    achievementsCounter:
+      entry.data.achievementsCounter?.trim() || CHROME_FALLBACK.achievementsCounter,
+    achievementLockedTitle:
+      entry.data.achievementLockedTitle?.trim() || CHROME_FALLBACK.achievementLockedTitle,
+    achievementSecretTitle:
+      entry.data.achievementSecretTitle?.trim() || CHROME_FALLBACK.achievementSecretTitle,
+    achievementUnlockedLabel:
+      entry.data.achievementUnlockedLabel?.trim() || CHROME_FALLBACK.achievementUnlockedLabel,
+    achievementsCloseLabel:
+      entry.data.achievementsCloseLabel?.trim() || CHROME_FALLBACK.achievementsCloseLabel,
+    achievementsResetLabel:
+      entry.data.achievementsResetLabel?.trim() || CHROME_FALLBACK.achievementsResetLabel,
   };
 }
 

@@ -3,13 +3,12 @@
  * and crank HUD glitch intensity for the rest of the page session.
  */
 
-import { maybeUnlockAchievement } from './achievement-toast';
+import { unlockAchievement } from './achievement-toast';
 
 /** Must match `STAGE_SELECT_EVENT` in stage-switch.ts (avoid importing that module here). */
 const STAGE_SELECT_EVENT = 'stage-select';
 
 export const NIGHTMARE_STAGE_ID = 'nightmare';
-export const ACHIEVEMENT_DEMONIC_COMBO_STORAGE_KEY = 've-achievement-demonic-combo';
 /** `dataset` key → `data-glitch-wild` on `<html>`. */
 export const GLITCH_WILD_ATTR = 'glitchWild';
 
@@ -46,12 +45,7 @@ export function enableWildGlitch(): void {
 }
 
 function unlockDemonicCombo() {
-  maybeUnlockAchievement({
-    storageKey: ACHIEVEMENT_DEMONIC_COMBO_STORAGE_KEY,
-    title: 'Demonic Combination',
-    sub: 'Unleash the Nightmare by 666',
-    glyph: 'demonic',
-  });
+  unlockAchievement('demonic-combo');
 }
 
 function switchToNightmare() {

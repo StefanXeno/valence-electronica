@@ -6,7 +6,7 @@
  * `data-player-state` on `[data-stage-player]`.
  */
 
-import { maybeUnlockAchievement } from './achievement-toast';
+import { unlockAchievement } from './achievement-toast';
 import { initEqFlatten } from './eq-flatten';
 import { matchesGestureIgnore, STAGE_GESTURE_IGNORE_SELECTOR } from './gesture-ignore';
 import {
@@ -31,7 +31,6 @@ import { prefersReducedMotion } from './viewport';
 export const PLAYER_STATE_EVENT = 'player-state-change';
 /** Ask the content overlay / phone menu to close after a discography play (035). */
 export const STAGE_OVERLAY_CLOSE_EVENT = 'stage-overlay-close';
-export const ACHIEVEMENT_PLAYER_FOUND_STORAGE_KEY = 've-achievement-player-found';
 
 /** How long the peeking vinyl waits for a tap before sliding away. */
 const HINT_MS = 4000;
@@ -254,12 +253,7 @@ export function initStagePlayer(): void {
 
   const unlockDiscovery = () => {
     markPlayerDiscovered();
-    maybeUnlockAchievement({
-      storageKey: ACHIEVEMENT_PLAYER_FOUND_STORAGE_KEY,
-      title: root.dataset.achievementTitle ?? 'Found it!',
-      sub: root.dataset.achievementSub ?? 'You discovered the hidden player.',
-      glyph: 'rub',
-    });
+    unlockAchievement('player-found');
   };
 
   /** Glitch packs (Nightmare): the panel opens/closes with a one-shot glitch instead of a slide. */

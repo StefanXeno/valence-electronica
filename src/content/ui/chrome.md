@@ -37,6 +37,12 @@ volumeSliderTooltip: Drag to adjust volume
 playerShowLabel: Show V-Flip
 playerOpenLabel: Open V-Flip
 playerCloseLabel: Close V-Flip
-playerAchievementTitle: Found it!
-playerAchievementSub: You discovered V-Flip, the hidden player.
+achievementsLabel: Achievements
+achievementsTitle: Achievements
+achievementsCounter: "{found} / {total} found"
+achievementLockedTitle: "???"
+achievementSecretTitle: Secret achievement
+achievementUnlockedLabel: Achievement unlocked
+achievementsCloseLabel: Close
+achievementsResetLabel: Reset achievements
 ---

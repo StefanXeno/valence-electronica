@@ -1,6 +1,6 @@
 /**
  * Remembers that the visitor found the hidden player (035). First-party UX flag only.
- * Unlike `hasAchievement()`, blocked storage reads as "not discovered" so private-mode
+ * Like `readAchievementState()`, blocked storage reads as "not discovered" so private-mode
  * visitors start with a clean stage; discovery then lasts for the page load only.
  */
 
