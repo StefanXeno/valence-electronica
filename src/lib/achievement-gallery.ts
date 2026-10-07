@@ -1,5 +1,5 @@
 /**
- * Achievement gallery (036) — trophy toggle + dialog wiring.
+ * Achievement gallery (036) — trophy toggle + panel wiring (V-Flip-style dock, bottom-right).
  *
  * Markup: `AchievementGallery.astro`. Exclusivity: opening the gallery closes content overlays,
  * the phone menu, and rub panels (`stage-overlay-close`), and the stage player collapses on the
@@ -45,8 +45,8 @@ function isNavMenuOpen(): boolean {
 export function initAchievementGallery(): void {
   const toggle = document.querySelector<HTMLButtonElement>('[data-achievement-toggle]');
   const gallery = document.querySelector<HTMLElement>('[data-achievement-gallery]');
-  const frame = gallery?.querySelector<HTMLElement>('[data-achievement-gallery-frame]');
-  if (!toggle || !gallery || !frame || gallery.dataset.galleryInit === '1') return;
+  const panel = gallery?.querySelector<HTMLElement>('[data-achievement-panel]');
+  if (!toggle || !gallery || !panel || gallery.dataset.galleryInit === '1') return;
   gallery.dataset.galleryInit = '1';
 
   const counter = gallery.querySelector<HTMLElement>('[data-achievement-counter]');
@@ -60,7 +60,7 @@ export function initAchievementGallery(): void {
   let returnFocus: HTMLElement | null = null;
   let lockedGlitchTimer: number | undefined;
 
-  const isOpen = () => !gallery.hidden;
+  const isOpen = () => gallery.dataset.galleryState === 'open';
 
   /** Put decoded copy into a secret tile once it is unlocked (never before). */
   const fillSecretTile = (tile: HTMLElement) => {
@@ -127,8 +127,11 @@ export function initAchievementGallery(): void {
     document.dispatchEvent(new CustomEvent(STAGE_OVERLAY_CLOSE_EVENT));
     if (document.querySelector('[data-track-rub-panel]:not([hidden])')) closeTrackRubPanel();
     render(readAchievementState());
-    gallery.hidden = false;
+    gallery.dataset.galleryState = 'open';
+    panel.inert = false;
     toggle.setAttribute('aria-expanded', 'true');
+    // Glitch packs: the panel cuts in with the shared glitch instead of the slide.
+    if (prefersGlitchMotion()) playElementGlitch(panel);
     document.documentElement.classList.add(GALLERY_OPEN_CLASS);
     closeBtn?.focus();
     flickerLocked();
@@ -138,7 +141,8 @@ export function initAchievementGallery(): void {
   const close = (opts: { restoreFocus?: boolean } = {}) => {
     if (!isOpen()) return;
     stopLockedGlitch();
-    gallery.hidden = true;
+    gallery.dataset.galleryState = 'closed';
+    panel.inert = true;
     toggle.setAttribute('aria-expanded', 'false');
     document.documentElement.classList.remove(GALLERY_OPEN_CLASS);
     if (opts.restoreFocus !== false) {
@@ -163,10 +167,12 @@ export function initAchievementGallery(): void {
   });
   closeBtn?.addEventListener('click', () => close());
 
-  // Outside click/tap on the backdrop (not the frame) closes.
-  gallery.addEventListener('pointerdown', (event) => {
-    if (event.target instanceof Node && frame.contains(event.target)) return;
-    close();
+  // Outside tap/click collapses without stealing focus (like V-Flip). The toast opens the
+  // gallery itself, so taps on it are left alone.
+  document.addEventListener('pointerdown', (event) => {
+    if (!isOpen() || !(event.target instanceof Element)) return;
+    if (gallery.contains(event.target) || event.target.closest('[data-ve-achievement]')) return;
+    close({ restoreFocus: false });
   });
 
   document.addEventListener('keydown', (event) => {

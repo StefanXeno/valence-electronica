@@ -23,6 +23,7 @@ overlays), `031-glitch-motion` (glitch language, reduced motion).
 - Q: Should "Reset achievements" also reset the hidden player's discovery state? → A: Yes — a full newcomer reset: all four achievement keys and the player discovery key.
 - Q: How do keyboard users reach the toast? → A: The toast never takes focus on appear; it is reachable by Tab while visible and stays open while focused; the trophy icon is the primary keyboard path.
 - Q: Should secret achievements stay hidden from people reading the page source? → A: Yes, as far as a static site allows (option C): the unlocked copy of secret achievements is not in the HTML, is stored encoded (not plain text) in what the browser downloads, and the secret achievement gets a neutral id; the old storage key is migrated once so progress survives. Determined code readers can still decode it; that is accepted.
+- Q: (Operator review after the first build) How should the gallery look? → A: Exactly like the V-Flip player, mirrored: a panel that grows out of the trophy corner (bottom-right) with the trophy in its bottom row, not a centered window. The trophy glyph is larger on phones, the reset is an icon button, and the laptop socials move to bottom-center so they no longer collide with the trophy.
 - Q: Add an achievement for looking at the source code? → A: Yes — "Coder" ("Take a look at the source code"), last in the gallery, with a hint (not secret). Since a page cannot detect view-source, an HTML comment hidden mid-document (not at the top) tells readers to type "coder"; typing it unlocks the achievement.
 - Q: How do phone users (no hardware keyboard) trigger the typed combos? → A: Each typed combo also works as a URL hash: `#coder` unlocks Coder (the source comment mentions it for phones), and `#666` triggers the full demonic combo. The hash is removed from the address bar right after it fires. Shareable links are accepted.
 
@@ -215,9 +216,10 @@ confirm the toast and the unlocked tile.
 
 ### Functional Requirements
 
-- **FR-001**: The site MUST offer an achievement gallery as a dialog panel over the stage.
-  It MUST NOT have its own route or change the URL, and MUST close via an X control, Escape,
-  and a click/tap outside the panel, restoring focus on close.
+- **FR-001**: The site MUST offer an achievement gallery as a panel that grows out of the
+  trophy corner, mirroring the V-Flip player (same box, sizes, and open/close motion; trophy
+  in the panel's bottom row). It MUST NOT have its own route or change the URL, and MUST
+  close via an X control, Escape, and a click/tap outside the panel.
 - **FR-002**: The gallery MUST be mutually exclusive with the stage player's open state and
   with content overlays: opening one closes the others.
 - **FR-003**: A trophy icon control MUST open the gallery. It MUST sit bottom-right at the
@@ -257,12 +259,14 @@ confirm the toast and the unlocked tile.
 - **FR-013**: Dev and preview (`/pre-release/`) builds MUST show a reset control in the
   gallery that resets this browser to the newcomer state: it clears all achievement keys
   and the hidden player's discovery key (`ve-player-discovered`, `026` FR-009). The live
-  build MUST NOT ship it.
+  build MUST NOT ship it The reset is an icon button next to the close control.
 - **FR-014**: Reduced motion MUST remove the icon pulse, panel entrance motion, and any
   glitch on locked tiles.
 - **FR-015**: The feature MUST NOT add tracking, network requests, accounts, or storage
   beyond the achievement keys (existing ones plus the renamed `ve-achievement-rub`;
   constitution I, V).
+- **FR-016a**: On laptop widths the social icons MUST sit bottom-center (labels reveal
+  above), so the bottom corners stay free for the vinyl (left) and trophy (right).
 - **FR-016**: UI wording that is not per-achievement (icon label, panel title, counter
   template, secret placeholder, close label, reset label) MUST come from UI chrome content.
 - **FR-017**: The artist guide MUST document the registry fields, the `secret` flag, the

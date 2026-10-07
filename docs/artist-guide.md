@@ -257,9 +257,9 @@ themselves live in their own file (see **Achievements** below).
 - Set a **token** to pick a built-in icon: `jukebox`, `about`, `discography`, `tour`,
   `catalog`, `info`, `shuffle`, `loop`, `socials`, `play`, `pause`, `playlist`, or `trophy`.
 
-**Label reveal (visitor-facing):** On **laptop** (1024px up), player and dock icons show a
-floating label **above** the control on hover/focus; social icons show it **below**. The
-player's song title does not. On **phone** (viewport below 1024px) those floaters are off.
+**Label reveal (visitor-facing):** On **laptop** (1024px up), player, dock, and social icons
+(bottom center) show a floating label **above** the control on hover/focus. The player's
+song title does not. On **phone** (viewport below 1024px) those floaters are off.
 
 **Shuffle timing:** When shuffle is on and loop is off, the stage advances after **one full
 atmosphere video file length** for audio entries (`hasAudio: true`). Entries with no audio

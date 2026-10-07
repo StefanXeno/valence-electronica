@@ -1,5 +1,14 @@
 # Contract: Gallery UI (markup and accessibility)
 
+> **Revised after operator review (2026-10-07):** the gallery is a V-Flip-style dock, not a
+> centered dialog. `[data-achievement-gallery]` is the fixed bottom-right dock root with
+> `data-gallery-state="open|closed"`; inside it, `[data-achievement-panel]`
+> (`role="dialog"`, non-modal, `inert` while closed) grows out of the trophy corner, and the
+> trophy toggle sits in the panel's footer row next to the counter. Header: eyebrow title,
+> icon reset (dev/preview), icon close. Outside pointerdown anywhere (except the dock and
+> the toast) closes. Markup below shows the original centered version for the parts that
+> did not change (tiles, templates, toast).
+
 **Feature**: `036-achievement-gallery`
 
 ## Trophy toggle
