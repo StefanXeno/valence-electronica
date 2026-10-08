@@ -69,7 +69,7 @@ AchievementState =
 ```
 
 - Unknown stored keys are ignored (only known ids are read).
-- Icon visible ⇔ `available && unlocked.size > 0` (and intro not active).
+- Icon visible ⇔ `available && unlocked.size > 0` (and the phone menu is closed).
 
 ## Tile view (derived, per achievement)
 

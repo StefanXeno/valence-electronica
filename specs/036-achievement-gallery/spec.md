@@ -232,8 +232,10 @@ reload → mode is off.
   scrolling and scrolls internally if needed.
 - **Wild mode** (666 combo) or Nightmare theme active: the panel stays readable; locked-tile
   glitch follows the existing glitch rules and stays off under reduced motion.
-- **Intro playing**: the icon stays hidden until the landing intro has finished, like other
-  stage chrome.
+- **Intro playing**: the icon stays laid out under the intro overlay like the V-Flip, so it
+  is already there when the intro ends.
+- **Phone menu open**: the icon fades out while the phone menu is open and returns as it
+  closes (it would otherwise sit on top of the menu footer).
 - **Phones and the typed combos**: phones have no hardware keyboard, so `coder` and `666`
   also work as URL hashes (`#coder`, `#666`). A shared link triggers them for the
   recipient; accepted.

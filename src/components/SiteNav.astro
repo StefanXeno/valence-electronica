@@ -758,8 +758,9 @@ const menuChannels = site.channels
 
       if (!root.classList.contains('is-menu-open') && menu.hidden) return;
 
-      // Drop portal before morph-collapse so reverse stagger reads cleanly.
-      resetPortalInstant();
+      // An open portal (e.g. discography play) rides the morph-collapse like the menu
+      // list does; `finishClose` drops it once the menu is gone.
+      if (prefersReducedMotion() || menu.hidden) resetPortalInstant();
       root.classList.remove('is-menu-open');
       document.documentElement.classList.remove('site-nav-menu-open');
       menuBtn.setAttribute('aria-expanded', 'false');
@@ -793,7 +794,7 @@ const menuChannels = site.channels
       if (event.button !== 0) return;
       longPressFired = false;
       clearLongPress();
-      if (!isPortalOpen()) return;
+      if (!root.classList.contains('is-menu-open') || !isPortalOpen()) return;
       longPressTimer = window.setTimeout(() => {
         longPressFired = true;
         longPressTimer = undefined;
@@ -811,11 +812,13 @@ const menuChannels = site.channels
         longPressFired = false;
         return;
       }
-      if (isPortalOpen()) {
+      const menuOpen = root.classList.contains('is-menu-open');
+      // A portal still collapsing with the menu is not "open" — this tap reopens the menu.
+      if (menuOpen && isPortalOpen()) {
         setPortalOpen(null);
         return;
       }
-      setMenuOpen(!root.classList.contains('is-menu-open'));
+      setMenuOpen(!menuOpen);
     });
 
     root.querySelectorAll<HTMLElement>('[data-site-nav-portal]').forEach((el) => {

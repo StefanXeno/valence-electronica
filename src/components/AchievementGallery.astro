@@ -264,9 +264,19 @@ const OPTION_TILES = new Set(['demonic-combo']);
     pointer-events: none;
   }
 
-  :global(html[data-intro-pending]) .achievement-dock,
-  :global(html[data-intro-active]) .achievement-dock {
-    display: none;
+  /* Like the V-Flip, the trophy stays laid out under the intro. It steps aside for the phone menu. */
+  .achievement-dock {
+    transition:
+      opacity var(--dock-dur) var(--dock-ease),
+      visibility 0s linear 0s;
+  }
+
+  :global(html.site-nav-menu-open) .achievement-dock {
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity var(--dock-dur) var(--dock-ease),
+      visibility 0s linear var(--dock-dur);
   }
 
   /* —— Trophy (resting home = bottom-right slot of the panel's footer row) —— */
@@ -739,6 +749,8 @@ const OPTION_TILES = new Set(['demonic-combo']);
   }
 
   @media (prefers-reduced-motion: reduce) {
+    .achievement-dock,
+    :global(html.site-nav-menu-open) .achievement-dock,
     .achievement-dock__panel,
     .achievement-tile__chevron,
     .achievement-tile__switch,
