@@ -189,9 +189,8 @@ const stageId = release.jukeboxId;
           </div>
         </div>
         {release.listenLinks.length > 0 && (
-          <div class="discog__listen discog__listen--summary">
-            <span class="discog__listen-label">{chrome.listenOnLabel}</span>
-            <ul class="discog__listen-links">
+          <div class="discog__listen discog__listen--summary discog__listen--bare">
+            <ul class="discog__listen-links" aria-label={chrome.listenOnLabel}>
               {release.listenLinks.map((link) => (
                 <li>
                   <a
@@ -497,6 +496,11 @@ const stageId = release.jukeboxId;
     padding-top: calc(0.45rem * var(--hud-scale));
     border-top: 1px solid color-mix(in srgb, var(--color-border) 40%, transparent);
     min-width: 0;
+  }
+
+  /* Singles: links only — no "Listen On" label, no divider above. */
+  .discog__listen--bare {
+    border-top: none;
   }
 
   .discog__item--nested .discog__listen--summary {

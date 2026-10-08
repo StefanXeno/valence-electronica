@@ -132,7 +132,9 @@ remains.
   `trackOrder`, singles stay individual, and blocks are ordered newest first.
 - **FR-004**: Each card MUST show cover (or placeholder), type chip, title, artist, and
   Listen On icons when valid links exist; activating the card MUST expand release date,
-  type, artist, links, and note.
+  type, artist, links, and note. On single cards the icons sit right-aligned under the
+  head without a visible "Listen On" label or divider (the label stays as the list's
+  accessible name).
 - **FR-005**: Supported listen platforms MUST be Bandcamp, Spotify, YouTube, SoundCloud,
   and Tidal; the primary link order MUST be Bandcamp → Spotify → first valid.
 - **FR-006**: Outbound links MUST open in a new tab; no embeds or autoplay widgets.
