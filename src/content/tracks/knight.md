@@ -11,5 +11,7 @@ listenLinks:
     url: https://soundcloud.com/valence-music/knight
   - platform: youtube
     url: https://www.youtube.com/watch?v=SmUnOst7Org
+  - platform: spotify
+    url: https://open.spotify.com/track/1FNwILuPEBGR0ghKiyloLz
 ---
 

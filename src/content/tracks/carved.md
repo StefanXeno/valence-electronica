@@ -11,5 +11,7 @@ listenLinks:
     url: https://open.spotify.com/track/1JMJHpYoopXHLnlNKiLvzV
   - platform: soundcloud
     url: https://soundcloud.com/valence-music/carved
+  - platform: youtube
+    url: https://www.youtube.com/watch?v=S3Ct1iCmRf8
 ---
 

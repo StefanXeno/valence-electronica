@@ -10,5 +10,7 @@ listenLinks:
     url: https://www.youtube.com/watch?v=BTXo0G35vy8
   - platform: soundcloud
     url: https://soundcloud.com/dreamscape_records/valence-divinity
+  - platform: spotify
+    url: https://open.spotify.com/track/5jtBFr2NQgbkeaKnP3nUZ0
 ---
 

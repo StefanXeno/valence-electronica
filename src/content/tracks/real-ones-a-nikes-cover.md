@@ -11,5 +11,7 @@ listenLinks:
     url: https://soundcloud.com/valence-music/real-ones-a-nikes-cover
   - platform: youtube
     url: https://www.youtube.com/watch?v=7Yz4kqzFEv0
+  - platform: spotify
+    url: https://open.spotify.com/track/6tv8eSuquXG6IDW1OtQsiL
 ---
 

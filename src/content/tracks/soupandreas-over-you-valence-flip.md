@@ -13,5 +13,7 @@ listenLinks:
     url: https://soundcloud.com/valence-music/over-you-remix
   - platform: youtube
     url: https://www.youtube.com/watch?v=b5Or7pgWarc
+  - platform: spotify
+    url: https://open.spotify.com/track/30Ex5Ln7MTKWh23INayUgf
 ---
 

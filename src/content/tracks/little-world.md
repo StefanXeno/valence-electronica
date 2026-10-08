@@ -10,5 +10,7 @@ listenLinks:
     url: https://soundcloud.com/valence-music/little-world
   - platform: youtube
     url: https://www.youtube.com/watch?v=FaFtW2T03tE
+  - platform: spotify
+    url: https://open.spotify.com/track/5hehLYKzbJFca0UwRufITn
 ---
 

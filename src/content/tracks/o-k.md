@@ -11,5 +11,7 @@ listenLinks:
     url: https://open.spotify.com/track/4Kl2kClQdQ3MIDhBkj9oqV
   - platform: soundcloud
     url: https://soundcloud.com/valence-music/o_k_hia
+  - platform: youtube
+    url: https://www.youtube.com/watch?v=VaERs4NogTg
 ---
 

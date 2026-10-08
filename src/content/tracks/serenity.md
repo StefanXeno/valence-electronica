@@ -11,5 +11,7 @@ listenLinks:
     url: https://soundcloud.com/valence-music/serenity
   - platform: youtube
     url: https://www.youtube.com/watch?v=7PxSrTc-bC0
+  - platform: spotify
+    url: https://open.spotify.com/track/2TC2UrIz1lmXFpLzbwqxz4
 ---
 

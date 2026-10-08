@@ -10,5 +10,7 @@ listenLinks:
     url: https://soundcloud.com/valence-music/moonlight
   - platform: youtube
     url: https://www.youtube.com/watch?v=pGaUhSsDtc4
+  - platform: spotify
+    url: https://open.spotify.com/track/5SoA8BfKdbLIslHakU1UxH
 ---
 

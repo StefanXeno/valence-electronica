@@ -9,5 +9,7 @@ listenLinks:
     url: https://valenceelectronica.bandcamp.com/album/real-ones
   - platform: soundcloud
     url: https://soundcloud.com/valence-music/nikes-instrumental
+  - platform: spotify
+    url: https://open.spotify.com/track/4KQ7hg8CHkwsw0mrL4wxZ2
 ---
 

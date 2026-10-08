@@ -10,5 +10,7 @@ listenLinks:
     url: https://open.spotify.com/track/1LWPLzrfTVJlHXOFVAeqKY
   - platform: soundcloud
     url: https://soundcloud.com/valence-music/valence-cyanide-i-wanna-feel
+  - platform: youtube
+    url: https://www.youtube.com/watch?v=ZloDTs5uuVw
 ---
 
