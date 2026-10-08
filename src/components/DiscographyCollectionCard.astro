@@ -17,6 +17,7 @@ const collectionId = `discog-collection-${year}-${block.label}`
   .toLowerCase()
   .replace(/[^a-z0-9]+/g, '-');
 const coverSrc = coverOrPlaceholder(block.coverUrl);
+const hasStageSong = block.entries.some((release) => Boolean(release.jukeboxId));
 ---
 
 <article
@@ -49,6 +50,7 @@ const coverSrc = coverOrPlaceholder(block.coverUrl);
           typeDetail={block.kindType}
           dateFmt={dateFmt}
           variant="nested"
+          leadSlot={hasStageSong}
         />
       ))
     }

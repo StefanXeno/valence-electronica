@@ -1,8 +1,12 @@
 ---
 /**
- * Discography "put on stage" control (035). Rendered only for stage songs
- * (releases with a jukebox id). `stage-switch.ts` handles the click and keeps
- * the play button / EQ marker pair in sync with the active stage entry.
+ * Discography "put on stage" control (035). Rendered for stage songs (releases
+ * with a jukebox id). `stage-switch.ts` handles the click and keeps the play
+ * button / EQ marker pair in sync with the active stage entry.
+ *
+ * - `badge`: floats over the bottom-right of a cover (parent must be `position: relative`).
+ * - `compact`: leading slot of a tracklist row. Without a `stageId` it renders an empty
+ *   spacer of the same width, so titles in a mixed tracklist stay aligned.
  */
 import { getBackgroundConfig } from '../lib/background';
 import type { UiChrome } from '../lib/stage';
@@ -10,9 +14,8 @@ import HudIcon from './HudIcon.astro';
 
 interface Props {
   chrome: UiChrome;
-  stageId: string;
-  /** `compact` for nested EP rows and the phone menu. */
-  size?: 'card' | 'compact';
+  stageId?: string;
+  size?: 'card' | 'compact' | 'badge';
 }
 
 const { chrome, stageId, size = 'card' } = Astro.props;
@@ -20,40 +23,48 @@ const { defaultVideoId } = await getBackgroundConfig();
 const isActive = stageId === defaultVideoId;
 ---
 
-<span class:list={['stage-play', { 'stage-play--compact': size === 'compact' }]}>
-  <button
-    type="button"
-    class="discog__play stage-play__control glitch-hit"
-    data-stage-button={stageId}
-    aria-pressed={isActive ? 'true' : 'false'}
-    aria-label={chrome.stageButtonLabel}
-    data-hud-label={chrome.stageButtonLabel}
-    data-hud-label-anchor="above"
-    hidden={isActive}
-  >
-    <HudIcon token="play" />
-  </button>
-  <span
-    class="discog__now-playing stage-play__control"
-    data-discog-playing={stageId}
-    role="status"
-    aria-label={chrome.currentlyPlayingLabel}
-    hidden={!isActive}
-  >
-    <span class="discog__eq" aria-hidden="true">
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
+{
+  stageId ? (
+    <span class:list={['stage-play', `stage-play--${size}`]}>
+      <button
+        type="button"
+        class="discog__play stage-play__control glitch-hit"
+        data-stage-button={stageId}
+        aria-pressed={isActive ? 'true' : 'false'}
+        aria-label={chrome.stageButtonLabel}
+        data-hud-label={chrome.stageButtonLabel}
+        data-hud-label-anchor="above"
+        hidden={isActive}
+      >
+        <HudIcon token="play" />
+      </button>
+      <span
+        class="discog__now-playing stage-play__control"
+        data-discog-playing={stageId}
+        role="status"
+        aria-label={chrome.currentlyPlayingLabel}
+        hidden={!isActive}
+      >
+        <span class="discog__eq" aria-hidden="true">
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+        </span>
+      </span>
     </span>
-  </span>
-</span>
+  ) : (
+    <span class:list={['stage-play', `stage-play--${size}`]} aria-hidden="true"></span>
+  )
+}
 
 <style>
   .stage-play {
     --stage-play-size: calc(2.35rem * var(--hud-scale));
     display: inline-flex;
+    /* Keeps the empty spacer variant as wide as a real control. */
+    min-width: var(--stage-play-size);
     align-items: center;
     justify-content: center;
     flex: 0 0 auto;
@@ -61,6 +72,33 @@ const isActive = stageId === defaultVideoId;
 
   .stage-play--compact {
     --stage-play-size: calc(2rem * var(--hud-scale));
+  }
+
+  .stage-play--badge {
+    --stage-play-size: calc(1.85rem * var(--hud-scale));
+    position: absolute;
+    right: calc(0.3rem * var(--hud-scale));
+    bottom: calc(0.3rem * var(--hud-scale));
+    z-index: 1;
+  }
+
+  /* Over artwork: dark glass so the control reads on any cover. */
+  .stage-play--badge .stage-play__control {
+    background-color: rgb(0 0 0 / 0.62);
+    backdrop-filter: blur(6px);
+    box-shadow: 0 0.2rem 0.6rem rgb(0 0 0 / 0.45);
+  }
+
+  .stage-play--badge .discog__play {
+    color: #fff;
+    border-color: rgb(255 255 255 / 0.35);
+  }
+
+  .stage-play--badge .discog__now-playing {
+    background-image: linear-gradient(
+      color-mix(in srgb, var(--color-accent) 22%, transparent),
+      color-mix(in srgb, var(--color-accent) 22%, transparent)
+    );
   }
 
   .stage-play__control {

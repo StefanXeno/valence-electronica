@@ -145,6 +145,10 @@ remains.
   collection headers MUST NOT show one. Pressing play MUST put the song on stage (see
   `026` FR-010) and close the overlay (laptop) or menu (phone); it MUST NOT force the
   player open.
+  Placement: on single cards it floats over the bottom-right corner of the cover; in EP
+  tracklists it sits in a leading column before the title (where a track number would),
+  and that column is reserved on every row of an EP that has at least one stage song so
+  titles stay aligned. Listen links stay on the right.
 
 ### Key Entities
 

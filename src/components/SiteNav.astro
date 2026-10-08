@@ -399,6 +399,9 @@ const menuChannels = site.channels
                           // Same head stack as singles: kind → title → artist.
                           const collectionArtist =
                             block.entries[0]?.artist ?? defaultArtist;
+                          const hasStageSong = block.entries.some((release) =>
+                            Boolean(release.jukeboxId),
+                          );
                           return (
                             <section class="site-nav__menu-portal-collection">
                               <div class="site-nav__menu-portal-collection-head">
@@ -431,6 +434,13 @@ const menuChannels = site.channels
                                   >
                                     {/* Title/artist + trailing platform glyphs (no Listen On label). */}
                                     <div class="site-nav__menu-portal-nested-row">
+                                      {hasStageSong && (
+                                        <StagePlayButton
+                                          chrome={chrome}
+                                          stageId={release.jukeboxId}
+                                          size="compact"
+                                        />
+                                      )}
                                       <div class="site-nav__menu-portal-head-text site-nav__menu-portal-head-text--nested">
                                         <span class="site-nav__menu-portal-head-text__title">
                                           {release.title}
@@ -461,13 +471,6 @@ const menuChannels = site.channels
                                           ))}
                                         </ul>
                                       )}
-                                      {release.jukeboxId && (
-                                        <StagePlayButton
-                                          chrome={chrome}
-                                          stageId={release.jukeboxId}
-                                          size="compact"
-                                        />
-                                      )}
                                     </div>
                                   </li>
                                 ))}
@@ -485,16 +488,25 @@ const menuChannels = site.channels
                           >
                             {/* Same head grid as EP — identical vertical centering + text rhythm. */}
                             <div class="site-nav__menu-portal-collection-head">
-                              <span
-                                class="site-nav__menu-portal-collection-cover"
-                                aria-hidden={release.coverUrl ? undefined : 'true'}
-                              >
-                                <img
-                                  src={singleCover}
-                                  alt=""
-                                  loading="lazy"
-                                  decoding="async"
-                                />
+                              <span class="site-nav__menu-portal-cover-slot">
+                                <span
+                                  class="site-nav__menu-portal-collection-cover"
+                                  aria-hidden={release.coverUrl ? undefined : 'true'}
+                                >
+                                  <img
+                                    src={singleCover}
+                                    alt=""
+                                    loading="lazy"
+                                    decoding="async"
+                                  />
+                                </span>
+                                {release.jukeboxId && (
+                                  <StagePlayButton
+                                    chrome={chrome}
+                                    stageId={release.jukeboxId}
+                                    size="badge"
+                                  />
+                                )}
                               </span>
                               <div class="site-nav__menu-portal-head-text">
                                 {release.kindType && (
@@ -505,9 +517,6 @@ const menuChannels = site.channels
                                   {release.artist ?? defaultArtist}
                                 </span>
                               </div>
-                              {release.jukeboxId && (
-                                <StagePlayButton chrome={chrome} stageId={release.jukeboxId} />
-                              )}
                             </div>
                             {release.listenLinks.length > 0 && (
                               <div class="site-nav__menu-portal-listen">
@@ -1305,9 +1314,10 @@ const menuChannels = site.channels
     margin-bottom: 0;
   }
 
-  /* Stage songs: cover | text | play (035). */
-  .site-nav__menu-portal-collection-head:has(> .stage-play) {
-    grid-template-columns: auto minmax(0, 1fr) auto;
+  /* Positioning context for the stage play badge (outside the cover's aria-hidden). */
+  .site-nav__menu-portal-cover-slot {
+    position: relative;
+    display: block;
   }
 
   /* Desktop-style Listen On row — singles only. */

@@ -20,6 +20,8 @@ interface Props {
   dateFmt: Intl.DateTimeFormat;
   /** `nested` = track inside a collection card (no per-track cover). */
   variant?: 'card' | 'nested';
+  /** Nested only: reserve the leading play column (some track in this collection is a stage song). */
+  leadSlot?: boolean;
 }
 
 const {
@@ -30,6 +32,7 @@ const {
   typeDetail,
   dateFmt,
   variant = 'card',
+  leadSlot = false,
 } = Astro.props;
 const nested = variant === 'nested';
 const detailsId = `discog-details-${release.id}`;
@@ -56,7 +59,8 @@ const stageId = release.jukeboxId;
   {
     nested ? (
       <div class="discog__main">
-        <div class="discog__nested-head">
+        <div class:list={['discog__nested-head', { 'discog__nested-head--lead': leadSlot || stageId }]}>
+          {(leadSlot || stageId) && <StagePlayButton chrome={chrome} stageId={stageId} size="compact" />}
           <button
             type="button"
             class="discog__toggle"
@@ -66,7 +70,6 @@ const stageId = release.jukeboxId;
             <span class="discog__head-text__title">{release.title}</span>
             <span class="discog__head-text__artist">{artistName}</span>
           </button>
-          {stageId && <StagePlayButton chrome={chrome} stageId={stageId} size="compact" />}
         </div>
         {release.listenLinks.length > 0 && (
           <div class="discog__listen discog__listen--summary">
@@ -137,20 +140,30 @@ const stageId = release.jukeboxId;
     ) : (
       <>
         <div class="discog__head">
-          <div
-            class="discog__cover"
-            aria-hidden={coverListenHref && hasRealCover ? undefined : 'true'}
-          >
-            {hasRealCover && coverListenHref && coverListenLabel ? (
-              <a
-                class="discog__cover-link glitch-hit"
-                href={coverListenHref}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={coverListenLabel}
-                data-hud-label={primaryListen?.label}
-                data-hud-label-anchor="above"
-              >
+          <div class="discog__cover-slot">
+            <div
+              class="discog__cover"
+              aria-hidden={coverListenHref && hasRealCover ? undefined : 'true'}
+            >
+              {hasRealCover && coverListenHref && coverListenLabel ? (
+                <a
+                  class="discog__cover-link glitch-hit"
+                  href={coverListenHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={coverListenLabel}
+                  data-hud-label={primaryListen?.label}
+                  data-hud-label-anchor="above"
+                >
+                  <img
+                    class="discog__cover-img"
+                    src={coverSrc}
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </a>
+              ) : (
                 <img
                   class="discog__cover-img"
                   src={coverSrc}
@@ -158,16 +171,9 @@ const stageId = release.jukeboxId;
                   loading="lazy"
                   decoding="async"
                 />
-              </a>
-            ) : (
-              <img
-                class="discog__cover-img"
-                src={coverSrc}
-                alt=""
-                loading="lazy"
-                decoding="async"
-              />
-            )}
+              )}
+            </div>
+            {stageId && <StagePlayButton chrome={chrome} stageId={stageId} size="badge" />}
           </div>
           <div class="discog__meta">
             <button
@@ -181,11 +187,6 @@ const stageId = release.jukeboxId;
               <span class="discog__head-text__artist">{artistName}</span>
             </button>
           </div>
-          {stageId && (
-            <div class="discog__play-slot">
-              <StagePlayButton chrome={chrome} stageId={stageId} />
-            </div>
-          )}
         </div>
         {release.listenLinks.length > 0 && (
           <div class="discog__listen discog__listen--summary">
@@ -307,9 +308,15 @@ const stageId = release.jukeboxId;
   /* Same head rhythm as EP/collection cards: cover | text | play */
   .discog__head {
     display: grid;
-    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-columns: auto minmax(0, 1fr);
     column-gap: calc(0.75rem * var(--hud-scale));
     align-items: center;
+  }
+
+  /* Positioning context for the stage play badge (outside the cover's aria-hidden). */
+  .discog__cover-slot {
+    position: relative;
+    flex: 0 0 auto;
   }
 
   .discog__cover {
@@ -555,17 +562,16 @@ const stageId = release.jukeboxId;
     height: calc(1.45rem * var(--hud-scale));
   }
 
-  .discog__play-slot {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
   .discog__nested-head {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-columns: minmax(0, 1fr);
     column-gap: calc(0.6rem * var(--hud-scale));
     align-items: center;
+  }
+
+  /* Tracklist convention: play / EQ sits where a track number would. */
+  .discog__nested-head--lead {
+    grid-template-columns: auto minmax(0, 1fr);
   }
 
   @media (prefers-reduced-motion: reduce) {
