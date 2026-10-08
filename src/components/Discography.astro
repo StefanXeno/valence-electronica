@@ -97,7 +97,10 @@ const dateFmt = new Intl.DateTimeFormat('en-GB', {
       catalog.addEventListener('click', (event) => {
         const target = event.target;
         if (!(target instanceof Element)) return;
-        if (target.closest('a, [data-stage-button]')) return;
+        // Links, stage play and the cover art (incl. its play badge) never toggle the card.
+        if (target.closest('a, [data-stage-button], .discog__cover-slot, .discog__collection-cover')) {
+          return;
+        }
 
         const item = target.closest<HTMLElement>('[data-discog-entry]');
         if (!item || !catalog.contains(item)) return;

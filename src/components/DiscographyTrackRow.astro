@@ -39,13 +39,6 @@ const detailsId = `discog-details-${release.id}`;
 const dateIso = release.sortDate.toISOString().slice(0, 10);
 const dateLabel = dateFmt.format(release.sortDate);
 const coverSrc = coverOrPlaceholder(release.coverUrl);
-const hasRealCover = Boolean(release.coverUrl?.trim());
-const primaryListen =
-  release.listenLinks.find((link) => link.url === release.url) ?? release.listenLinks[0];
-const coverListenHref = release.url;
-const coverListenLabel = primaryListen
-  ? `${chrome.listenOnLabel} ${release.title} (${primaryListen.label})`
-  : undefined;
 const expandedType = typeDetail ?? release.kind;
 /** Only stage songs (with a jukebox entry) can go on stage — catalog-only rows get no play. */
 const stageId = release.jukeboxId;
@@ -141,37 +134,15 @@ const stageId = release.jukeboxId;
       <>
         <div class="discog__head">
           <div class="discog__cover-slot">
-            <div
-              class="discog__cover"
-              aria-hidden={coverListenHref && hasRealCover ? undefined : 'true'}
-            >
-              {hasRealCover && coverListenHref && coverListenLabel ? (
-                <a
-                  class="discog__cover-link glitch-hit"
-                  href={coverListenHref}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={coverListenLabel}
-                  data-hud-label={primaryListen?.label}
-                  data-hud-label-anchor="above"
-                >
-                  <img
-                    class="discog__cover-img"
-                    src={coverSrc}
-                    alt=""
-                    loading="lazy"
-                    decoding="async"
-                  />
-                </a>
-              ) : (
-                <img
-                  class="discog__cover-img"
-                  src={coverSrc}
-                  alt=""
-                  loading="lazy"
-                  decoding="async"
-                />
-              )}
+            {/* Artwork only — no link; clicks on the cover do nothing. */}
+            <div class="discog__cover" aria-hidden="true">
+              <img
+                class="discog__cover-img"
+                src={coverSrc}
+                alt=""
+                loading="lazy"
+                decoding="async"
+              />
             </div>
             {stageId && <StagePlayButton chrome={chrome} stageId={stageId} size="badge" />}
           </div>
@@ -315,6 +286,8 @@ const stageId = release.jukeboxId;
   /* Positioning context for the stage play badge (outside the cover's aria-hidden). */
   .discog__cover-slot {
     position: relative;
+    /* The card is clickable; the artwork is not. */
+    cursor: default;
     flex: 0 0 auto;
   }
 
@@ -334,24 +307,6 @@ const stageId = release.jukeboxId;
 
   .discog__item.is-expanded:not(.discog__item--nested) .discog__cover {
     --discog-cover-size: calc(8rem * var(--hud-scale));
-  }
-
-  .discog__cover-link {
-    display: block;
-    width: 100%;
-    height: 100%;
-    color: inherit;
-    text-decoration: none;
-  }
-
-  .discog__cover-link:focus-visible {
-    outline: 2px solid color-mix(in srgb, var(--color-accent) 70%, transparent);
-    outline-offset: 2px;
-  }
-
-  .discog__cover-link:hover .discog__cover-img,
-  .discog__cover-link:focus-visible .discog__cover-img {
-    filter: brightness(1.08);
   }
 
   .discog__cover-img {

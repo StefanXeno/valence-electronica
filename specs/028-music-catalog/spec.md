@@ -49,20 +49,20 @@ placeholder cover.
 ### User Story 2 - Fan jumps to a streaming platform (Priority: P1)
 
 A fan likes a release and wants to hear the full song elsewhere. The card shows "Listen On"
-platform icons; the cover links to the primary platform (Bandcamp first, then Spotify,
-then any).
+platform icons. The cover is artwork only: clicking it does nothing (it neither opens a
+platform nor expands the card).
 
 **Why this priority**: Leading fans to the music is the site's main job.
 
-**Independent Test**: Activate each Listen On icon and the cover on one release; confirm
-each opens the right platform in a new tab.
+**Independent Test**: Activate each Listen On icon on one release; confirm each opens the
+right platform in a new tab. Click the cover; confirm nothing happens.
 
 **Acceptance Scenarios**:
 
 1. **Given** a release has listen links, **When** its card renders, **Then** one icon per
    valid link appears and opens in a new tab.
 2. **Given** a release has no valid links, **When** its card renders, **Then** no Listen
-   On row and no cover link appear.
+   On row appears.
 
 ---
 
