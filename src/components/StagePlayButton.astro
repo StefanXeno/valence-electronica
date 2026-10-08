@@ -64,6 +64,7 @@ const isActive = stageId === defaultVideoId;
     --stage-play-size: calc(2.35rem * var(--hud-scale));
     display: inline-flex;
     /* Keeps the empty spacer variant as wide as a real control. */
+    width: var(--stage-play-size);
     min-width: var(--stage-play-size);
     align-items: center;
     justify-content: center;
@@ -75,7 +76,7 @@ const isActive = stageId === defaultVideoId;
   }
 
   .stage-play--badge {
-    --stage-play-size: calc(1.85rem * var(--hud-scale));
+    --stage-play-size: calc(2.1rem * var(--hud-scale));
     position: absolute;
     right: calc(0.3rem * var(--hud-scale));
     bottom: calc(0.3rem * var(--hud-scale));
@@ -145,5 +146,13 @@ const isActive = stageId === defaultVideoId;
 
   .stage-play .discog__eq {
     height: calc(var(--stage-play-size) * 0.5);
+  }
+
+  /* Small circles: slimmer bars so the EQ stays inside the ring (default is 32px wide). */
+  .stage-play--compact .discog__eq,
+  .stage-play--badge .discog__eq {
+    --eq-bar-width: 3px;
+    --eq-bar-gap: 2px;
+    height: calc(var(--stage-play-size) * 0.45);
   }
 </style>
