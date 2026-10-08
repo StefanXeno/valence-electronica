@@ -109,6 +109,15 @@ export const PLATFORM_LABELS: Record<ListenPlatform, string> = {
   tidal: 'Tidal',
 };
 
+/** Order of the listen icons on every card. */
+const DISPLAY_ORDER: readonly ListenPlatform[] = [
+  'spotify',
+  'youtube',
+  'soundcloud',
+  'bandcamp',
+  'tidal',
+];
+
 function isListenPlatform(value: string): value is ListenPlatform {
   return (LISTEN_PLATFORMS as readonly string[]).includes(value);
 }
@@ -141,7 +150,10 @@ export function parseListenLinks(
     }
     links.push({ platform, url: row.url, label: PLATFORM_LABELS[platform] });
   }
-  return links;
+  // One icon order everywhere, whatever order the frontmatter lists them in.
+  return links.sort(
+    (a, b) => DISPLAY_ORDER.indexOf(a.platform) - DISPLAY_ORDER.indexOf(b.platform),
+  );
 }
 
 /** Prefer Bandcamp for discography title links, then Spotify, then first valid link. */

@@ -66,7 +66,8 @@ filename slug is the stable id (e.g. `nightmare.md` → `nightmare`).
   [Theme packs](#theme-packs-selection-only))
 - `listenLinks` — optional outbound links (`platform`: `bandcamp`, `spotify`, `youtube`,
   `soundcloud`, or `tidal`; `url` must start with `https://`). Shown as **Listen On** icons in
-  Discography; the cover link uses Bandcamp first, then Spotify, then other platforms
+  Discography, always in the order Spotify, YouTube, SoundCloud, Bandcamp, Tidal (the order
+  in the file does not matter); the cover link uses Bandcamp first, then Spotify, then other platforms
 
 **Body:** Lyrics for that record (leave empty for instrumentals). **Lyrics are not shown on
 the live site in v1** — the body is kept for a future feature.

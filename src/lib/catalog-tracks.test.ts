@@ -87,6 +87,26 @@ describe('parseListenLinks', () => {
     expect(links[0].platform).toBe('bandcamp');
     expect(links[0].label).toBe('Bandcamp');
   });
+
+  it('orders links Spotify, YouTube, SoundCloud, Bandcamp, Tidal', () => {
+    const links = parseListenLinks(
+      [
+        { platform: 'tidal', url: 'https://tidal.com/x' },
+        { platform: 'bandcamp', url: 'https://bandcamp.com/x' },
+        { platform: 'soundcloud', url: 'https://soundcloud.com/x' },
+        { platform: 'youtube', url: 'https://youtube.com/x' },
+        { platform: 'spotify', url: 'https://open.spotify.com/x' },
+      ],
+      'test',
+    );
+    expect(links.map((link) => link.platform)).toEqual([
+      'spotify',
+      'youtube',
+      'soundcloud',
+      'bandcamp',
+      'tidal',
+    ]);
+  });
 });
 
 describe('pickPrimaryListenUrl', () => {
