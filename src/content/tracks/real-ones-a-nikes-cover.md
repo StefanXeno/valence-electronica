@@ -9,5 +9,7 @@ listenLinks:
     url: https://valenceelectronica.bandcamp.com/album/real-ones
   - platform: soundcloud
     url: https://soundcloud.com/valence-music/real-ones-a-nikes-cover
+  - platform: youtube
+    url: https://www.youtube.com/watch?v=7Yz4kqzFEv0
 ---
 

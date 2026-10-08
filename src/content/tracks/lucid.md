@@ -8,5 +8,7 @@ listenLinks:
     url: https://valenceelectronica.bandcamp.com/album/infinite
   - platform: soundcloud
     url: https://soundcloud.com/valence-music/lucid
+  - platform: youtube
+    url: https://www.youtube.com/watch?v=t2Luu7pzPIA
 ---
 

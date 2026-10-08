@@ -7,5 +7,7 @@ cover: /images/covers/angels.webp
 listenLinks:
   - platform: youtube
     url: https://www.youtube.com/watch?v=Hg9bl4b1pz4
+  - platform: soundcloud
+    url: https://soundcloud.com/valence-music/valence-arkangel
 ---
 

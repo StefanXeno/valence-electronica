@@ -15,6 +15,8 @@ listenLinks:
     url: https://valenceelectronica.bandcamp.com/track/nightmare
   - platform: spotify
     url: https://open.spotify.com/track/0fBiVHEUo9hW7GDhDvovcj
+  - platform: soundcloud
+    url: https://soundcloud.com/valence-music/nightmare
 # credits:
 #   - role: Producer
 #     name: Valence

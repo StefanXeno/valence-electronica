@@ -14,5 +14,7 @@ listenLinks:
     url: https://open.spotify.com/track/5dveMGcQYe5iqXWeOBcdrx
   - platform: soundcloud
     url: https://soundcloud.com/valence-music/valence-kasheeey-insane
+  - platform: youtube
+    url: https://www.youtube.com/watch?v=D8VH0ajwBic
 ---
 

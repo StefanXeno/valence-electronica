@@ -12,5 +12,7 @@ listenLinks:
     url: https://valenceelectronica.bandcamp.com/album/crystallize-2014-2015
   - platform: soundcloud
     url: https://soundcloud.com/valence-music/au5-inside-feat-danyka-nadeau-valence-remix
+  - platform: youtube
+    url: https://www.youtube.com/watch?v=9E8ol3HPalw
 ---
 

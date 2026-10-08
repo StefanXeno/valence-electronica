@@ -12,5 +12,7 @@ listenLinks:
     url: https://valenceelectronica.bandcamp.com/album/real-ones
   - platform: soundcloud
     url: https://soundcloud.com/valence-music/donara-fight-for-you-valence-remix
+  - platform: youtube
+    url: https://www.youtube.com/watch?v=ulNYnwfTeqU
 ---
 

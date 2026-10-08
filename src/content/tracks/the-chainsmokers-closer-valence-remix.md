@@ -11,5 +11,7 @@ listenLinks:
     url: https://valenceelectronica.bandcamp.com/album/gasoline-closer
   - platform: soundcloud
     url: https://soundcloud.com/valence-music/closer-valence-remix
+  - platform: youtube
+    url: https://www.youtube.com/watch?v=fInskOE49vE
 ---
 

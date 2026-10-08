@@ -8,5 +8,7 @@ listenLinks:
     url: https://valenceelectronica.bandcamp.com/track/euphoria-feat-sirius-plain
   - platform: soundcloud
     url: https://soundcloud.com/valence-music/euphoria-solo
+  - platform: youtube
+    url: https://www.youtube.com/watch?v=lzs4ukBLqkM
 ---
 

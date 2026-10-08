@@ -14,5 +14,7 @@ listenLinks:
     url: https://open.spotify.com/track/4YJWEXfjHP7P8T7BhMzRYI
   - platform: soundcloud
     url: https://soundcloud.com/valence-music/valence-kasheeey-black-white-colourblind
+  - platform: youtube
+    url: https://www.youtube.com/watch?v=kBtD-1zGsfc
 ---
 

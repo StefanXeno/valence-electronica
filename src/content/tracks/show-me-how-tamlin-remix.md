@@ -11,5 +11,7 @@ listenLinks:
     url: https://open.spotify.com/track/5iUFgATQyR83FVu7avNV3w
   - platform: youtube
     url: https://www.youtube.com/watch?v=4GeCs1WjmuQ
+  - platform: soundcloud
+    url: https://soundcloud.com/itstamlin/valence-show-me-how-feat-kdo
 ---
 

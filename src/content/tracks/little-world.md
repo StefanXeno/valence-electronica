@@ -8,5 +8,7 @@ listenLinks:
     url: https://valenceelectronica.bandcamp.com/track/little-world
   - platform: soundcloud
     url: https://soundcloud.com/valence-music/little-world
+  - platform: youtube
+    url: https://www.youtube.com/watch?v=FaFtW2T03tE
 ---
 

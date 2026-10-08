@@ -10,5 +10,7 @@ listenLinks:
     url: https://open.spotify.com/track/5x10HVRrw5uhdIC2jmA7zE
   - platform: soundcloud
     url: https://soundcloud.com/valence-music/valence-sijak
+  - platform: youtube
+    url: https://www.youtube.com/watch?v=fxCRKAaAhPw
 ---
 

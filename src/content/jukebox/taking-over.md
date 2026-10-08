@@ -14,6 +14,8 @@ listenLinks:
     url: https://valenceelectronica.bandcamp.com/track/taking-over
   - platform: spotify
     url: https://open.spotify.com/track/4uhZrCtmwCZOnLIOTDAQQK
+  - platform: soundcloud
+    url: https://soundcloud.com/valence-music/taking-over-over
 sources:
   - src: /videos/taking-over.mp4
     type: video/mp4

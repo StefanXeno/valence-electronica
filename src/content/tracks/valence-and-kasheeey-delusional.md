@@ -14,5 +14,7 @@ listenLinks:
     url: https://open.spotify.com/track/4Yzt4xl2YR7b0MOUCszs44
   - platform: soundcloud
     url: https://soundcloud.com/valence-music/delusional
+  - platform: youtube
+    url: https://www.youtube.com/watch?v=26uAbdHkA0Q
 ---
 

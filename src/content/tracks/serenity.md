@@ -9,5 +9,7 @@ listenLinks:
     url: https://valenceelectronica.bandcamp.com/album/serenity-ep
   - platform: soundcloud
     url: https://soundcloud.com/valence-music/serenity
+  - platform: youtube
+    url: https://www.youtube.com/watch?v=7PxSrTc-bC0
 ---
 

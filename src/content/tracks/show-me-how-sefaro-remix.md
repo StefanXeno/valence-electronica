@@ -9,5 +9,7 @@ listenLinks:
     url: https://open.spotify.com/track/08Oj5GAgGSUvzg9VcVJd25
   - platform: bandcamp
     url: https://valenceelectronica.bandcamp.com/album/show-me-how-remix-ep
+  - platform: soundcloud
+    url: https://soundcloud.com/sefaro/valence-show-me-how-sefaro
 ---
 

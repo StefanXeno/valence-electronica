@@ -10,5 +10,7 @@ listenLinks:
     url: https://open.spotify.com/track/6qN5lTJLlgBjV3oAYh4vEB
   - platform: soundcloud
     url: https://soundcloud.com/valence-music/drive
+  - platform: youtube
+    url: https://www.youtube.com/watch?v=W459a1v-Ies
 ---
 

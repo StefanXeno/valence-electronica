@@ -9,5 +9,7 @@ listenLinks:
     url: https://valenceelectronica.bandcamp.com/album/crystallize-2014-2015
   - platform: soundcloud
     url: https://soundcloud.com/valence-music/crystallize
+  - platform: youtube
+    url: https://www.youtube.com/watch?v=1TNlCpXO32M
 ---
 

@@ -14,5 +14,7 @@ listenLinks:
     url: https://open.spotify.com/track/3n1NqsPeldcxghVIG2yM4d
   - platform: soundcloud
     url: https://soundcloud.com/valence-music/manchild
+  - platform: youtube
+    url: https://www.youtube.com/watch?v=Uh7NpKTKZc4
 ---
 

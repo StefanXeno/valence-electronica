@@ -10,5 +10,7 @@ listenLinks:
     url: https://open.spotify.com/track/5yUuBteZlvF4fruHe1mMFu
   - platform: soundcloud
     url: https://soundcloud.com/valence-music/rise
+  - platform: youtube
+    url: https://www.youtube.com/watch?v=FbM8YCgbb74
 ---
 

@@ -11,5 +11,7 @@ listenLinks:
     url: https://open.spotify.com/track/1zFCui0XhDYq0fyVeS3LiO
   - platform: soundcloud
     url: https://soundcloud.com/valence-music/202lalune
+  - platform: youtube
+    url: https://www.youtube.com/watch?v=jy1zgTRZs_Q
 ---
 

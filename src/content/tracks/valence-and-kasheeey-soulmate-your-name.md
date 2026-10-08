@@ -13,5 +13,7 @@ listenLinks:
     url: https://open.spotify.com/track/5HVmmyaHfRVWnQMBJORwq6
   - platform: soundcloud
     url: https://soundcloud.com/valence-music/valence-kasheeey-soulmate-your-name
+  - platform: youtube
+    url: https://www.youtube.com/watch?v=DEozRStwfJU
 ---
 

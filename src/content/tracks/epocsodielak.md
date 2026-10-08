@@ -9,5 +9,7 @@ listenLinks:
     url: https://valenceelectronica.bandcamp.com/album/real-ones
   - platform: soundcloud
     url: https://soundcloud.com/valence-music/epocsodielak
+  - platform: youtube
+    url: https://www.youtube.com/watch?v=jWo4g9Diico
 ---
 

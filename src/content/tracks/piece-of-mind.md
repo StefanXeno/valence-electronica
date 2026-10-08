@@ -11,5 +11,7 @@ listenLinks:
     url: https://open.spotify.com/track/6dzlWuSrmtzDrjwE5kjaXc
   - platform: soundcloud
     url: https://soundcloud.com/valence-music/pieceofmind
+  - platform: youtube
+    url: https://www.youtube.com/watch?v=0CfdnuFZZs8
 ---
 

@@ -14,5 +14,7 @@ listenLinks:
     url: https://open.spotify.com/track/0qp4lbXzdB8gwzDLQkLu2J
   - platform: soundcloud
     url: https://soundcloud.com/valence-music/valence-kasheeey-not-a-doll
+  - platform: youtube
+    url: https://www.youtube.com/watch?v=-9ZFBKREjSQ
 ---
 

@@ -14,6 +14,8 @@ listenLinks:
     url: https://valenceelectronica.bandcamp.com/album/show-me-how-remix-ep
   - platform: spotify
     url: https://open.spotify.com/track/0VblOMezfOZLVxB5vxN1UT
+  - platform: soundcloud
+    url: https://soundcloud.com/valence-music/show-me-how-feat-kdo
 sources:
   - src: /videos/show-me-how.mp4
     type: video/mp4

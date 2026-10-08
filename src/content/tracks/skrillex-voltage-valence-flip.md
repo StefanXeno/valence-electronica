@@ -11,5 +11,7 @@ listenLinks:
     url: https://valenceelectronica.bandcamp.com/album/infinite
   - platform: soundcloud
     url: https://soundcloud.com/valence-music/skrillex-voltage-valence-flip
+  - platform: youtube
+    url: https://www.youtube.com/watch?v=yANRTnNO0JI
 ---
 

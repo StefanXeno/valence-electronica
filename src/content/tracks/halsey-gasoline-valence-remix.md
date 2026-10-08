@@ -13,5 +13,7 @@ listenLinks:
     url: https://open.spotify.com/track/7g9iEU1vj6RyQ7xSmXLeT8
   - platform: soundcloud
     url: https://soundcloud.com/valence-music/gasoline-valence-remix
+  - platform: youtube
+    url: https://www.youtube.com/watch?v=XmKTbP317O8
 ---
 

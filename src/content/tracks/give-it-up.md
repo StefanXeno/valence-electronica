@@ -9,5 +9,7 @@ listenLinks:
     url: https://valenceelectronica.bandcamp.com/album/crystallize-2014-2015
   - platform: soundcloud
     url: https://soundcloud.com/valence-music/give-it-up
+  - platform: youtube
+    url: https://www.youtube.com/watch?v=ofdMf_x4Sno
 ---
 

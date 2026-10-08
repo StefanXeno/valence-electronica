@@ -13,6 +13,8 @@ listenLinks:
     url: https://open.spotify.com/track/1osiC6EXbBbNej2dM5UoDv
   - platform: soundcloud
     url: https://soundcloud.com/valence-music/infinite
+  - platform: bandcamp
+    url: https://valenceelectronica.bandcamp.com/track/infinite
 sources:
   - src: /videos/infinite.mp4
     type: video/mp4

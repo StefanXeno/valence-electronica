@@ -7,5 +7,7 @@ cover: /images/covers/kaleidoscopes.webp
 listenLinks:
   - platform: bandcamp
     url: https://valenceelectronica.bandcamp.com/album/real-ones
+  - platform: youtube
+    url: https://www.youtube.com/watch?v=UiHiSVDCZ-s
 ---
 
