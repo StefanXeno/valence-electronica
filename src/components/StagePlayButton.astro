@@ -93,7 +93,8 @@ const isActive = stageId === defaultVideoId;
     background: color-mix(in srgb, var(--color-accent) 10%, transparent);
   }
 
-  .discog__play[hidden] {
+  /* `display: grid` above would otherwise beat the `hidden` attribute on both controls. */
+  .stage-play__control[hidden] {
     display: none;
   }
 
