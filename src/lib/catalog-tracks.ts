@@ -76,6 +76,8 @@ export type DiscographyBlock =
       /** Full label, e.g. `Compilation (INITIATE)`. */
       label: string;
       coverUrl?: string;
+      /** Whole-release links from `src/content/collections/` (empty when none). */
+      listenLinks: ListenLink[];
       sortDate: Date;
       year: number;
       entries: DiscographyEntry[];
@@ -327,7 +329,11 @@ function blockSortTitle(block: DiscographyBlock): string {
  * tracks sharing the same kind string become one collection block; singles stay
  * individual. Timeline order is newest → oldest.
  */
-export function groupDiscographyByYear(entries: DiscographyEntry[]): DiscographyYearGroup[] {
+export function groupDiscographyByYear(
+  entries: DiscographyEntry[],
+  /** Collection name (text inside `kind` parentheses) → whole-release listen links. */
+  collectionLinks: ReadonlyMap<string, ListenLink[]> = new Map(),
+): DiscographyYearGroup[] {
   const sorted = sortDiscographyEntries(entries);
   const collectionBuckets = new Map<string, DiscographyEntry[]>();
   const singles: DiscographyEntry[] = [];
@@ -345,6 +351,7 @@ export function groupDiscographyByYear(entries: DiscographyEntry[]): Discography
   }
 
   const blocks: DiscographyBlock[] = singles.map((entry) => ({ type: 'single' as const, entry }));
+  const usedCollectionNames = new Set<string>();
 
   for (const [rawKind, members] of collectionBuckets) {
     const parsed = parseReleaseKind(rawKind);
@@ -358,16 +365,24 @@ export function groupDiscographyByYear(entries: DiscographyEntry[]): Discography
     // Newest track date places the collection in the year timeline.
     const sortDate = newestSortDate(members);
     if (!sortDate) continue;
+    usedCollectionNames.add(parsed.collection);
     blocks.push({
       type: 'collection',
       kindType: parsed.type,
       collection: parsed.collection,
       label: rawKind,
       coverUrl,
+      listenLinks: collectionLinks.get(parsed.collection) ?? [],
       sortDate,
       year: sortDate.getUTCFullYear(),
       entries: withCover,
     });
+  }
+
+  for (const name of collectionLinks.keys()) {
+    if (!usedCollectionNames.has(name)) {
+      console.warn(`[catalog] collection links "${name}" match no EP / Compilation / Album kind`);
+    }
   }
 
   blocks.sort(
@@ -452,6 +467,18 @@ export async function getMergedDiscography(
   }
 
   return mergeDiscographyEntries(jukeboxRows, trackRows);
+}
+
+/** Whole-release listen links from `src/content/collections/`, keyed by collection name. */
+export async function getCollectionListenLinks(): Promise<Map<string, ListenLink[]>> {
+  const { getCollection } = await import('astro:content');
+  const rows = await getCollection('collections');
+  const links = new Map<string, ListenLink[]>();
+  for (const entry of rows) {
+    if (entry.id.startsWith('__empty__')) continue;
+    links.set(entry.data.name.trim(), parseListenLinks(entry.data.listenLinks, entry.id));
+  }
+  return links;
 }
 
 /** @deprecated Use getMergedDiscography — kept as alias for callers migrating incrementally. */

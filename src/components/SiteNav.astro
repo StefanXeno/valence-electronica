@@ -3,7 +3,11 @@ import { Image } from 'astro:assets';
 import { getCollection, render } from 'astro:content';
 import site from '../data/site.json';
 import wordmark from '../assets/images/brand/valence-wordmark.png';
-import { getMergedDiscography, groupDiscographyByYear } from '../lib/catalog-tracks';
+import {
+  getCollectionListenLinks,
+  getMergedDiscography,
+  groupDiscographyByYear,
+} from '../lib/catalog-tracks';
 import { getValidJukeboxEntries } from '../lib/background';
 import type { UiChrome } from '../lib/stage';
 import {
@@ -39,7 +43,7 @@ const legalPanels = await Promise.all(
   }),
 );
 const releases = await getMergedDiscography(new Set(stageVideos.map((v) => v.id)));
-const releaseYearGroups = groupDiscographyByYear(releases);
+const releaseYearGroups = groupDiscographyByYear(releases, await getCollectionListenLinks());
 const defaultArtist = site.artist.name;
 const artistName = site.artist.name;
 const tourPortalDateFmt = new Intl.DateTimeFormat('en-GB', {
@@ -424,6 +428,30 @@ const menuChannels = site.channels
                                   <span class="site-nav__menu-portal-head-text__artist">
                                     {collectionArtist}
                                   </span>
+                                  {block.listenLinks.length > 0 && (
+                                    <div class="site-nav__menu-portal-listen">
+                                      <ul
+                                        class="site-nav__menu-portal-listen-links"
+                                        aria-label={chrome.listenOnLabel}
+                                      >
+                                        {block.listenLinks.map((link) => (
+                                          <li>
+                                            <a
+                                              class="glitch-hit"
+                                              href={link.url}
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              aria-label={link.label}
+                                              data-hud-label={link.label}
+                                              data-hud-label-anchor="above"
+                                            >
+                                              <ChannelIcon id={link.platform} label={link.label} />
+                                            </a>
+                                          </li>
+                                        ))}
+                                      </ul>
+                                    </div>
+                                  )}
                                 </div>
                               </div>
                               <ul class="site-nav__menu-portal-release-list site-nav__menu-portal-release-list--collection">
@@ -1322,7 +1350,7 @@ const menuChannels = site.channels
     display: block;
   }
 
-  /* Singles: links sit under kind / title / artist, beside the cover. */
+  /* Singles and EPs / albums: links sit under kind / title / artist, beside the cover. */
   .site-nav__menu-portal-listen {
     display: flex;
     flex-wrap: wrap;

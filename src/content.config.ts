@@ -92,6 +92,18 @@ const tracks = defineCollection({
   }),
 });
 
+/**
+ * Listen links for a whole EP / Compilation / Album. `name` must match the text in
+ * parentheses of its tracks' `kind`, e.g. `NOT A DOLL EP` for `kind: EP (NOT A DOLL EP)`.
+ */
+const releaseCollections = defineCollection({
+  loader: globAllowEmpty({ pattern: '**/*.md', base: './src/content/collections' }),
+  schema: z.object({
+    name: filledText,
+    listenLinks: z.array(listenLink).optional(),
+  }),
+});
+
 const about = defineCollection({
   loader: globAllowEmpty({ pattern: '**/*.md', base: './src/content/about' }),
   schema: z.object({}),
@@ -188,4 +200,12 @@ const ui = defineCollection({
   }),
 });
 
-export const collections = { legal, jukebox, tracks, about, shows, ui };
+export const collections = {
+  legal,
+  jukebox,
+  tracks,
+  collections: releaseCollections,
+  about,
+  shows,
+  ui,
+};

@@ -1,6 +1,10 @@
 ---
 import site from '../data/site.json';
-import { getMergedDiscography, groupDiscographyByYear } from '../lib/catalog-tracks';
+import {
+  getCollectionListenLinks,
+  getMergedDiscography,
+  groupDiscographyByYear,
+} from '../lib/catalog-tracks';
 import { getValidJukeboxEntries } from '../lib/background';
 import type { UiChrome } from '../lib/stage';
 import DiscographyCollectionCard from './DiscographyCollectionCard.astro';
@@ -14,7 +18,7 @@ const { chrome } = Astro.props;
 const videos = await getValidJukeboxEntries();
 const validIds = new Set(videos.map((entry) => entry.id));
 const releases = await getMergedDiscography(validIds);
-const yearGroups = groupDiscographyByYear(releases);
+const yearGroups = groupDiscographyByYear(releases, await getCollectionListenLinks());
 const defaultArtist = site.artist.name;
 const dateFmt = new Intl.DateTimeFormat('en-GB', {
   day: 'numeric',

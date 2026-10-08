@@ -134,7 +134,9 @@ remains.
   Listen On icons when valid links exist; activating the card MUST expand release date,
   type, artist, links, and note. On single cards the icons sit under kind / title / artist,
   beside the cover, without a visible "Listen On" label or divider (the label stays as
-  the list's accessible name).
+  the list's accessible name). EP / Compilation / Album cards MAY show whole-release
+  links the same way, from `src/content/collections/` (matched by the collection name in
+  `kind`).
 - **FR-005**: Supported listen platforms MUST be Bandcamp, Spotify, YouTube, SoundCloud,
   and Tidal; the primary link order MUST be Bandcamp → Spotify → first valid.
 - **FR-006**: Outbound links MUST open in a new tab; no embeds or autoplay widgets.

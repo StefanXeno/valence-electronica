@@ -2,6 +2,7 @@
 import type { DiscographyBlock } from '../lib/catalog-tracks';
 import type { UiChrome } from '../lib/stage';
 import { coverOrPlaceholder } from '../lib/url';
+import ChannelIcon from './ChannelIcon.astro';
 import DiscographyTrackRow from './DiscographyTrackRow.astro';
 
 interface Props {
@@ -38,6 +39,25 @@ const hasStageSong = block.entries.some((release) => Boolean(release.jukeboxId))
     <div class="discog__head-text">
       <span class="discog__head-text__kind">{block.kindType}</span>
       <span class="discog__head-text__title" id={collectionId}>{block.collection}</span>
+      {block.listenLinks.length > 0 && (
+        <ul class="discog__collection-listen" aria-label={chrome.listenOnLabel}>
+          {block.listenLinks.map((link) => (
+            <li>
+              <a
+                class="glitch-hit"
+                href={link.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={link.label}
+                data-hud-label={link.label}
+                data-hud-label-anchor="above"
+              >
+                <ChannelIcon id={link.platform} label={link.label} />
+              </a>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   </div>
   <ul class="discog__collection-tracks">
@@ -84,6 +104,50 @@ const hasStageSong = block.entries.some((release) => Boolean(release.jukeboxId))
     grid-template-columns: auto minmax(0, 1fr);
     column-gap: calc(0.75rem * var(--hud-scale));
     align-items: center;
+  }
+
+  /* Whole-release links under the title, beside the cover — same look as single cards. */
+  .discog__collection-listen {
+    list-style: none;
+    margin: 0;
+    padding: calc(0.4rem * var(--hud-scale)) 0 0;
+    display: flex;
+    flex-flow: row wrap;
+    align-items: center;
+    gap: calc(0.35rem * var(--hud-scale));
+  }
+
+  .discog__collection-listen li {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .discog__collection-listen a {
+    overflow: visible;
+    display: inline-grid;
+    place-items: center;
+    width: calc(2.35rem * var(--hud-scale));
+    height: calc(2.35rem * var(--hud-scale));
+    border: 1px solid color-mix(in srgb, var(--color-border) 60%, transparent);
+    border-radius: 999px;
+    color: var(--color-text-muted);
+    background: color-mix(in srgb, var(--color-bg) 30%, transparent);
+    transition:
+      color 160ms ease,
+      border-color 160ms ease,
+      background-color 160ms ease;
+  }
+
+  .discog__collection-listen a:hover {
+    color: var(--color-accent-alt);
+    border-color: color-mix(in srgb, var(--color-accent) 45%, var(--color-border));
+    background: color-mix(in srgb, var(--color-accent) 10%, transparent);
+  }
+
+  .discog__collection-listen :global(.channel-icon) {
+    width: calc(1.45rem * var(--hud-scale));
+    height: calc(1.45rem * var(--hud-scale));
   }
 
   .discog__collection-cover {

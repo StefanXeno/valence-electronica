@@ -140,6 +140,25 @@ intentionally want two Discography rows.
 
 ---
 
+#### EP / album links (whole release)
+
+**Folder:** [`src/content/collections/`](../src/content/collections/)
+
+One Markdown file per EP, Compilation, or Album that has its own release links (e.g. the
+Bandcamp album page or a Spotify album). The links show under the release title, next to
+the cover, in Discography and the phone menu.
+
+**Frontmatter:**
+
+- `name` — must match the text in parentheses of the tracks' `kind` exactly, e.g.
+  `NOT A DOLL EP` for `kind: EP (NOT A DOLL EP)`. Put it in quotes if it contains special
+  characters (`•`, `:`).
+- `listenLinks` — same platforms as tracks.
+
+A `name` that matches no release only prints a build warning; nothing shows on the site.
+
+---
+
 ### Tracks vs jukebox — quick pick
 
 | Situation | Use |
