@@ -1376,7 +1376,7 @@ const menuChannels = site.channels
 
   .site-nav__menu-portal-listen-links :global(.channel-icon) {
     width: 1.25rem;
-    height: 1.45rem;
+    height: 1.25rem;
   }
 
   .site-nav__menu-portal-collection-head {
@@ -1399,9 +1399,14 @@ const menuChannels = site.channels
   }
 
   .site-nav__menu-portal-collection-cover {
-    /* Tall enough that a single's info + links column fits beside it without extra space below. */
     width: 6rem;
     height: 6rem;
+  }
+
+  /* Singles: cover taller than the info + links column, so it breathes above and below. */
+  .site-nav__menu-portal-collection--single .site-nav__menu-portal-collection-cover {
+    width: 8rem;
+    height: 8rem;
   }
 
   .site-nav__menu-portal-collection-cover img,
