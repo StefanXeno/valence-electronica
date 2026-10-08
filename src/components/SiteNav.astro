@@ -516,32 +516,32 @@ const menuChannels = site.channels
                                 <span class="site-nav__menu-portal-head-text__artist">
                                   {release.artist ?? defaultArtist}
                                 </span>
+                                {release.listenLinks.length > 0 && (
+                                  <div class="site-nav__menu-portal-listen">
+                                    <ul
+                                      class="site-nav__menu-portal-listen-links"
+                                      aria-label={chrome.listenOnLabel}
+                                    >
+                                      {release.listenLinks.map((link) => (
+                                        <li>
+                                          <a
+                                            class="glitch-hit"
+                                            href={link.url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            aria-label={link.label}
+                                            data-hud-label={link.label}
+                                            data-hud-label-anchor="above"
+                                          >
+                                            <ChannelIcon id={link.platform} label={link.label} />
+                                          </a>
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                )}
                               </div>
                             </div>
-                            {release.listenLinks.length > 0 && (
-                              <div class="site-nav__menu-portal-listen">
-                                <ul
-                                  class="site-nav__menu-portal-listen-links"
-                                  aria-label={chrome.listenOnLabel}
-                                >
-                                  {release.listenLinks.map((link) => (
-                                    <li>
-                                      <a
-                                        class="glitch-hit"
-                                        href={link.url}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        aria-label={link.label}
-                                        data-hud-label={link.label}
-                                        data-hud-label-anchor="above"
-                                      >
-                                        <ChannelIcon id={link.platform} label={link.label} />
-                                      </a>
-                                    </li>
-                                  ))}
-                                </ul>
-                              </div>
-                            )}
                           </div>
                         );
                       })}
@@ -1322,20 +1322,19 @@ const menuChannels = site.channels
     display: block;
   }
 
-  /* Singles: links row under the head, right-aligned, no label or divider. */
+  /* Singles: links sit under kind / title / artist, beside the cover. */
   .site-nav__menu-portal-listen {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     gap: 0.45rem;
-    margin-top: 0.55rem;
+    margin-top: 0.4rem;
     min-width: 0;
   }
 
   .site-nav__menu-portal-listen-links {
     list-style: none;
     margin: 0;
-    margin-left: auto;
     padding: 0;
     display: inline-flex;
     flex-flow: row wrap;
@@ -1353,9 +1352,9 @@ const menuChannels = site.channels
     overflow: visible;
     display: inline-grid;
     place-items: center;
-    /* Larger tap targets for mobile portal. */
-    width: 2.65rem;
-    height: 2.65rem;
+    /* Tap targets that still fit beside the cover. */
+    width: 2.3rem;
+    height: 2.3rem;
     border: 1px solid color-mix(in srgb, #fff 22%, transparent);
     border-radius: 999px;
     color: color-mix(in srgb, #fff 72%, transparent);
@@ -1376,7 +1375,7 @@ const menuChannels = site.channels
   }
 
   .site-nav__menu-portal-listen-links :global(.channel-icon) {
-    width: 1.45rem;
+    width: 1.25rem;
     height: 1.45rem;
   }
 
@@ -1400,8 +1399,9 @@ const menuChannels = site.channels
   }
 
   .site-nav__menu-portal-collection-cover {
-    width: 5.5rem;
-    height: 5.5rem;
+    /* Tall enough that a single's info + links column fits beside it without extra space below. */
+    width: 6rem;
+    height: 6rem;
   }
 
   .site-nav__menu-portal-collection-cover img,

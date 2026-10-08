@@ -186,29 +186,29 @@ const stageId = release.jukeboxId;
               <span class="discog__head-text__title">{release.title}</span>
               <span class="discog__head-text__artist">{artistName}</span>
             </button>
+            {release.listenLinks.length > 0 && (
+              <div class="discog__listen discog__listen--summary discog__listen--bare">
+                <ul class="discog__listen-links" aria-label={chrome.listenOnLabel}>
+                  {release.listenLinks.map((link) => (
+                    <li>
+                      <a
+                        class="glitch-hit"
+                        href={link.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={link.label}
+                        data-hud-label={link.label}
+                        data-hud-label-anchor="above"
+                      >
+                        <ChannelIcon id={link.platform} label={link.label} />
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
         </div>
-        {release.listenLinks.length > 0 && (
-          <div class="discog__listen discog__listen--summary discog__listen--bare">
-            <ul class="discog__listen-links" aria-label={chrome.listenOnLabel}>
-              {release.listenLinks.map((link) => (
-                <li>
-                  <a
-                    class="glitch-hit"
-                    href={link.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={link.label}
-                    data-hud-label={link.label}
-                    data-hud-label-anchor="above"
-                  >
-                    <ChannelIcon id={link.platform} label={link.label} />
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
         <div class="discog__details" id={detailsId} hidden>
           <dl class="discog__facts">
             <div class="discog__fact">
@@ -498,9 +498,14 @@ const stageId = release.jukeboxId;
     min-width: 0;
   }
 
-  /* Singles: links only — no "Listen On" label, no divider above. */
+  /* Singles: links only, under the title block beside the cover — no label, no divider. */
   .discog__listen--bare {
+    padding-top: calc(0.4rem * var(--hud-scale));
     border-top: none;
+  }
+
+  .discog__listen--bare .discog__listen-links {
+    margin-left: 0;
   }
 
   .discog__item--nested .discog__listen--summary {
