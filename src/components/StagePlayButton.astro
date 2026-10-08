@@ -140,8 +140,7 @@ const isActive = stageId === defaultVideoId;
   .discog__play :global(.hud-icon) {
     width: calc(var(--stage-play-size) * 0.47);
     height: calc(var(--stage-play-size) * 0.47);
-    /* Optical center for the play triangle */
-    translate: 0.08em 0;
+    /* No extra nudge: the play path is already drawn with its centroid at the viewBox centre. */
   }
 
   .stage-play .discog__eq {
