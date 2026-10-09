@@ -34,6 +34,7 @@ export const WILD_SURFACE_SELECTORS = [
   '.discog__item',
   '.discog__head-text__title',
   '.stage-card',
+  '.tour__row',
 ].join(', ');
 
 const WILD_SKIP_CLOSEST =

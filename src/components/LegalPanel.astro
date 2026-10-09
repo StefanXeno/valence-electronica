@@ -160,7 +160,8 @@ const titleId = `legal-panel-title-${slug}`;
       --legal-pad-x: clamp(2rem, 6vw, 4rem);
       border: 0;
       border-radius: 0;
-      background: color-mix(in srgb, #050505 92%, transparent);
+      /* A bit denser than the phone menu: the stage HUD should not ghost through. */
+      background: color-mix(in srgb, #050505 95%, transparent);
       backdrop-filter: blur(16px);
       box-shadow: none;
       animation: none;
