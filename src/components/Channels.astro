@@ -111,6 +111,21 @@ const channels = site.channels.map((channel) => {
     height: calc(22px * var(--hud-scale));
   }
 
+  /* Laptop: a touch smaller than the corner controls, so the row reads as secondary. */
+  @media (min-width: 1024px) {
+    li a,
+    li.placeholder span {
+      width: calc(2.15rem * var(--hud-scale));
+      height: calc(2.15rem * var(--hud-scale));
+    }
+
+    li a :global(.channel-icon),
+    li.placeholder :global(.channel-icon) {
+      width: calc(19px * var(--hud-scale));
+      height: calc(19px * var(--hud-scale));
+    }
+  }
+
   li.placeholder {
     color: var(--color-text-muted);
   }
