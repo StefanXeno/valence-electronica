@@ -38,7 +38,7 @@ export const WILD_SURFACE_SELECTORS = [
 ].join(', ');
 
 const WILD_SKIP_CLOSEST =
-  '[data-atmosphere], [data-track-rub-overlay], .ve-achievement, [data-legal-overlay], [data-landing-intro], .hud-label-reveal';
+  '[data-atmosphere], .ve-achievement, [data-legal-overlay], [data-landing-intro], .hud-label-reveal';
 
 export type AmbientGlitchEligibility = {
   glitchHit: boolean;

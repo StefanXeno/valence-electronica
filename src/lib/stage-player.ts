@@ -183,17 +183,13 @@ function isNavMenuOpen(): boolean {
   return document.documentElement.classList.contains('site-nav-menu-open');
 }
 
-function isRubPanelOpen(): boolean {
-  return Boolean(document.querySelector('[data-track-rub-panel]:not([hidden])'));
-}
-
 /** Achievement gallery (036) sets this class on <html> while open. */
 function isAchievementGalleryOpen(): boolean {
   return document.documentElement.classList.contains('achievement-gallery-open');
 }
 
 function isOverlayOpen(): boolean {
-  return isLegalOverlayOpen() || isNavMenuOpen() || isRubPanelOpen() || isAchievementGalleryOpen();
+  return isLegalOverlayOpen() || isNavMenuOpen() || isAchievementGalleryOpen();
 }
 
 /** Primary taps on empty stage only — chrome, overlays and the intro never count. */

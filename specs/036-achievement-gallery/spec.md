@@ -285,6 +285,7 @@ reload → mode is off.
   secret rub achievement moves to the neutral key `ve-achievement-rub`; on load, an existing
   `ve-achievement-why-are-you-rubbing` value MUST be copied to the new key and the old key
   removed, once.
+  *(Superseded 2026-10-09: the rub achievement and this migration are removed.)*
 - **FR-012**: The gallery and icon MUST distinguish "storage unavailable" from "unlocked":
   with storage unavailable, the icon MUST stay hidden and the gallery MUST NOT report any
   achievement as unlocked.
@@ -339,14 +340,14 @@ Order and copy at launch (hints are drafts; the artist may rewrite them):
 
 | Order | Achievement | Secret | Hint (locked) |
 | ----- | ----------- | ------ | ------------- |
-| 1 | Why are you rubbing?! | yes | — |
+| 1 | Taking Over (replaced "Why are you rubbing?!" on 2026-10-09) | yes | — |
 | 2 | Infinite | no | *On one track, going in circles is the whole point.* |
 | 3 | Found it! | no | *Knock on the stage and someone might answer.* |
 | 4 | Demonic Combination | no | *Some numbers wake the Nightmare.* |
 | 5 | Coder — *Take a look at the source code* | no | *Real fans read the fine print.* |
 
-Titles and subtitles 1–4 carry over unchanged from today's toasts; Coder is new. Ids: `rub`
-(neutral id for the secret entry), `infinite-spin`, `player-found`, `demonic-combo`,
+Titles and subtitles 1–4 carry over unchanged from today's toasts; Coder is new. Ids: `taking-over`
+(was `rub` until 2026-10-09), `infinite-spin`, `player-found`, `demonic-combo`,
 `coder`.
 
 ### Key Entities

@@ -6,46 +6,42 @@
 
 **Status**: As-built (consolidated living spec) — first spec for this feature
 
-**Updated**: 2026-10-06 — "player found" achievement (folded in from `035`)
+**Updated**: 2026-10-06 — "player found" achievement (folded in from `035`); 2026-10-09 — the
+rub egg ("Why are you rubbing?!", reveal panel, rub tagline) is replaced by the Taking Over
+swipe
 
 **Consolidates**: post-spec work from 2026-09-20 (commits `beb17a0` … `5336b73`); replaces
 the vinyl → V-Flip easter egg idea from `021-jukebox-easter-egg`, which was retired
 
-**Input**: Document the hidden interactions that reward curious visitors: rubbing a song in
-the discography reveals its hidden text, spinning a circle on the Infinite stage, and the
+**Input**: Document the hidden interactions that reward curious visitors: dragging Taking
+Over sideways in the discography, spinning a circle on the Infinite stage, and the
 one-time "achievement unlocked" toasts they trigger. Finding the hidden stage player
 (see `026`) is the third achievement; typing 666 (the demonic combo) is the fourth.
 
 ## User Scenarios & Testing *(mandatory)*
 
-### User Story 1 - Rubbing a song reveals its secret text (Priority: P1)
+### User Story 1 - Taking Over takes over (Priority: P1)
 
-A curious visitor scrubs back and forth over a song card in the discography. After three
-quick back-and-forth rubs, a full panel opens with that song's hidden text (e.g. lyrics or
-liner notes). The first time ever, an achievement toast pops up ("Why are you rubbing?!"),
-and the tagline under the wordmark changes to "You know how to rub ^^" for the rest of the
-visit.
+A curious visitor grabs the Taking Over row in the discography and drags it sideways. The
+row follows the pointer with some resistance and springs back on release. Pulling it far
+enough (either direction) unlocks the "Taking Over" achievement once per browser.
 
-**Why this priority**: The flagship easter egg; it gives the stored track text a reason to
-exist.
+**Why this priority**: The flagship easter egg; a playful nod to the track name.
 
-**Independent Test**: On a `rubbable` release with body text, rub horizontally three
-times on laptop (mouse) and phone (finger); confirm the panel opens, the toast shows only
-on the first success in this browser, and the tagline is pinned until reload.
+**Independent Test**: Open the discography (laptop overlay and phone menu), drag the Taking
+Over row left or right past ~110px; confirm the row springs back and the toast shows only
+on the first success in this browser.
 
 **Acceptance Scenarios**:
 
-1. **Given** a catalog card marked `rubbable` whose content file has body text, **When** the
-   visitor makes three direction reversals with enough horizontal travel within the idle
-   window, **Then** a full panel with that text opens.
-2. **Given** the panel is open, **When** the visitor uses Close or Escape, **Then** it
-   closes and focus returns to where it was.
-3. **Given** the first successful rub in this browser, **When** the panel opens, **Then**
-   an achievement toast appears once and is announced to screen readers.
-4. **Given** a successful rub, **When** the tagline rotates, **Then** it stays pinned to the
-   rub line until reload.
-5. **Given** the pointer starts on a link, play, or listen control, **When** it moves,
-   **Then** no rub starts and the control behaves normally.
+1. **Given** a catalog row marked `swipeable`, **When** the visitor drags it horizontally
+   past ~110px and releases, **Then** the row springs back and the achievement unlocks once.
+2. **Given** a shorter drag, **When** released, **Then** the row springs back and nothing
+   unlocks.
+3. **Given** the motion starts mostly vertical, **When** the finger moves, **Then** the page
+   scrolls and the row does not move.
+4. **Given** the pointer starts on a link, play, or listen control, **When** it moves,
+   **Then** no drag starts and the control behaves normally.
 
 ---
 
@@ -74,40 +70,39 @@ confirm the toast appears once per browser.
 ### Edge Cases
 
 - `localStorage` blocked (private mode) → achievements are treated as already unlocked, so
-  toasts do not show; the rub panel still opens.
+  toasts do not show; the row still drags.
 - Vertical scrolling on touch must not be stolen: only clearly horizontal motion locks a
-  rub; a completed rub suppresses the following synthetic click.
+  drag; a completed drag suppresses the following synthetic click (no row expand).
 - Reduced motion → toast appears and disappears without animation.
-- A row without body text or without `rubbable: true` never opens a panel.
+- A row without `swipeable: true` never drags.
 
 ## Requirements *(mandatory)*
 
 ### Functional Requirements
 
-- **FR-001**: Content entries (jukebox or tracks) MAY set `rubbable: true`; only those with
-  non-empty Markdown body MUST get a hidden reveal panel.
-- **FR-002**: A rub MUST require three direction reversals with ≥ ~36px travel each,
-  resetting after ~1.6 s idle; it MUST ignore gestures starting on links, play buttons, or
-  listen controls.
-- **FR-003**: The reveal panel MUST be a modal dialog with title, artist, body text, a
-  Close control, Escape support, and focus restore; it MUST NOT change the URL.
+- **FR-001**: Content entries (jukebox or tracks) MAY set `swipeable: true` (today: Taking
+  Over); their discography rows (overlay and phone menu) become draggable sideways.
+- **FR-002**: The drag MUST lock only after ~10px of mostly horizontal motion, move the row
+  damped (×0.55, capped at 150px) and spring it back on release; releasing after ≥ ~110px
+  of pointer travel MUST unlock "Taking Over" (key `ve-achievement-taking-over`). It MUST
+  ignore gestures starting on links, play buttons, or listen controls.
+- **FR-003**: *(retired with the rub egg: hidden reveal panel.)*
 - **FR-004**: The Infinite spin MUST only arm while the active stage id is `infinite`, MUST
   ignore gestures starting on interactive chrome, and MUST unlock after ~0.9 revolutions
   with wobble tolerance and a ~3.2 s idle reset.
 - **FR-005**: Achievements MUST be one-shot per browser via first-party `localStorage`
   keys, shown through one shared toast with title, subtitle, glyph, and a screen-reader
   announcement.
-- **FR-006**: A successful rub MUST pin the tagline to the rub line for the page session
-  only (no persistence).
+- **FR-006**: *(retired with the rub egg: tagline pin.)*
 - **FR-007**: Easter eggs MUST NOT be required for any primary task and MUST NOT add
   tracking. (The hidden player is discovered by a tap gesture but always has a keyboard
   path — see `026` FR-014.)
 - **FR-008**: The first reveal of the hidden stage player in a browser MUST unlock the
   "player found" achievement (key `ve-achievement-player-found`); its title and subtitle
   MUST come from UI chrome (`playerAchievementTitle`, `playerAchievementSub`).
-- **FR-009**: Rub, Infinite spin, and the player tap hint MUST share one gesture-ignore
+- **FR-009**: The Taking Over swipe, Infinite spin, and the player tap hint MUST share one gesture-ignore
   selector set so no gesture starts on controls, navigation, overlays, or the player, and
-  a tap on empty stage never starts a rub or spin.
+  a tap on empty stage never starts a swipe or spin.
 - **FR-010**: Typing `666` on the keyboard (not inside a text field, digits ≤ ~1.6 s apart)
   MUST put Nightmare on stage, unlock the "Demonic Combination" achievement (key
   `ve-achievement-demonic-combo`, glyph `666`), and switch HUD glitches to a "wild" mode
@@ -116,15 +111,14 @@ confirm the toast appears once per browser.
 
 ### Key Entities
 
-- **Rubbable entry**: catalog entry with `rubbable: true` and body text.
-- **Achievement**: storage key, title, subtitle, glyph (`rub`, `infinite`, `demonic`); four
-  today: rub, Infinite spin, player found, demonic combo.
+- **Swipeable entry**: catalog entry with `swipeable: true`.
+- **Achievement**: see `036` (registry in `src/data/achievements.json`).
 
 ## Success Criteria *(mandatory)*
 
 ### Measurable Outcomes
 
-- **SC-001**: A visitor who knows the gesture triggers the rub reveal on the first or
+- **SC-001**: A visitor who knows the gesture unlocks Taking Over on the first or
   second attempt on both mouse and touch.
 - **SC-002**: Each achievement toast shows at most once per browser.
 - **SC-003**: 0 regressions in clicking, scrolling, or expanding discography cards caused
@@ -133,7 +127,7 @@ confirm the toast appears once per browser.
 ## Assumptions
 
 - Easter eggs are intentionally undocumented for visitors; the artist guide should still
-  document the `rubbable` flag.
+  document the `swipeable` flag.
 
 ## Known Gaps *(as of 2026-10-06)*
 

@@ -4,7 +4,7 @@ sortDate: 2025-07-12
 kind: Single
 themeId: acid-lime
 hasAudio: true
-rubbable: true
+swipeable: true
 poster: /images/posters/taking-over.jpg
 cover: /images/covers/taking-over.webp
 listenLinks:

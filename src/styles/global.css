@@ -231,3 +231,10 @@ html {
     pointer-events: none;
   }
 }
+
+/* Taking Over swipe egg (src/lib/track-swipe.ts): the row follows the pointer. */
+[data-swipeable].is-swiping {
+  cursor: grabbing;
+  user-select: none;
+  -webkit-user-select: none;
+}

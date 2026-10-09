@@ -57,7 +57,7 @@ filename slug is the stable id (e.g. `nightmare.md` → `nightmare`).
   order of the player song list (newest first). Omit → the song still plays on stage but is
   hidden from Discography
 - `blurb` — optional one-line hook shown when the Discography row is expanded
-- `credits` — optional list of `{ role, name }` rows (used by the rub easter egg)
+- `credits` — optional list of `{ role, name }` rows (the Artist credit is shown in the discography)
 - `mentions` — optional thank-you / shout-out line (stored for future use)
 - `kind` — optional release type in discography (e.g. `single`, `ep`, `album`)
 - `inDiscography` — optional; set `false` to hide from discography while the song stays in

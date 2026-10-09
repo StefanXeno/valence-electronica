@@ -63,8 +63,8 @@ const catalogMetadata = {
   blurb: z.string().optional(),
   credits: z.array(credit).optional(),
   mentions: z.string().optional(),
-  /** Easter egg: horizontal rub ×3 reveals the markdown body in a full overlay. */
-  rubbable: z.boolean().optional(),
+  /** Easter egg: dragging the discography row sideways unlocks "Taking Over" (track-swipe.ts). */
+  swipeable: z.boolean().optional(),
 };
 
 const jukebox = defineCollection({

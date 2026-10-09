@@ -1,107 +1,16 @@
 ---
 /**
- * Secret full-view for rubbable catalog entries.
- * Reuses LegalPanel chrome language (frame, exit, prose body) without History URL changes.
+ * Shared one-shot achievement toast (036). Driven by `src/lib/achievement-toast.ts`.
  */
-import { getCollection, render } from 'astro:content';
-import { parseCredits, pickArtistName } from '../lib/catalog-tracks';
-import site from '../data/site.json';
 import { ACHIEVEMENT_GLYPHS, toClientPayload } from '../lib/achievements';
 import { loadAchievementRegistry } from '../lib/achievements-registry';
 import { getChrome } from '../lib/stage';
 import AchievementGlyph from './AchievementGlyph.astro';
 
-type RubPanel = {
-  id: string;
-  title: string;
-  artist?: string;
-  Content: Awaited<ReturnType<typeof render>>['Content'];
-};
-
 const chrome = await getChrome();
 // Validated at build: a broken achievements.json fails `npm run build` here.
 const achievementPayload = toClientPayload(loadAchievementRegistry());
-
-const [jukeboxRaw, tracksRaw] = await Promise.all([
-  getCollection('jukebox'),
-  getCollection('tracks'),
-]);
-
-const panels: RubPanel[] = [];
-const seen = new Set<string>();
-
-for (const entry of [...jukeboxRaw, ...tracksRaw]) {
-  if (entry.id.startsWith('__empty__')) continue;
-  if (seen.has(entry.id)) continue;
-  if (entry.data.rubbable !== true) continue;
-  if (!entry.body?.trim()) continue;
-  seen.add(entry.id);
-
-  const { Content } = await render(entry);
-  const credits = parseCredits(entry.data.credits, entry.id);
-  panels.push({
-    id: entry.id,
-    title: entry.data.label,
-    artist: pickArtistName(credits, site.artist.name),
-    Content,
-  });
-}
 ---
-
-{
-  panels.length > 0 && (
-    <div id="track-rub-overlay" data-track-rub-overlay>
-      {panels.map(({ id, title, artist, Content }) => {
-        const titleId = `track-rub-title-${id}`;
-        return (
-          <div
-            class="track-rub-panel"
-            id={`track-rub-panel-${id}`}
-            data-track-rub-panel={id}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby={titleId}
-            hidden
-          >
-            <div class="track-rub-panel__frame">
-              <header class="track-rub-panel__header">
-                <button
-                  type="button"
-                  class="track-rub-panel__exit glitch-hit"
-                  data-track-rub-exit
-                  aria-label="Close"
-                  title="Close"
-                >
-                  <svg
-                    class="track-rub-panel__exit-icon"
-                    viewBox="0 0 24 24"
-                    width="18"
-                    height="18"
-                    aria-hidden="true"
-                    focusable="false"
-                  >
-                    <path
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      d="M6 6l12 12M18 6L6 18"
-                    />
-                  </svg>
-                </button>
-                <h1 id={titleId}>{title}</h1>
-                {artist && <p class="track-rub-panel__artist">{artist}</p>}
-              </header>
-              <div class="track-rub-panel__body">
-                <Content />
-              </div>
-            </div>
-          </div>
-        );
-      })}
-    </div>
-  )
-}
 
 {/* Shared one-shot achievement toast — driven by achievement-toast.ts. Ships without copy:
    text comes from the registry payload so secret titles never sit in the HTML (036). */}
@@ -135,102 +44,7 @@ for (const entry of [...jukeboxRaw, ...tracksRaw]) {
 </div>
 
 <style>
-  /* Above SiteNav menu (z≈10) and LegalOverlay (z≈5) so the secret wins. */
-  .track-rub-panel {
-    position: fixed;
-    inset: 0;
-    z-index: 40;
-    display: grid;
-    place-items: stretch;
-    padding: clamp(0.75rem, 3vw, 1.5rem);
-    background: color-mix(in srgb, var(--color-bg) 55%, transparent);
-    pointer-events: auto;
-  }
-
-  .track-rub-panel[hidden] {
-    display: none;
-  }
-
-  .track-rub-panel__frame {
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-    max-height: 100%;
-    border: 1px solid var(--color-border);
-    border-radius: 0.75rem;
-    background: color-mix(in srgb, var(--color-surface) 92%, transparent);
-    backdrop-filter: blur(8px);
-    box-shadow: 0 1rem 3rem rgb(0 0 0 / 35%);
-    animation: track-rub-panel-in 320ms ease-out both;
-  }
-
-  .track-rub-panel__header {
-    display: grid;
-    gap: var(--space-s);
-    padding: var(--space-m) var(--space-m) var(--space-s);
-    border-bottom: 1px solid var(--color-border);
-  }
-
-  .track-rub-panel__exit {
-    justify-self: end;
-    appearance: none;
-    display: inline-grid;
-    place-items: center;
-    width: 2.25rem;
-    height: 2.25rem;
-    margin: 0;
-    padding: 0;
-    color: var(--color-text);
-    border: 1px solid var(--color-border);
-    border-radius: 999px;
-    background: var(--color-bg);
-    cursor: pointer;
-    font: inherit;
-  }
-
-  .track-rub-panel__exit:hover {
-    border-color: var(--color-accent);
-  }
-
-  .track-rub-panel__exit-icon {
-    display: block;
-  }
-
-  .track-rub-panel__header h1 {
-    margin: 0;
-    font-family: var(--font-display);
-    font-size: clamp(1.5rem, 5vw, 2.25rem);
-  }
-
-  .track-rub-panel__artist {
-    margin: 0;
-    font-size: 0.95rem;
-    color: var(--color-text-muted);
-  }
-
-  .track-rub-panel__body {
-    overflow: auto;
-    padding: var(--space-m);
-    color: var(--color-text);
-  }
-
-  .track-rub-panel__body :global(p) {
-    max-width: 42rem;
-    white-space: pre-line;
-  }
-
-  @keyframes track-rub-panel-in {
-    from {
-      opacity: 0;
-      transform: translateY(0.75rem) scale(0.985);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0) scale(1);
-    }
-  }
-
-  /* Above rub panel (z=40) — top-center toast, never steals pointer events. */
+  /* Above SiteNav menu (z≈10) and overlays — top-center toast, never steals pointer events. */
   .ve-achievement {
     position: fixed;
     top: max(0.85rem, env(safe-area-inset-top, 0px));
@@ -402,10 +216,6 @@ for (const entry of [...jukeboxRaw, ...tracksRaw]) {
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .track-rub-panel__frame {
-      animation: none;
-    }
-
     .ve-achievement.is-in .ve-achievement__card,
     .ve-achievement.is-out .ve-achievement__card,
     .ve-achievement.is-in .ve-achievement__glyph {

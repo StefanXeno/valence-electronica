@@ -8,7 +8,6 @@ import {
   formatCounter,
   KNOWN_ACHIEVEMENT_IDS,
   markUnlocked,
-  migrateLegacyKeys,
   parseClientPayload,
   readAchievementState,
   resetProgress,
@@ -43,7 +42,7 @@ function blockedStorage(): Storage {
 
 function validEntries() {
   return [
-    { id: 'rub', title: 'Secret Title', subtitle: 'Secret sub.', glyph: 'vinyl', secret: true },
+    { id: 'taking-over', title: 'Secret Title', subtitle: 'Secret sub.', glyph: 'vinyl', secret: true },
     { id: 'infinite-spin', title: 'Infinite', subtitle: 'Spin.', glyph: 'infinite', hint: 'Circles.' },
     { id: 'player-found', title: 'Found it!', subtitle: 'Player.', glyph: 'vinyl', hint: 'Knock.' },
     { id: 'demonic-combo', title: 'Demonic', subtitle: '666.', glyph: 'demonic', hint: 'Numbers.' },
@@ -51,12 +50,10 @@ function validEntries() {
   ];
 }
 
-const LEGACY_RUB_KEY = 've-achievement-why-are-you-' + 'rubbing';
-
 describe('validateAchievementRegistry', () => {
   it('accepts the shipped registry', () => {
     const list = validateAchievementRegistry(registryJson);
-    expect(list.map((a) => a.id)).toEqual(['rub', 'infinite-spin', 'player-found', 'demonic-combo', 'coder']);
+    expect(list.map((a) => a.id)).toEqual(['taking-over', 'infinite-spin', 'player-found', 'demonic-combo', 'coder']);
     expect(list[0].secret).toBe(true);
     expect(list[0].hint).toBeUndefined();
   });
@@ -121,7 +118,7 @@ describe('unlock state', () => {
     const storage = memoryStorage({
       [achievementStorageKey('coder')]: '1',
       've-achievement-removed-egg': '1',
-      [achievementStorageKey('rub')]: '0',
+      [achievementStorageKey('taking-over')]: '0',
     });
     expect(readAchievementState(storage)).toEqual({ available: true, unlocked: new Set(['coder']) });
   });
@@ -133,10 +130,10 @@ describe('unlock state', () => {
 
   it('marks a first unlock only once', () => {
     const storage = memoryStorage();
-    expect(markUnlocked('rub', storage)).toBe(true);
-    expect(markUnlocked('rub', storage)).toBe(false);
-    expect(storage.getItem('ve-achievement-rub')).toBe('1');
-    expect(markUnlocked('rub', blockedStorage())).toBe(false);
+    expect(markUnlocked('taking-over', storage)).toBe(true);
+    expect(markUnlocked('taking-over', storage)).toBe(false);
+    expect(storage.getItem('ve-achievement-taking-over')).toBe('1');
+    expect(markUnlocked('taking-over', blockedStorage())).toBe(false);
   });
 
   it('only toasts new unlocks with working storage', () => {
@@ -156,32 +153,6 @@ describe('unlock state', () => {
   });
 });
 
-describe('migrateLegacyKeys', () => {
-  it('moves the legacy rub key', () => {
-    const storage = memoryStorage({ [LEGACY_RUB_KEY]: '1' });
-    migrateLegacyKeys(storage);
-    expect(storage.getItem('ve-achievement-rub')).toBe('1');
-    expect(storage.getItem(LEGACY_RUB_KEY)).toBeNull();
-  });
-
-  it('is a no-op without the legacy key', () => {
-    const storage = memoryStorage();
-    migrateLegacyKeys(storage);
-    expect(storage.length).toBe(0);
-  });
-
-  it('removes the legacy key when both exist', () => {
-    const storage = memoryStorage({ [LEGACY_RUB_KEY]: '1', 've-achievement-rub': '1' });
-    migrateLegacyKeys(storage);
-    expect(storage.getItem(LEGACY_RUB_KEY)).toBeNull();
-    expect(storage.getItem('ve-achievement-rub')).toBe('1');
-  });
-
-  it('survives blocked storage', () => {
-    expect(() => migrateLegacyKeys(blockedStorage())).not.toThrow();
-  });
-});
-
 describe('gallery view', () => {
   const list = validateAchievementRegistry({ achievements: validEntries() });
 
@@ -198,7 +169,7 @@ describe('gallery view', () => {
   });
 
   it('shows an unlocked secret like any other tile', () => {
-    const state = readAchievementState(memoryStorage({ [achievementStorageKey('rub')]: '1' }));
+    const state = readAchievementState(memoryStorage({ [achievementStorageKey('taking-over')]: '1' }));
     expect(tileViews(list, state)[0]).toEqual({ kind: 'unlocked', achievement: list[0] });
   });
 

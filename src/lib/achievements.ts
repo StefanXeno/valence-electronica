@@ -10,7 +10,7 @@
 import { PLAYER_DISCOVERED_STORAGE_KEY } from './player-discovery';
 
 export const KNOWN_ACHIEVEMENT_IDS = [
-  'rub',
+  'taking-over',
   'infinite-spin',
   'player-found',
   'demonic-combo',
@@ -221,22 +221,6 @@ export function resetProgress(storage: Storage | undefined = defaultStorage()): 
     storage.removeItem(PLAYER_DISCOVERED_STORAGE_KEY);
   } catch {
     /* blocked storage — nothing to reset */
-  }
-}
-
-/** Pre-036 key of the secret rub achievement, obfuscated so it does not spell out the title. */
-const LEGACY_RUB_KEY_OBF = '==wZulmYiVnctU3b51SZyFWL5h2dtQnbl1WZ2VWaoNWYtUmd';
-
-/** Move the legacy rub key to `ve-achievement-rub` once; safe to call on every load. */
-export function migrateLegacyKeys(storage: Storage | undefined = defaultStorage()): void {
-  if (!storage) return;
-  try {
-    const legacyKey = decodeObfuscated(LEGACY_RUB_KEY_OBF);
-    if (storage.getItem(legacyKey) === null) return;
-    if (storage.getItem(legacyKey) === '1') storage.setItem(achievementStorageKey('rub'), '1');
-    storage.removeItem(legacyKey);
-  } catch {
-    /* blocked storage — nothing to migrate */
   }
 }
 

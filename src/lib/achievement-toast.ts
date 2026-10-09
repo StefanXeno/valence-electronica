@@ -1,6 +1,6 @@
 /**
  * Shared game-style achievement toast (036).
- * Visual shell lives in TrackRubOverlay.astro — this module drives show/hide, copy, and glyph.
+ * Visual shell lives in AchievementToast.astro — this module drives show/hide, copy, and glyph.
  * Copy comes from the registry payload (`getAchievement`), never from the trigger modules.
  */
 

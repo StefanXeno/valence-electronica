@@ -468,7 +468,7 @@ const menuChannels = site.channels
                                 {block.entries.map((release) => (
                                   <li
                                     class="site-nav__menu-portal-release site-nav__menu-portal-release--nested"
-                                    data-rubbable={release.rubbable ? release.id : undefined}
+                                    data-swipeable={release.swipeable ? '' : undefined}
                                   >
                                     {/* Title/artist + trailing play and platform glyphs (no Listen On label). */}
                                     <div class="site-nav__menu-portal-nested-row">
@@ -524,7 +524,7 @@ const menuChannels = site.channels
                         return (
                           <div
                             class="site-nav__menu-portal-collection site-nav__menu-portal-collection--single"
-                            data-rubbable={release.rubbable ? release.id : undefined}
+                            data-swipeable={release.swipeable ? '' : undefined}
                           >
                             {/* Same head grid as EP — identical vertical centering + text rhythm. */}
                             <div class="site-nav__menu-portal-collection-head">
@@ -1736,8 +1736,8 @@ const menuChannels = site.channels
     border-bottom: 1px solid color-mix(in srgb, #fff 12%, transparent);
   }
 
-  .site-nav__menu-portal-release[data-rubbable],
-  .site-nav__menu-portal-collection[data-rubbable] {
+  .site-nav__menu-portal-release[data-swipeable],
+  .site-nav__menu-portal-collection[data-swipeable] {
     touch-action: pan-y;
   }
 

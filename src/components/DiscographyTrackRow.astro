@@ -44,7 +44,7 @@ const stageId = release.jukeboxId;
 <li
   class:list={['discog__item', { 'discog__item--nested': nested }]}
   data-discog-entry={release.id}
-  data-rubbable={release.rubbable ? release.id : undefined}
+  data-swipeable={release.swipeable ? '' : undefined}
 >
   {
     nested ? (
@@ -255,7 +255,7 @@ const stageId = release.jukeboxId;
       box-shadow 200ms ease;
   }
 
-  .discog__item[data-rubbable] {
+  .discog__item[data-swipeable] {
     touch-action: pan-y;
   }
 

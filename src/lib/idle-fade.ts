@@ -29,7 +29,7 @@ const PROXIMITY_TARGETS: ReadonlyArray<{ control: string; host: string }> = [
   { control: '[data-achievement-toggle]', host: '[data-achievement-gallery]' },
 ];
 
-/** Open V-Flip / achievements / phone menu / content sheets / rub panel (same checks as stage-player.ts). */
+/** Open V-Flip / achievements / phone menu / content sheets (same checks as stage-player.ts). */
 function isPanelOpen(): boolean {
   const html = document.documentElement;
   return (
@@ -37,7 +37,7 @@ function isPanelOpen(): boolean {
     html.classList.contains('achievement-gallery-open') ||
     Boolean(
       document.querySelector(
-        ".stage-player[data-player-state='full'], [data-achievement-gallery][data-gallery-state='open'], #legal-overlay [data-legal-panel]:not([hidden]), [data-track-rub-panel]:not([hidden])",
+        ".stage-player[data-player-state='full'], [data-achievement-gallery][data-gallery-state='open'], #legal-overlay [data-legal-panel]:not([hidden])",
       ),
     )
   );

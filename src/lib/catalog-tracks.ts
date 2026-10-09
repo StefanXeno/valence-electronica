@@ -62,8 +62,8 @@ export interface DiscographyEntry {
   coverUrl?: string;
   /** Expanded-panel notes: blurb, or tracks-collection body. */
   notes?: string;
-  /** Easter egg: rub gesture can reveal this track’s markdown body. */
-  rubbable?: boolean;
+  /** Easter egg: the row can be dragged sideways (Taking Over achievement). */
+  swipeable?: boolean;
 }
 
 /** Single track or EP/Compilation group inside a year. */
@@ -98,7 +98,7 @@ export interface CatalogMetadataFields {
   notes?: string;
   blurb?: string;
   credits?: { role: string; name: string }[];
-  rubbable?: boolean;
+  swipeable?: boolean;
 }
 
 export const PLATFORM_LABELS: Record<ListenPlatform, string> = {
@@ -324,7 +324,7 @@ export function toDiscographyEntry(
     jukeboxId,
     coverUrl,
     notes,
-    rubbable: data.rubbable === true ? true : undefined,
+    swipeable: data.swipeable === true ? true : undefined,
   };
 }
 

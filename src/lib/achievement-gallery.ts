@@ -2,7 +2,7 @@
  * Achievement gallery (036) — trophy toggle + panel wiring (V-Flip-style dock, bottom-right).
  *
  * Markup: `AchievementGallery.astro`. Exclusivity: opening the gallery closes content overlays,
- * the phone menu, and rub panels (`stage-overlay-close`), and the stage player collapses on the
+ * and the phone menu (`stage-overlay-close`), and the stage player collapses on the
  * `html.achievement-gallery-open` class. The gallery closes when any of those open.
  */
 
@@ -21,7 +21,6 @@ import {
   type AchievementId,
   type AchievementState,
 } from './achievements';
-import { closeTrackRubPanel } from './track-rub';
 import { playElementGlitch, prefersGlitchMotion } from './glitch';
 import {
   disableWildGlitch,
@@ -156,9 +155,8 @@ export function initAchievementGallery(): void {
   const open = () => {
     if (isOpen() || toggle.hidden) return;
     returnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : toggle;
-    // One surface at a time: content overlay, phone menu, and rub panels close first.
+    // One surface at a time: content overlay and phone menu close first.
     document.dispatchEvent(new CustomEvent(STAGE_OVERLAY_CLOSE_EVENT));
-    if (document.querySelector('[data-track-rub-panel]:not([hidden])')) closeTrackRubPanel();
     render(readAchievementState());
     gallery.dataset.galleryState = 'open';
     panel.inert = false;

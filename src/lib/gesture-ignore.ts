@@ -1,7 +1,7 @@
 /**
- * Shared "never start a gesture here" selectors for stage gestures (rub, Infinite spin,
- * hidden player hint). Layered because the rub lives inside discography rows (it may
- * start on the row toggle) while spin and the player hint must ignore all chrome.
+ * Shared "never start a gesture here" selectors for stage gestures (Taking Over swipe,
+ * Infinite spin, hidden player hint). Layered because the swipe lives inside discography
+ * rows (it may start on the row toggle) while spin and the player hint must ignore all chrome.
  */
 
 /** Outbound links and play controls — no gesture may start here. */
@@ -26,7 +26,6 @@ export const INTERACTIVE_SELECTOR = [
   'summary',
   '[role="button"]',
   '[data-stage-player]',
-  '[data-track-rub-panel]',
   '[data-mute-control]',
   '[data-volume-control]',
   '[data-shuffle-toggle]',
@@ -38,7 +37,6 @@ export const CHROME_SELECTOR = [
   '[data-site-nav]',
   '.site-nav',
   '#legal-overlay',
-  '[data-track-rub-overlay]',
   '[data-achievement-gallery]',
   '[data-achievement-toggle]',
 ].join(', ');

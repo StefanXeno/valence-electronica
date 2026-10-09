@@ -10,7 +10,7 @@ import Footer from '../components/Footer.astro';
 import BackgroundAtmosphere from '../components/BackgroundAtmosphere.astro';
 import GlitchPress from '../components/GlitchPress.astro';
 import LegalOverlay from '../components/LegalOverlay.astro';
-import TrackRubOverlay from '../components/TrackRubOverlay.astro';
+import AchievementToast from '../components/AchievementToast.astro';
 import AchievementGallery from '../components/AchievementGallery.astro';
 import SourceNote from '../components/SourceNote.astro';
 import { getDefaultVideo } from '../lib/background';
@@ -77,23 +77,20 @@ const indexable = site.seo.indexable && !isPreviewBuild();
       */}
       <LegalOverlay />
     </div>
-    <TrackRubOverlay />
+    <AchievementToast />
     <AchievementGallery />
     <GlitchPress />
     <div id="hud-label-reveal" class="hud-label-reveal" aria-hidden="true" hidden></div>
     <script>
       import { initLabelReveal } from '../lib/label-reveal';
-      import { initTrackRub } from '../lib/track-rub';
+      import { initTrackSwipe } from '../lib/track-swipe';
       import { initInfiniteSpin } from '../lib/infinite-spin';
       import { initDemonicCombo } from '../lib/demonic-combo';
       import { initCoderCombo } from '../lib/coder-combo';
-      import { migrateLegacyKeys } from '../lib/achievements';
       import { initAchievementGallery } from '../lib/achievement-gallery';
       import { initIdleFade } from '../lib/idle-fade';
-      // Before anything reads achievement state (pre-036 rub key → `ve-achievement-rub`).
-      migrateLegacyKeys();
       initLabelReveal();
-      initTrackRub();
+      initTrackSwipe();
       initInfiniteSpin();
       initDemonicCombo();
       initCoderCombo();

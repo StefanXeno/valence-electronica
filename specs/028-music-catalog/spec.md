@@ -116,7 +116,7 @@ remains.
   first seen).
 - Jukebox entries without `cover` fall back to their stage poster.
 - Listen links with unsupported platforms or non-http URLs are dropped.
-- A row marked `rubbable` participates in the rub easter egg (see `032`).
+- A row marked `swipeable` can be dragged sideways for the Taking Over easter egg (see `032`).
 
 ## Requirements *(mandatory)*
 
@@ -126,7 +126,7 @@ remains.
   `inDiscography: false`) and catalog-only entries from `src/content/tracks/`; on id
   collision the jukebox entry MUST win.
 - **FR-002**: Catalog-only tracks MUST require `label` and `sortDate`; they MAY set `kind`,
-  `trackOrder`, `listenLinks`, `cover`, `blurb`, `credits`, `mentions`, `rubbable`.
+  `trackOrder`, `listenLinks`, `cover`, `blurb`, `credits`, `mentions`, `swipeable`.
 - **FR-003**: Entries MUST be grouped by calendar year (newest first); within a year, EP and
   compilation members with the same `kind` string MUST form one collection card ordered by
   `trackOrder`, singles stay individual, and blocks are ordered newest first.
@@ -157,7 +157,7 @@ remains.
 ### Key Entities
 
 - **Release (discography entry)**: id, title, sort date/year, kind (type + collection
-  name), track order, artist, cover, listen links, note, optional stage id, rubbable flag.
+  name), track order, artist, cover, listen links, note, optional stage id, swipeable flag.
 - **Collection**: EP or compilation inferred from a shared `kind` string within a year.
 - **Listen link**: platform + https URL.
 

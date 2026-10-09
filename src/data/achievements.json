@@ -1,9 +1,9 @@
 {
   "achievements": [
     {
-      "id": "rub",
-      "title": "Why are you rubbing?!",
-      "subtitle": "Rub a song in the discography for three times.",
+      "id": "taking-over",
+      "title": "Taking Over",
+      "subtitle": "You took Taking Over a little too literally.",
       "glyph": "vinyl",
       "secret": true
     },
