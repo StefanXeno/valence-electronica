@@ -113,6 +113,42 @@ const openSlug = slugFromOverlayPath(Astro.url.pathname, basePath);
   }
 
   var lastFocus = null;
+  var collapseTimer = null;
+
+  // Desktop circle morph (see LegalPanel): grows out of the clicked nav item, collapses back.
+  function morphs() {
+    return (
+      window.matchMedia('(min-width: 1024px)').matches &&
+      !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    );
+  }
+
+  function morphDurationMs() {
+    var raw = getComputedStyle(document.documentElement).getPropertyValue('--morph-dur').trim();
+    var ms = parseFloat(raw);
+    if (!isFinite(ms)) return 480;
+    return raw.endsWith('ms') ? ms : ms * 1000;
+  }
+
+  /** Circle origin as viewport percentages (robust under the root zoom). */
+  function setOrigin(panel, source) {
+    if (!(source instanceof Element)) return;
+    var rect = source.getBoundingClientRect();
+    if (!rect.width && !rect.height) return;
+    var x = ((rect.left + rect.width / 2) / window.innerWidth) * 100;
+    var y = ((rect.top + rect.height / 2) / window.innerHeight) * 100;
+    panel.style.setProperty('--legal-origin', x.toFixed(2) + '% ' + y.toFixed(2) + '%');
+  }
+
+  function cancelCollapse() {
+    if (collapseTimer !== null) {
+      window.clearTimeout(collapseTimer);
+      collapseTimer = null;
+    }
+    panels().forEach(function (panel) {
+      panel.classList.remove('is-collapsed');
+    });
+  }
 
   function setDocumentTitle(slug) {
     if (!slug) {
@@ -140,8 +176,18 @@ const openSlug = slugFromOverlayPath(Astro.url.pathname, basePath);
       lastFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     }
 
+    var wasOpen = Boolean(activeSlug());
+    cancelCollapse();
     closeAll();
+    if (options && options.origin) setOrigin(panel, options.origin);
     panel.hidden = false;
+
+    // Grow from the origin (switching between open panels stays instant).
+    if (morphs() && !wasOpen) {
+      panel.classList.add('is-collapsed');
+      void panel.offsetWidth;
+      panel.classList.remove('is-collapsed');
+    }
 
     var frame = panel.querySelector('.legal-panel__frame');
     if (frame instanceof HTMLElement) {
@@ -165,7 +211,19 @@ const openSlug = slugFromOverlayPath(Astro.url.pathname, basePath);
 
   function closePanel(options) {
     var historyMode = (options && options.historyMode) || 'push';
-    closeAll();
+    var open = activeSlug() ? panelFor(activeSlug()) : null;
+    if (open && morphs()) {
+      // Collapse back into the origin, then hide.
+      cancelCollapse();
+      open.classList.add('is-collapsed');
+      collapseTimer = window.setTimeout(function () {
+        collapseTimer = null;
+        open.classList.remove('is-collapsed');
+        open.hidden = true;
+      }, morphDurationMs());
+    } else {
+      closeAll();
+    }
     setDocumentTitle(null);
 
     if (historyMode !== 'none') {
@@ -182,7 +240,7 @@ const openSlug = slugFromOverlayPath(Astro.url.pathname, basePath);
 
   function activeSlug() {
     var open = panels().find(function (panel) {
-      return !panel.hidden;
+      return !panel.hidden && !panel.classList.contains('is-collapsed');
     });
     return open ? open.getAttribute('data-legal-panel') : null;
   }
@@ -206,7 +264,7 @@ const openSlug = slugFromOverlayPath(Astro.url.pathname, basePath);
 
     event.preventDefault();
     lastFocus = link;
-    openPanel(slug, { historyMode: 'push' });
+    openPanel(slug, { historyMode: 'push', origin: link });
   });
 
   document.addEventListener('keydown', function (event) {

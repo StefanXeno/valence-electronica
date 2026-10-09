@@ -138,9 +138,81 @@ const titleId = `legal-panel-title-${slug}`;
     }
   }
 
+  /*
+   * Desktop: same layer as the phone menu — full viewport, dark glass, no card. It opens as
+   * a circle growing out of the clicked nav item (`--legal-origin`, set by LegalOverlay)
+   * and collapses back into it. Content sits in one centered column.
+   */
+  @media (min-width: 1024px) {
+    .legal-panel {
+      padding: 0;
+    }
+
+    .legal-panel__frame {
+      --legal-pad-x: clamp(2rem, 6vw, 4rem);
+      border: 0;
+      border-radius: 0;
+      background: color-mix(in srgb, #050505 92%, transparent);
+      backdrop-filter: blur(16px);
+      box-shadow: none;
+      animation: none;
+      clip-path: circle(160% at var(--legal-origin, 50% 0%));
+      transition: clip-path var(--morph-dur) var(--morph-ease);
+    }
+
+    .legal-panel.is-collapsed .legal-panel__frame {
+      clip-path: circle(0% at var(--legal-origin, 50% 0%));
+    }
+
+    .legal-panel__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-m);
+      width: 100%;
+      max-width: 52rem;
+      margin: 0 auto;
+      padding: clamp(2.5rem, 7vh, 4.5rem) var(--legal-pad-x) 1.15rem;
+      box-sizing: border-box;
+      border-bottom: 0;
+    }
+
+    .legal-panel__header h1 {
+      font-family: var(--font-display);
+      font-size: clamp(1.9rem, 2.6vw, 2.6rem);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      line-height: 1.15;
+    }
+
+    .legal-panel__exit {
+      order: 1;
+      flex: 0 0 auto;
+      width: 2.75rem;
+      height: 2.75rem;
+      background: transparent;
+    }
+
+    /* The column scrolls with the whole layer, so the scrollbar sits at the viewport edge. */
+    .legal-panel__frame {
+      overflow-y: auto;
+      overscroll-behavior: contain;
+    }
+
+    .legal-panel__body {
+      overflow: visible;
+      width: 100%;
+      max-width: 52rem;
+      margin: 0 auto;
+      padding: 0 var(--legal-pad-x) clamp(2.5rem, 7vh, 4.5rem);
+      box-sizing: border-box;
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .legal-panel__frame {
       animation: none;
+      transition: none;
     }
   }
 </style>

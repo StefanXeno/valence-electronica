@@ -12,8 +12,8 @@
   --corner-hud-fade-in: 600ms;
   /* While idle on desktop: how quickly opacity catches up with the cursor distance. */
   --corner-hud-proximity-ease: 120ms;
-  /* How long a covered control stays covered after the menu closes (phone menu morph). */
-  --corner-hud-uncover-delay: 480ms;
+  /* How long a covered control stays covered after the menu closes (the menu's circle morph). */
+  --corner-hud-uncover-delay: var(--morph-dur);
 }
 
 [data-corner-hud] {

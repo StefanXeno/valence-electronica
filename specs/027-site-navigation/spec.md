@@ -131,6 +131,9 @@ each footer icon; all open in a new tab.
 - **FR-004**: Content destinations (`about`, `discography`, `tour`, `contact`, `shop`) MUST
   have top-level routes; legal pages MUST live under `/legal/{slug}`. All open the same
   overlay panel over the stage, with history integration, Escape, and an exit control.
+  On laptops the panel mirrors the phone menu: a full-viewport dark layer that opens as a
+  circle growing out of the clicked nav item and collapses back into it on exit (shared
+  `--morph-dur` / `--morph-ease` with the phone menu); content sits in one centered column.
 - **FR-005**: The phone menu MUST render destination content inside the menu (fade
   portal), offer back via the corner control and swipe right, and close via X or Escape.
 - **FR-006**: Active channels from `site.json` MUST appear as icons top-right on laptops
