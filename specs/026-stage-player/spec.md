@@ -175,6 +175,8 @@ Entry points: the player song list and the discography play buttons (see `028`).
   (and by `data-stage-button` / `data-jukebox-option` controls); it MUST start the entry
   immediately and restart its advance clock without resetting shuffle.
 - **FR-011**: The player MUST stay at the periphery; it MUST NOT cover the stage center.
+  After ~4 s without input, the minimal vinyl and the closed achievement trophy fade out
+  (any input, hover or keyboard focus brings them back; `src/lib/idle-fade.ts`).
   The minimal vinyl is the only chrome at rest (phone ~70px, about 1.5% of a 390×844
   viewport) and MUST keep its position when the player opens or closes.
 - **FR-012**: The song list MUST show only stage songs (valid jukebox entries), newest

@@ -84,6 +84,7 @@ const indexable = site.seo.indexable && !isPreviewBuild();
       import { initCoderCombo } from '../lib/coder-combo';
       import { migrateLegacyKeys } from '../lib/achievements';
       import { initAchievementGallery } from '../lib/achievement-gallery';
+      import { initIdleFade } from '../lib/idle-fade';
       // Before anything reads achievement state (pre-036 rub key → `ve-achievement-rub`).
       migrateLegacyKeys();
       initLabelReveal();
@@ -92,6 +93,7 @@ const indexable = site.seo.indexable && !isPreviewBuild();
       initDemonicCombo();
       initCoderCombo();
       initAchievementGallery();
+      initIdleFade();
     </script>
   </body>
 </html>

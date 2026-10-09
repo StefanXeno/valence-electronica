@@ -223,6 +223,21 @@ const defaultLabel =
     left: var(--player-gap);
     bottom: var(--player-gap);
     pointer-events: none;
+    transition: opacity var(--ui-idle-fade-in) ease-out;
+  }
+
+  /* Idle (see idle-fade.ts): the resting vinyl fades out; open, hint, hover and focus stay. */
+  :global(html[data-ui-idle]) .stage-player[data-player-state='minimal']:not(:has(:focus-visible)) {
+    opacity: 0;
+    transition: opacity var(--ui-idle-fade-out) ease-in;
+  }
+
+  @media (hover: hover) {
+    /* Same selector + :hover so it outranks the idle rule. */
+    :global(html[data-ui-idle]) .stage-player[data-player-state='minimal']:hover:not(:has(:focus-visible)) {
+      opacity: 1;
+      transition: opacity var(--ui-idle-fade-in) ease-out;
+    }
   }
 
   /* —— Vinyl (hint / minimal / full) —— */
