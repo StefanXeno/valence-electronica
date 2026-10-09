@@ -261,6 +261,13 @@ const OPTION_TILES = new Set(['demonic-combo']);
     bottom: var(--dock-gap);
     /* Above the page shell (z=1); sinks below it while a menu covers the corners (corner-hud.css). */
     z-index: 2;
+    /*
+     * The closed panel is absolute, which would leave the dock 0×0. Firefox then skips the
+     * corner-hud opacity fade (the trophy pops out). Keep at least the trophy's footprint,
+     * like the V-Flip root (its panel stays in flow).
+     */
+    min-width: calc(var(--dock-toggle-size) + var(--dock-toggle-right));
+    min-height: calc(var(--dock-toggle-size) + var(--dock-toggle-bottom));
     font-family: var(--font-display);
     pointer-events: none;
   }
