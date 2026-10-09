@@ -93,6 +93,24 @@ const dateFmt = new Intl.DateTimeFormat('en-GB', {
     };
   }
 
+  /**
+   * The dock's divider and label overflow its animated height, so they fade instead:
+   * in once the box has mostly opened, out before it starts to close.
+   */
+  function fadeDock(slot: HTMLElement | null, label: HTMLElement | null, show: boolean) {
+    if (!slot) return [];
+    const line = getComputedStyle(slot).borderTopColor;
+    const timing = show
+      ? { duration: DURATION * 0.5, delay: DURATION * 0.5, easing: 'ease-out', fill: 'backwards' as const }
+      : { duration: DURATION * 0.3, easing: 'ease-in', fill: 'forwards' as const };
+    const lineFrames = [{ borderTopColor: 'transparent' }, { borderTopColor: line }];
+    const labelFrames = [{ opacity: 0 }, { opacity: 0.75 }];
+    return [
+      slot.animate(show ? lineFrames : [...lineFrames].reverse(), timing),
+      label?.animate(show ? labelFrames : [...labelFrames].reverse(), timing),
+    ];
+  }
+
   function syncCollection(item: HTMLElement) {
     const collection = item.closest<HTMLElement>('[data-discog-collection]');
     if (!collection) return;
@@ -146,7 +164,7 @@ const dateFmt = new Intl.DateTimeFormat('en-GB', {
       const runs = [
         slide(details, 0, details.offsetHeight, [0, 1]),
         slide(dock, 0, dock?.offsetHeight ?? 0),
-        label?.animate([{ opacity: 0 }, { opacity: 0.75 }], { duration: DURATION, easing: EASE }),
+        ...fadeDock(slot, label, true),
         links && before ? travel(links, before) : undefined,
       ];
       Promise.all(runs.map((run) => run?.finished)).finally(() => {
@@ -181,7 +199,7 @@ const dateFmt = new Intl.DateTimeFormat('en-GB', {
     const runs = [
       slide(details, detailsHeight, 0, [1, 0]),
       slide(dock, dockHeight, 0),
-      label?.animate([{ opacity: 0.75 }, { opacity: 0 }], { duration: DURATION * 0.6, easing: EASE, fill: 'forwards' }),
+      ...fadeDock(slot, label, false),
       links && before ? travel(links, before) : undefined,
     ];
     Promise.all(runs.map((run) => run?.finished)).finally(() => {
@@ -235,6 +253,8 @@ const dateFmt = new Intl.DateTimeFormat('en-GB', {
 
   /* —— Catalog (fullscreen discography): year groups + expandable rows —— */
   .discog--catalog {
+    /* Rows animate their height; scroll anchoring would nudge the list mid-animation. */
+    overflow-anchor: none;
     gap: calc(1.35rem * var(--hud-scale));
   }
 
