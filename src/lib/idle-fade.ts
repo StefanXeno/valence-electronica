@@ -2,9 +2,8 @@
  * Idle fade for the corner HUD (V-Flip vinyl + achievement trophy).
  *
  * After `IDLE_MS` without a click/tap or key press, `<html>` gets `data-ui-idle`; the next
- * click/tap or key press removes it again (the HUD fades back in). The components own the
- * CSS (which states fade, hover/focus exceptions); fade speeds are `--ui-idle-fade-out` /
- * `--ui-idle-fade-in`.
+ * click/tap or key press removes it again (the HUD fades back in). All fade CSS for the pair
+ * lives in `src/styles/corner-hud.css` (`--corner-hud-*` tokens).
  *
  * Desktop (fine pointer + hover): moving the mouse does not wake the HUD. While idle, each
  * control's opacity follows the cursor's distance to it instead (`--hud-proximity`, 0–1):
@@ -88,7 +87,7 @@ export function initIdleFade(): void {
     const params = new URLSearchParams(window.location.search);
     idleMs = parseSecondsParam(params.get('idle')) ?? IDLE_MS;
     const fadeMs = parseSecondsParam(params.get('idlefade'));
-    if (fadeMs !== undefined) html.style.setProperty('--ui-idle-fade-out', `${fadeMs}ms`);
+    if (fadeMs !== undefined) html.style.setProperty('--corner-hud-fade-out', `${fadeMs}ms`);
     near = parsePositiveParam(params.get('near')) ?? NEAR_PX;
     far = Math.max(parsePositiveParam(params.get('far')) ?? FAR_PX, near + 1);
   }

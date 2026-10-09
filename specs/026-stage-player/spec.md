@@ -179,7 +179,9 @@ Entry points: the player song list and the discography play buttons (see `028`).
   trophy fade out; the next click/tap or key press (or keyboard focus) brings them back. On
   desktop, mouse movement does not wake them: while idle, each one's opacity follows the
   cursor's distance to it. While the V-Flip panel, the achievement gallery, the phone menu
-  or a content overlay is open, neither fades (`src/lib/idle-fade.ts`).
+  or a content overlay is open, neither fades (`src/lib/idle-fade.ts`). Both form one
+  "corner HUD" group (`src/styles/corner-hud.css`): same fade settings, and the phone menu
+  and the open V-Flip panel cover and reveal the trophy exactly like the vinyl.
   The minimal vinyl is the only chrome at rest (phone ~70px, about 1.5% of a 390×844
   viewport) and MUST keep its position when the player opens or closes.
 - **FR-012**: The song list MUST show only stage songs (valid jukebox entries), newest

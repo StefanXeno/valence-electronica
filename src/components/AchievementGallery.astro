@@ -22,6 +22,7 @@ const OPTION_TILES = new Set(['demonic-combo']);
 
 <div
   class="achievement-dock"
+  data-corner-hud="trophy"
   data-achievement-gallery
   data-gallery-state="closed"
   data-counter-template={chrome.achievementsCounter}
@@ -258,59 +259,14 @@ const OPTION_TILES = new Set(['demonic-combo']);
     position: fixed;
     right: var(--dock-gap);
     bottom: var(--dock-gap);
-    /* Above the page shell (z=1); drops below it while the V-Flip panel is open on phones. */
+    /* Above the page shell (z=1); sinks below it while a menu covers the corners (corner-hud.css). */
     z-index: 2;
     font-family: var(--font-display);
     pointer-events: none;
   }
 
-  /* Like the V-Flip, the trophy stays laid out under the intro. It steps aside for the phone menu. */
-  .achievement-dock {
-    transition:
-      opacity var(--ui-idle-fade-in) var(--dock-ease),
-      visibility 0s linear 0s,
-      z-index 0s linear var(--dock-dur);
-  }
-
-  /*
-   * Phone: the open V-Flip panel spans the full width and must cover the trophy, like the
-   * open gallery covers the vinyl. The player lives inside `.page-shell` (its own stacking
-   * context, z=1), so its z=3 never beats the body-level dock (z=2) — drop the dock below
-   * the shell instead. Coming back waits for the panel's close (see the delay above).
-   */
-  @media (max-width: 1023px) {
-    :global(html:has(.stage-player[data-player-state='full'])) .achievement-dock[data-gallery-state='closed'] {
-      z-index: 0;
-      transition:
-        opacity var(--ui-idle-fade-in) var(--dock-ease),
-        visibility 0s linear 0s,
-        z-index 0s linear 0s;
-    }
-  }
-
-  /* Idle (see idle-fade.ts): the closed trophy fades out, or on desktop to its cursor
-     proximity; keyboard focus keeps it. */
-  :global(html[data-ui-idle]) .achievement-dock[data-gallery-state='closed']:not(:has(:focus-visible)) {
-    opacity: var(--hud-proximity, 0);
-    transition:
-      opacity var(--ui-idle-fade-out) ease-in,
-      visibility 0s linear 0s;
-  }
-
-  /* Once the mouse moves, opacity follows it closely. */
-  :global(html[data-ui-idle][data-ui-tracking]) .achievement-dock[data-gallery-state='closed']:not(:has(:focus-visible)) {
-    transition:
-      opacity var(--ui-proximity-ease) linear,
-      visibility 0s linear 0s;
-  }
-
-  :global(html.site-nav-menu-open) .achievement-dock {
-    opacity: 0;
-    visibility: hidden;
-    transition:
-      opacity var(--dock-dur) var(--dock-ease),
-      visibility 0s linear var(--dock-dur);
-  }
+  /* Idle fade, proximity and being covered by the V-Flip / phone menu: shared with the
+     V-Flip in styles/corner-hud.css. */
 
   /* —— Trophy (resting home = bottom-right slot of the panel's footer row) —— */
 
@@ -782,8 +738,6 @@ const OPTION_TILES = new Set(['demonic-combo']);
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .achievement-dock,
-    :global(html.site-nav-menu-open) .achievement-dock,
     .achievement-dock__panel,
     .achievement-tile__chevron,
     .achievement-tile__switch,

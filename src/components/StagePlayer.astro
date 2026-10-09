@@ -49,6 +49,7 @@ const defaultLabel =
   videos.length > 0 && (
     <div
       class="stage-player"
+      data-corner-hud="vflip"
       data-stage-player
       data-player-state="hidden"
       data-stage-catalog={JSON.stringify(catalog)}
@@ -223,19 +224,7 @@ const defaultLabel =
     left: var(--player-gap);
     bottom: var(--player-gap);
     pointer-events: none;
-    transition: opacity var(--ui-idle-fade-in) ease-out;
-  }
-
-  /* Idle (see idle-fade.ts): the resting vinyl fades out, or on desktop to its cursor
-     proximity; open, hint and keyboard focus stay. */
-  :global(html[data-ui-idle]) .stage-player[data-player-state='minimal']:not(:has(:focus-visible)) {
-    opacity: var(--hud-proximity, 0);
-    transition: opacity var(--ui-idle-fade-out) ease-in;
-  }
-
-  /* Once the mouse moves, opacity follows it closely. */
-  :global(html[data-ui-idle][data-ui-tracking]) .stage-player[data-player-state='minimal']:not(:has(:focus-visible)) {
-    transition: opacity var(--ui-proximity-ease) linear;
+    /* Idle fade / proximity: shared with the trophy in styles/corner-hud.css. */
   }
 
   /* —— Vinyl (hint / minimal / full) —— */

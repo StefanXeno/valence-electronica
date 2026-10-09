@@ -1,0 +1,80 @@
+/*
+ * Corner HUD: the V-Flip vinyl (bottom-left, `data-corner-hud="vflip"`) and the achievement
+ * trophy (bottom-right, `data-corner-hud="trophy"`) behave as one group. Every fade and
+ * cover rule for the pair lives here so both always use the same settings.
+ *
+ * Resting = V-Flip `minimal` / gallery `closed`; open panels and the hint never fade.
+ */
+
+:root {
+  /* Idle (src/lib/idle-fade.ts): slow fade out, softer return on the next click/key. */
+  --corner-hud-fade-out: 1.2s;
+  --corner-hud-fade-in: 600ms;
+  /* While idle on desktop: how quickly opacity catches up with the cursor distance. */
+  --corner-hud-proximity-ease: 120ms;
+  /* How long a covered control stays covered after the menu closes (phone menu morph). */
+  --corner-hud-uncover-delay: 480ms;
+}
+
+[data-corner-hud] {
+  transition:
+    opacity var(--corner-hud-fade-in) ease-out,
+    z-index 0s linear var(--corner-hud-uncover-delay);
+}
+
+/* —— Idle: fade out (desktop: to the cursor proximity, see idle-fade.ts) —— */
+
+html[data-ui-idle]
+  :is(
+    [data-corner-hud='vflip'][data-player-state='minimal'],
+    [data-corner-hud='trophy'][data-gallery-state='closed']
+  ):not(:has(:focus-visible)) {
+  opacity: var(--hud-proximity, 0);
+  transition:
+    opacity var(--corner-hud-fade-out) ease-in,
+    z-index 0s linear var(--corner-hud-uncover-delay);
+}
+
+/* Once the mouse moves, opacity follows it closely. */
+html[data-ui-idle][data-ui-tracking]
+  :is(
+    [data-corner-hud='vflip'][data-player-state='minimal'],
+    [data-corner-hud='trophy'][data-gallery-state='closed']
+  ):not(:has(:focus-visible)) {
+  transition:
+    opacity var(--corner-hud-proximity-ease) linear,
+    z-index 0s linear var(--corner-hud-uncover-delay);
+}
+
+/*
+ * —— Covered by a menu ——
+ * The V-Flip lives inside `.page-shell` (its own stacking context, z=1), so the phone menu
+ * and its own open panel cover it naturally. The trophy is body-level (z=2), so it sinks
+ * below the shell while they are open: both are then covered — and revealed — by the very
+ * same menu animation. It comes back up after `--corner-hud-uncover-delay`.
+ */
+html.site-nav-menu-open [data-corner-hud='trophy'] {
+  z-index: 0;
+  transition:
+    opacity var(--corner-hud-fade-in) ease-out,
+    z-index 0s linear 0s;
+}
+
+/* Phone: the open V-Flip panel spans the full width, over the trophy corner. */
+@media (max-width: 1023px) {
+  html:has([data-corner-hud='vflip'][data-player-state='full'])
+    [data-corner-hud='trophy'][data-gallery-state='closed'] {
+    z-index: 0;
+    transition:
+      opacity var(--corner-hud-fade-in) ease-out,
+      z-index 0s linear 0s;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --corner-hud-fade-out: 0s;
+    --corner-hud-fade-in: 0s;
+    --corner-hud-proximity-ease: 0s;
+  }
+}
