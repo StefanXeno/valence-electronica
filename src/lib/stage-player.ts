@@ -374,6 +374,15 @@ export function initStagePlayer(): void {
 
   document.addEventListener('pointercancel', () => taps.reset(), { passive: true });
 
+  // Discography play counts as the stage knock: the hidden vinyl peeks out, so the
+  // fan can tap it and unlock `player-found` just like after three stage taps.
+  document.addEventListener('click', (event) => {
+    if (!tapsCount()) return;
+    const target = event.target;
+    if (!(target instanceof Element) || !target.closest('[data-stage-button]')) return;
+    dispatch('TAP_HINT');
+  });
+
   // A content overlay or the phone menu opening collapses the full player (no stacking).
   const collapseForOverlay = () => {
     if (state === 'full' && (isLegalOverlayOpen() || isNavMenuOpen() || isAchievementGalleryOpen())) {

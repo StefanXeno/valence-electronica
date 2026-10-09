@@ -168,7 +168,8 @@ Entry points: the player song list and the discography play buttons (see `028`).
   (first-party `localStorage` key `ve-player-discovered`; blocked storage → hidden, and
   discovery lasts for the page load). Three taps/clicks on empty stage within ~1.5 s MUST
   move hidden → hint (controls, nav, overlays, the intro, and rub/spin gestures never
-  count); a tap on the peeking vinyl MUST open **full**; without it, hint returns to hidden
+  count); pressing a discography play button (`data-stage-button`) while hidden MUST do
+  the same; a tap on the peeking vinyl MUST open **full**; without it, hint returns to hidden
   after ~4 s. The first reveal MUST unlock the "player found" achievement (see `032`).
 - **FR-010**: A manual pick MUST be requestable by any UI through one stage-select event
   (and by `data-stage-button` / `data-jukebox-option` controls); it MUST start the entry
