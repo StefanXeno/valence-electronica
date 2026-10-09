@@ -130,7 +130,11 @@ const dateFmt = new Intl.DateTimeFormat('en-GB', {
 
     if (open) {
       const before = links?.getBoundingClientRect();
-      const homeHeight = home?.offsetHeight ?? 0;
+      // Pin the home's size before the links leave it: nothing in the head moves.
+      if (home) {
+        home.style.height = `${home.offsetHeight}px`;
+        home.style.width = `${home.offsetWidth}px`;
+      }
       item.classList.add('is-expanded');
       details.hidden = false;
       if (dock) dock.hidden = false;
@@ -142,14 +146,10 @@ const dateFmt = new Intl.DateTimeFormat('en-GB', {
       const runs = [
         slide(details, 0, details.offsetHeight, [0, 1]),
         slide(dock, 0, dock?.offsetHeight ?? 0),
-        // Cards: the emptied home under the title folds away instead of jumping.
-        home && home.closest('.discog__head') ? slide(home, homeHeight, 0) : undefined,
         label?.animate([{ opacity: 0 }, { opacity: 0.75 }], { duration: DURATION, easing: EASE }),
         links && before ? travel(links, before) : undefined,
       ];
-      if (home && home.closest('.discog__head')) home.style.display = 'flow-root';
       Promise.all(runs.map((run) => run?.finished)).finally(() => {
-        if (home) home.style.display = '';
         busy.delete(item);
       });
       return;
@@ -160,6 +160,10 @@ const dateFmt = new Intl.DateTimeFormat('en-GB', {
     const dockHeight = dock?.offsetHeight ?? 0;
     item.classList.remove('is-expanded');
     if (links && home) home.append(links);
+    if (home) {
+      home.style.height = '';
+      home.style.width = '';
+    }
     syncCollection(item);
 
     const finish = () => {
@@ -177,7 +181,6 @@ const dateFmt = new Intl.DateTimeFormat('en-GB', {
     const runs = [
       slide(details, detailsHeight, 0, [1, 0]),
       slide(dock, dockHeight, 0),
-      home && home.closest('.discog__head') ? slide(home, 0, home.offsetHeight) : undefined,
       label?.animate([{ opacity: 0.75 }, { opacity: 0 }], { duration: DURATION * 0.6, easing: EASE, fill: 'forwards' }),
       links && before ? travel(links, before) : undefined,
     ];

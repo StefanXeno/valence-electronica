@@ -427,10 +427,8 @@ const hasLinks = release.listenLinks.length > 0 || Boolean(stageId);
     flex: 0 0 auto;
   }
 
-  /* Links live in the dock while expanded; the emptied home takes no room. */
-  .discog__item.is-expanded .discog__listen-home {
-    display: none;
-  }
+  /* While expanded the emptied home keeps its size (pinned inline by Discography.astro),
+     so the title block never shifts and the travelling links land where they aim. */
 
   .discog__listen-dock-inner {
     display: flex;
