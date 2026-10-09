@@ -19,6 +19,8 @@ const collectionId = `discog-collection-${year}-${block.label}`
   .toLowerCase()
   .replace(/[^a-z0-9]+/g, '-');
 const coverSrc = coverOrPlaceholder(block.coverUrl);
+/** Same head stack as singles and the phone menu: kind → title → artist. */
+const collectionArtist = block.entries[0]?.artist ?? defaultArtist;
 /** Cover play puts the first stage song of this EP/album (track order) on stage. */
 const leadStageId = block.entries.find((release) => release.jukeboxId)?.jukeboxId;
 ---
@@ -44,6 +46,7 @@ const leadStageId = block.entries.find((release) => release.jukeboxId)?.jukeboxI
     <div class="discog__head-text">
       <span class="discog__head-text__kind">{block.kindType}</span>
       <span class="discog__head-text__title" id={collectionId}>{block.collection}</span>
+      <span class="discog__head-text__artist">{collectionArtist}</span>
       {block.listenLinks.length > 0 && (
         <ul class="discog__collection-listen" aria-label={chrome.listenOnLabel}>
           {block.listenLinks.map((link) => (
@@ -87,9 +90,10 @@ const leadStageId = block.entries.find((release) => release.jukeboxId)?.jukeboxI
     flex-direction: column;
     gap: calc(0.55rem * var(--hud-scale));
     padding: calc(0.75rem * var(--hud-scale));
-    border: 1px solid color-mix(in srgb, var(--color-border) 85%, transparent);
-    border-radius: calc(0.6rem * var(--hud-scale));
-    background: color-mix(in srgb, var(--color-bg) 22%, transparent);
+    /* Neutral card chrome, as in the phone menu. */
+    border: 1px solid color-mix(in srgb, #fff 14%, transparent);
+    border-radius: calc(0.55rem * var(--hud-scale));
+    background: color-mix(in srgb, #fff 4%, transparent);
     min-width: 0;
     transition:
       border-color 200ms ease,
@@ -131,8 +135,8 @@ const leadStageId = block.entries.find((release) => release.jukeboxId)?.jukeboxI
     overflow: visible;
     display: inline-grid;
     place-items: center;
-    width: calc(2.35rem * var(--hud-scale));
-    height: calc(2.35rem * var(--hud-scale));
+    width: calc(1.95rem * var(--hud-scale));
+    height: calc(1.95rem * var(--hud-scale));
     border: 1px solid color-mix(in srgb, var(--color-border) 60%, transparent);
     border-radius: 999px;
     color: var(--color-text-muted);
@@ -150,8 +154,8 @@ const leadStageId = block.entries.find((release) => release.jukeboxId)?.jukeboxI
   }
 
   .discog__collection-listen :global(.channel-icon) {
-    width: calc(1.45rem * var(--hud-scale));
-    height: calc(1.45rem * var(--hud-scale));
+    width: calc(1.15rem * var(--hud-scale));
+    height: calc(1.15rem * var(--hud-scale));
   }
 
   /* Positioning context for the stage play badge (outside the cover's aria-hidden). */
@@ -195,7 +199,8 @@ const leadStageId = block.entries.find((release) => release.jukeboxId)?.jukeboxI
   }
 
   .discog__head-text__kind,
-  .discog__head-text__title {
+  .discog__head-text__title,
+  .discog__head-text__artist {
     display: block;
     margin: 0;
     padding: 0;
@@ -220,6 +225,12 @@ const leadStageId = block.entries.find((release) => release.jukeboxId)?.jukeboxI
     color: var(--color-text);
   }
 
+  .discog__head-text__artist {
+    font-size: calc(0.78rem * var(--hud-scale));
+    line-height: 1.05;
+    color: var(--color-text-muted);
+  }
+
   .discog__collection-tracks {
     list-style: none;
     margin: 0;
@@ -227,7 +238,7 @@ const leadStageId = block.entries.find((release) => release.jukeboxId)?.jukeboxI
     display: flex;
     flex-direction: column;
     gap: 0;
-    border-top: 1px solid color-mix(in srgb, var(--color-border) 40%, transparent);
+    border-top: 1px solid color-mix(in srgb, #fff 12%, transparent);
   }
 
   @media (prefers-reduced-motion: reduce) {

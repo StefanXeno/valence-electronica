@@ -49,6 +49,8 @@ const stageId = release.jukeboxId;
   {
     nested ? (
       <div class="discog__main">
+        {/* Like the phone tracklist: title/artist left, play + platform glyphs right. */}
+        <div class="discog__nested-row">
         <button
           type="button"
           class="discog__toggle"
@@ -59,11 +61,8 @@ const stageId = release.jukeboxId;
           <span class="discog__head-text__artist">{artistName}</span>
         </button>
         {(release.listenLinks.length > 0 || stageId) && (
-          <div class="discog__listen discog__listen--summary">
-            {release.listenLinks.length > 0 && (
-              <span class="discog__listen-label">{chrome.listenOnLabel}</span>
-            )}
-            <ul class="discog__listen-links">
+          <div class="discog__listen discog__listen--summary discog__listen--glyphs">
+            <ul class="discog__listen-links" aria-label={chrome.listenOnLabel}>
               {/* Play leads the right-hand icon row, before the platform links. */}
               {stageId && (
                 <li>
@@ -88,6 +87,7 @@ const stageId = release.jukeboxId;
             </ul>
           </div>
         )}
+        </div>
         <div class="discog__details" id={detailsId} hidden>
           <dl class="discog__facts">
             <div class="discog__fact">
@@ -243,9 +243,10 @@ const stageId = release.jukeboxId;
     flex-direction: column;
     gap: calc(0.55rem * var(--hud-scale));
     padding: calc(0.75rem * var(--hud-scale));
-    border: 1px solid color-mix(in srgb, var(--color-border) 85%, transparent);
-    border-radius: calc(0.6rem * var(--hud-scale));
-    background: color-mix(in srgb, var(--color-bg) 22%, transparent);
+    /* Neutral card chrome, as in the phone menu. */
+    border: 1px solid color-mix(in srgb, #fff 14%, transparent);
+    border-radius: calc(0.55rem * var(--hud-scale));
+    background: color-mix(in srgb, #fff 4%, transparent);
     min-width: 0;
     cursor: pointer;
     transition:
@@ -263,7 +264,7 @@ const stageId = release.jukeboxId;
     padding: calc(0.55rem * var(--hud-scale)) 0;
     border: none;
     border-radius: 0;
-    border-bottom: 1px solid color-mix(in srgb, var(--color-border) 28%, transparent);
+    border-bottom: 1px solid color-mix(in srgb, #fff 10%, transparent);
     background: transparent;
     box-shadow: none;
     gap: 0;
@@ -473,9 +474,43 @@ const stageId = release.jukeboxId;
     margin-left: 0;
   }
 
-  .discog__item--nested .discog__listen--summary {
-    padding-top: calc(0.35rem * var(--hud-scale));
+  .discog__nested-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: calc(0.45rem * var(--hud-scale));
+    min-width: 0;
+  }
+
+  .discog__nested-row .discog__toggle {
+    flex: 1 1 auto;
+    width: auto;
+  }
+
+  /* Dense trailing glyphs — the phone tracklist's compact circles, no label. */
+  .discog__listen--glyphs {
+    flex: 0 0 auto;
+    padding-top: 0;
     border-top: none;
+  }
+
+  .discog__listen--glyphs .discog__listen-links {
+    flex-wrap: nowrap;
+    gap: calc(0.22rem * var(--hud-scale));
+  }
+
+  .discog__listen--glyphs .discog__listen-links a {
+    width: calc(1.85rem * var(--hud-scale));
+    height: calc(1.85rem * var(--hud-scale));
+  }
+
+  .discog__listen--glyphs .discog__listen-links :global(.channel-icon) {
+    width: calc(0.95rem * var(--hud-scale));
+    height: calc(0.95rem * var(--hud-scale));
+  }
+
+  .discog__listen--glyphs .discog__listen-links :global(.stage-play) {
+    --stage-play-size: calc(1.85rem * var(--hud-scale));
   }
 
   .discog__item.is-expanded .discog__listen--summary {
@@ -515,8 +550,8 @@ const stageId = release.jukeboxId;
     overflow: visible;
     display: inline-grid;
     place-items: center;
-    width: calc(2.35rem * var(--hud-scale));
-    height: calc(2.35rem * var(--hud-scale));
+    width: calc(1.95rem * var(--hud-scale));
+    height: calc(1.95rem * var(--hud-scale));
     border: 1px solid color-mix(in srgb, var(--color-border) 60%, transparent);
     border-radius: 999px;
     color: var(--color-text-muted);
@@ -534,13 +569,13 @@ const stageId = release.jukeboxId;
   }
 
   .discog__listen-links :global(.channel-icon) {
-    width: calc(1.45rem * var(--hud-scale));
-    height: calc(1.45rem * var(--hud-scale));
+    width: calc(1.15rem * var(--hud-scale));
+    height: calc(1.15rem * var(--hud-scale));
   }
 
   /* Play shares the row with the platform links: same circle size. */
   .discog__listen-links :global(.stage-play) {
-    --stage-play-size: calc(2.35rem * var(--hud-scale));
+    --stage-play-size: calc(1.95rem * var(--hud-scale));
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -550,17 +585,17 @@ const stageId = release.jukeboxId;
   }
 
   @media (max-width: 1023px) {
-    .discog__listen-links a {
+    .discog__listen:not(.discog__listen--glyphs) .discog__listen-links a {
       width: 2.5rem;
       height: 2.5rem;
     }
 
-    .discog__listen-links :global(.channel-icon) {
+    .discog__listen:not(.discog__listen--glyphs) .discog__listen-links :global(.channel-icon) {
       width: 1.55rem;
       height: 1.55rem;
     }
 
-    .discog__listen-links :global(.stage-play) {
+    .discog__listen:not(.discog__listen--glyphs) .discog__listen-links :global(.stage-play) {
       --stage-play-size: 2.5rem;
     }
   }
