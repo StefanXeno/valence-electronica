@@ -157,11 +157,13 @@ const titleId = `legal-panel-title-${slug}`;
       box-shadow: none;
       animation: none;
       clip-path: circle(160% at var(--legal-origin, 50% 0%));
-      transition: clip-path var(--morph-dur) var(--morph-ease);
+      /* Opening runs a touch slower than the shared morph; closing keeps --morph-dur. */
+      transition: clip-path var(--legal-open-dur, 650ms) var(--morph-ease);
     }
 
     .legal-panel.is-collapsed .legal-panel__frame {
       clip-path: circle(0% at var(--legal-origin, 50% 0%));
+      transition: clip-path var(--morph-dur) var(--morph-ease);
     }
 
     .legal-panel__header {
