@@ -430,6 +430,12 @@ const hasLinks = release.listenLinks.length > 0 || Boolean(stageId);
   /* While expanded the emptied home keeps its size (pinned inline by Discography.astro),
      so the title block never shifts and the travelling links land where they aim. */
 
+  /* flow-root keeps the inner margin inside the dock, so its animated height covers all of
+     it (a collapsed-through margin would snap the rows below at the end of closing). */
+  .discog__listen-dock {
+    display: flow-root;
+  }
+
   .discog__listen-dock-inner {
     display: flex;
     align-items: center;
