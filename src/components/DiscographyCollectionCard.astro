@@ -110,7 +110,7 @@ const leadStageId = block.entries.find((release) => release.jukeboxId)?.jukeboxI
   .discog__collection-head {
     display: grid;
     grid-template-columns: auto minmax(0, 1fr);
-    column-gap: calc(0.75rem * var(--hud-scale));
+    column-gap: calc(0.85rem * var(--hud-scale));
     align-items: center;
   }
 
@@ -135,8 +135,8 @@ const leadStageId = block.entries.find((release) => release.jukeboxId)?.jukeboxI
     overflow: visible;
     display: inline-grid;
     place-items: center;
-    width: calc(1.95rem * var(--hud-scale));
-    height: calc(1.95rem * var(--hud-scale));
+    width: calc(1.85rem * var(--hud-scale));
+    height: calc(1.85rem * var(--hud-scale));
     border: 1px solid color-mix(in srgb, var(--color-border) 60%, transparent);
     border-radius: 999px;
     color: var(--color-text-muted);
@@ -154,8 +154,8 @@ const leadStageId = block.entries.find((release) => release.jukeboxId)?.jukeboxI
   }
 
   .discog__collection-listen :global(.channel-icon) {
-    width: calc(1.15rem * var(--hud-scale));
-    height: calc(1.15rem * var(--hud-scale));
+    width: calc(1.05rem * var(--hud-scale));
+    height: calc(1.05rem * var(--hud-scale));
   }
 
   /* Positioning context for the stage play badge (outside the cover's aria-hidden). */
@@ -165,7 +165,7 @@ const leadStageId = block.entries.find((release) => release.jukeboxId)?.jukeboxI
   }
 
   .discog__collection-cover {
-    --discog-cover-size: calc(5.5rem * var(--hud-scale));
+    --discog-cover-size: calc(6.75rem * var(--hud-scale));
     width: var(--discog-cover-size);
     height: var(--discog-cover-size);
     flex: 0 0 auto;
@@ -173,13 +173,6 @@ const leadStageId = block.entries.find((release) => release.jukeboxId)?.jukeboxI
     overflow: hidden;
     border: 1px solid color-mix(in srgb, var(--color-border) 70%, transparent);
     background: color-mix(in srgb, var(--color-border) 22%, transparent);
-    transition:
-      width 280ms cubic-bezier(0.22, 1, 0.36, 1),
-      height 280ms cubic-bezier(0.22, 1, 0.36, 1);
-  }
-
-  .discog__collection-card.is-expanded .discog__collection-cover {
-    --discog-cover-size: calc(8rem * var(--hud-scale));
   }
 
   .discog__collection-cover-img {
@@ -208,7 +201,7 @@ const leadStageId = block.entries.find((release) => release.jukeboxId)?.jukeboxI
 
   .discog__head-text__kind {
     font-family: var(--font-display);
-    font-size: calc(0.68rem * var(--hud-scale));
+    font-size: calc(0.56rem * var(--hud-scale));
     font-weight: 600;
     letter-spacing: 0.12em;
     line-height: 1;
@@ -218,7 +211,7 @@ const leadStageId = block.entries.find((release) => release.jukeboxId)?.jukeboxI
 
   .discog__head-text__title {
     font-family: var(--font-display);
-    font-size: calc(1.05rem * var(--hud-scale));
+    font-size: calc(0.84rem * var(--hud-scale));
     font-weight: 600;
     letter-spacing: 0.04em;
     line-height: 1.05;
@@ -226,8 +219,8 @@ const leadStageId = block.entries.find((release) => release.jukeboxId)?.jukeboxI
   }
 
   .discog__head-text__artist {
-    font-size: calc(0.78rem * var(--hud-scale));
-    line-height: 1.05;
+    font-size: calc(0.66rem * var(--hud-scale));
+    line-height: 1.2;
     color: var(--color-text-muted);
   }
 
@@ -241,9 +234,4 @@ const leadStageId = block.entries.find((release) => release.jukeboxId)?.jukeboxI
     border-top: 1px solid color-mix(in srgb, #fff 12%, transparent);
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    .discog__collection-cover {
-      transition: none;
-    }
-  }
 </style>

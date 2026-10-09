@@ -39,6 +39,8 @@ const coverSrc = coverOrPlaceholder(release.coverUrl);
 const expandedType = typeDetail ?? release.kind;
 /** Only stage songs (with a jukebox entry) can go on stage — catalog-only rows get no play. */
 const stageId = release.jukeboxId;
+/** Tracklist rows carry play + platform links; cards carry platform links (play is on the cover). */
+const hasLinks = release.listenLinks.length > 0 || Boolean(stageId);
 ---
 
 <li
@@ -46,11 +48,14 @@ const stageId = release.jukeboxId;
   data-discog-entry={release.id}
   data-swipeable={release.swipeable ? '' : undefined}
 >
+  {/*
+    One links list per row. Collapsed it sits in its "home" (under the title on cards, at the
+    right of tracklist rows); expanding moves it into the dock at the bottom-right of the box
+    while the details slide out above it (animated in Discography.astro).
+  */}
   {
     nested ? (
-      <div class="discog__main">
-        {/* Like the phone tracklist: title/artist left, play + platform glyphs right. */}
-        <div class="discog__nested-row">
+      <div class="discog__nested-row">
         <button
           type="button"
           class="discog__toggle"
@@ -60,10 +65,14 @@ const stageId = release.jukeboxId;
           <span class="discog__head-text__title">{release.title}</span>
           <span class="discog__head-text__artist">{artistName}</span>
         </button>
-        {(release.listenLinks.length > 0 || stageId) && (
-          <div class="discog__listen discog__listen--summary discog__listen--glyphs">
-            <ul class="discog__listen-links" aria-label={chrome.listenOnLabel}>
-              {/* Play leads the right-hand icon row, before the platform links. */}
+        {hasLinks && (
+          <div class="discog__listen-home" data-discog-listen-home>
+            <ul
+              class="discog__listen-links discog__listen-links--compact"
+              aria-label={chrome.listenOnLabel}
+              data-discog-listen-links
+            >
+              {/* Play leads the icon row, before the platform links. */}
               {stageId && (
                 <li>
                   <StagePlayButton chrome={chrome} stageId={stageId} />
@@ -87,131 +96,40 @@ const stageId = release.jukeboxId;
             </ul>
           </div>
         )}
-        </div>
-        <div class="discog__details" id={detailsId} hidden>
-          <dl class="discog__facts">
-            <div class="discog__fact">
-              <dt>{chrome.releasedLabel}</dt>
-              <dd>
-                <time datetime={dateIso}>{dateLabel}</time>
-              </dd>
-            </div>
-            {expandedType && (
-              <div class="discog__fact">
-                <dt>Type</dt>
-                <dd>{expandedType}</dd>
-              </div>
-            )}
-            <div class="discog__fact">
-              <dt>Artist</dt>
-              <dd>{artistName}</dd>
-            </div>
-          </dl>
-          {(release.listenLinks.length > 0 || stageId) && (
-            <div class="discog__listen">
-              {release.listenLinks.length > 0 && (
-                <span class="discog__listen-label">{chrome.listenOnLabel}</span>
-              )}
-              <ul class="discog__listen-links">
-                {stageId && (
-                  <li>
-                    <StagePlayButton chrome={chrome} stageId={stageId} />
-                  </li>
-                )}
-                {release.listenLinks.map((link) => (
-                  <li>
-                    <a
-                      class="glitch-hit"
-                      href={link.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label={link.label}
-                      data-hud-label={link.label}
-                      data-hud-label-anchor="above"
-                    >
-                      <ChannelIcon id={link.platform} label={link.label} />
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-          {release.notes && <p class="discog__notes">{release.notes}</p>}
-        </div>
       </div>
     ) : (
-      <>
-        <div class="discog__head">
-          <div class="discog__cover-slot">
-            {/* Artwork only — no link; clicks on the cover do nothing. */}
-            <div class="discog__cover" aria-hidden="true">
-              <img
-                class="discog__cover-img"
-                src={coverSrc}
-                alt=""
-                loading="lazy"
-                decoding="async"
-              />
-            </div>
-            {stageId && <StagePlayButton chrome={chrome} stageId={stageId} size="badge" />}
+      <div class="discog__head">
+        <div class="discog__cover-slot">
+          {/* Artwork only — no link; clicks on the cover do nothing. */}
+          <div class="discog__cover" aria-hidden="true">
+            <img
+              class="discog__cover-img"
+              src={coverSrc}
+              alt=""
+              loading="lazy"
+              decoding="async"
+            />
           </div>
-          <div class="discog__meta">
-            <button
-              type="button"
-              class="discog__toggle"
-              aria-expanded="false"
-              aria-controls={detailsId}
-            >
-              {kindLabel && <span class="discog__head-text__kind">{kindLabel}</span>}
-              <span class="discog__head-text__title">{release.title}</span>
-              <span class="discog__head-text__artist">{artistName}</span>
-            </button>
-            {release.listenLinks.length > 0 && (
-              <div class="discog__listen discog__listen--summary discog__listen--bare">
-                <ul class="discog__listen-links" aria-label={chrome.listenOnLabel}>
-                  {release.listenLinks.map((link) => (
-                    <li>
-                      <a
-                        class="glitch-hit"
-                        href={link.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        aria-label={link.label}
-                        data-hud-label={link.label}
-                        data-hud-label-anchor="above"
-                      >
-                        <ChannelIcon id={link.platform} label={link.label} />
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
+          {stageId && <StagePlayButton chrome={chrome} stageId={stageId} size="badge" />}
         </div>
-        <div class="discog__details" id={detailsId} hidden>
-          <dl class="discog__facts">
-            <div class="discog__fact">
-              <dt>{chrome.releasedLabel}</dt>
-              <dd>
-                <time datetime={dateIso}>{dateLabel}</time>
-              </dd>
-            </div>
-            {expandedType && (
-              <div class="discog__fact">
-                <dt>Type</dt>
-                <dd>{expandedType}</dd>
-              </div>
-            )}
-            <div class="discog__fact">
-              <dt>Artist</dt>
-              <dd>{artistName}</dd>
-            </div>
-          </dl>
+        <div class="discog__meta">
+          <button
+            type="button"
+            class="discog__toggle"
+            aria-expanded="false"
+            aria-controls={detailsId}
+          >
+            {kindLabel && <span class="discog__head-text__kind">{kindLabel}</span>}
+            <span class="discog__head-text__title">{release.title}</span>
+            <span class="discog__head-text__artist">{artistName}</span>
+          </button>
           {release.listenLinks.length > 0 && (
-            <div class="discog__listen">
-              <span class="discog__listen-label">{chrome.listenOnLabel}</span>
-              <ul class="discog__listen-links">
+            <div class="discog__listen-home" data-discog-listen-home>
+              <ul
+                class="discog__listen-links"
+                aria-label={chrome.listenOnLabel}
+                data-discog-listen-links
+              >
                 {release.listenLinks.map((link) => (
                   <li>
                     <a
@@ -230,9 +148,42 @@ const stageId = release.jukeboxId;
               </ul>
             </div>
           )}
-          {release.notes && <p class="discog__notes">{release.notes}</p>}
         </div>
-      </>
+      </div>
+    )
+  }
+  <div class="discog__details" id={detailsId} hidden>
+    <div class="discog__details-inner">
+      <dl class="discog__facts">
+        <div class="discog__fact">
+          <dt>{chrome.releasedLabel}</dt>
+          <dd>
+            <time datetime={dateIso}>{dateLabel}</time>
+          </dd>
+        </div>
+        {expandedType && (
+          <div class="discog__fact">
+            <dt>Type</dt>
+            <dd>{expandedType}</dd>
+          </div>
+        )}
+        <div class="discog__fact">
+          <dt>Artist</dt>
+          <dd>{artistName}</dd>
+        </div>
+      </dl>
+      {release.notes && <p class="discog__notes">{release.notes}</p>}
+    </div>
+  </div>
+  {
+    (nested ? hasLinks : release.listenLinks.length > 0) && (
+      <div class="discog__listen-dock" data-discog-listen-dock hidden>
+        <div class="discog__listen-dock-inner" data-discog-listen-dock-slot>
+          {release.listenLinks.length > 0 && (
+            <span class="discog__listen-label">{chrome.listenOnLabel}</span>
+          )}
+        </div>
+      </div>
     )
   }
 </li>
@@ -241,7 +192,6 @@ const stageId = release.jukeboxId;
   .discog__item {
     display: flex;
     flex-direction: column;
-    gap: calc(0.55rem * var(--hud-scale));
     padding: calc(0.75rem * var(--hud-scale));
     /* Neutral card chrome, as in the phone menu. */
     border: 1px solid color-mix(in srgb, #fff 14%, transparent);
@@ -250,9 +200,9 @@ const stageId = release.jukeboxId;
     min-width: 0;
     cursor: pointer;
     transition:
-      border-color 200ms ease,
-      background-color 200ms ease,
-      box-shadow 200ms ease;
+      border-color 320ms ease,
+      background-color 320ms ease,
+      box-shadow 320ms ease;
   }
 
   .discog__item[data-swipeable] {
@@ -261,13 +211,12 @@ const stageId = release.jukeboxId;
 
   .discog__item--nested {
     display: block;
-    padding: calc(0.55rem * var(--hud-scale)) 0;
+    padding: calc(0.5rem * var(--hud-scale)) 0;
     border: none;
     border-radius: 0;
     border-bottom: 1px solid color-mix(in srgb, #fff 10%, transparent);
     background: transparent;
     box-shadow: none;
-    gap: 0;
   }
 
   .discog__item--nested:last-child {
@@ -285,11 +234,10 @@ const stageId = release.jukeboxId;
     background: color-mix(in srgb, var(--color-accent) 6%, transparent);
   }
 
-  /* Same head rhythm as EP/collection cards: cover | text | play */
   .discog__head {
     display: grid;
     grid-template-columns: auto minmax(0, 1fr);
-    column-gap: calc(0.75rem * var(--hud-scale));
+    column-gap: calc(0.85rem * var(--hud-scale));
     align-items: center;
   }
 
@@ -302,21 +250,14 @@ const stageId = release.jukeboxId;
   }
 
   .discog__cover {
-    --discog-cover-size: calc(5.5rem * var(--hud-scale));
+    --discog-cover-size: calc(6.75rem * var(--hud-scale));
     width: var(--discog-cover-size);
     height: var(--discog-cover-size);
     flex: 0 0 auto;
     border-radius: calc(0.4rem * var(--hud-scale));
     overflow: hidden;
-    border: 1px solid color-mix(in srgb, var(--color-border) 70%, transparent);
-    background: color-mix(in srgb, var(--color-border) 22%, transparent);
-    transition:
-      width 280ms cubic-bezier(0.22, 1, 0.36, 1),
-      height 280ms cubic-bezier(0.22, 1, 0.36, 1);
-  }
-
-  .discog__item.is-expanded:not(.discog__item--nested) .discog__cover {
-    --discog-cover-size: calc(8rem * var(--hud-scale));
+    border: 1px solid color-mix(in srgb, #fff 14%, transparent);
+    background: color-mix(in srgb, #fff 6%, transparent);
   }
 
   .discog__cover-img {
@@ -334,20 +275,13 @@ const stageId = release.jukeboxId;
     align-self: center;
   }
 
-  .discog__main {
-    display: flex;
-    flex-direction: column;
-    gap: calc(0.3rem * var(--hud-scale));
-    min-width: 0;
-  }
-
   .discog__toggle {
     appearance: none;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     justify-content: center;
-    gap: 0.12rem;
+    gap: 0.15rem;
     margin: 0;
     padding: 0;
     border: 0;
@@ -376,52 +310,63 @@ const stageId = release.jukeboxId;
 
   .discog__head-text__kind {
     font-family: var(--font-display);
-    font-size: calc(0.68rem * var(--hud-scale));
+    font-size: calc(0.56rem * var(--hud-scale));
     font-weight: 600;
     letter-spacing: 0.12em;
-    line-height: 1;
+    line-height: 1.1;
     text-transform: uppercase;
     color: var(--color-text-muted);
   }
 
   .discog__head-text__title {
     font-family: var(--font-display);
-    font-size: calc(1.05rem * var(--hud-scale));
+    font-size: calc(0.84rem * var(--hud-scale));
     font-weight: 600;
-    letter-spacing: 0.04em;
-    line-height: 1.05;
+    letter-spacing: 0.03em;
+    line-height: 1.15;
     color: var(--color-text);
   }
 
-  /* Tracklist rows: title only a touch larger than the artist line (0.78rem). */
+  /* Tracklist rows: title only a touch larger than the artist line. */
   .discog__item--nested .discog__head-text__title {
-    font-size: calc(0.86rem * var(--hud-scale));
+    font-size: calc(0.7rem * var(--hud-scale));
     font-weight: 500;
     letter-spacing: 0.02em;
   }
 
   .discog__head-text__artist {
-    font-size: calc(0.78rem * var(--hud-scale));
-    line-height: 1.05;
+    font-size: calc(0.66rem * var(--hud-scale));
+    line-height: 1.2;
     color: var(--color-text-muted);
   }
 
-  .discog__details {
-    display: flex;
-    flex-direction: column;
-    gap: calc(0.55rem * var(--hud-scale));
-    padding-top: calc(0.15rem * var(--hud-scale));
+  .discog__item--nested .discog__head-text__artist {
+    font-size: calc(0.6rem * var(--hud-scale));
   }
 
-  .discog__details[hidden] {
+  /* —— Details: slide out below the head (height animated in Discography.astro) —— */
+
+  .discog__details {
+    overflow: hidden;
+  }
+
+  .discog__details[hidden],
+  .discog__listen-dock[hidden] {
     display: none;
+  }
+
+  .discog__details-inner {
+    display: flex;
+    flex-direction: column;
+    gap: calc(0.5rem * var(--hud-scale));
+    padding-top: calc(0.7rem * var(--hud-scale));
   }
 
   .discog__facts {
     margin: 0;
     display: flex;
     flex-direction: column;
-    gap: calc(0.3rem * var(--hud-scale));
+    gap: calc(0.28rem * var(--hud-scale));
   }
 
   .discog__fact {
@@ -429,7 +374,7 @@ const stageId = release.jukeboxId;
     grid-template-columns: minmax(4.5rem, auto) minmax(0, 1fr);
     column-gap: calc(0.65rem * var(--hud-scale));
     align-items: baseline;
-    font-size: calc(0.78rem * var(--hud-scale));
+    font-size: calc(0.66rem * var(--hud-scale));
   }
 
   .discog__fact dt {
@@ -449,30 +394,12 @@ const stageId = release.jukeboxId;
 
   .discog__notes {
     margin: 0;
-    font-size: calc(0.78rem * var(--hud-scale));
+    font-size: calc(0.66rem * var(--hud-scale));
     line-height: 1.45;
     color: var(--color-text-muted);
   }
 
-  .discog__listen {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: calc(0.45rem * var(--hud-scale));
-    padding-top: calc(0.45rem * var(--hud-scale));
-    border-top: 1px solid color-mix(in srgb, var(--color-border) 40%, transparent);
-    min-width: 0;
-  }
-
-  /* Singles: links only, under the title block beside the cover — no label, no divider. */
-  .discog__listen--bare {
-    padding-top: calc(0.4rem * var(--hud-scale));
-    border-top: none;
-  }
-
-  .discog__listen--bare .discog__listen-links {
-    margin-left: 0;
-  }
+  /* —— Listen links: home (collapsed) and dock (expanded, bottom-right) —— */
 
   .discog__nested-row {
     display: flex;
@@ -487,39 +414,41 @@ const stageId = release.jukeboxId;
     width: auto;
   }
 
-  /* Dense trailing glyphs — the phone tracklist's compact circles, no label. */
-  .discog__listen--glyphs {
+  /* flow-root keeps the list's top margin inside, so the home's height is measurable. */
+  .discog__head .discog__listen-home {
+    display: flow-root;
+  }
+
+  .discog__head .discog__listen-home > .discog__listen-links {
+    margin-top: calc(0.45rem * var(--hud-scale));
+  }
+
+  .discog__nested-row .discog__listen-home {
     flex: 0 0 auto;
-    padding-top: 0;
-    border-top: none;
   }
 
-  .discog__listen--glyphs .discog__listen-links {
-    flex-wrap: nowrap;
-    gap: calc(0.22rem * var(--hud-scale));
-  }
-
-  .discog__listen--glyphs .discog__listen-links a {
-    width: calc(1.85rem * var(--hud-scale));
-    height: calc(1.85rem * var(--hud-scale));
-  }
-
-  .discog__listen--glyphs .discog__listen-links :global(.channel-icon) {
-    width: calc(0.95rem * var(--hud-scale));
-    height: calc(0.95rem * var(--hud-scale));
-  }
-
-  .discog__listen--glyphs .discog__listen-links :global(.stage-play) {
-    --stage-play-size: calc(1.85rem * var(--hud-scale));
-  }
-
-  .discog__item.is-expanded .discog__listen--summary {
+  /* Links live in the dock while expanded; the emptied home takes no room. */
+  .discog__item.is-expanded .discog__listen-home {
     display: none;
+  }
+
+  .discog__listen-dock-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: calc(0.45rem * var(--hud-scale));
+    margin-top: calc(0.6rem * var(--hud-scale));
+    padding-top: calc(0.55rem * var(--hud-scale));
+    border-top: 1px solid color-mix(in srgb, #fff 12%, transparent);
+  }
+
+  .discog__listen-dock-inner .discog__listen-links {
+    margin-left: auto;
   }
 
   .discog__listen-label {
     font-family: var(--font-display);
-    font-size: calc(0.58rem * var(--hud-scale));
+    font-size: calc(0.52rem * var(--hud-scale));
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.1em;
@@ -531,8 +460,6 @@ const stageId = release.jukeboxId;
   .discog__listen-links {
     list-style: none;
     margin: 0;
-    /* Label left, links pushed to the right edge (also after a wrap). */
-    margin-left: auto;
     padding: 0;
     display: inline-flex;
     flex-flow: row wrap;
@@ -550,12 +477,12 @@ const stageId = release.jukeboxId;
     overflow: visible;
     display: inline-grid;
     place-items: center;
-    width: calc(1.95rem * var(--hud-scale));
-    height: calc(1.95rem * var(--hud-scale));
-    border: 1px solid color-mix(in srgb, var(--color-border) 60%, transparent);
+    width: calc(1.85rem * var(--hud-scale));
+    height: calc(1.85rem * var(--hud-scale));
+    border: 1px solid color-mix(in srgb, #fff 18%, transparent);
     border-radius: 999px;
     color: var(--color-text-muted);
-    background: color-mix(in srgb, var(--color-bg) 30%, transparent);
+    background: color-mix(in srgb, #fff 4%, transparent);
     transition:
       color 160ms ease,
       border-color 160ms ease,
@@ -569,33 +496,47 @@ const stageId = release.jukeboxId;
   }
 
   .discog__listen-links :global(.channel-icon) {
-    width: calc(1.15rem * var(--hud-scale));
-    height: calc(1.15rem * var(--hud-scale));
+    width: calc(1.05rem * var(--hud-scale));
+    height: calc(1.05rem * var(--hud-scale));
   }
 
   /* Play shares the row with the platform links: same circle size. */
   .discog__listen-links :global(.stage-play) {
-    --stage-play-size: calc(1.95rem * var(--hud-scale));
+    --stage-play-size: calc(1.85rem * var(--hud-scale));
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    .discog__cover {
-      transition: none;
-    }
+  /* Tracklist rows: the phone menu's dense glyphs (kept when they move to the dock). */
+  .discog__listen-links--compact {
+    flex-wrap: nowrap;
+    gap: calc(0.22rem * var(--hud-scale));
+  }
+
+  .discog__listen-links--compact a {
+    width: calc(1.6rem * var(--hud-scale));
+    height: calc(1.6rem * var(--hud-scale));
+  }
+
+  .discog__listen-links--compact :global(.channel-icon) {
+    width: calc(0.85rem * var(--hud-scale));
+    height: calc(0.85rem * var(--hud-scale));
+  }
+
+  .discog__listen-links--compact :global(.stage-play) {
+    --stage-play-size: calc(1.6rem * var(--hud-scale));
   }
 
   @media (max-width: 1023px) {
-    .discog__listen:not(.discog__listen--glyphs) .discog__listen-links a {
+    .discog__listen-links:not(.discog__listen-links--compact) a {
       width: 2.5rem;
       height: 2.5rem;
     }
 
-    .discog__listen:not(.discog__listen--glyphs) .discog__listen-links :global(.channel-icon) {
+    .discog__listen-links:not(.discog__listen-links--compact) :global(.channel-icon) {
       width: 1.55rem;
       height: 1.55rem;
     }
 
-    .discog__listen:not(.discog__listen--glyphs) .discog__listen-links :global(.stage-play) {
+    .discog__listen-links:not(.discog__listen-links--compact) :global(.stage-play) {
       --stage-play-size: 2.5rem;
     }
   }

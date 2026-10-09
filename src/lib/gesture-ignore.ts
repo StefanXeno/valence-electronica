@@ -8,7 +8,8 @@
 export const OUTBOUND_AND_PLAY_SELECTOR = [
   'a',
   '[data-stage-button]',
-  '.discog__listen',
+  '.discog__listen-home',
+  '.discog__listen-dock',
   '.discog__listen-links',
   '.site-nav__menu-portal-listen',
   '.site-nav__menu-portal-listen-links',

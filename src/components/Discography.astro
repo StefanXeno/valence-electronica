@@ -74,19 +74,117 @@ const dateFmt = new Intl.DateTimeFormat('en-GB', {
 }
 
 <script>
-  function setExpanded(item: HTMLElement, open: boolean) {
-    const toggle = item.querySelector<HTMLButtonElement>('.discog__toggle');
-    const details = item.querySelector<HTMLElement>('.discog__details');
-    if (!toggle || !details) return;
-    item.classList.toggle('is-expanded', open);
-    toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-    details.hidden = !open;
+  const DURATION = 460;
+  const EASE = 'cubic-bezier(0.22, 1, 0.36, 1)';
+  /** Rows mid-animation: a second click waits for the first to finish. */
+  const busy = new WeakSet<HTMLElement>();
 
+  const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function parts(item: HTMLElement) {
+    return {
+      toggle: item.querySelector<HTMLButtonElement>('.discog__toggle'),
+      details: item.querySelector<HTMLElement>('.discog__details'),
+      home: item.querySelector<HTMLElement>('[data-discog-listen-home]'),
+      dock: item.querySelector<HTMLElement>('[data-discog-listen-dock]'),
+      slot: item.querySelector<HTMLElement>('[data-discog-listen-dock-slot]'),
+      links: item.querySelector<HTMLElement>('[data-discog-listen-links]'),
+      label: item.querySelector<HTMLElement>('[data-discog-listen-dock-slot] .discog__listen-label'),
+    };
+  }
+
+  function syncCollection(item: HTMLElement) {
     const collection = item.closest<HTMLElement>('[data-discog-collection]');
-    if (collection) {
-      const anyOpen = Boolean(collection.querySelector('.discog__item.is-expanded'));
-      collection.classList.toggle('is-expanded', anyOpen);
+    if (!collection) return;
+    const anyOpen = Boolean(collection.querySelector('.discog__item.is-expanded'));
+    collection.classList.toggle('is-expanded', anyOpen);
+  }
+
+  /** Height 0 ↔ natural, so the box grows or shrinks smoothly. */
+  function slide(el: HTMLElement | null, from: number, to: number, opacity?: [number, number]) {
+    if (!el) return undefined;
+    const frames: Keyframe[] = [
+      { height: `${from}px`, ...(opacity ? { opacity: opacity[0] } : {}) },
+      { height: `${to}px`, ...(opacity ? { opacity: opacity[1] } : {}) },
+    ];
+    return el.animate(frames, { duration: DURATION, easing: EASE });
+  }
+
+  /** FLIP: play the links from where they were to where they are now. */
+  function travel(links: HTMLElement, before: DOMRect) {
+    const after = links.getBoundingClientRect();
+    const dx = before.left - after.left;
+    const dy = before.top - after.top;
+    if (!dx && !dy) return undefined;
+    return links.animate(
+      [{ transform: `translate(${dx}px, ${dy}px)` }, { transform: 'none' }],
+      { duration: DURATION, easing: EASE },
+    );
+  }
+
+  function setExpanded(item: HTMLElement, open: boolean) {
+    const { toggle, details, home, dock, slot, links, label } = parts(item);
+    if (!toggle || !details || busy.has(item)) return;
+    const animate = !reducedMotion();
+    toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+
+    if (open) {
+      const before = links?.getBoundingClientRect();
+      const homeHeight = home?.offsetHeight ?? 0;
+      item.classList.add('is-expanded');
+      details.hidden = false;
+      if (dock) dock.hidden = false;
+      if (links && slot) slot.append(links);
+      syncCollection(item);
+      if (!animate) return;
+
+      busy.add(item);
+      const runs = [
+        slide(details, 0, details.offsetHeight, [0, 1]),
+        slide(dock, 0, dock?.offsetHeight ?? 0),
+        // Cards: the emptied home under the title folds away instead of jumping.
+        home && home.closest('.discog__head') ? slide(home, homeHeight, 0) : undefined,
+        label?.animate([{ opacity: 0 }, { opacity: 0.75 }], { duration: DURATION, easing: EASE }),
+        links && before ? travel(links, before) : undefined,
+      ];
+      if (home && home.closest('.discog__head')) home.style.display = 'flow-root';
+      Promise.all(runs.map((run) => run?.finished)).finally(() => {
+        if (home) home.style.display = '';
+        busy.delete(item);
+      });
+      return;
     }
+
+    const before = links?.getBoundingClientRect();
+    const detailsHeight = details.offsetHeight;
+    const dockHeight = dock?.offsetHeight ?? 0;
+    item.classList.remove('is-expanded');
+    if (links && home) home.append(links);
+    syncCollection(item);
+
+    const finish = () => {
+      details.hidden = true;
+      if (dock) dock.hidden = true;
+      busy.delete(item);
+    };
+    if (!animate) {
+      finish();
+      return;
+    }
+
+    busy.add(item);
+    // Keep details and dock on screen while they fold back up.
+    const runs = [
+      slide(details, detailsHeight, 0, [1, 0]),
+      slide(dock, dockHeight, 0),
+      home && home.closest('.discog__head') ? slide(home, 0, home.offsetHeight) : undefined,
+      label?.animate([{ opacity: 0.75 }, { opacity: 0 }], { duration: DURATION * 0.6, easing: EASE, fill: 'forwards' }),
+      links && before ? travel(links, before) : undefined,
+    ];
+    Promise.all(runs.map((run) => run?.finished)).finally(() => {
+      runs.forEach((run) => run?.cancel());
+      finish();
+    });
   }
 
   function initCatalog(root: ParentNode = document) {
