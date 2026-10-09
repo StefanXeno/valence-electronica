@@ -11,6 +11,9 @@
  * fully visible within `NEAR_PX`, invisible beyond `FAR_PX`. `data-ui-tracking` switches the
  * CSS to a short transition so the fade follows the mouse.
  *
+ * While a panel is open (V-Flip, achievements, phone menu, content overlay) the HUD never
+ * goes idle, so clicks inside it cannot make the other control fade out and back in.
+ *
  * Tuning (dev + pre-release builds only): `?idle=<seconds>`, `?idlefade=<seconds>`,
  * `?near=<px>`, `?far=<px>`.
  */
@@ -26,6 +29,20 @@ const PROXIMITY_TARGETS: ReadonlyArray<{ control: string; host: string }> = [
   { control: '[data-player-vinyl]', host: '.stage-player' },
   { control: '[data-achievement-toggle]', host: '[data-achievement-gallery]' },
 ];
+
+/** Open V-Flip / achievements / phone menu / content sheets / rub panel (same checks as stage-player.ts). */
+function isPanelOpen(): boolean {
+  const html = document.documentElement;
+  return (
+    html.classList.contains('site-nav-menu-open') ||
+    html.classList.contains('achievement-gallery-open') ||
+    Boolean(
+      document.querySelector(
+        ".stage-player[data-player-state='full'], [data-achievement-gallery][data-gallery-state='open'], #legal-overlay [data-legal-panel]:not([hidden]), [data-track-rub-panel]:not([hidden])",
+      ),
+    )
+  );
+}
 
 /** Positive number from a query value; anything else → undefined. */
 export function parsePositiveParam(value: string | null): number | undefined {
@@ -122,6 +139,11 @@ export function initIdleFade(): void {
   // —— Idle timer ——
   let timer: number | undefined;
   const goIdle = () => {
+    // Panels hold the HUD awake; check again once the idle time has passed.
+    if (isPanelOpen()) {
+      timer = window.setTimeout(goIdle, idleMs);
+      return;
+    }
     // Start from the cursor's current distance, so a nearby control only dims partway.
     if (desktop.matches) applyProximity();
     html.setAttribute('data-ui-idle', '');
