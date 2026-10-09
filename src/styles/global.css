@@ -27,6 +27,8 @@
   /* Corner HUD (V-Flip, trophy) after a few idle seconds: slow fade out, quick return. */
   --ui-idle-fade-out: 1.2s;
   --ui-idle-fade-in: 250ms;
+  /* While idle on desktop: how quickly opacity catches up with the cursor distance. */
+  --ui-proximity-ease: 120ms;
 }
 
 *,

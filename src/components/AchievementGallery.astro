@@ -271,22 +271,20 @@ const OPTION_TILES = new Set(['demonic-combo']);
       visibility 0s linear 0s;
   }
 
-  /* Idle (see idle-fade.ts): the closed trophy fades out; hover and focus keep it. */
+  /* Idle (see idle-fade.ts): the closed trophy fades out, or on desktop to its cursor
+     proximity; keyboard focus keeps it. */
   :global(html[data-ui-idle]) .achievement-dock[data-gallery-state='closed']:not(:has(:focus-visible)) {
-    opacity: 0;
+    opacity: var(--hud-proximity, 0);
     transition:
       opacity var(--ui-idle-fade-out) ease-in,
       visibility 0s linear 0s;
   }
 
-  @media (hover: hover) {
-    /* Same selector + :hover so it outranks the idle rule. */
-    :global(html[data-ui-idle]) .achievement-dock[data-gallery-state='closed']:hover:not(:has(:focus-visible)) {
-      opacity: 1;
-      transition:
-        opacity var(--ui-idle-fade-in) var(--dock-ease),
-        visibility 0s linear 0s;
-    }
+  /* Once the mouse moves, opacity follows it closely. */
+  :global(html[data-ui-idle][data-ui-tracking]) .achievement-dock[data-gallery-state='closed']:not(:has(:focus-visible)) {
+    transition:
+      opacity var(--ui-proximity-ease) linear,
+      visibility 0s linear 0s;
   }
 
   :global(html.site-nav-menu-open) .achievement-dock {

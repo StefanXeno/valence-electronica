@@ -226,18 +226,16 @@ const defaultLabel =
     transition: opacity var(--ui-idle-fade-in) ease-out;
   }
 
-  /* Idle (see idle-fade.ts): the resting vinyl fades out; open, hint, hover and focus stay. */
+  /* Idle (see idle-fade.ts): the resting vinyl fades out, or on desktop to its cursor
+     proximity; open, hint and keyboard focus stay. */
   :global(html[data-ui-idle]) .stage-player[data-player-state='minimal']:not(:has(:focus-visible)) {
-    opacity: 0;
+    opacity: var(--hud-proximity, 0);
     transition: opacity var(--ui-idle-fade-out) ease-in;
   }
 
-  @media (hover: hover) {
-    /* Same selector + :hover so it outranks the idle rule. */
-    :global(html[data-ui-idle]) .stage-player[data-player-state='minimal']:hover:not(:has(:focus-visible)) {
-      opacity: 1;
-      transition: opacity var(--ui-idle-fade-in) ease-out;
-    }
+  /* Once the mouse moves, opacity follows it closely. */
+  :global(html[data-ui-idle][data-ui-tracking]) .stage-player[data-player-state='minimal']:not(:has(:focus-visible)) {
+    transition: opacity var(--ui-proximity-ease) linear;
   }
 
   /* —— Vinyl (hint / minimal / full) —— */
