@@ -131,8 +131,11 @@ const dateFmt = new Intl.DateTimeFormat('en-GB', {
   /** FLIP: play the links from where they were to where they are now. */
   function travel(links: HTMLElement, before: DOMRect) {
     const after = links.getBoundingClientRect();
-    const dx = before.left - after.left;
-    const dy = before.top - after.top;
+    // Rects are in screen px, `translate` in the element's CSS px: undo the root `zoom`
+    // (1.2 on laptops), or the links overshoot by that factor and snap back at the end.
+    const scale = links.offsetWidth > 0 ? after.width / links.offsetWidth : 1;
+    const dx = (before.left - after.left) / scale;
+    const dy = (before.top - after.top) / scale;
     if (!dx && !dy) return undefined;
     return links.animate(
       [{ transform: `translate(${dx}px, ${dy}px)` }, { transform: 'none' }],
