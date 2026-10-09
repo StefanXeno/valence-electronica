@@ -149,11 +149,15 @@ const dateFmt = new Intl.DateTimeFormat('en-GB', {
     const animate = !reducedMotion();
     toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
 
+    // Cards: the emptied home under the title folds away, so the text block glides to the
+    // cover's vertical centre. Tracklist rows: the home keeps its size (the row stays put).
+    const foldsHome = Boolean(home?.closest('.discog__head'));
+
     if (open) {
       const before = links?.getBoundingClientRect();
-      // Pin the home's size before the links leave it: nothing in the head moves.
-      if (home) {
-        home.style.height = `${home.offsetHeight}px`;
+      const homeHeight = home?.offsetHeight ?? 0;
+      if (home && !foldsHome) {
+        home.style.height = `${homeHeight}px`;
         home.style.width = `${home.offsetWidth}px`;
       }
       item.classList.add('is-expanded');
@@ -169,6 +173,8 @@ const dateFmt = new Intl.DateTimeFormat('en-GB', {
         slide(dock, 0, dock?.offsetHeight ?? 0),
         ...fadeDock(slot, label, true),
         links && before ? travel(links, before) : undefined,
+        // After the FLIP measure: the dock target sits below the head, unaffected by this.
+        foldsHome ? slide(home, homeHeight, 0) : undefined,
       ];
       Promise.all(runs.map((run) => run?.finished)).finally(() => {
         busy.delete(item);
@@ -203,7 +209,9 @@ const dateFmt = new Intl.DateTimeFormat('en-GB', {
       slide(details, detailsHeight, 0, [1, 0]),
       slide(dock, dockHeight, 0),
       ...fadeDock(slot, label, false),
+      // Measure the links' final home first, then let the home grow back into place.
       links && before ? travel(links, before) : undefined,
+      foldsHome && home ? slide(home, 0, home.offsetHeight) : undefined,
     ];
     Promise.all(runs.map((run) => run?.finished)).finally(() => {
       runs.forEach((run) => run?.cancel());

@@ -427,8 +427,8 @@ const hasLinks = release.listenLinks.length > 0 || Boolean(stageId);
     flex: 0 0 auto;
   }
 
-  /* While expanded the emptied home keeps its size (pinned inline by Discography.astro),
-     so the title block never shifts and the travelling links land where they aim. */
+  /* Expanded: a card's emptied home folds to 0 (title block centres on the cover); a
+     tracklist row's home keeps its size, pinned inline by Discography.astro. */
 
   /* flow-root keeps the inner margin inside the dock, so its animated height covers all of
      it (a collapsed-through margin would snap the rows below at the end of closing). */
