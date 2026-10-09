@@ -29,7 +29,7 @@ Initial content:
 ```json
 {
   "achievements": [
-    { "id": "taking-over", "title": "Taking Over", "subtitle": "You took Taking Over a little too literally.", "glyph": "vinyl", "secret": true },
+    { "id": "taking-over", "title": "Taking Over", "subtitle": "You took Taking Over a little too literally.", "glyph": "vinyl", "hint": "One track in the discography won't stay in its lane." },
     { "id": "infinite-spin", "title": "Infinite", "subtitle": "You tried to spin infinitely on the Infinite track", "glyph": "infinite", "hint": "On one track, going in circles is the whole point." },
     { "id": "player-found", "title": "Found it!", "subtitle": "You discovered V-Flip, the hidden player.", "glyph": "vinyl", "hint": "Knock on the stage and someone might answer." },
     { "id": "demonic-combo", "title": "Demonic Combination", "subtitle": "Unleash the Nightmare by 666", "glyph": "demonic", "hint": "Some numbers wake the Nightmare." },

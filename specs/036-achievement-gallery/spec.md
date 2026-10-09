@@ -340,7 +340,7 @@ Order and copy at launch (hints are drafts; the artist may rewrite them):
 
 | Order | Achievement | Secret | Hint (locked) |
 | ----- | ----------- | ------ | ------------- |
-| 1 | Taking Over (replaced "Why are you rubbing?!" on 2026-10-09) | yes | — |
+| 1 | Taking Over (replaced "Why are you rubbing?!" on 2026-10-09) | no | *One track in the discography won't stay in its lane.* |
 | 2 | Infinite | no | *On one track, going in circles is the whole point.* |
 | 3 | Found it! | no | *Knock on the stage and someone might answer.* |
 | 4 | Demonic Combination | no | *Some numbers wake the Nightmare.* |

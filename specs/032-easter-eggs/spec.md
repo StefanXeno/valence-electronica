@@ -84,7 +84,8 @@ confirm the toast appears once per browser.
   Over); their discography rows (overlay and phone menu) become draggable sideways.
 - **FR-002**: The drag MUST lock only after ~10px of mostly horizontal motion, move the row
   damped (×0.55, capped at 150px) and spring it back on release; releasing after ≥ ~110px
-  of pointer travel MUST unlock "Taking Over" (key `ve-achievement-taking-over`). It MUST
+  of pointer travel MUST unlock "Taking Over" (key `ve-achievement-taking-over`; not
+  secret — its title is a public track name, which `check-secrets` would flag). It MUST
   ignore gestures starting on links, play buttons, or listen controls.
 - **FR-003**: *(retired with the rub egg: hidden reveal panel.)*
 - **FR-004**: The Infinite spin MUST only arm while the active stage id is `infinite`, MUST

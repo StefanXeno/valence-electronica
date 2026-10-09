@@ -54,8 +54,9 @@ describe('validateAchievementRegistry', () => {
   it('accepts the shipped registry', () => {
     const list = validateAchievementRegistry(registryJson);
     expect(list.map((a) => a.id)).toEqual(['taking-over', 'infinite-spin', 'player-found', 'demonic-combo', 'coder']);
-    expect(list[0].secret).toBe(true);
-    expect(list[0].hint).toBeUndefined();
+    // Taking Over shares its title with a public track, so it cannot be secret.
+    expect(list[0].secret).toBeFalsy();
+    expect(list[0].hint).toBeTruthy();
   });
 
   it('keeps array order as tile order', () => {
