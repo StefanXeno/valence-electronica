@@ -20,8 +20,6 @@ interface Props {
   dateFmt: Intl.DateTimeFormat;
   /** `nested` = track inside a collection card (no per-track cover). */
   variant?: 'card' | 'nested';
-  /** Nested only: reserve the leading play column (some track in this collection is a stage song). */
-  leadSlot?: boolean;
 }
 
 const {
@@ -32,7 +30,6 @@ const {
   typeDetail,
   dateFmt,
   variant = 'card',
-  leadSlot = false,
 } = Astro.props;
 const nested = variant === 'nested';
 const detailsId = `discog-details-${release.id}`;
@@ -52,22 +49,27 @@ const stageId = release.jukeboxId;
   {
     nested ? (
       <div class="discog__main">
-        <div class:list={['discog__nested-head', { 'discog__nested-head--lead': leadSlot || stageId }]}>
-          {(leadSlot || stageId) && <StagePlayButton chrome={chrome} stageId={stageId} size="compact" />}
-          <button
-            type="button"
-            class="discog__toggle"
-            aria-expanded="false"
-            aria-controls={detailsId}
-          >
-            <span class="discog__head-text__title">{release.title}</span>
-            <span class="discog__head-text__artist">{artistName}</span>
-          </button>
-        </div>
-        {release.listenLinks.length > 0 && (
+        <button
+          type="button"
+          class="discog__toggle"
+          aria-expanded="false"
+          aria-controls={detailsId}
+        >
+          <span class="discog__head-text__title">{release.title}</span>
+          <span class="discog__head-text__artist">{artistName}</span>
+        </button>
+        {(release.listenLinks.length > 0 || stageId) && (
           <div class="discog__listen discog__listen--summary">
-            <span class="discog__listen-label">{chrome.listenOnLabel}</span>
+            {release.listenLinks.length > 0 && (
+              <span class="discog__listen-label">{chrome.listenOnLabel}</span>
+            )}
             <ul class="discog__listen-links">
+              {/* Play leads the right-hand icon row, before the platform links. */}
+              {stageId && (
+                <li>
+                  <StagePlayButton chrome={chrome} stageId={stageId} />
+                </li>
+              )}
               {release.listenLinks.map((link) => (
                 <li>
                   <a
@@ -105,10 +107,17 @@ const stageId = release.jukeboxId;
               <dd>{artistName}</dd>
             </div>
           </dl>
-          {release.listenLinks.length > 0 && (
+          {(release.listenLinks.length > 0 || stageId) && (
             <div class="discog__listen">
-              <span class="discog__listen-label">{chrome.listenOnLabel}</span>
+              {release.listenLinks.length > 0 && (
+                <span class="discog__listen-label">{chrome.listenOnLabel}</span>
+              )}
               <ul class="discog__listen-links">
+                {stageId && (
+                  <li>
+                    <StagePlayButton chrome={chrome} stageId={stageId} />
+                  </li>
+                )}
                 {release.listenLinks.map((link) => (
                   <li>
                     <a
@@ -529,16 +538,9 @@ const stageId = release.jukeboxId;
     height: calc(1.45rem * var(--hud-scale));
   }
 
-  .discog__nested-head {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    column-gap: calc(0.6rem * var(--hud-scale));
-    align-items: center;
-  }
-
-  /* Tracklist convention: play / EQ sits where a track number would. */
-  .discog__nested-head--lead {
-    grid-template-columns: auto minmax(0, 1fr);
+  /* Play shares the row with the platform links: same circle size. */
+  .discog__listen-links :global(.stage-play) {
+    --stage-play-size: calc(2.35rem * var(--hud-scale));
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -556,6 +558,10 @@ const stageId = release.jukeboxId;
     .discog__listen-links :global(.channel-icon) {
       width: 1.55rem;
       height: 1.55rem;
+    }
+
+    .discog__listen-links :global(.stage-play) {
+      --stage-play-size: 2.5rem;
     }
   }
 </style>

@@ -403,23 +403,33 @@ const menuChannels = site.channels
                           // Same head stack as singles: kind → title → artist.
                           const collectionArtist =
                             block.entries[0]?.artist ?? defaultArtist;
-                          const hasStageSong = block.entries.some((release) =>
-                            Boolean(release.jukeboxId),
-                          );
+                          // Cover play: first stage song of this EP/album, in track order.
+                          const leadStageId = block.entries.find(
+                            (release) => release.jukeboxId,
+                          )?.jukeboxId;
                           return (
                             <section class="site-nav__menu-portal-collection">
                               <div class="site-nav__menu-portal-collection-head">
-                                <div
-                                  class="site-nav__menu-portal-collection-cover"
-                                  aria-hidden={block.coverUrl ? undefined : 'true'}
-                                >
-                                  <img
-                                    src={coverSrc}
-                                    alt=""
-                                    loading="lazy"
-                                    decoding="async"
-                                  />
-                                </div>
+                                <span class="site-nav__menu-portal-cover-slot">
+                                  <span
+                                    class="site-nav__menu-portal-collection-cover"
+                                    aria-hidden={block.coverUrl ? undefined : 'true'}
+                                  >
+                                    <img
+                                      src={coverSrc}
+                                      alt=""
+                                      loading="lazy"
+                                      decoding="async"
+                                    />
+                                  </span>
+                                  {leadStageId && (
+                                    <StagePlayButton
+                                      chrome={chrome}
+                                      stageId={leadStageId}
+                                      size="badge"
+                                    />
+                                  )}
+                                </span>
                                 <div class="site-nav__menu-portal-head-text">
                                   <span class="site-nav__menu-portal-head-text__kind">{block.kindType}</span>
                                   <span class="site-nav__menu-portal-head-text__title">
@@ -460,15 +470,8 @@ const menuChannels = site.channels
                                     class="site-nav__menu-portal-release site-nav__menu-portal-release--nested"
                                     data-rubbable={release.rubbable ? release.id : undefined}
                                   >
-                                    {/* Title/artist + trailing platform glyphs (no Listen On label). */}
+                                    {/* Title/artist + trailing play and platform glyphs (no Listen On label). */}
                                     <div class="site-nav__menu-portal-nested-row">
-                                      {hasStageSong && (
-                                        <StagePlayButton
-                                          chrome={chrome}
-                                          stageId={release.jukeboxId}
-                                          size="compact"
-                                        />
-                                      )}
                                       <div class="site-nav__menu-portal-head-text site-nav__menu-portal-head-text--nested">
                                         <span class="site-nav__menu-portal-head-text__title">
                                           {release.title}
@@ -477,11 +480,20 @@ const menuChannels = site.channels
                                           {release.artist ?? defaultArtist}
                                         </span>
                                       </div>
-                                      {release.listenLinks.length > 0 && (
+                                      {(release.listenLinks.length > 0 || release.jukeboxId) && (
                                         <ul
                                           class="site-nav__menu-portal-listen-glyphs"
                                           aria-label={chrome.listenOnLabel}
                                         >
+                                          {release.jukeboxId && (
+                                            <li>
+                                              <StagePlayButton
+                                                chrome={chrome}
+                                                stageId={release.jukeboxId}
+                                                size="compact"
+                                              />
+                                            </li>
+                                          )}
                                           {release.listenLinks.map((link) => (
                                             <li>
                                               <a
@@ -1574,6 +1586,11 @@ const menuChannels = site.channels
   .site-nav__menu-portal-listen-glyphs :global(.channel-icon) {
     width: 0.95rem;
     height: 0.95rem;
+  }
+
+  /* Play leads the glyph row: same circle size as the platform glyphs. */
+  .site-nav__menu-portal-listen-glyphs :global(.stage-play) {
+    --stage-play-size: 1.85rem;
   }
 
   /* Nested EP tracks: title only a touch larger than the artist line (0.72rem). */

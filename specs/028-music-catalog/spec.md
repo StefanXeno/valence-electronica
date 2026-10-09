@@ -145,14 +145,14 @@ remains.
   `releasedLabel`, `emptyReleases`, `stageButtonLabel`) from UI chrome.
 - **FR-008**: Rows whose release is a stage song (has a jukebox entry) MUST show a play
   button — or a "currently playing" EQ marker while that song is on stage — in the overlay
-  (single cards and nested EP rows) and in the phone menu. Catalog-only tracks and
-  collection headers MUST NOT show one. Pressing play MUST put the song on stage (see
-  `026` FR-010) and close the overlay (laptop) or menu (phone); it MUST NOT force the
+  (single cards and nested EP rows) and in the phone menu. Catalog-only tracks MUST NOT
+  show one. EP/album covers show one when at least one of their tracks is a stage song;
+  it plays the first such track in track order. Pressing play MUST put the song on stage
+  (see `026` FR-010) and close the overlay (laptop) or menu (phone); it MUST NOT force the
   player open.
-  Placement: on single cards it floats over the bottom-right corner of the cover; in EP
-  tracklists it sits in a leading column before the title (where a track number would),
-  and that column is reserved on every row of an EP that has at least one stage song so
-  titles stay aligned. Listen links stay on the right.
+  Placement: on single and EP/album cards it floats over the bottom-right corner of the
+  cover; in EP tracklists it sits on the right as the first icon of the listen-link row,
+  before the platform links (no leading column, titles start flush left).
 
 ### Key Entities
 

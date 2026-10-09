@@ -4,6 +4,7 @@ import type { UiChrome } from '../lib/stage';
 import { coverOrPlaceholder } from '../lib/url';
 import ChannelIcon from './ChannelIcon.astro';
 import DiscographyTrackRow from './DiscographyTrackRow.astro';
+import StagePlayButton from './StagePlayButton.astro';
 
 interface Props {
   chrome: UiChrome;
@@ -18,7 +19,8 @@ const collectionId = `discog-collection-${year}-${block.label}`
   .toLowerCase()
   .replace(/[^a-z0-9]+/g, '-');
 const coverSrc = coverOrPlaceholder(block.coverUrl);
-const hasStageSong = block.entries.some((release) => Boolean(release.jukeboxId));
+/** Cover play puts the first stage song of this EP/album (track order) on stage. */
+const leadStageId = block.entries.find((release) => release.jukeboxId)?.jukeboxId;
 ---
 
 <article
@@ -27,14 +29,17 @@ const hasStageSong = block.entries.some((release) => Boolean(release.jukeboxId))
   aria-labelledby={collectionId}
 >
   <div class="discog__collection-head">
-    <div class="discog__collection-cover" aria-hidden={block.coverUrl ? undefined : 'true'}>
-      <img
-        class="discog__collection-cover-img"
-        src={coverSrc}
-        alt=""
-        loading="lazy"
-        decoding="async"
-      />
+    <div class="discog__collection-cover-slot">
+      <div class="discog__collection-cover" aria-hidden={block.coverUrl ? undefined : 'true'}>
+        <img
+          class="discog__collection-cover-img"
+          src={coverSrc}
+          alt=""
+          loading="lazy"
+          decoding="async"
+        />
+      </div>
+      {leadStageId && <StagePlayButton chrome={chrome} stageId={leadStageId} size="badge" />}
     </div>
     <div class="discog__head-text">
       <span class="discog__head-text__kind">{block.kindType}</span>
@@ -70,7 +75,6 @@ const hasStageSong = block.entries.some((release) => Boolean(release.jukeboxId))
           typeDetail={block.kindType}
           dateFmt={dateFmt}
           variant="nested"
-          leadSlot={hasStageSong}
         />
       ))
     }
@@ -148,6 +152,12 @@ const hasStageSong = block.entries.some((release) => Boolean(release.jukeboxId))
   .discog__collection-listen :global(.channel-icon) {
     width: calc(1.45rem * var(--hud-scale));
     height: calc(1.45rem * var(--hud-scale));
+  }
+
+  /* Positioning context for the stage play badge (outside the cover's aria-hidden). */
+  .discog__collection-cover-slot {
+    position: relative;
+    flex: 0 0 auto;
   }
 
   .discog__collection-cover {
