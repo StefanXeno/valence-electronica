@@ -258,7 +258,7 @@ const OPTION_TILES = new Set(['demonic-combo']);
     position: fixed;
     right: var(--dock-gap);
     bottom: var(--dock-gap);
-    /* Below the stage player (z=3): an open V-Flip panel covers the trophy on phones. */
+    /* Above the page shell (z=1); drops below it while the V-Flip panel is open on phones. */
     z-index: 2;
     font-family: var(--font-display);
     pointer-events: none;
@@ -268,7 +268,24 @@ const OPTION_TILES = new Set(['demonic-combo']);
   .achievement-dock {
     transition:
       opacity var(--ui-idle-fade-in) var(--dock-ease),
-      visibility 0s linear 0s;
+      visibility 0s linear 0s,
+      z-index 0s linear var(--dock-dur);
+  }
+
+  /*
+   * Phone: the open V-Flip panel spans the full width and must cover the trophy, like the
+   * open gallery covers the vinyl. The player lives inside `.page-shell` (its own stacking
+   * context, z=1), so its z=3 never beats the body-level dock (z=2) — drop the dock below
+   * the shell instead. Coming back waits for the panel's close (see the delay above).
+   */
+  @media (max-width: 1023px) {
+    :global(html:has(.stage-player[data-player-state='full'])) .achievement-dock[data-gallery-state='closed'] {
+      z-index: 0;
+      transition:
+        opacity var(--ui-idle-fade-in) var(--dock-ease),
+        visibility 0s linear 0s,
+        z-index 0s linear 0s;
+    }
   }
 
   /* Idle (see idle-fade.ts): the closed trophy fades out, or on desktop to its cursor
