@@ -70,9 +70,13 @@ const indexable = site.seo.indexable && !isPreviewBuild();
       </main>
       <SourceNote />
       <Footer />
+      {/*
+        Legal + content sheets (About/Tour/…) share LegalPanel. Inside the page shell so the
+        nav wordmark (z=8) stays above the desktop layer (z=5); on phones the panel sits
+        above the whole nav (z=9).
+      */}
+      <LegalOverlay />
     </div>
-    {/* Body-level overlay: legal + content sheets (About/Tour/…) share LegalPanel. */}
-    <LegalOverlay />
     <TrackRubOverlay />
     <AchievementGallery />
     <GlitchPress />

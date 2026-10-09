@@ -48,12 +48,13 @@ html[data-ui-idle][data-ui-tracking]
 
 /*
  * —— Covered by a menu ——
- * The V-Flip lives inside `.page-shell` (its own stacking context, z=1), so the phone menu
- * and its own open panel cover it naturally. The trophy is body-level (z=2), so it sinks
+ * The V-Flip lives inside `.page-shell` (its own stacking context, z=1), so the phone menu,
+ * the content layer and its own open panel cover it naturally. The trophy is body-level (z=2), so it sinks
  * below the shell while they are open: both are then covered — and revealed — by the very
  * same menu animation. It comes back up after `--corner-hud-uncover-delay`.
  */
-html.site-nav-menu-open [data-corner-hud='trophy'] {
+html.site-nav-menu-open [data-corner-hud='trophy'],
+html:has(#legal-overlay [data-legal-panel]:not([hidden])) [data-corner-hud='trophy'] {
   z-index: 0;
   transition:
     opacity var(--corner-hud-fade-in) ease-out,

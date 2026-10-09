@@ -134,6 +134,8 @@ each footer icon; all open in a new tab.
   On laptops the panel mirrors the phone menu: a full-viewport dark layer that opens as a
   circle growing out of the clicked nav item and collapses back into it on exit (shared
   `--morph-dur` / `--morph-ease` with the phone menu); content sits in one centered column.
+  The VALENCE wordmark stays in front of the layer (it opens below the nav); the other nav
+  items step aside while it is open.
 - **FR-005**: The phone menu MUST render destination content inside the menu (fade
   portal), offer back via the corner control and swipe right, and close via X or Escape.
 - **FR-006**: Active channels from `site.json` MUST appear as icons top-right on laptops

@@ -12,7 +12,7 @@ html[data-intro-pending]:not([data-intro-active]) body {
 }
 
 /*
- * Lift intro above body-level HUD (legal / label reveal sit outside page-shell).
+ * Lift intro above body-level HUD (label reveal, achievements sit outside page-shell).
  * Intro lives inside page-shell (z-index 1), so we raise the shell while it runs.
  */
 html[data-intro-pending] .page-shell,

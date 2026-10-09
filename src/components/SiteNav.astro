@@ -1943,6 +1943,18 @@ const menuChannels = site.channels
     .site-nav__primary {
       display: flex;
       flex: 1 1 auto;
+      transition:
+        opacity 240ms ease,
+        visibility 0s linear 0s;
+    }
+
+    /* Content layer open (it sits below the nav): only the wordmark stays in front. */
+    :global(html:has(#legal-overlay [data-legal-panel]:not([hidden]))) .site-nav__primary {
+      opacity: 0;
+      visibility: hidden;
+      transition:
+        opacity 240ms ease,
+        visibility 0s linear 240ms;
     }
 
     .site-nav__menu-btn,

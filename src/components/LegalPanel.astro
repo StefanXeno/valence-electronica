@@ -143,6 +143,13 @@ const titleId = `legal-panel-title-${slug}`;
    * a circle growing out of the clicked nav item (`--legal-origin`, set by LegalOverlay)
    * and collapses back into it. Content sits in one centered column.
    */
+  /* Phone: above the whole nav (z=8) — deep links show the sheet over everything. */
+  @media (max-width: 1023px) {
+    .legal-panel {
+      z-index: 9;
+    }
+  }
+
   @media (min-width: 1024px) {
     .legal-panel {
       padding: 0;
@@ -174,7 +181,8 @@ const titleId = `legal-panel-title-${slug}`;
       width: 100%;
       max-width: 52rem;
       margin: 0 auto;
-      padding: clamp(2.5rem, 7vh, 4.5rem) var(--legal-pad-x) 1.15rem;
+      /* Clear the nav wordmark that stays in front (top inset + 11rem × 362/960). */
+      padding: calc(0.75rem + 11rem * 362 / 960 + 1.75rem) var(--legal-pad-x) 1.15rem;
       box-sizing: border-box;
       border-bottom: 0;
     }
