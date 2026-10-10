@@ -2,6 +2,7 @@
 import site from '../data/site.json';
 import ChannelIcon from './ChannelIcon.astro';
 import { getChrome } from '../lib/stage';
+import { withBase } from '../lib/url';
 
 const chrome = await getChrome();
 const channels = site.channels.map((channel) => {
@@ -51,6 +52,12 @@ const channels = site.channels.map((channel) => {
     </nav>
   )
 }
+
+{/* Desktop legal links — small and quiet under the socials (phone has them in the menu). */}
+<nav class="channels-legal" aria-label="Legal">
+  <a href={withBase('/legal/imprint')} data-legal-slug="imprint">{chrome.imprintButton}</a>
+  <a href={withBase('/legal/privacy')} data-legal-slug="privacy">{chrome.privacyButton}</a>
+</nav>
 
 <style>
   .channels {
@@ -136,5 +143,32 @@ const channels = site.channels.map((channel) => {
 
   li.placeholder span {
     cursor: default;
+  }
+
+  .channels-legal {
+    display: flex;
+    justify-content: center;
+    gap: calc(0.9rem * var(--hud-scale));
+    margin-top: calc(0.35rem * var(--hud-scale));
+    font-family: var(--font-display);
+    font-size: calc(10px * var(--hud-scale));
+    letter-spacing: 0.04em;
+    line-height: 1.2;
+    text-shadow: 0 1px 10px var(--bg-scrim);
+  }
+
+  .channels-legal a {
+    color: var(--color-text-muted);
+    text-decoration: none;
+    opacity: 0.7;
+    transition:
+      opacity 160ms ease,
+      color 160ms ease;
+  }
+
+  .channels-legal a:hover,
+  .channels-legal a:focus-visible {
+    color: var(--color-text);
+    opacity: 1;
   }
 </style>

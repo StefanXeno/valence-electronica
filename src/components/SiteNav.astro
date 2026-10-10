@@ -122,20 +122,7 @@ const menuChannels = site.channels
       >
         {chrome.discographyTitle}
       </a>
-      <a
-        class="site-nav__item"
-        href={withBase('/legal/imprint')}
-        data-legal-slug="imprint"
-      >
-        {chrome.imprintButton}
-      </a>
-      <a
-        class="site-nav__item"
-        href={withBase('/legal/privacy')}
-        data-legal-slug="privacy"
-      >
-        {chrome.privacyButton}
-      </a>
+      {/* Imprint / Privacy live under the stage socials on desktop (Channels.astro). */}
     </nav>
 
     <button
