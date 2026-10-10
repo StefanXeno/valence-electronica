@@ -1,5 +1,14 @@
 /* Identity subtext rotation — sequential fade (012-rotating-tagline). */
 
+/* Pixel face for the 8-bit tagline bubble (self-hosted, SIL OFL — see OFL.txt beside it). */
+@font-face {
+  font-family: 'Press Start 2P';
+  src: url('../assets/fonts/press-start-2p/press-start-2p-latin-400.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 .tagline[data-tagline-phase] {
   transition: opacity 0.5s ease;
 }
