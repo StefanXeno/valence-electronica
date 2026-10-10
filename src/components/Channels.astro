@@ -111,12 +111,16 @@ const channels = site.channels.map((channel) => {
     height: calc(22px * var(--hud-scale));
   }
 
-  /* Laptop: a touch smaller than the corner controls, so the row reads as secondary. */
+  /* Laptop: a touch smaller than the corner controls, so the row reads as secondary.
+     Bare glyphs — no circle chrome; hover/focus only shifts the colour. */
   @media (min-width: 1024px) {
     li a,
     li.placeholder span {
       width: calc(2.15rem * var(--hud-scale));
       height: calc(2.15rem * var(--hud-scale));
+      border: 0;
+      background: none;
+      backdrop-filter: none;
     }
 
     li a :global(.channel-icon),
