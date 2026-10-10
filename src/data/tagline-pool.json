@@ -21,21 +21,7 @@
       ]
     },
     {
-      "text": "Show me how you move.",
-      "rules": [
-        {
-          "type": "weekday",
-          "days": [5]
-        },
-        {
-          "type": "time",
-          "from": "22:00",
-          "to": "04:00"
-        }
-      ]
-    },
-    {
-      "text": "Friday night mode.",
+      "text": "Show me how you love.",
       "rules": [
         {
           "type": "weekday",
@@ -81,10 +67,10 @@
       ]
     },
     {
-      "text": "A fu**ing nightmare, a motherfu**ing nightmare!"
+      "text": "A fu**ing nightmare, what a fu**ing nightmare!"
     },
     {
-      "text": "I feel like taking over..."
+      "text": "I feel it taking over..."
     },
     {
       "text": "Also try playing Minecraft"
