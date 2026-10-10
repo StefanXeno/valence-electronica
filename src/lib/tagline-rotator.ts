@@ -14,6 +14,11 @@ import {
 
 const FADE_MS = 500;
 const GLITCH_SWAP_RATIO = 0.45;
+/** Speech-bubble swap: new bubble pops out of the logo, old one slides below and fades. */
+const POP_MS = 520;
+const OLD_SLIDE_MS = 420;
+const OLD_FADE_DELAY_MS = 300;
+const OLD_FADE_MS = 1800;
 
 /** Write one line into the tagline node; `linkText` (or the whole line) links to `url`. */
 function renderLine(root: HTMLElement, line: EligibleTagline): void {
@@ -128,6 +133,82 @@ export function initTaglineRotator(root: HTMLElement, fallbackText: string): () 
     currentText = line.text;
   };
 
+  const bubble = root.closest<HTMLElement>('[data-tagline-bubble]');
+  const ghosts = new Set<HTMLElement>();
+
+  const clearGhosts = () => {
+    for (const ghost of ghosts) ghost.remove();
+    ghosts.clear();
+  };
+
+  /** Freeze the current bubble as a non-interactive copy placed right below the live one. */
+  const spawnGhost = (live: HTMLElement): HTMLElement => {
+    const ghost = live.cloneNode(true) as HTMLElement;
+    ghost.removeAttribute('data-tagline-bubble');
+    ghost.classList.remove('is-popping');
+    ghost.classList.add('is-old');
+    ghost.setAttribute('aria-hidden', 'true');
+    for (const el of ghost.querySelectorAll<HTMLElement>('[data-tagline-root]')) {
+      el.removeAttribute('data-tagline-root');
+      el.removeAttribute('data-tagline-phase');
+      el.removeAttribute('data-glitch');
+      el.classList.remove('glitch-hit', 'is-glitching', 'is-glitch-hover', 'is-glitch-continuous', 'is-glitch-ambient');
+    }
+    for (const link of ghost.querySelectorAll('a')) link.tabIndex = -1;
+    live.after(ghost);
+    ghosts.add(ghost);
+    return ghost;
+  };
+
+  const applyWithPop = async (line: EligibleTagline, live: HTMLElement) => {
+    if (taglineTextsEqual(line.text, currentText)) return;
+
+    root.removeAttribute('data-tagline-phase');
+    clearGlitchState();
+    // Only one old bubble at a time — a still-fading one just goes.
+    clearGhosts();
+
+    const before = live.getBoundingClientRect();
+    const ghost = spawnGhost(live);
+
+    renderLine(root, line);
+    currentText = line.text;
+
+    // FLIP: the old bubble starts where it was and glides into its slot below.
+    const dy = before.top - ghost.getBoundingClientRect().top;
+    ghost.animate([{ transform: `translateY(${dy}px)` }, { transform: 'none' }], {
+      duration: OLD_SLIDE_MS,
+      easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+    });
+    const fade = ghost.animate([{ opacity: 1 }, { opacity: 0 }], {
+      duration: OLD_FADE_MS,
+      delay: OLD_FADE_DELAY_MS,
+      easing: 'ease-in-out',
+      fill: 'forwards',
+    });
+    const dropGhost = () => {
+      ghost.remove();
+      ghosts.delete(ghost);
+    };
+    fade.finished.then(dropGhost, dropGhost);
+
+    live.classList.remove('is-popping');
+    void live.offsetWidth;
+    live.classList.add('is-popping');
+    await waitForMotionEnd(live, POP_MS);
+    live.classList.remove('is-popping');
+    if (disposed) return;
+
+    if (isGlitchThemeActive()) {
+      const dur = playElementGlitch(root, 'is-glitching');
+      if (dur) {
+        await waitMs(dur + 80);
+        if (disposed) return;
+        clearGlitchState();
+      }
+    }
+  };
+
   const applyWithGlitch = async (line: EligibleTagline) => {
     if (taglineTextsEqual(line.text, currentText)) return;
 
@@ -158,6 +239,9 @@ export function initTaglineRotator(root: HTMLElement, fallbackText: string): () 
     if (!animate || prefersReducedMotion()) {
       applyInstant(line);
       return Promise.resolve();
+    }
+    if (bubble) {
+      return applyWithPop(line, bubble);
     }
     if (isGlitchThemeActive()) {
       return applyWithGlitch(line);
@@ -217,6 +301,7 @@ export function initTaglineRotator(root: HTMLElement, fallbackText: string): () 
     disposed = true;
     clearRotationTimer();
     clearGlitchState();
+    clearGhosts();
     root.removeAttribute('data-tagline-phase');
   };
 
