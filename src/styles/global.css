@@ -238,3 +238,100 @@ html {
   user-select: none;
   -webkit-user-select: none;
 }
+
+/*
+ * About me (src/content/about/me.md): photos and paragraphs alternate in a zigzag.
+ * The markdown is image / text / image / text / image / text / sign-off, so the
+ * placement keys on child position. Shared by the desktop sheet (AboutPanel)
+ * and the phone menu portal (SiteNav). Doubled class outranks their scoped `p` margins.
+ */
+.about-body {
+  display: flow-root;
+}
+
+.about-body.about-body > p:has(> img) {
+  margin: 0;
+}
+
+.about-body.about-body > p > img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  border-radius: 0.5rem;
+}
+
+.about-body.about-body > p:nth-child(3) > img {
+  object-position: 50% 42%;
+}
+
+.about-body.about-body > p:nth-child(5) > img {
+  /* Landscape shot — keep the subject (right of centre) in the portrait crop. */
+  object-position: 62% 50%;
+}
+
+/* Phone: floats, so long paragraphs wrap under the photo instead of a thin column. */
+@media (max-width: 767px) {
+  .about-body.about-body > p:has(> img) {
+    clear: both;
+    width: 44%;
+    margin-bottom: 0.6em;
+  }
+
+  .about-body.about-body > p:nth-child(1),
+  .about-body.about-body > p:nth-child(5) {
+    float: left;
+    margin-right: 1em;
+  }
+
+  .about-body.about-body > p:nth-child(3) {
+    float: right;
+    width: 38%;
+    margin-left: 1em;
+    margin-top: 0.4em;
+  }
+}
+
+/* Desktop: two-column zigzag, text vertically centred beside each photo. */
+@media (min-width: 768px) {
+  .about-body {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: 2rem;
+    row-gap: 2.5rem;
+    align-items: center;
+    max-width: 58rem;
+  }
+
+  .about-body.about-body > * {
+    grid-column: 1 / -1;
+    margin: 0;
+  }
+
+  .about-body.about-body > p:nth-child(1),
+  .about-body.about-body > p:nth-child(5) {
+    grid-column: 1 / 6;
+  }
+
+  .about-body.about-body > p:nth-child(2),
+  .about-body.about-body > p:nth-child(6) {
+    grid-column: 6 / 12;
+  }
+
+  .about-body.about-body > p:nth-child(3) {
+    grid-column: 9 / 13;
+    grid-row: 2;
+  }
+
+  .about-body.about-body > p:nth-child(4) {
+    grid-column: 2 / 9;
+    grid-row: 2;
+  }
+
+  /* Sign-off sits under the last paragraph's column. */
+  .about-body.about-body > p:nth-child(7) {
+    grid-column: 6 / 12;
+    margin-top: -1.5rem;
+  }
+}
