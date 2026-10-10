@@ -85,61 +85,41 @@ const fallbackTagline = formatTagline(tagline.trim());
   }
 
   /*
-   * 8-bit speech bubble beside the SiteNav wordmark. One "pixel" = --px.
-   * Border = four offset box-shadows (leaves the notched pixel corners). The
-   * tail is the classic pixel speech-bubble stub (straight drop, then a stepped
-   * kink to a one-pixel tip), flipped to point up at the wordmark: two masked
-   * layers, ink outline + fill that opens the top border where the tail joins.
+   * 8-bit speech bubble under the SiteNav wordmark. One "pixel" = --px.
+   * Frame = 9-slice SVG (border-image): 1-pixel outline with two-step corners.
+   * Tail = small right-angled pixel triangle (straight left edge, stepped
+   * diagonal) pointing up at the logo; its bottom row overlays the frame's
+   * top edge and opens it.
    */
   .identity--tagline {
     --px: 3px;
-    --tail-h: 7;
-    --bubble-ink: #050505;
-    --bubble-fill: var(--color-text);
     position: relative;
     width: max-content;
-    max-width: calc(100% - 2 * var(--px));
-    /* Room above for the tail (it sits outside the box, over the gap to the logo). */
-    margin: calc(var(--px) * var(--tail-h)) var(--px) var(--px);
-    padding: calc(var(--px) * 2) calc(var(--px) * 3);
-    background: var(--bubble-fill);
-    box-shadow:
-      0 calc(var(--px) * -1) 0 0 var(--bubble-ink),
-      0 var(--px) 0 0 var(--bubble-ink),
-      calc(var(--px) * -1) 0 0 0 var(--bubble-ink),
-      var(--px) 0 0 0 var(--bubble-ink);
+    max-width: 100%;
+    box-sizing: border-box;
+    /* Room above for the tail (4 pixels outside the frame). */
+    margin-top: calc(var(--px) * 4);
+    padding: var(--px) calc(var(--px) * 2);
+    border: calc(var(--px) * 3) solid transparent;
+    border-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 7 7' shape-rendering='crispEdges'%3E%3Cpath fill='%23f6f3f3' d='M2 1h3v1H2zM1 2h5v3H1zM2 5h3v1H2z'/%3E%3Cpath fill='%23050505' d='M2 0h3v1H2zM1 1h1v1H1zM5 1h1v1H5zM0 2h1v3H0zM6 2h1v3H6zM1 5h1v1H1zM5 5h1v1H5zM2 6h3v1H2z'/%3E%3C/svg%3E") 3 fill / calc(var(--px) * 3) stretch;
     text-shadow: none;
   }
 
-  .identity--tagline::before,
-  .identity--tagline::after {
+  .identity--tagline::before {
     content: '';
     position: absolute;
-    /* Drawn pointing down (rows top → bottom, row 0 = border row); flipped up. */
     left: calc(var(--px) * 1);
-    top: calc(var(--px) * var(--tail-h) * -1);
-    width: calc(var(--px) * 8);
-    height: calc(var(--px) * var(--tail-h));
-    transform: scaleY(-1);
-    mask-size: 100% 100%;
-    mask-repeat: no-repeat;
+    top: calc(var(--px) * -7);
+    width: calc(var(--px) * 5);
+    height: calc(var(--px) * 5);
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 5 5' shape-rendering='crispEdges'%3E%3Cpath fill='%23f6f3f3' d='M1 2h1v3H1zM2 3h1v2H2zM3 4h1v1H3z'/%3E%3Cpath fill='%23050505' d='M0 0h1v5H0zM1 1h1v1H1zM2 2h1v1H2zM3 3h1v1H3zM4 4h1v1H4z'/%3E%3C/svg%3E") 0 0 / 100% 100% no-repeat;
     pointer-events: none;
-  }
-
-  .identity--tagline::before {
-    background: var(--bubble-ink);
-    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 7' shape-rendering='crispEdges'%3E%3Cpath d='M2 0h1v3H2zM6 0h1v3H6zM1 3h1v3H1zM5 3h1v1H5zM4 4h1v1H4zM2 5h2v1H2zM0 6h1v1H0z'/%3E%3C/svg%3E");
-  }
-
-  .identity--tagline::after {
-    background: var(--bubble-fill);
-    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 7' shape-rendering='crispEdges'%3E%3Cpath d='M3 0h3v3H3zM2 3h3v1H2zM2 4h2v1H2z'/%3E%3C/svg%3E");
   }
 
   .identity--tagline .tagline {
     margin: 0;
     max-width: none;
-    color: var(--bubble-ink);
+    color: #050505;
     line-height: 1.35;
     text-align: left;
   }
