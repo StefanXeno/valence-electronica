@@ -57,9 +57,9 @@ confirm the toast appears once per browser.
 
 **Acceptance Scenarios**:
 
-1. **Given** Infinite is the active stage entry, **When** the visitor draws ~0.9 of a turn
-   around the press point (radius ≥ ~28px) without a sustained reverse, **Then** the
-   achievement unlocks once.
+1. **Given** Infinite is the active stage entry, **When** the visitor draws ~¾ of a circle
+   (path turning ≥ 0.75 turn, at least ~40px wide and tall; wobble and short lifts are
+   fine), **Then** the achievement unlocks once.
 2. **Given** another entry is active, **When** the visitor draws circles, **Then** nothing
    happens.
 3. **Given** the gesture starts on any control, panel, or the player, **When** it moves,
@@ -89,8 +89,9 @@ confirm the toast appears once per browser.
   ignore gestures starting on links, play buttons, or listen controls.
 - **FR-003**: *(retired with the rub egg: hidden reveal panel.)*
 - **FR-004**: The Infinite spin MUST only arm while the active stage id is `infinite`, MUST
-  ignore gestures starting on interactive chrome, and MUST unlock after ~0.9 revolutions
-  with wobble tolerance and a ~3.2 s idle reset.
+  ignore gestures starting on interactive chrome, and MUST unlock after ~0.75 of a drawn
+  circle (measured as the path's own turning, so the start point need not be the centre)
+  with wobble tolerance, multi-stroke continuation, and a ~3.2 s idle reset.
 - **FR-005**: Achievements MUST be one-shot per browser via first-party `localStorage`
   keys, shown through one shared toast with title, subtitle, glyph, and a screen-reader
   announcement.

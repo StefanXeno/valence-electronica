@@ -1,7 +1,11 @@
 /**
  * Easter egg: circular pointer / finger spin while the Infinite stage is active.
- * ~0.9 revolutions around the down-point unlocks a one-shot achievement toast.
- * Tuned to be forgiving — imperfect circles / wobble still count.
+ * ~0.75 of a drawn circle unlocks a one-shot achievement toast.
+ *
+ * Progress is the path's own turning (sum of heading changes), not the angle
+ * around the press point: a circle drawn from its edge only sweeps half a turn
+ * around that point, which made the old detector demand nearly two circles.
+ * Tuned to be forgiving — wobbly, egg-shaped, or multi-stroke circles still count.
  */
 
 import { unlockAchievement } from './achievement-toast';
@@ -12,34 +16,80 @@ import { matchesGestureIgnore, STAGE_GESTURE_IGNORE_SELECTOR } from './gesture-i
 const INFINITE_STAGE_ID = 'infinite';
 
 const TAU = Math.PI * 2;
-/** Just under one full turn — easy easter egg, not a precision test. */
-const REVOLUTIONS_NEEDED = 0.9;
-/** Floor so pure cursor jitter near the down-point cannot unlock. */
-const MIN_RADIUS_PX = 28;
-/** Longer window so a slightly interrupted circle can still finish. */
+/** Three quarters of a circle — easy easter egg, not a precision test. */
+export const REVOLUTIONS_NEEDED = 0.75;
+/** Both bounding-box sides must reach this, so jitter or a straight line never unlocks. */
+export const MIN_EXTENT_PX = 40;
+/** Distance between heading samples — smooths out pointer noise. */
+const SAMPLE_STEP_PX = 6;
+/** Sharper bends are a back-and-forth scribble, not curving — they add nothing. */
+const MAX_TURN_RAD = Math.PI * 0.8;
+/** Window to keep going (also across a short lift) before progress resets. */
 const IDLE_RESET_MS = 3200;
-/** Ignore micro pointer jitter before sampling a new angle. */
-const MOVE_THRESHOLD_PX = 5;
-/** Tiny angular ticks (noise) never add or subtract progress. */
-const ANGLE_DEADZONE_RAD = 0.04; // ~2.3°
-/**
- * Opposite-direction ticks are absorbed (wobble) without subtracting from
- * accumulated progress. Only a sustained reverse past this cancels the gesture.
- */
-const REVERSE_CANCEL_RAD = Math.PI * 0.65; // ~117° clear reverse → reset
+
+function normalizeDelta(delta: number): number {
+  // Wrap to (-π, π] so each sample is the shortest turn.
+  let d = delta;
+  while (d > Math.PI) d -= TAU;
+  while (d <= -Math.PI) d += TAU;
+  return d;
+}
+
+/** Pure path-turning tracker (no DOM) — feed points, ask whether a circle was drawn. */
+export function createSpinTracker() {
+  let lastX: number | null = null;
+  let lastY: number | null = null;
+  let lastHeading: number | null = null;
+  let turned = 0;
+  let minX = Infinity;
+  let maxX = -Infinity;
+  let minY = Infinity;
+  let maxY = -Infinity;
+
+  return {
+    /** Start a new stroke: keep progress, but don't link headings across the lift. */
+    newStroke() {
+      lastX = null;
+      lastY = null;
+      lastHeading = null;
+    },
+    /** Add a pointer sample; returns true once enough of a circle has been drawn. */
+    addPoint(x: number, y: number): boolean {
+      minX = Math.min(minX, x);
+      maxX = Math.max(maxX, x);
+      minY = Math.min(minY, y);
+      maxY = Math.max(maxY, y);
+
+      if (lastX === null || lastY === null) {
+        lastX = x;
+        lastY = y;
+        return false;
+      }
+      const dx = x - lastX;
+      const dy = y - lastY;
+      if (Math.hypot(dx, dy) < SAMPLE_STEP_PX) return false;
+      lastX = x;
+      lastY = y;
+
+      const heading = Math.atan2(dy, dx);
+      if (lastHeading !== null) {
+        const delta = normalizeDelta(heading - lastHeading);
+        if (Math.abs(delta) < MAX_TURN_RAD) turned += delta;
+      }
+      lastHeading = heading;
+
+      return this.isComplete();
+    },
+    isComplete(): boolean {
+      const bigEnough = maxX - minX >= MIN_EXTENT_PX && maxY - minY >= MIN_EXTENT_PX;
+      return bigEnough && Math.abs(turned) >= TAU * REVOLUTIONS_NEEDED;
+    },
+  };
+}
 
 type SpinSession = {
   pointerId: number;
-  cx: number;
-  cy: number;
-  lastX: number;
-  lastY: number;
-  lastAngle: number | null;
-  /** +1 / -1 once a meaningful direction is established; 0 until then. */
-  direction: number;
-  accumulated: number;
-  /** How much reverse angle has been absorbed since last forward progress. */
-  reverseDebt: number;
+  tracker: ReturnType<typeof createSpinTracker>;
   idleTimer: ReturnType<typeof setTimeout> | null;
 };
 
@@ -74,14 +124,6 @@ function shouldIgnoreTarget(target: EventTarget | null): boolean {
   return matchesGestureIgnore(target, STAGE_GESTURE_IGNORE_SELECTOR);
 }
 
-function normalizeDelta(delta: number): number {
-  // Wrap to (-π, π] so each sample is the shortest turn.
-  let d = delta;
-  while (d > Math.PI) d -= TAU;
-  while (d <= -Math.PI) d += TAU;
-  return d;
-}
-
 function unlockInfiniteSpin() {
   endSession();
   unlockAchievement('infinite-spin');
@@ -93,19 +135,14 @@ function onPointerDown(event: PointerEvent) {
   if (!shouldToast('infinite-spin')) return;
   if (shouldIgnoreTarget(event.target)) return;
 
-  endSession();
-  session = {
-    pointerId: event.pointerId,
-    cx: event.clientX,
-    cy: event.clientY,
-    lastX: event.clientX,
-    lastY: event.clientY,
-    lastAngle: null,
-    direction: 0,
-    accumulated: 0,
-    reverseDebt: 0,
-    idleTimer: null,
-  };
+  if (session) {
+    // Continue a circle after a short lift instead of starting over.
+    session.pointerId = event.pointerId;
+    session.tracker.newStroke();
+  } else {
+    session = { pointerId: event.pointerId, tracker: createSpinTracker(), idleTimer: null };
+  }
+  session.tracker.addPoint(event.clientX, event.clientY);
   armIdle(session);
 }
 
@@ -116,60 +153,8 @@ function onPointerMove(event: PointerEvent) {
     return;
   }
 
-  const dx = event.clientX - session.cx;
-  const dy = event.clientY - session.cy;
-  const radius = Math.hypot(dx, dy);
-  if (radius < MIN_RADIUS_PX) {
-    armIdle(session);
-    return;
-  }
-
-  // Pixel deadzone — tiny twitches never sample a new angle.
-  const moveDx = event.clientX - session.lastX;
-  const moveDy = event.clientY - session.lastY;
-  if (Math.hypot(moveDx, moveDy) < MOVE_THRESHOLD_PX) {
-    armIdle(session);
-    return;
-  }
-  session.lastX = event.clientX;
-  session.lastY = event.clientY;
-
-  const angle = Math.atan2(dy, dx);
-  if (session.lastAngle === null) {
-    session.lastAngle = angle;
-    armIdle(session);
-    return;
-  }
-
-  const delta = normalizeDelta(angle - session.lastAngle);
-  session.lastAngle = angle;
-
-  // Angular deadzone — noise neither adds nor subtracts.
-  if (Math.abs(delta) < ANGLE_DEADZONE_RAD) {
-    armIdle(session);
-    return;
-  }
-
-  if (session.direction === 0) {
-    session.direction = Math.sign(delta);
-    session.accumulated += delta;
-    session.reverseDebt = 0;
-  } else if (Math.sign(delta) === session.direction) {
-    session.accumulated += delta;
-    session.reverseDebt = 0;
-  } else {
-    // Opposite tick: absorb wobble; only clear cancel resets progress.
-    session.reverseDebt += Math.abs(delta);
-    if (session.reverseDebt >= REVERSE_CANCEL_RAD) {
-      endSession();
-      return;
-    }
-    // Below cancel: ignore — do not subtract from accumulated.
-  }
-
   armIdle(session);
-
-  if (Math.abs(session.accumulated) >= TAU * REVOLUTIONS_NEEDED) {
+  if (session.tracker.addPoint(event.clientX, event.clientY)) {
     unlockInfiniteSpin();
   }
 }
