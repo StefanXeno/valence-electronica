@@ -929,7 +929,9 @@ const menuChannels = site.channels
 
 <style>
   .site-nav {
-    pointer-events: auto;
+    /* Empty header area passes clicks through (tagline bubble sits beside the
+       wordmark, under this bar); controls and the open menu opt back in. */
+    pointer-events: none;
     position: fixed;
     z-index: 8;
     top: 0;
@@ -954,6 +956,12 @@ const menuChannels = site.channels
     padding: 0.2rem 0;
     background: transparent;
     border: 0;
+  }
+
+  .site-nav__brand,
+  .site-nav__item,
+  .site-nav__menu-btn {
+    pointer-events: auto;
   }
 
   .site-nav__brand {
