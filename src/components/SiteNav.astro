@@ -85,6 +85,23 @@ const menuChannels = site.channels
 
     <nav class="site-nav__primary" aria-label="Primary">
       {
+        about && (
+          <a class="site-nav__item" href={withBase('/about')} data-legal-slug="about">
+            {chrome.aboutTitle}
+          </a>
+        )
+      }
+      <a
+        class="site-nav__item"
+        href={withBase('/discography')}
+        data-legal-slug="discography"
+      >
+        {chrome.discographyTitle}
+      </a>
+      <a class="site-nav__item" href={withBase('/tour')} data-legal-slug="tour">
+        {chrome.tourTitle}
+      </a>
+      {
         shopUrl ? (
           <a
             class="site-nav__item"
@@ -105,23 +122,6 @@ const menuChannels = site.channels
           </a>
         )
       }
-      <a class="site-nav__item" href={withBase('/tour')} data-legal-slug="tour">
-        {chrome.tourTitle}
-      </a>
-      {
-        about && (
-          <a class="site-nav__item" href={withBase('/about')} data-legal-slug="about">
-            {chrome.aboutTitle}
-          </a>
-        )
-      }
-      <a
-        class="site-nav__item"
-        href={withBase('/discography')}
-        data-legal-slug="discography"
-      >
-        {chrome.discographyTitle}
-      </a>
       {/* Imprint / Privacy live under the stage socials on desktop (Channels.astro). */}
     </nav>
 
@@ -151,6 +151,37 @@ const menuChannels = site.channels
     <div class="site-nav__menu-body" data-site-nav-menu-body>
       <nav class="site-nav__menu-list" aria-label="Primary">
         {
+          about && (
+            <a
+              class="site-nav__menu-item"
+              href={withBase('/about')}
+              data-site-nav-portal="about"
+              style="--nav-stagger: 0"
+            >
+              <span class="site-nav__menu-item-label">{chrome.aboutTitle}</span>
+            </a>
+          )
+        }
+
+        <a
+          class="site-nav__menu-item"
+          href={withBase('/discography')}
+          data-site-nav-portal="discography"
+          style="--nav-stagger: 1"
+        >
+          <span class="site-nav__menu-item-label">{chrome.discographyTitle}</span>
+        </a>
+
+        <a
+          class="site-nav__menu-item"
+          href={withBase('/tour')}
+          data-site-nav-portal="tour"
+          style="--nav-stagger: 2"
+        >
+          <span class="site-nav__menu-item-label">{chrome.tourTitle}</span>
+        </a>
+
+        {
           shopUrl ? (
             <a
               class="site-nav__menu-item"
@@ -159,7 +190,7 @@ const menuChannels = site.channels
               rel="noopener noreferrer"
               data-site-nav-shop="external"
               data-site-nav-menu-close
-              style="--nav-stagger: 0"
+              style="--nav-stagger: 3"
             >
               <span class="site-nav__menu-item-label">{chrome.shopTitle}</span>
             </a>
@@ -168,42 +199,12 @@ const menuChannels = site.channels
               class="site-nav__menu-item"
               href={withBase('/shop')}
               data-site-nav-portal="shop"
-              style="--nav-stagger: 0"
+              style="--nav-stagger: 3"
             >
               <span class="site-nav__menu-item-label">{chrome.shopTitle}</span>
             </a>
           )
         }
-
-        <a
-          class="site-nav__menu-item"
-          href={withBase('/tour')}
-          data-site-nav-portal="tour"
-          style="--nav-stagger: 1"
-        >
-          <span class="site-nav__menu-item-label">{chrome.tourTitle}</span>
-        </a>
-
-        {
-          about && (
-            <a
-              class="site-nav__menu-item"
-              href={withBase('/about')}
-              data-site-nav-portal="about"
-              style="--nav-stagger: 2"
-            >
-              <span class="site-nav__menu-item-label">{chrome.aboutTitle}</span>
-            </a>
-          )
-        }
-        <a
-          class="site-nav__menu-item"
-          href={withBase('/discography')}
-          data-site-nav-portal="discography"
-          style="--nav-stagger: 3"
-        >
-          <span class="site-nav__menu-item-label">{chrome.discographyTitle}</span>
-        </a>
       </nav>
 
       {/* Quiet horizontal legal pair — not competing with primary row weight. */}
