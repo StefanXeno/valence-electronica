@@ -65,6 +65,7 @@ export interface UiChrome {
   loopIconEmoji?: string;
   shuffleDefault: boolean;
   loopDefault: boolean;
+  openingLoops: number;
   unmuteTooltip: string;
   muteTooltip: string;
   volumeSliderTooltip: string;
@@ -152,6 +153,7 @@ const CHROME_FALLBACK: UiChrome = {
   loopIcon: 'loop',
   shuffleDefault: true,
   loopDefault: false,
+  openingLoops: 5,
   unmuteTooltip: 'Unmute',
   muteTooltip: 'Mute',
   volumeSliderTooltip: 'Drag to adjust volume',
@@ -273,6 +275,7 @@ export async function getChrome(): Promise<UiChrome> {
     loopLabel: entry.data.loopLabel?.trim() || CHROME_FALLBACK.loopLabel,
     shuffleDefault: entry.data.shuffleDefault ?? CHROME_FALLBACK.shuffleDefault,
     loopDefault: entry.data.loopDefault ?? CHROME_FALLBACK.loopDefault,
+    openingLoops: entry.data.openingLoops ?? CHROME_FALLBACK.openingLoops,
     unmuteTooltip: entry.data.unmuteTooltip?.trim() || CHROME_FALLBACK.unmuteTooltip,
     muteTooltip: entry.data.muteTooltip?.trim() || CHROME_FALLBACK.muteTooltip,
     volumeSliderTooltip:

@@ -81,6 +81,7 @@ function bootStageSwitch(root: HTMLElement): void {
   initStageSwitch(catalog, root.dataset.stageFallback ?? '', schedule, {
     shuffleDefault: root.dataset.shuffleDefault !== 'false',
     loopDefault: root.dataset.loopDefault === 'true',
+    openingLoops: Number(root.dataset.openingLoops) || 1,
   });
 }
 

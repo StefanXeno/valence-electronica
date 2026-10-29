@@ -405,12 +405,15 @@ export function initStageSwitch(
   catalog: StageCatalogEntry[],
   staticFallbackId: string,
   schedule?: StageSchedule,
-  playbackDefaults?: { shuffleDefault: boolean; loopDefault: boolean },
+  playbackDefaults?: { shuffleDefault: boolean; loopDefault: boolean; openingLoops?: number },
 ) {
   const byId = new Map(catalog.map((entry) => [entry.id, entry]));
   const catalogIds = catalog.map((entry) => entry.id);
   const catalogIdSet = new Set(catalogIds);
   let activeId = staticFallbackId;
+  /** The theme a visitor lands on plays this many loops before shuffle moves on. */
+  const openingLoops = Math.max(1, Math.floor(playbackDefaults?.openingLoops ?? 1));
+  let openingStage = true;
 
   if (playbackDefaults) {
     initPlaybackDefaults(playbackDefaults.shuffleDefault, playbackDefaults.loopDefault);
@@ -438,7 +441,13 @@ export function initStageSwitch(
     const entry = byId.get(activeId);
     if (!entry) return;
     const video = document.querySelector<HTMLVideoElement>('[data-bg-video]');
-    restartAdvanceClock(entry, readVideoDuration(video), () => hop());
+    restartAdvanceClock(
+      entry,
+      readVideoDuration(video),
+      () => hop(),
+      openingStage ? openingLoops : 1,
+      video?.currentTime ?? 0,
+    );
   };
 
   const hop = () => {
@@ -466,6 +475,7 @@ export function initStageSwitch(
     handoffGeneration += 1;
     const generation = handoffGeneration;
     activeId = id;
+    openingStage = false;
     syncStageUi(activeId);
 
     const isStale = () => generation !== handoffGeneration;

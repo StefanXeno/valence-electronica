@@ -12,6 +12,20 @@ describe('dwellSeconds', () => {
     expect(dwellSeconds({ hasAudio: true }, 0)).toBe(NO_AUDIO_DWELL_SEC);
   });
 
+  it('waits several passes when asked (landing theme)', () => {
+    expect(dwellSeconds({ hasAudio: true }, 25.6, 5)).toBeCloseTo(128);
+  });
+
+  it('counts the pass that is playing, so the hop lands on a loop boundary', () => {
+    expect(dwellSeconds({ hasAudio: true }, 25.6, 1, 10)).toBeCloseTo(15.6);
+    expect(dwellSeconds({ hasAudio: true }, 25.6, 5, 10)).toBeCloseTo(118);
+  });
+
+  it('ignores missing or invalid positions and loop counts below one', () => {
+    expect(dwellSeconds({ hasAudio: true }, 20, 1, Number.NaN)).toBe(20);
+    expect(dwellSeconds({ hasAudio: true }, 20, 0)).toBe(20);
+  });
+
   it('returns 45s for no-audio entries regardless of duration', () => {
     expect(dwellSeconds({ hasAudio: false }, 120)).toBe(NO_AUDIO_DWELL_SEC);
     expect(dwellSeconds({ hasAudio: false }, null)).toBe(NO_AUDIO_DWELL_SEC);

@@ -180,6 +180,8 @@ const ui = defineCollection({
     loopIcon: z.string().optional(),
     shuffleDefault: z.boolean().optional(),
     loopDefault: z.boolean().optional(),
+    /** Loops of the landing theme before shuffle advances (default 5). */
+    openingLoops: z.number().int().positive().optional(),
     unmuteTooltip: z.string().optional(),
     muteTooltip: z.string().optional(),
     volumeSliderTooltip: z.string().optional(),

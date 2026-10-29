@@ -31,6 +31,7 @@ shuffleLabel: Shuffle
 shuffleIcon: shuffle
 shuffleDefault: true
 loopDefault: false
+openingLoops: 5
 unmuteTooltip: Unmute
 muteTooltip: Mute
 volumeSliderTooltip: Drag to adjust volume

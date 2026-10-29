@@ -6,9 +6,15 @@ export type PlaybackCatalogEntry = {
   hasAudio: boolean;
 };
 
+/**
+ * Seconds until the stage may advance: `loops` passes of the video, counting the pass that
+ * is playing, so the hop lands on a loop boundary (`positionSec` = video.currentTime).
+ */
 export function dwellSeconds(
   entry: Pick<PlaybackCatalogEntry, 'hasAudio'>,
   videoDurationSec?: number | null,
+  loops = 1,
+  positionSec = 0,
 ): number {
   if (!entry.hasAudio) return NO_AUDIO_DWELL_SEC;
   if (
@@ -16,7 +22,8 @@ export function dwellSeconds(
     Number.isFinite(videoDurationSec) &&
     videoDurationSec > 0
   ) {
-    return videoDurationSec;
+    const intoLoop = Number.isFinite(positionSec) && positionSec > 0 ? positionSec % videoDurationSec : 0;
+    return Math.max(1, loops) * videoDurationSec - intoLoop;
   }
   return NO_AUDIO_DWELL_SEC;
 }
@@ -96,12 +103,14 @@ export function restartAdvanceClock(
   entry: Pick<PlaybackCatalogEntry, 'hasAudio'>,
   videoDurationSec: number | null | undefined,
   fire: () => void,
+  loops = 1,
+  positionSec = 0,
 ): void {
   if (isAdvanceBlocked()) {
     clearAdvanceTimer();
     return;
   }
-  scheduleAdvance(dwellSeconds(entry, videoDurationSec), fire);
+  scheduleAdvance(dwellSeconds(entry, videoDurationSec, loops, positionSec), fire);
 }
 
 export function watchIntroGate(onClear: () => void, onRestart: () => void): () => void {

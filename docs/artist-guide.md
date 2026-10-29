@@ -241,6 +241,8 @@ Phone and laptop use the same player.
 - `shuffleLabel` — shuffle button label (default: Shuffle)
 - `shuffleDefault` — `true` (default) or `false` for load-time shuffle
 - `loopDefault` — `false` (default); `true` keeps the current song instead of advancing
+- `openingLoops` — how many times the song a visitor lands on loops before shuffle moves on
+  (default: 5; `1` = advance after the first pass like every other song)
 - `unmuteTooltip` / `muteTooltip` — mute button hint
 - `volumeSliderTooltip` — laptop slider hint when unmuted (phone has mute only)
 - `socialsLabel` / `socialsIcon` — phone **Links** label (default label: Links; default
@@ -288,7 +290,8 @@ themselves live in their own file (see **Achievements** below).
 song title does not. On **phone** (viewport below 1024px) those floaters are off.
 
 **Shuffle timing:** When shuffle is on and loop is off, the stage advances after **one full
-atmosphere video file length** for audio entries (`hasAudio: true`). Entries with no audio
+atmosphere video file length** for audio entries (`hasAudio: true`), always at the end of a
+pass. The song a visitor lands on stays for `openingLoops` passes (default 5) first. Entries with no audio
 advance after **45 seconds**. Today’s short loop-bed mp4s hop on file length until you ship
 longer stage videos.
 
