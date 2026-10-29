@@ -5,7 +5,7 @@
         --slug wannacry \\
         --video "tmp/WannaCry Website Loop.mp4" \\
         --audio "tmp/wannacry Master2.wav" \\
-        --bpm 175 --bars 16 --start 155.349 \\
+        --bpm 175 --bars 8 --repeat 2 --start 78.549 \\
         --cover "tmp/WannaCry Version 2.png"
 
 Writes (relative to the repo root, or --out):
@@ -14,10 +14,12 @@ Writes (relative to the repo root, or --out):
   public/images/posters/<slug>.jpg    first frame of the loop
   public/images/covers/<slug>.webp    square cover, 1400 px
 
-Audio: `--bars` bars of the master from `--start`, a short crossfade at the seam with
-the audio just before `--start` (so the wrap is click-free and rhythmically continuous),
-then resampled by a tiny factor so it lasts exactly as long as the video. Omit --audio to
-keep the video's own audio track; pass --no-audio for a silent loop.
+Audio: `--bars` bars of the master from `--start` (pick both with find_seam.py), played
+`--repeat` times, with a short crossfade at the seam into the audio just before `--start`
+(click-free, rhythmically continuous). Each file's audio is resampled to a sample count
+that fills whole codec frames (no end padding = no silence at the browser's loop point),
+and the video is stretched by the same few ms. Omit --audio to keep the video's own
+audio track; pass --no-audio for a silent loop.
 
 Defaults match what shipped for WannaCry: 960x540, light denoise, AV1 CRF 50,
 H.264 CRF 31. Stage video sits under a ~70 % scrim, so this is visually lossless there.
@@ -46,7 +48,13 @@ def probe_float(path, entry, stream='v:0'):
     return float(out)
 
 
-def build_loop_wav(audio, start, length, xfade, target_len, workdir):
+def decoded_samples(path):
+    pcm = subprocess.run(['ffmpeg', '-v', 'error', '-i', path, '-vn', '-ac', '1', '-ar', '48000',
+                          '-f', 's16le', '-'], check=True, capture_output=True).stdout
+    return len(pcm) // 2
+
+
+def build_loop_wav(audio, start, length, xfade, workdir, repeat=1):
     seg = os.path.join(workdir, 'seg.wav')
     pre = min(xfade, start)
     run(['ffmpeg', '-v', 'error', '-y', '-ss', f'{start - pre:.6f}', '-t', f'{length + pre:.6f}',
@@ -66,18 +74,38 @@ def build_loop_wav(audio, start, length, xfade, target_len, workdir):
         for c in range(ch):
             j = (frames - n_pre + i) * ch + c
             body[j] = int(body[j] * (1 - g) + head[i * ch + c] * g)
+    body = body * repeat
     loop = os.path.join(workdir, 'loop.wav')
     with wave.open(loop, 'wb') as o:
         o.setnchannels(ch)
         o.setsampwidth(2)
         o.setframerate(sr)
         o.writeframes(body.tobytes())
-    factor = (frames / sr) / target_len
-    out = os.path.join(workdir, 'loop48.wav')
-    # asetrate shifts pitch by the same tiny factor (~0.1 % = 2 cents): inaudible, artefact-free.
+    return loop, sr, frames * repeat / sr
+
+
+# Encoder delay and frame size at 48 kHz (ffmpeg's native aac, libopus). An audio track of
+# k * frame - delay samples needs no end padding, so the decoded track is exactly that long.
+# Any padding would be heard as a short silence each time the browser loops the video.
+CODEC_FRAMING = {'aac': (1024, 0), 'opus': (960, 312)}
+
+
+def gapless_samples(codec, target_len):
+    frame, delay = CODEC_FRAMING[codec]
+    return round((target_len * 48000 + delay) / frame) * frame - delay
+
+
+def fit_loop_wav(loop, sr, loop_len, samples, workdir, tag):
+    """Resample the loop to exactly `samples` at 48 kHz.
+
+    asetrate shifts tempo and pitch by the same tiny factor (~0.1 % = 2 cents): inaudible,
+    artefact-free, and the loop stays bar-exact."""
+    factor = loop_len / (samples / 48000)
+    out = os.path.join(workdir, f'loop-{tag}.wav')
     run(['ffmpeg', '-v', 'error', '-y', '-i', loop, '-af',
-         f'asetrate={sr}*{factor:.8f},aresample=48000', '-c:a', 'pcm_s16le', out])
-    print(f'audio loop {frames / sr:.4f}s -> {target_len:.4f}s (rate x{factor:.6f})')
+         f'asetrate={sr}*{factor:.9f},aresample=48000,atrim=end_sample={samples},apad=whole_len={samples}',
+         '-c:a', 'pcm_s16le', out])
+    print(f'{tag}: audio loop {loop_len:.4f}s -> {samples} samples = {samples / 48000:.5f}s (rate x{factor:.6f})')
     return out
 
 
@@ -90,7 +118,10 @@ def main():
     ap.add_argument('--bpm', type=float)
     ap.add_argument('--bars', type=int, default=16)
     ap.add_argument('--start', type=float, help='loop start in the master, seconds')
-    ap.add_argument('--xfade', type=float, default=0.03)
+    ap.add_argument('--repeat', type=int, default=1,
+                    help='play the --bars section this many times (e.g. --bars 8 --repeat 2 for a 16-bar video)')
+    ap.add_argument('--xfade', type=float, default=0.03,
+                    help='seconds of crossfade at the seam into the audio just before --start')
     ap.add_argument('--cover', help='square artwork (png/jpg)')
     ap.add_argument('--width', type=int, default=960)
     ap.add_argument('--av1-crf', type=int, default=50)
@@ -109,31 +140,40 @@ def main():
         os.makedirs(d, exist_ok=True)
 
     vdur = probe_float(args.video, 'stream=duration')
+    nframes = round(vdur * probe_float(args.video, 'stream=r_frame_rate'))
     height = round(args.width * 9 / 16 / 2) * 2
     vf = f'scale={args.width}:{height}:flags=lanczos' + (f',{args.denoise}' if args.denoise else '')
 
-    with tempfile.TemporaryDirectory() as work:
-        if args.no_audio:
-            amap = []
-        elif args.audio:
-            length = args.bars * 240 / args.bpm
-            loop = build_loop_wav(args.audio, args.start, length, args.xfade, vdur, work)
-            amap = ['-i', loop, '-map', '0:v:0', '-map', '1:a:0']
-        else:
-            amap = ['-map', '0:v:0', '-map', '0:a:0?']
+    av1 = os.path.join(videos, f'{args.slug}-av1.mp4')
+    h264 = os.path.join(videos, f'{args.slug}.mp4')
+    encoders = [
+        (av1, 'opus', ['-c:v', 'libsvtav1', '-preset', '3', '-crf', str(args.av1_crf), '-g', '96'],
+         ['-c:a', 'libopus', '-b:a', '96k']),
+        (h264, 'aac', ['-c:v', 'libx264', '-preset', 'veryslow', '-crf', str(args.h264_crf),
+                       '-profile:v', 'high', '-g', '48'],
+         ['-c:a', 'aac', '-b:a', '128k']),
+    ]
 
-        common_in = ['ffmpeg', '-v', 'error', '-y', '-i', args.video, *amap, '-vf', vf,
-                     '-pix_fmt', 'yuv420p', '-map_metadata', '-1', '-movflags', '+faststart',
-                     '-t', f'{vdur:.6f}']
-        if args.no_audio:
-            common_in += ['-an']
-        av1 = os.path.join(videos, f'{args.slug}-av1.mp4')
-        h264 = os.path.join(videos, f'{args.slug}.mp4')
-        run([*common_in, '-c:v', 'libsvtav1', '-preset', '3', '-crf', str(args.av1_crf), '-g', '96',
-             *([] if args.no_audio else ['-c:a', 'libopus', '-b:a', '96k']), av1])
-        run([*common_in, '-c:v', 'libx264', '-preset', 'veryslow', '-crf', str(args.h264_crf),
-             '-profile:v', 'high', '-g', '48',
-             *([] if args.no_audio else ['-c:a', 'aac', '-b:a', '128k']), h264])
+    with tempfile.TemporaryDirectory() as work:
+        if args.audio:
+            loop, sr, loop_len = build_loop_wav(
+                args.audio, args.start, args.bars * 240 / args.bpm, args.xfade, work, args.repeat)
+        for out, acodec, vcodec, acodec_args in encoders:
+            if args.no_audio:
+                inputs, maps, vlen, aargs = [], ['-map', '0:v:0', '-an'], vdur, []
+            elif args.audio:
+                samples = gapless_samples(acodec, vdur)
+                wav = fit_loop_wav(loop, sr, loop_len, samples, work, acodec)
+                inputs, maps, vlen, aargs = ['-i', wav], ['-map', '0:v:0', '-map', '1:a:0'], samples / 48000, acodec_args
+            else:
+                inputs, maps, vlen, aargs = [], ['-map', '0:v:0', '-map', '0:a:0?'], vdur, acodec_args
+            # Stretch the video by the same few milliseconds so both tracks end together:
+            # same frames, exact rational frame rate (frames / audio length).
+            rate = f'{nframes * 48000}/{round(vlen * 48000)}'
+            run(['ffmpeg', '-v', 'error', '-y', '-i', args.video, *inputs, *maps,
+                 '-vf', f'{vf},setpts=PTS*{vlen / vdur:.9f}', '-r', rate, '-video_track_timescale', '48000',
+                 '-pix_fmt', 'yuv420p', '-map_metadata', '-1', '-movflags', '+faststart',
+                 *vcodec, *aargs, out])
 
         frame = os.path.join(work, 'poster.png')
         run(['ffmpeg', '-v', 'error', '-y', '-i', args.video, '-frames:v', '1',
@@ -143,6 +183,12 @@ def main():
              '-quality', '76', poster])
 
     outputs = [av1, h264, poster]
+    if args.audio:
+        for out, acodec, _, _ in encoders:
+            got = decoded_samples(out)
+            want = gapless_samples(acodec, vdur)
+            print(f"{os.path.basename(out)}: decoded {got} samples, expected {want}"
+                  f"{'' if got == want else '  <-- MISMATCH: the loop will gap'}")
     if args.cover:
         cover = os.path.join(covers, f'{args.slug}.webp')
         run(['magick', args.cover, '-background', 'white', '-alpha', 'remove', '-alpha', 'off',

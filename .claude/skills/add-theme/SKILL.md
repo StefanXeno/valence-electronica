@@ -64,23 +64,43 @@ python3 -I .claude/skills/add-theme/scripts/analyze_video.py "tmp/<loop>.mp4" --
 - `analyze_video.py` tells how many bars the video spans (website loops are usually cut
   to exactly 8 or 16 bars) and lists hard cuts with their bar position.
 
-Pick the musical section to match the video's dramaturgy:
-
-- **Video has one big hard cut mid-loop** (e.g. bar 8 of 16: build-up footage → explosion):
-  put the strongest drop (usually the last one) exactly on that cut.
-  `--start = drop_time − cut_time`. Confirm the cut's exact frame by tiling the frames
-  around it (`-ss <cut-0.3> … -vf "fps=24,scale=240:-1,tile=5x2"`); the scene filter can
-  be off by one frame.
-- **No dominant cut**: start on the drop downbeat and loop whole drop bars.
-- Seam: start and end are exactly N bars apart, so the rhythm is continuous; the build
-  script crossfades 30 ms into the audio right before `--start`.
-
-Verify after the build: the drop must hit at the cut time in the final file.
+Then rank seams — **this decides the loop**, not the video's cuts:
 
 ```bash
-ffmpeg -v error -ss <cut-0.25> -t 0.5 -i public/videos/<slug>.mp4 -vn -ac 1 -f s16le - | python3 -I -c "
-import sys,array;a=array.array('h');a.frombytes(sys.stdin.buffer.read());w=1102
-print(' '.join(str(max(abs(x) for x in a[i:i+w])//1000) for i in range(0,len(a),w)))"
+python3 -I .claude/skills/add-theme/scripts/find_seam.py "tmp/<master>.wav" \
+  --bpm <BPM> --downbeat <downbeat phase> --loop-bars <video bars>
+```
+
+Rules (learned on WannaCry, where the first version was audibly looping):
+
+- The audio loop is its own loop; it does **not** need to follow the video's dramaturgy
+  (operator: video and audio looping independently is fine, nobody notices). Do not put
+  a drop on a video cut at the cost of the seam.
+- Never wrap from a drop back into a build-up / pre-drop part — the energy and melody
+  change gives the loop away. Loop *inside* one loud section.
+- Pick the lowest score among loud rows (sub-bass near the drop level). Score ≲ 1 is
+  smooth; the rejected WannaCry build→drop loop scored 2.7, the shipped one 0.79.
+- Half-length sections played twice (`--bars 8 --repeat 2` for a 16-bar video) often win:
+  drops repeat 8-bar phrases, so the wrap equals a transition the song itself makes.
+- Prefer starts on 4/8-bar phrase boundaries of the drop when scores are close.
+
+The build script makes the audio sample-exact for each codec (no AAC/Opus end padding,
+which would be a short silence at every browser loop) and stretches the video by a few
+ms to the same length; it prints `decoded … expected …` — both must match.
+
+Check the wrap of the final file (level before/after and the biggest sample step at the
+seam vs. a typical step; no trailing silence):
+
+```bash
+python3 -I - <<'PY'
+import array, math, subprocess
+for p in ('public/videos/<slug>.mp4', 'public/videos/<slug>-av1.mp4'):
+    a = array.array('h'); a.frombytes(subprocess.run(['ffmpeg','-v','error','-i',p,'-vn','-ac','1','-ar','48000','-f','s16le','-'], capture_output=True).stdout)
+    db = lambda x: 20*math.log10(max(1, math.sqrt(sum(v*v for v in x)/len(x)))/32768)
+    n = len(a); wrap = a[n-4800:] + a[:4800]; hp = [abs(wrap[i]-wrap[i-1]) for i in range(1, len(wrap))]
+    print(p, 'last 2s %.1f dB -> first 2s %.1f dB' % (db(a[-96000:]), db(a[:96000])),
+          '| seam step', max(hp[4752:4848]), 'vs 99th pct', sorted(hp)[int(len(hp)*.99)])
+PY
 ```
 
 ## 3. Build the media
@@ -88,7 +108,7 @@ print(' '.join(str(max(abs(x) for x in a[i:i+w])//1000) for i in range(0,len(a),
 ```bash
 python3 -I .claude/skills/add-theme/scripts/build_theme_media.py \
   --slug <slug> --video "tmp/<loop>.mp4" --audio "tmp/<master>.wav" \
-  --bpm <BPM> --bars <N> --start <seconds> --cover "tmp/<art>.png"
+  --bpm <BPM> --bars <N> [--repeat 2] --start <seconds> --cover "tmp/<art>.png"
 ```
 
 It writes `public/videos/<slug>-av1.mp4` (AV1/Opus), `public/videos/<slug>.mp4`
@@ -193,7 +213,7 @@ after they push.
 
 One commit, Conventional style like the history
 (`feat(stage): <Song> as the landing theme` / `feat(stage): <Song> stage theme`), body with
-loop math (BPM, bars, start, cut), media sizes, pack colours and extras. Do not push.
+loop math (BPM, bars × repeat, start, seam score), media sizes, pack colours and extras. Do not push.
 
 Final report to the operator (German): what was added, the loop choice and why, file
 sizes, theme colours, verified facts with sources, and what is missing (unverified
