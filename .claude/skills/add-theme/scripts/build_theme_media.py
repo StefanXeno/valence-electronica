@@ -54,28 +54,40 @@ def decoded_samples(path):
     return len(pcm) // 2
 
 
-def build_loop_wav(audio, start, length, xfade, workdir, repeat=1, hold=0.0):
-    seg = os.path.join(workdir, 'seg.wav')
-    run(['ffmpeg', '-v', 'error', '-y', '-ss', f'{start:.6f}', '-t', f'{length + hold + xfade + 0.1:.6f}',
-         '-i', audio, '-ac', '2', '-c:a', 'pcm_s16le', seg])
-    with wave.open(seg) as w:
-        sr = w.getframerate()
-        data = array.array('h')
-        data.frombytes(w.readframes(w.getnframes()))
+def build_loop_wav(audio, segments, xfade, workdir, repeat=1, hold=0.0):
+    """Concatenate `segments` [(start_s, length_s), ...] of `audio`, then repeat the result.
+
+    Every segment's head starts as the audio that follows the *previous* segment's end in
+    the master (cyclically) and fades into the segment start. At each jump the waveform
+    is therefore sample-continuous (end -> exactly what the song plays next), then blends
+    into the new place. Starts must be downbeats. `hold` keeps the continuation unchanged
+    for a moment (e.g. a bass note ringing over) so the fade ends just before the next hit.
+    """
     ch = 2
-    frames = int(round(length * sr))
-    n_h = int(round(hold * sr))
-    n_x = int(round(xfade * sr))
-    body, after = data[:frames * ch], data[frames * ch:(frames + n_h + n_x) * ch]
-    # The loop's head starts as the audio that follows the loop's end in the master and
-    # fades into the loop start. At the wrap the waveform is therefore sample-continuous
-    # (end -> exactly what the song plays next), then blends into the repeat.
-    # Start on a downbeat. `hold` keeps the continuation unchanged for a moment (e.g. a
-    # bass note ringing over from the loop end) and ends the fade just before the next hit.
-    for i in range(n_h + n_x):
-        g = max(0.0, (i - n_h) / n_x)
-        for c in range(ch):
-            body[i * ch + c] = int(after[i * ch + c] * (1 - g) + body[i * ch + c] * g)
+    bodies, afters = [], []
+    for k, (start, length) in enumerate(segments):
+        seg = os.path.join(workdir, f'seg{k}.wav')
+        run(['ffmpeg', '-v', 'error', '-y', '-ss', f'{start:.6f}', '-t', f'{length + hold + xfade + 0.1:.6f}',
+             '-i', audio, '-ac', '2', '-c:a', 'pcm_s16le', seg])
+        with wave.open(seg) as w:
+            sr = w.getframerate()
+            data = array.array('h')
+            data.frombytes(w.readframes(w.getnframes()))
+        frames = int(round(length * sr))
+        n_h = int(round(hold * sr))
+        n_x = int(round(xfade * sr))
+        bodies.append(data[:frames * ch])
+        afters.append(data[frames * ch:(frames + n_h + n_x) * ch])
+    for k, body in enumerate(bodies):
+        after = afters[k - 1]
+        for i in range(n_h + n_x):
+            g = max(0.0, (i - n_h) / n_x)
+            for c in range(ch):
+                body[i * ch + c] = int(after[i * ch + c] * (1 - g) + body[i * ch + c] * g)
+    body = array.array('h')
+    for b in bodies:
+        body.extend(b)
+    frames = len(body) // ch
     body = body * repeat
     loop = os.path.join(workdir, 'loop.wav')
     with wave.open(loop, 'wb') as o:
@@ -111,6 +123,13 @@ def fit_loop_wav(loop, sr, loop_len, samples, workdir, tag):
     return out
 
 
+def parse_segments(args):
+    if args.segments:
+        return [(float(st), int(bars) * 240 / args.bpm)
+                for st, bars in (part.split(':') for part in args.segments.split(','))]
+    return [(args.start, args.bars * 240 / args.bpm)]
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--slug', required=True)
@@ -120,6 +139,8 @@ def main():
     ap.add_argument('--bpm', type=float)
     ap.add_argument('--bars', type=int, default=16)
     ap.add_argument('--start', type=float, help='loop start in the master, seconds')
+    ap.add_argument('--segments', help="instead of --start/--bars: 'start_s:bars,start_s:bars' "
+                                       '(two or more sections with good seams, from find_seam.py)')
     ap.add_argument('--repeat', type=int, default=1,
                     help='play the --bars section this many times (e.g. --bars 8 --repeat 2 for a 16-bar video)')
     ap.add_argument('--xfade', type=float, default=0.06,
@@ -135,8 +156,8 @@ def main():
     ap.add_argument('--out', default='.')
     args = ap.parse_args()
 
-    if args.audio and (args.bpm is None or args.start is None):
-        ap.error('--audio needs --bpm and --start')
+    if args.audio and (args.bpm is None or (args.start is None and not args.segments)):
+        ap.error('--audio needs --bpm and --start (or --segments)')
 
     videos = os.path.join(args.out, 'public/videos')
     posters = os.path.join(args.out, 'public/images/posters')
@@ -162,8 +183,7 @@ def main():
     with tempfile.TemporaryDirectory() as work:
         if args.audio:
             loop, sr, loop_len = build_loop_wav(
-                args.audio, args.start, args.bars * 240 / args.bpm, args.xfade, work, args.repeat,
-                args.seam_hold)
+                args.audio, parse_segments(args), args.xfade, work, args.repeat, args.seam_hold)
         for out, acodec, vcodec, acodec_args in encoders:
             if args.no_audio:
                 inputs, maps, vlen, aargs = [], ['-map', '0:v:0', '-an'], vdur, []

@@ -133,6 +133,30 @@ result (extract a frame from a busy and a calm moment and Read the PNG) and tune
 
 Do not commit anything from `tmp/`.
 
+### Loops that don't divide evenly
+
+If no `--bars N --repeat k` fits the video well, combine sections: `--segments
+'start_s:bars,start_s:bars'` (all starts on downbeats). Each jump fades from the song's
+real continuation into the next section. Find good pairs by brute force over
+(S1, L1, S2, L2) with L1 + L2 = video bars, cost = fwd seam score of both jumps (same
+distance as find_seam.py). Nightmare: bars 3–12 then 5–12 (seams 0.60 / 0.85).
+
+## 3b. Re-loop an existing theme (keep its video)
+
+```bash
+python3 -I .claude/skills/add-theme/scripts/reloop_audio.py --stage public/videos/<slug>.mp4 \
+  --audio <best music source> --bpm <BPM> --start <s> --bars <N> --repeat <k>   # or --segments
+```
+
+Copies the picture bit for bit and only rebuilds the AAC track (gapless). The video's
+timestamps are rescaled to the loop length, so choose a loop within ~5 % of the video's
+length in bars (Nightmare: 18.75 bars of video → 18-bar loop, 24 → 25 fps). Use the
+best source available (master wav > "Loop + Music" source in tmp/ > the stage mp4's own
+AAC). If no seam scores below ~1.5 in the available audio (Infinite's 45 s excerpt),
+don't ship a worse loop — ask the operator for the master.
+
+Show Me How already loops perfectly — leave it alone.
+
 ## 4. Colour pack
 
 Sample the artwork (and the poster frame) rather than guessing:
