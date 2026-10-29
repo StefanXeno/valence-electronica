@@ -5,7 +5,7 @@
         --slug wannacry \\
         --video "tmp/WannaCry Website Loop.mp4" \\
         --audio "tmp/wannacry Master2.wav" \\
-        --bpm 175 --bars 8 --repeat 2 --start 78.549 \\
+        --bpm 175 --bars 8 --repeat 2 --start 78.703 --seam-hold 0.115 --xfade 0.035 \\
         --cover "tmp/WannaCry Version 2.png"
 
 Writes (relative to the repo root, or --out):
@@ -15,8 +15,8 @@ Writes (relative to the repo root, or --out):
   public/images/covers/<slug>.webp    square cover, 1400 px
 
 Audio: `--bars` bars of the master from `--start` (pick both with find_seam.py), played
-`--repeat` times, with a short crossfade at the seam into the audio just before `--start`
-(click-free, rhythmically continuous). Each file's audio is resampled to a sample count
+`--repeat` times. `--start` should be a downbeat. The loop head fades from the audio that
+follows the loop end in the master into the loop start, so the wrap is sample-continuous. Each file's audio is resampled to a sample count
 that fills whole codec frames (no end padding = no silence at the browser's loop point),
 and the video is stretched by the same few ms. Omit --audio to keep the video's own
 audio track; pass --no-audio for a silent loop.
@@ -54,26 +54,28 @@ def decoded_samples(path):
     return len(pcm) // 2
 
 
-def build_loop_wav(audio, start, length, xfade, workdir, repeat=1):
+def build_loop_wav(audio, start, length, xfade, workdir, repeat=1, hold=0.0):
     seg = os.path.join(workdir, 'seg.wav')
-    pre = min(xfade, start)
-    run(['ffmpeg', '-v', 'error', '-y', '-ss', f'{start - pre:.6f}', '-t', f'{length + pre:.6f}',
+    run(['ffmpeg', '-v', 'error', '-y', '-ss', f'{start:.6f}', '-t', f'{length + hold + xfade + 0.1:.6f}',
          '-i', audio, '-ac', '2', '-c:a', 'pcm_s16le', seg])
     with wave.open(seg) as w:
         sr = w.getframerate()
         data = array.array('h')
         data.frombytes(w.readframes(w.getnframes()))
     ch = 2
-    n_pre = int(round(pre * sr))
-    head, body = data[:n_pre * ch], data[n_pre * ch:]
-    frames = len(body) // ch
-    # Fade the loop's tail into the audio that precedes `start`: at the wrap the
-    # listener hears exactly what the master plays right before the loop start.
-    for i in range(n_pre):
-        g = i / n_pre
+    frames = int(round(length * sr))
+    n_h = int(round(hold * sr))
+    n_x = int(round(xfade * sr))
+    body, after = data[:frames * ch], data[frames * ch:(frames + n_h + n_x) * ch]
+    # The loop's head starts as the audio that follows the loop's end in the master and
+    # fades into the loop start. At the wrap the waveform is therefore sample-continuous
+    # (end -> exactly what the song plays next), then blends into the repeat.
+    # Start on a downbeat. `hold` keeps the continuation unchanged for a moment (e.g. a
+    # bass note ringing over from the loop end) and ends the fade just before the next hit.
+    for i in range(n_h + n_x):
+        g = max(0.0, (i - n_h) / n_x)
         for c in range(ch):
-            j = (frames - n_pre + i) * ch + c
-            body[j] = int(body[j] * (1 - g) + head[i * ch + c] * g)
+            body[i * ch + c] = int(after[i * ch + c] * (1 - g) + body[i * ch + c] * g)
     body = body * repeat
     loop = os.path.join(workdir, 'loop.wav')
     with wave.open(loop, 'wb') as o:
@@ -120,8 +122,11 @@ def main():
     ap.add_argument('--start', type=float, help='loop start in the master, seconds')
     ap.add_argument('--repeat', type=int, default=1,
                     help='play the --bars section this many times (e.g. --bars 8 --repeat 2 for a 16-bar video)')
-    ap.add_argument('--xfade', type=float, default=0.03,
-                    help='seconds of crossfade at the seam into the audio just before --start')
+    ap.add_argument('--xfade', type=float, default=0.06,
+                    help='seconds over which the audio after the loop end fades into the loop start')
+    ap.add_argument('--seam-hold', type=float, default=0.0,
+                    help='seconds the post-loop audio plays unchanged before the fade starts; '
+                         'end hold+xfade just before the first hit after the downbeat')
     ap.add_argument('--cover', help='square artwork (png/jpg)')
     ap.add_argument('--width', type=int, default=960)
     ap.add_argument('--av1-crf', type=int, default=50)
@@ -157,7 +162,8 @@ def main():
     with tempfile.TemporaryDirectory() as work:
         if args.audio:
             loop, sr, loop_len = build_loop_wav(
-                args.audio, args.start, args.bars * 240 / args.bpm, args.xfade, work, args.repeat)
+                args.audio, args.start, args.bars * 240 / args.bpm, args.xfade, work, args.repeat,
+                args.seam_hold)
         for out, acodec, vcodec, acodec_args in encoders:
             if args.no_audio:
                 inputs, maps, vlen, aargs = [], ['-map', '0:v:0', '-an'], vdur, []

@@ -83,6 +83,13 @@ Rules (learned on WannaCry, where the first version was audibly looping):
 - Half-length sections played twice (`--bars 8 --repeat 2` for a 16-bar video) often win:
   drops repeat 8-bar phrases, so the wrap equals a transition the song itself makes.
 - Prefer starts on 4/8-bar phrase boundaries of the drop when scores are close.
+- `--start` must be the exact downbeat (no offsets to line up with video cuts — that put
+  a pre-phrase bass gap at every WannaCry wrap).
+- Compare the sub-bass right after the loop's start downbeat with the song's real
+  continuation after the loop end. If the end bar rings over (bass sustaining into the
+  next bar) but the start bar does not (it follows a gap in the song), find the first hit
+  after the downbeat (5 ms peak scan) and set `--seam-hold` + `--xfade` to end just
+  before it (WannaCry: hit at 155 ms → `--seam-hold 0.115 --xfade 0.035`).
 
 The build script makes the audio sample-exact for each codec (no AAC/Opus end padding,
 which would be a short silence at every browser loop) and stretches the video by a few
@@ -108,7 +115,8 @@ PY
 ```bash
 python3 -I .claude/skills/add-theme/scripts/build_theme_media.py \
   --slug <slug> --video "tmp/<loop>.mp4" --audio "tmp/<master>.wav" \
-  --bpm <BPM> --bars <N> [--repeat 2] --start <seconds> --cover "tmp/<art>.png"
+  --bpm <BPM> --bars <N> [--repeat 2] --start <seconds> [--seam-hold s --xfade s] \
+  --cover "tmp/<art>.png"
 ```
 
 It writes `public/videos/<slug>-av1.mp4` (AV1/Opus), `public/videos/<slug>.mp4`
