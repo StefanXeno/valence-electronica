@@ -38,17 +38,25 @@ def main():
     ap.add_argument('--repeat', type=int, default=1)
     ap.add_argument('--xfade', type=float, default=0.06)
     ap.add_argument('--seam-hold', type=float, default=0.0)
+    ap.add_argument('--seam-mode', choices=('fwd', 'bwd'), default='fwd')
     ap.add_argument('--bitrate', default='128k')
+    ap.add_argument('--video-frames', type=int,
+                    help='keep only the first N frames (re-encodes the picture, H.264 --crf); cut inside '
+                         'a static hold that also precedes the old wrap so the picture loop looks the same')
+    ap.add_argument('--crf', type=int, default=28)
+    ap.add_argument('--gop', type=int, default=48, help='keyframe interval; mostly static footage: 250')
+    ap.add_argument('--tune', help="x264 tune, e.g. 'stillimage' for artwork + text animations")
     ap.add_argument('--max-speed-change', type=float, default=0.05,
                     help='refuse to retime the video by more than this fraction')
     args = ap.parse_args()
     if args.start is None and not args.segments:
         ap.error('--start or --segments is required')
 
-    vdur = probe_float(args.stage, 'stream=duration')
+    fps = probe_float(args.stage, 'stream=r_frame_rate')
+    vdur = args.video_frames / fps if args.video_frames else probe_float(args.stage, 'stream=duration')
     with tempfile.TemporaryDirectory() as work:
         loop, sr, loop_len = build_loop_wav(
-            args.audio, parse_segments(args), args.xfade, work, args.repeat, args.seam_hold)
+            args.audio, parse_segments(args), args.xfade, work, args.repeat, args.seam_hold, args.seam_mode)
         speed = loop_len / vdur
         if abs(speed - 1) > args.max_speed_change:
             sys.exit(f'loop is {loop_len:.3f}s but the video {vdur:.3f}s (x{speed:.3f}); pick another length')
@@ -59,8 +67,18 @@ def main():
              f'asetrate={sr}*{factor:.9f},aresample=48000,atrim=end_sample={samples},apad=whole_len={samples}',
              '-c:a', 'pcm_s16le', wav])
         out = os.path.join(work, 'out.mp4')
-        run(['ffmpeg', '-v', 'error', '-y', '-itsscale', f'{speed:.9f}', '-i', args.stage, '-i', wav,
-             '-map', '0:v:0', '-map', '1:a:0', '-c:v', 'copy', '-c:a', 'aac', '-b:a', args.bitrate,
+        if args.video_frames:
+            n = args.video_frames
+            video = ['-c:v', 'libx264', '-preset', 'veryslow', '-crf', str(args.crf), '-profile:v', 'high',
+                     '-pix_fmt', 'yuv420p', '-g', str(args.gop), *(['-tune', args.tune] if args.tune else []),
+                     '-frames:v', str(n),
+                     '-vf', f'setpts=PTS*{speed:.9f}', '-r', f'{n * 48000}/{round(loop_len * 48000)}',
+                     '-video_track_timescale', '48000']
+            itsscale = []
+        else:
+            video, itsscale = ['-c:v', 'copy'], ['-itsscale', f'{speed:.9f}']
+        run(['ffmpeg', '-v', 'error', '-y', *itsscale, '-i', args.stage, '-i', wav,
+             '-map', '0:v:0', '-map', '1:a:0', *video, '-c:a', 'aac', '-b:a', args.bitrate,
              '-map_metadata', '-1', '-movflags', '+faststart', out])
         got = decoded_samples(out)
         shutil.move(out, args.stage)

@@ -157,6 +157,20 @@ don't ship a worse loop — ask the operator for the master.
 
 Show Me How already loops perfectly — leave it alone.
 
+Lessons from Nightmare (first re-loop was audibly bad):
+
+- Jump only between phrase starts (multiples of 4 bars from the section start). Seams
+  inside 4-bar figures break the riff/melody even when the timbre matches.
+- Score each jump both ways and use the better side: `fwd` (bar after the end ≈ start
+  bar) or `bwd` (bar before the end ≈ bar before the start). Pass it as `--seam-mode`.
+  A `bwd` jump lands like the song's own lead-in; `--seam-hold` then keeps that lead-in
+  (Nightmare: the bass stop 250 ms before bar 80).
+- Prefer the chorus / main hook the operator names, from the master: repeated sections
+  (chroma self-similarity, 4-bar groups) show where the refrain comes back.
+- Videos that are artwork + text animations can be cut in a static hold
+  (`--video-frames N`, frame diff ≈ 0 around N and before the old wrap) instead of being
+  retimed; re-encode with `--gop 250 --tune stillimage`.
+
 ## 4. Colour pack
 
 Sample the artwork (and the poster frame) rather than guessing:

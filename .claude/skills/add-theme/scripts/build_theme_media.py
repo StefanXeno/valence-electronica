@@ -54,20 +54,30 @@ def decoded_samples(path):
     return len(pcm) // 2
 
 
-def build_loop_wav(audio, segments, xfade, workdir, repeat=1, hold=0.0):
+def build_loop_wav(audio, segments, xfade, workdir, repeat=1, hold=0.0, mode='fwd'):
     """Concatenate `segments` [(start_s, length_s), ...] of `audio`, then repeat the result.
 
-    Every segment's head starts as the audio that follows the *previous* segment's end in
-    the master (cyclically) and fades into the segment start. At each jump the waveform
-    is therefore sample-continuous (end -> exactly what the song plays next), then blends
-    into the new place. Starts must be downbeats. `hold` keeps the continuation unchanged
-    for a moment (e.g. a bass note ringing over) so the fade ends just before the next hit.
+    Starts must be downbeats. Each jump (segment end -> next segment start) is smoothed in
+    one of two ways, matching what find_seam.py says is alike:
+
+    fwd: the bar after the end sounds like the start bar. The next segment's head starts
+         as the audio that follows the previous segment's end in the master, then fades
+         into the new place; `hold` keeps that continuation unchanged for a moment (e.g. a
+         bass note ringing over) so the fade ends just before the next hit.
+    bwd: the bar before the end sounds like the bar before the start. The segment's tail
+         fades into the audio that precedes the next segment's start and plays its last
+         `hold` seconds unchanged, so the jump lands exactly like the song's own lead-in
+         (e.g. a bass stop right before the downbeat).
     """
     ch = 2
-    bodies, afters = [], []
+    bodies, afters, befores = [], [], []
     for k, (start, length) in enumerate(segments):
         seg = os.path.join(workdir, f'seg{k}.wav')
-        run(['ffmpeg', '-v', 'error', '-y', '-ss', f'{start:.6f}', '-t', f'{length + hold + xfade + 0.1:.6f}',
+        pre = hold + xfade if mode == 'bwd' else 0.0
+        if start < pre:
+            raise SystemExit(f'segment at {start}s needs {pre}s of audio before it')
+        run(['ffmpeg', '-v', 'error', '-y', '-ss', f'{start - pre:.6f}',
+             '-t', f'{pre + length + hold + xfade + 0.1:.6f}',
              '-i', audio, '-ac', '2', '-c:a', 'pcm_s16le', seg])
         with wave.open(seg) as w:
             sr = w.getframerate()
@@ -76,14 +86,25 @@ def build_loop_wav(audio, segments, xfade, workdir, repeat=1, hold=0.0):
         frames = int(round(length * sr))
         n_h = int(round(hold * sr))
         n_x = int(round(xfade * sr))
-        bodies.append(data[:frames * ch])
-        afters.append(data[frames * ch:(frames + n_h + n_x) * ch])
+        n_p = int(round(pre * sr))
+        befores.append(data[:n_p * ch])
+        bodies.append(data[n_p * ch:(n_p + frames) * ch])
+        afters.append(data[(n_p + frames) * ch:(n_p + frames + n_h + n_x) * ch])
     for k, body in enumerate(bodies):
-        after = afters[k - 1]
-        for i in range(n_h + n_x):
-            g = max(0.0, (i - n_h) / n_x)
-            for c in range(ch):
-                body[i * ch + c] = int(after[i * ch + c] * (1 - g) + body[i * ch + c] * g)
+        if mode == 'fwd':
+            after = afters[k - 1]
+            for i in range(n_h + n_x):
+                g = max(0.0, (i - n_h) / n_x)
+                for c in range(ch):
+                    body[i * ch + c] = int(after[i * ch + c] * (1 - g) + body[i * ch + c] * g)
+        else:
+            before = befores[(k + 1) % len(bodies)]
+            n = len(body) // ch
+            for i in range(n_x + n_h):
+                g = min(1.0, i / n_x)  # 0 -> 1 over the fade, then the pure lead-in
+                for c in range(ch):
+                    j = (n - n_x - n_h + i) * ch + c
+                    body[j] = int(body[j] * (1 - g) + before[i * ch + c] * g)
     body = array.array('h')
     for b in bodies:
         body.extend(b)
@@ -148,6 +169,8 @@ def main():
     ap.add_argument('--seam-hold', type=float, default=0.0,
                     help='seconds the post-loop audio plays unchanged before the fade starts; '
                          'end hold+xfade just before the first hit after the downbeat')
+    ap.add_argument('--seam-mode', choices=('fwd', 'bwd'), default='fwd',
+                    help="which side of the jump find_seam/phrase scoring found alike (see build_loop_wav)")
     ap.add_argument('--cover', help='square artwork (png/jpg)')
     ap.add_argument('--width', type=int, default=960)
     ap.add_argument('--av1-crf', type=int, default=50)
@@ -183,7 +206,8 @@ def main():
     with tempfile.TemporaryDirectory() as work:
         if args.audio:
             loop, sr, loop_len = build_loop_wav(
-                args.audio, parse_segments(args), args.xfade, work, args.repeat, args.seam_hold)
+                args.audio, parse_segments(args), args.xfade, work, args.repeat, args.seam_hold,
+                args.seam_mode)
         for out, acodec, vcodec, acodec_args in encoders:
             if args.no_audio:
                 inputs, maps, vlen, aargs = [], ['-map', '0:v:0', '-an'], vdur, []
