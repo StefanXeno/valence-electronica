@@ -128,6 +128,21 @@
   --bg-scrim: rgb(8 10 2 / 72%);
 }
 
+/*
+  Sampled from the WannaCry cover + loop: periwinkle (left headphones, ransom-note
+  overlay #636dee) on a deep "system message" navy; pink from the middle headphones.
+*/
+[data-theme='ransom-blue'] {
+  --color-bg: #06072a;
+  --color-surface: rgb(14 16 56 / 82%);
+  --color-border: #2c3290;
+  --color-text: #f0f1ff;
+  --color-text-muted: #9ea3dc;
+  --color-accent: #636dee;
+  --color-accent-alt: #ee7d98;
+  --bg-scrim: rgb(4 5 30 / 70%);
+}
+
 html[data-stage-crossfade='smooth'] {
   --theme-crossfade-dur: 1000ms;
   --theme-crossfade-ease: cubic-bezier(0.45, 0, 0.55, 1);

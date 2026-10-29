@@ -10,7 +10,8 @@ export type ThemePackId =
   | 'cyan-pulse'
   | 'electric-cyan'
   | 'steel-slate'
-  | 'acid-lime';
+  | 'acid-lime'
+  | 'ransom-blue';
 
 export interface ThemePackCapabilities {
   loopingVideo: boolean;
@@ -31,6 +32,7 @@ export const PACK_CSS_THEME_IDS = [
   'electric-cyan',
   'steel-slate',
   'acid-lime',
+  'ransom-blue',
 ] as const;
 
 export const THEME_PACKS: Record<ThemePackId, ThemePack> = {
@@ -57,6 +59,10 @@ export const THEME_PACKS: Record<ThemePackId, ThemePack> = {
   'acid-lime': {
     id: 'acid-lime',
     capabilities: { loopingVideo: true, audioEligible: true, hudGlitch: false },
+  },
+  'ransom-blue': {
+    id: 'ransom-blue',
+    capabilities: { loopingVideo: true, audioEligible: true, hudGlitch: true },
   },
 };
 

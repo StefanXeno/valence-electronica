@@ -19,7 +19,7 @@ For the formal maintainer contract, see
    (filename slug, e.g. `nightmare`, `example-cyan`).
 3. All calendar math uses **Europe/Berlin**, not the visitor’s local clock.
 4. When no rule matches, the site uses the jukebox entry with `default: true`
-   (today: Nightmare).
+   (today: WannaCry).
 5. To turn scheduling off temporarily, set `"rules": []`.
 
 ---

@@ -8,6 +8,11 @@
     },
     {
       "type": "date",
+      "on": "05-12",
+      "jukeboxId": "wannacry"
+    },
+    {
+      "type": "date",
       "on": "2027-06-01",
       "jukeboxId": "infinite"
     },

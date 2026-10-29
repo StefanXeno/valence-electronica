@@ -139,7 +139,7 @@ describe('validateStageSchedule', () => {
 
   it('accepts the shipped schedule against its own catalog', () => {
     expect(() =>
-      validateStageSchedule(loadStageSchedule(), new Set(['nightmare', 'infinite', 'taking-over', 'show-me-how'])),
+      validateStageSchedule(loadStageSchedule(), new Set(['nightmare', 'infinite', 'taking-over', 'show-me-how', 'wannacry'])),
     ).not.toThrow();
   });
 

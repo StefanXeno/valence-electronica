@@ -414,6 +414,7 @@ matching registry and CSS in the codebase — do not invent new ids.
 | `electric-cyan` | Teal glitch loop — Show Me How (video) |
 | `steel-slate` | Muted steel loop — Infinite (video + audio) |
 | `acid-lime` | Lime / acid loop (video + audio) |
+| `ransom-blue` | Navy / periwinkle ransomware loop — WannaCry (video + audio + HUD glitch) |
 
 **Developer only:** Creating or editing theme packs (`src/lib/theme-packs.ts`,
 `src/styles/themes.css`). Ask the developer for a new visual mood.

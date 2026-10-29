@@ -7,7 +7,6 @@ themeId: nightmare-crimson
 hasAudio: true
 poster: /images/posters/nightmare.jpg
 cover: /images/covers/nightmare.webp
-default: true
 listenLinks:
   - platform: youtube
     url: https://www.youtube.com/watch?v=kQx_0MrphFM
