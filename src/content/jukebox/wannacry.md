@@ -14,6 +14,10 @@ credits:
 listenLinks:
   - platform: bandcamp
     url: https://valenceelectronica.bandcamp.com/track/wannacry-valence-flip
+  - platform: youtube
+    url: https://www.youtube.com/watch?v=DWGHYFzJ01E
+  - platform: soundcloud
+    url: https://soundcloud.com/valence-music/wannacry-valence-flip
 sources:
   - src: /videos/wannacry-av1.mp4
     type: video/mp4; codecs="av01.0.04M.08, opus"
