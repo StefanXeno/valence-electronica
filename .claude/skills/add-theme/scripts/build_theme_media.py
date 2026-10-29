@@ -27,6 +27,7 @@ Calmer footage can go lower (better) on both CRFs for the same size.
 """
 import argparse
 import array
+import math
 import os
 import subprocess
 import tempfile
@@ -144,6 +145,33 @@ def fit_loop_wav(loop, sr, loop_len, samples, workdir, tag):
     return out
 
 
+def rotate_to_quietest(wav, window=0.04):
+    """Rotate a finished (cyclic) loop so the file starts in its quietest moment.
+
+    Browsers do not loop <video> gaplessly: at the file end they seek back and leave a
+    short dropout (~20-50 ms). The music is a seamless cycle, so where the file starts is
+    free; putting the wrap into the quietest `window` (e.g. right after a hit, inside a
+    stop) masks that dropout."""
+    with wave.open(wav) as w:
+        params = w.getparams()
+        data = array.array('h')
+        data.frombytes(w.readframes(w.getnframes()))
+    ch = params.nchannels
+    n = len(data) // ch
+    win, hop = int(window * params.framerate), int(0.005 * params.framerate)
+    energy = [sum(data[(i % n) * ch] ** 2 for i in range(j, j + win, 4)) for j in range(0, n, hop)]
+    best = min(range(len(energy)), key=energy.__getitem__)
+    level = 10 * math.log10(max(1, energy[best] / (win / 4)) / 32768 ** 2)
+    median = sorted(energy)[len(energy) // 2]
+    cut = (best * hop + win // 2) % n
+    rotated = data[cut * ch:] + data[:cut * ch]
+    with wave.open(wav, 'wb') as o:
+        o.setparams(params)
+        o.writeframes(rotated.tobytes())
+    print(f'rotated: file starts {cut / params.framerate:.3f}s into the loop '
+          f'({level:.1f} dB there, median {10 * math.log10(max(1, median / (win / 4)) / 32768 ** 2):.1f} dB)')
+
+
 def parse_segments(args):
     if args.segments:
         return [(float(st), int(bars) * 240 / args.bpm)
@@ -171,6 +199,8 @@ def main():
                          'end hold+xfade just before the first hit after the downbeat')
     ap.add_argument('--seam-mode', choices=('fwd', 'bwd'), default='fwd',
                     help="which side of the jump find_seam/phrase scoring found alike (see build_loop_wav)")
+    ap.add_argument('--rotate', action='store_true',
+                    help='start the file in the loop\'s quietest moment to mask the browser\'s loop dropout')
     ap.add_argument('--cover', help='square artwork (png/jpg)')
     ap.add_argument('--width', type=int, default=960)
     ap.add_argument('--av1-crf', type=int, default=50)
@@ -214,6 +244,8 @@ def main():
             elif args.audio:
                 samples = gapless_samples(acodec, vdur)
                 wav = fit_loop_wav(loop, sr, loop_len, samples, work, acodec)
+                if args.rotate:
+                    rotate_to_quietest(wav)
                 inputs, maps, vlen, aargs = ['-i', wav], ['-map', '0:v:0', '-map', '1:a:0'], samples / 48000, acodec_args
             else:
                 inputs, maps, vlen, aargs = [], ['-map', '0:v:0', '-map', '0:a:0?'], vdur, acodec_args

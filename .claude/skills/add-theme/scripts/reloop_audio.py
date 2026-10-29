@@ -24,7 +24,8 @@ import sys
 import tempfile
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from build_theme_media import build_loop_wav, decoded_samples, parse_segments, probe_float, run  # noqa: E402
+from build_theme_media import (  # noqa: E402
+    build_loop_wav, decoded_samples, fit_loop_wav, parse_segments, probe_float, rotate_to_quietest, run)
 
 
 def main():
@@ -40,6 +41,8 @@ def main():
     ap.add_argument('--seam-hold', type=float, default=0.0)
     ap.add_argument('--seam-mode', choices=('fwd', 'bwd'), default='fwd')
     ap.add_argument('--bitrate', default='128k')
+    ap.add_argument('--rotate', action='store_true',
+                    help="start the file in the loop's quietest moment to mask the browser's loop dropout")
     ap.add_argument('--video-frames', type=int,
                     help='keep only the first N frames (re-encodes the picture, H.264 --crf); cut inside '
                          'a static hold that also precedes the old wrap so the picture loop looks the same')
@@ -61,11 +64,10 @@ def main():
         if abs(speed - 1) > args.max_speed_change:
             sys.exit(f'loop is {loop_len:.3f}s but the video {vdur:.3f}s (x{speed:.3f}); pick another length')
         samples = math.ceil(loop_len * 48000 / 1024) * 1024  # whole AAC frames: no end padding
-        wav = os.path.join(work, 'loop48.wav')
+        wav = fit_loop_wav(loop, sr, loop_len, samples, work, 'aac')
         factor = loop_len / (samples / 48000)
-        run(['ffmpeg', '-v', 'error', '-y', '-i', loop, '-af',
-             f'asetrate={sr}*{factor:.9f},aresample=48000,atrim=end_sample={samples},apad=whole_len={samples}',
-             '-c:a', 'pcm_s16le', wav])
+        if args.rotate:
+            rotate_to_quietest(wav)
         out = os.path.join(work, 'out.mp4')
         if args.video_frames:
             n = args.video_frames

@@ -91,6 +91,12 @@ Rules (learned on WannaCry, where the first version was audibly looping):
   after the downbeat (5 ms peak scan) and set `--seam-hold` + `--xfade` to end just
   before it (WannaCry: hit at 155 ms → `--seam-hold 0.115 --xfade 0.035`).
 
+Always pass `--rotate`: browsers don't loop `<video>` gaplessly (a short dropout at
+the file end, heard on Nightmare even with a perfect musical seam). The music is a cycle,
+so `--rotate` starts the file in the loop's quietest 40 ms, where the dropout is masked.
+Diagnostic: with `--repeat 2` the musical seam also sits mid-file — if the operator only
+hears the wrap every full file length, it is the browser, not the music.
+
 The build script makes the audio sample-exact for each codec (no AAC/Opus end padding,
 which would be a short silence at every browser loop) and stretches the video by a few
 ms to the same length; it prints `decoded … expected …` — both must match.
@@ -115,7 +121,7 @@ PY
 ```bash
 python3 -I .claude/skills/add-theme/scripts/build_theme_media.py \
   --slug <slug> --video "tmp/<loop>.mp4" --audio "tmp/<master>.wav" \
-  --bpm <BPM> --bars <N> [--repeat 2] --start <seconds> [--seam-hold s --xfade s] \
+  --bpm <BPM> --bars <N> [--repeat 2] --start <seconds> [--seam-hold s --xfade s] --rotate \
   --cover "tmp/<art>.png"
 ```
 
@@ -145,7 +151,7 @@ distance as find_seam.py). Nightmare: bars 3–12 then 5–12 (seams 0.60 / 0.85
 
 ```bash
 python3 -I .claude/skills/add-theme/scripts/reloop_audio.py --stage public/videos/<slug>.mp4 \
-  --audio <best music source> --bpm <BPM> --start <s> --bars <N> --repeat <k>   # or --segments
+  --audio <best music source> --bpm <BPM> --start <s> --bars <N> --repeat <k> --rotate   # or --segments
 ```
 
 Copies the picture bit for bit and only rebuilds the AAC track (gapless). The video's
